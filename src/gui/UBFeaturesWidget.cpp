@@ -572,7 +572,7 @@ void UBFeaturesListView::thumbnailSizeChanged( int value )
     setIconSize(QSize(value, value));
     setGridSize(QSize(value + 20, value + 20 ));
 
-    mSettings->featureSliderPosition->set(value);
+    UBSettings::settings()->featureSliderPosition->set(value);
 }
 
 //issue 1474 - NNE - 20131118 : Add the menu for restoring the elements in the trash

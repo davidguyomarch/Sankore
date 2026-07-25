@@ -157,6 +157,7 @@ private:
     void switchToWebView();    
 
 private:
+    UBSettings* mSettings;
     UBFeaturesController *controller;
     UBFeaturesListView *pathListView;
     QVBoxLayout *layout;
@@ -577,7 +578,6 @@ public:
     virtual QString	displayText ( const QVariant & value, const QLocale & locale ) const;
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 private:
-    UBSettings* mSettings;
     QPixmap *arrowPixmap;
 };
 
