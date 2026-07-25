@@ -302,6 +302,7 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     , mZLayerController(new UBZLayerController(this))
     , mpLastPolygon(nullptr)
 {
+    mSettings = UBSettings::settings();
     UBCoreGraphicsScene::setObjectName("BoardScene");
 #ifdef __ppc__
     mShouldUseOMP = false;
@@ -461,7 +462,7 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             mRemovedItems.clear();
             moveTo(scenePos);
 
-            qreal eraserWidth = UBSettings::settings()->currentEraserWidth();
+            qreal eraserWidth = mSettings->currentEraserWidth();
             eraserWidth /= UBApplication::boardController->systemScaleFactor();
             eraserWidth /= UBApplication::boardController->currentZoom();
 
@@ -556,7 +557,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
         }
         else if (currentTool == UBStylusTool::Eraser)
         {
-            qreal eraserWidth = UBSettings::settings()->currentEraserWidth();
+            qreal eraserWidth = mSettings->currentEraserWidth();
             eraserWidth /= UBApplication::boardController->systemScaleFactor();
             eraserWidth /= UBApplication::boardController->currentZoom();
 
@@ -684,7 +685,7 @@ bool UBGraphicsScene::inputDeviceRelease()
 
 void UBGraphicsScene::drawEraser(const QPointF &pPoint, bool isFirstDraw)
 {
-    qreal eraserWidth = UBSettings::settings()->currentEraserWidth();
+    qreal eraserWidth = mSettings->currentEraserWidth();
     eraserWidth /= UBApplication::boardController->systemScaleFactor();
     eraserWidth /= UBApplication::boardController->currentZoom();
 
@@ -919,7 +920,7 @@ void UBGraphicsScene::drawArcTo(const QPointF& pCenterPoint, qreal pSpanAngle)
         removeItem(mArcPolygonItem);
         mArcPolygonItem = 0;
     }
-    qreal penWidth = UBSettings::settings()->currentPenWidth();
+    qreal penWidth = mSettings->currentPenWidth();
     penWidth /= UBApplication::boardController->systemScaleFactor();
     penWidth /= UBApplication::boardController->currentZoom();
 
@@ -1425,7 +1426,7 @@ void UBGraphicsScene::addGraphicsWidget(UBGraphicsWidgetItem* graphicsWidget, co
 
 UBGraphicsW3CWidgetItem* UBGraphicsScene::addOEmbed(const QUrl& pContentUrl, const QPointF& pPos)
 {
-    QStringList widgetPaths = UBPersistenceManager::persistenceManager()->allWidgets(UBSettings::settings()->applicationApplicationsLibraryDirectory());
+    QStringList widgetPaths = UBPersistenceManager::persistenceManager()->allWidgets(mSettings->applicationApplicationsLibraryDirectory());
 
     UBGraphicsW3CWidgetItem *widget = 0;
 
@@ -1543,9 +1544,9 @@ UBGraphicsSvgItem* UBGraphicsScene::addSvg(const QUrl& pSvgFileUrl, const QPoint
 
 UBGraphicsTextItem* UBGraphicsScene::addText(const QString& pString, const QPointF& pTopLeft)
 {
-    return addTextWithFont(pString, pTopLeft, UBSettings::settings()->fontPixelSize()
-            , UBSettings::settings()->fontFamily(), UBSettings::settings()->isBoldFont()
-            , UBSettings::settings()->isItalicFont());
+    return addTextWithFont(pString, pTopLeft, mSettings->fontPixelSize()
+            , mSettings->fontFamily(), mSettings->isBoldFont()
+            , mSettings->isItalicFont());
 }
 
 UBGraphicsTextItem* UBGraphicsScene::textForObjectName(const QString& pString, const QString& objectName)
@@ -1566,7 +1567,7 @@ UBGraphicsTextItem* UBGraphicsScene::textForObjectName(const QString& pString, c
     }
 
     if(!textItem){
-        textItem = addTextWithFont(pString,QPointF(0,0) ,72,UBSettings::settings()->fontFamily(),true,false);
+        textItem = addTextWithFont(pString,QPointF(0,0) ,72,mSettings->fontFamily(),true,false);
         textItem->setObjectName(objectName);
         textItem->setData(UBGraphicsItemData::ItemEditable,QVariant(false));
         textItem->adjustSize();
@@ -1611,7 +1612,7 @@ UBGraphicsTextItem* UBGraphicsScene::addTextWithFont(const QString& pString, con
 
     if (fontFamily == "")
     {
-        font = QFont(UBSettings::settings()->fontFamily());
+        font = QFont(mSettings->fontFamily());
     }
     else
     {
@@ -1620,7 +1621,7 @@ UBGraphicsTextItem* UBGraphicsScene::addTextWithFont(const QString& pString, con
 
     if (pointSize < 1)
     {
-        font.setPixelSize(UBSettings::settings()->fontPixelSize());
+        font.setPixelSize(mSettings->fontPixelSize());
     }
     else
     {
