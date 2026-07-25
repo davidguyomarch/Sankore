@@ -213,9 +213,11 @@ private:
     void resizeTabs();
 
 private:
-    UBSettings* mSettings;
     eUBDockPaletteType mPaletteType;
     UBTabDockPalette *mTabPalette;
+
+protected:
+    UBSettings* mSettings;
 };
 
 #endif // UBDOCKPALETTE_H
