@@ -300,6 +300,8 @@ signals:
  *                    class    UBTeacherGuideWidget                        *
  ***************************************************************************/
 
+class UBSettings;
+
 class UBTeacherGuideWidget : public UBAbstractTeacherGuide
 {
     Q_OBJECT
@@ -320,6 +322,7 @@ public:
     }
 
 private:
+    UBSettings* mSettings;
     UBTeacherGuidePageZeroWidget* mpPageZeroWidget;
     UBTeacherGuideEditionWidget* mpEditionWidget;
     UBTeacherGuidePresentationWidget* mpPresentationWidget;

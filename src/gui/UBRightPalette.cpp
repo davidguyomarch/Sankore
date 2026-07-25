@@ -39,16 +39,16 @@ UBRightPalette::UBRightPalette(QWidget *parent, const char *name):
     mCollapseWidth = 150;
     bool isCollapsed = false;
     if(mCurrentMode == eUBDockPaletteWidget_BOARD){
-        mLastWidth = UBSettings::settings()->rightLibPaletteBoardModeWidth->get().toInt();
-        isCollapsed = UBSettings::settings()->rightLibPaletteBoardModeIsCollapsed->get().toBool();
+        mLastWidth = mSettings->rightLibPaletteBoardModeWidth->get().toInt();
+        isCollapsed = mSettings->rightLibPaletteBoardModeIsCollapsed->get().toBool();
     }
     else if(mCurrentMode == eUBDockPaletteWidget_DESKTOP){
-        mLastWidth = UBSettings::settings()->rightLibPaletteDesktopModeWidth->get().toInt();
-        isCollapsed = UBSettings::settings()->rightLibPaletteDesktopModeIsCollapsed->get().toBool();
+        mLastWidth = mSettings->rightLibPaletteDesktopModeWidth->get().toInt();
+        isCollapsed = mSettings->rightLibPaletteDesktopModeIsCollapsed->get().toBool();
     }
     else if(mCurrentMode == eUBDockPaletteWidget_WEB){
-        mLastWidth = UBSettings::settings()->rightLibPaletteWebModeWidth->get().toInt();
-        isCollapsed = UBSettings::settings()->rightLibPaletteWebModeIsCollapsed->get().toBool();
+        mLastWidth = mSettings->rightLibPaletteWebModeWidth->get().toInt();
+        isCollapsed = mSettings->rightLibPaletteWebModeIsCollapsed->get().toBool();
     }
     if(isCollapsed)
         resize(0,parentWidget()->height());
@@ -84,18 +84,18 @@ void UBRightPalette::resizeEvent(QResizeEvent *event)
     int newWidth = width();
     if(mCurrentMode == eUBDockPaletteWidget_BOARD){
         if(newWidth > mCollapseWidth)
-            UBSettings::settings()->rightLibPaletteBoardModeWidth->set(newWidth);
-        UBSettings::settings()->rightLibPaletteBoardModeIsCollapsed->set(newWidth == 0);
+            mSettings->rightLibPaletteBoardModeWidth->set(newWidth);
+        mSettings->rightLibPaletteBoardModeIsCollapsed->set(newWidth == 0);
     }
     else if (mCurrentMode == eUBDockPaletteWidget_DESKTOP){
         if(newWidth > mCollapseWidth)
-            UBSettings::settings()->rightLibPaletteDesktopModeWidth->set(newWidth);
-        UBSettings::settings()->rightLibPaletteDesktopModeIsCollapsed->set(newWidth == 0);
+            mSettings->rightLibPaletteDesktopModeWidth->set(newWidth);
+        mSettings->rightLibPaletteDesktopModeIsCollapsed->set(newWidth == 0);
     }
     else if (mCurrentMode == eUBDockPaletteWidget_WEB){
         if(newWidth > mCollapseWidth)
-            UBSettings::settings()->rightLibPaletteWebModeWidth->set(newWidth);
-        UBSettings::settings()->rightLibPaletteWebModeIsCollapsed->set(newWidth == 0);
+            mSettings->rightLibPaletteWebModeWidth->set(newWidth);
+        mSettings->rightLibPaletteWebModeIsCollapsed->set(newWidth == 0);
     }
     UBDockPalette::resizeEvent(event);
     emit resized();
@@ -115,21 +115,21 @@ bool UBRightPalette::switchMode(eUBDockPaletteWidgetMode mode)
 {
     int newModeWidth;
     if(mode == eUBDockPaletteWidget_BOARD){
-        mLastWidth = UBSettings::settings()->rightLibPaletteBoardModeWidth->get().toInt();
+        mLastWidth = mSettings->rightLibPaletteBoardModeWidth->get().toInt();
         newModeWidth = mLastWidth;
-        if(UBSettings::settings()->rightLibPaletteBoardModeIsCollapsed->get().toBool())
+        if(mSettings->rightLibPaletteBoardModeIsCollapsed->get().toBool())
             newModeWidth = 0;
     }
     else if (mode == eUBDockPaletteWidget_DESKTOP){
-        mLastWidth = UBSettings::settings()->rightLibPaletteDesktopModeWidth->get().toInt();
+        mLastWidth = mSettings->rightLibPaletteDesktopModeWidth->get().toInt();
         newModeWidth = mLastWidth;
-        if(UBSettings::settings()->rightLibPaletteDesktopModeIsCollapsed->get().toBool())
+        if(mSettings->rightLibPaletteDesktopModeIsCollapsed->get().toBool())
             newModeWidth = 0;
     }
     else if (mode == eUBDockPaletteWidget_WEB){
-        mLastWidth = UBSettings::settings()->rightLibPaletteWebModeWidth->get().toInt();
+        mLastWidth = mSettings->rightLibPaletteWebModeWidth->get().toInt();
         newModeWidth = mLastWidth;
-        if(UBSettings::settings()->rightLibPaletteWebModeIsCollapsed->get().toBool())
+        if(mSettings->rightLibPaletteWebModeIsCollapsed->get().toBool())
             newModeWidth = 0;
     }
     // HACK to force the reoganization of tabs

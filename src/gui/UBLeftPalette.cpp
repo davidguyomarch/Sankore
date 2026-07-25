@@ -37,12 +37,12 @@ UBLeftPalette::UBLeftPalette(QWidget *parent, const char *name):
 
     bool isCollapsed = false;
     if(mCurrentMode == eUBDockPaletteWidget_BOARD){
-        mLastWidth = UBSettings::settings()->leftLibPaletteBoardModeWidth->get().toInt();
-        isCollapsed = UBSettings::settings()->leftLibPaletteBoardModeIsCollapsed->get().toBool();
+        mLastWidth = mSettings->leftLibPaletteBoardModeWidth->get().toInt();
+        isCollapsed = mSettings->leftLibPaletteBoardModeIsCollapsed->get().toBool();
     }
     else{
-        mLastWidth = UBSettings::settings()->leftLibPaletteDesktopModeWidth->get().toInt();
-        isCollapsed = UBSettings::settings()->leftLibPaletteDesktopModeIsCollapsed->get().toBool();
+        mLastWidth = mSettings->leftLibPaletteDesktopModeWidth->get().toInt();
+        isCollapsed = mSettings->leftLibPaletteDesktopModeIsCollapsed->get().toBool();
     }
 
     if(isCollapsed)
@@ -63,7 +63,7 @@ UBLeftPalette::~UBLeftPalette()
 void UBLeftPalette::onDocumentSet(UBDocumentProxy* documentProxy)
 {
     //This is necessary to force the teacher guide to be showed in priority each time a document is set
-    if(documentProxy && UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
+    if(documentProxy && mSettings->teacherGuidePageZeroActivated->get().toBool())
         mLastOpenedTabForMode.insert(eUBDockPaletteWidget_BOARD, 1);
 }
 
@@ -84,13 +84,13 @@ void UBLeftPalette::resizeEvent(QResizeEvent *event)
     int newWidth = width();
     if(mCurrentMode == eUBDockPaletteWidget_BOARD){
         if(newWidth > mCollapseWidth)
-            UBSettings::settings()->leftLibPaletteBoardModeWidth->set(newWidth+1);
-        UBSettings::settings()->leftLibPaletteBoardModeIsCollapsed->set(newWidth == 0);
+            mSettings->leftLibPaletteBoardModeWidth->set(newWidth+1);
+        mSettings->leftLibPaletteBoardModeIsCollapsed->set(newWidth == 0);
     }
     else if (mCurrentMode == eUBDockPaletteWidget_DESKTOP){
         if(newWidth > mCollapseWidth)
-            UBSettings::settings()->leftLibPaletteDesktopModeWidth->set(newWidth);
-        UBSettings::settings()->leftLibPaletteDesktopModeIsCollapsed->set(newWidth == 0);
+            mSettings->leftLibPaletteDesktopModeWidth->set(newWidth);
+        mSettings->leftLibPaletteDesktopModeIsCollapsed->set(newWidth == 0);
     }
     UBDockPalette::resizeEvent(event);
 }
@@ -100,15 +100,15 @@ bool UBLeftPalette::switchMode(eUBDockPaletteWidgetMode mode)
 {
     int newModeWidth;
     if(mode == eUBDockPaletteWidget_BOARD){
-        mLastWidth = UBSettings::settings()->leftLibPaletteBoardModeWidth->get().toInt();
+        mLastWidth = mSettings->leftLibPaletteBoardModeWidth->get().toInt();
         newModeWidth = mLastWidth;
-        if(UBSettings::settings()->leftLibPaletteBoardModeIsCollapsed->get().toBool())
+        if(mSettings->leftLibPaletteBoardModeIsCollapsed->get().toBool())
             newModeWidth = 0;
     }
     else if (mode == eUBDockPaletteWidget_DESKTOP){
-        mLastWidth = UBSettings::settings()->leftLibPaletteDesktopModeWidth->get().toInt();
+        mLastWidth = mSettings->leftLibPaletteDesktopModeWidth->get().toInt();
         newModeWidth = mLastWidth;
-        if(UBSettings::settings()->leftLibPaletteDesktopModeIsCollapsed->get().toBool())
+        if(mSettings->leftLibPaletteDesktopModeIsCollapsed->get().toBool())
             newModeWidth = 0;
     }
     //TODO claudio another hack
