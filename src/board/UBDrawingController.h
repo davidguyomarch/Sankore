@@ -29,6 +29,7 @@
 #include "core/UB.h"
 
 class UBAbstractDrawRuler;
+class UBSettings;
 
 class UBDrawingController : public QObject
 {
@@ -42,6 +43,8 @@ class UBDrawingController : public QObject
 
         static UBDrawingController* drawingController();
         static void destroy();
+
+        void setSettings(UBSettings* settings) { mSettings = settings; }
 
         int stylusTool();
         int latestDrawingTool();
@@ -86,6 +89,7 @@ class UBDrawingController : public QObject
         void colorIndexChanged(int index);
 
     private:
+        UBSettings* mSettings;
         UBStylusTool::Enum mStylusTool;
         UBStylusTool::Enum mLatestDrawingTool;
         bool mIsDesktopMode;

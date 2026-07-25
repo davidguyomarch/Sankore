@@ -40,6 +40,7 @@
 
 class UBGraphicsTextItem;
 class UBGraphicsProxyWidget;
+class UBSettings;
 
 class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
 {
@@ -54,6 +55,9 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
     public:
         UBGraphicsTextItemDelegate(UBGraphicsTextItem* pDelegated, QObject * parent = 0);
         virtual ~UBGraphicsTextItemDelegate();
+
+        void setSettings(UBSettings* settings) { mSettings = settings; }
+
         bool isEditable();
         void scaleTextSize(qreal multiplyer);
         virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value);
@@ -155,6 +159,7 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         void showMenuTable();
 
 private:
+      UBSettings* mSettings;
       const int delta;
       void insertList(QTextListFormat::Style format);
       QTextListFormat::Style nextStyle(QTextListFormat::Style format);
