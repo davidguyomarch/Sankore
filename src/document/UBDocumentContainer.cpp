@@ -147,14 +147,14 @@ void UBDocumentContainer::addPixmapAt(const QPixmap *pix, int index)
 
 int UBDocumentContainer::pageFromSceneIndex(int sceneIndex)
 {
-    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
+    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
         return sceneIndex;
     return sceneIndex+1;
 }
 
 int UBDocumentContainer::sceneIndexFromPage(int page)
 {
-    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
+    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
         return page;
     return page-1;
 }
