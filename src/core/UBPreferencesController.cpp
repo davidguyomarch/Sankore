@@ -71,6 +71,7 @@ UBPreferencesController::UBPreferencesController(QWidget *parent)
     , mPenProperties(0)
     , mMarkerProperties(0)
 {
+    mSettings = UBSettings::settings();
     
     mPreferencesWindow = new UBPreferencesDialog(this,parent, Qt::Dialog);
     mPreferencesUI = new Ui::preferencesDialog();  // deleted in
@@ -111,7 +112,7 @@ void UBPreferencesController::show()
 
 void UBPreferencesController::wire()
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     // main tab
     mPreferencesUI->mainTabWidget->setCurrentWidget(mPreferencesUI->displayTab);
@@ -191,7 +192,7 @@ void UBPreferencesController::wire()
 
 void UBPreferencesController::init()
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     // about tab
     mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox->setChecked(settings->appEnableAutomaticSoftwareUpdates->get().toBool());
@@ -288,7 +289,7 @@ void UBPreferencesController::init()
     list << mIsoCodeAndLanguage.keys();
     list.sort();
     //Issue NC - CFA - 20140520 : clear list, to prevent duplication of the list
-    QString currentIsoLanguage = UBSettings::settings()->appPreferredLanguage->get().toString();
+    QString currentIsoLanguage = mSettings->appPreferredLanguage->get().toString();
     mPreferencesUI->languageComboBox->clear();
     mPreferencesUI->languageComboBox->addItems(list);
     if(currentIsoLanguage.length()){
@@ -310,33 +311,33 @@ void UBPreferencesController::init()
 
 void UBPreferencesController::onStartupTipsClicked(bool clicked)
 {
-    UBSettings::settings()->appStartupHintsEnabled->setBool(clicked);
+    mSettings->appStartupHintsEnabled->setBool(clicked);
 }
 
 void UBPreferencesController::onLanguageChanged(QString currentItem)
 {
     QString isoCode = mIsoCodeAndLanguage[currentItem] == "NO_VALUE" ? "" : mIsoCodeAndLanguage[currentItem];
-    UBSettings::settings()->appPreferredLanguage->setString(isoCode);
+    mSettings->appPreferredLanguage->setString(isoCode);
     mPreferencesUI->quitOpenSankorePushButton->setEnabled(true);
 }
 
 void UBPreferencesController::onCommunityUsernameChanged()
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
     settings->setCommunityUsername(mPreferencesUI->Username_textBox->text());
     persistanceCheckboxUpdate();
 }
 
 void UBPreferencesController::onCommunityPasswordChanged()
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
     settings->setCommunityPassword(mPreferencesUI->Password_textEdit->text());
     persistanceCheckboxUpdate();
 }
 
 void UBPreferencesController::onCommunityPersistenceChanged()
 {
-    UBSettings::settings()->setCommunityPersistence(mPreferencesUI->PSCredentialsPersistenceCheckBox->isChecked());
+    mSettings->setCommunityPersistence(mPreferencesUI->PSCredentialsPersistenceCheckBox->isChecked());
 }
 
 void UBPreferencesController::persistanceCheckboxUpdate()
@@ -381,9 +382,9 @@ void UBPreferencesController::close()
     //web
     QString homePage = mPreferencesUI->webHomePage->text();
 
-    UBSettings::settings()->webHomePage->set(homePage);
-    UBSettings::settings()->setProxyUsername(mPreferencesUI->proxyUsername->text());
-    UBSettings::settings()->setProxyPassword(mPreferencesUI->proxyPassword->text());
+    mSettings->webHomePage->set(homePage);
+    mSettings->setProxyUsername(mPreferencesUI->proxyUsername->text());
+    mSettings->setProxyPassword(mPreferencesUI->proxyPassword->text());
 
     if (!inputValuesConsistence())
         return;
@@ -394,7 +395,7 @@ void UBPreferencesController::close()
 
 void UBPreferencesController::defaultSettings()
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     if (mPreferencesUI->mainTabWidget->currentWidget() == mPreferencesUI->displayTab)
     {
@@ -469,7 +470,7 @@ void UBPreferencesController::defaultSettings()
 
 void UBPreferencesController::widthSliderChanged(int value)
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     qreal width = value / sSliderRatio;
 
@@ -573,7 +574,7 @@ void UBPreferencesController::toolbarPositionChanged(bool checked)
 {
     Q_UNUSED(checked);
 
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     settings->appToolBarPositionedAtTop->set(mPreferencesUI->toolbarAtTopRadioButton->isChecked());
 
@@ -581,13 +582,13 @@ void UBPreferencesController::toolbarPositionChanged(bool checked)
 
 void UBPreferencesController::toolbarOrientationVertical(bool checked)
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
     settings->appToolBarOrientationVertical->set(checked);
 }
 
 void UBPreferencesController::toolbarOrientationHorizontal(bool checked)
 {
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
     settings->appToolBarOrientationVertical->set(!checked);
 }
 
@@ -619,7 +620,7 @@ UBBrushPropertiesFrame::UBBrushPropertiesFrame(QFrame* owner, const QList<QColor
     lightBackgroundColorPicker0->setSelectedColorIndex(0);
     lightBackgroundColorPickers.append(lightBackgroundColorPicker0);
 
-    for (int i = 1 ; i < UBSettings::settings()->colorPaletteSize ; i++)
+    for (int i = 1 ; i < mSettings->colorPaletteSize ; i++)
     {
         UBColorPicker *picker = new UBColorPicker(lightBackgroundFrame);
         picker->setObjectName(QString::fromUtf8("penLightBackgroundColor") + QString::number(i));
@@ -646,7 +647,7 @@ UBBrushPropertiesFrame::UBBrushPropertiesFrame(QFrame* owner, const QList<QColor
     darkBackgroundColorPicker0->setSelectedColorIndex(0);
     darkBackgroundColorPickers.append(darkBackgroundColorPicker0);
 
-    for (int i = 1 ; i < UBSettings::settings()->colorPaletteSize ; i++)
+    for (int i = 1 ; i < mSettings->colorPaletteSize ; i++)
     {
         UBColorPicker *picker = new UBColorPicker(darkBackgroundFrame);
         picker->setObjectName(QString::fromUtf8("penDarkBackgroundColor") + QString::number(i));
