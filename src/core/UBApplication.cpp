@@ -149,10 +149,10 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
         || args.contains("log");
 
 
-    setupTranslators(args);
-
     UBSettings *settings = UBSettings::settings();
     mSettings = settings;
+
+    setupTranslators(args);
 
     UBResources::resources();
 
