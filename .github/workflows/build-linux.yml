@@ -136,7 +136,6 @@ jobs:
 
       - name: Smoke test (app coverage)
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-        continue-on-error: true
         run: |
           export QT_QPA_PLATFORM=offscreen
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
