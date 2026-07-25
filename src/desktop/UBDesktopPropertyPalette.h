@@ -32,6 +32,8 @@
 
 class UBRightPalette;
 
+class UBSettings;
+
 class UBDesktopPropertyPalette : public UBPropertyPalette
 {
     Q_OBJECT
@@ -39,6 +41,7 @@ class UBDesktopPropertyPalette : public UBPropertyPalette
     public:
         UBDesktopPropertyPalette(QWidget *parent, UBRightPalette* _rightPalette);
     private:
+    UBSettings* mSettings;
         UBRightPalette* rightPalette;
     protected:
         virtual int getParentRightOffset();

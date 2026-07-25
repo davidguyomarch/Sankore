@@ -42,6 +42,7 @@ UBScreenMirror::UBScreenMirror(QWidget* parent)
     , mSourceWidget(0)
     , mTimerID(0)
 {
+    mSettings = UBSettings::settings();
     // NOOP
 }
 
@@ -123,7 +124,7 @@ void UBScreenMirror::start()
         int ms = 125;
 
         bool success;
-        int fps = UBSettings::settings()->mirroringRefreshRateInFps->get().toInt(&success);
+        int fps = mSettings->mirroringRefreshRateInFps->get().toInt(&success);
 
         if (success && fps > 0)
         {

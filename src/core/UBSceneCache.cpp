@@ -36,6 +36,7 @@
 UBSceneCache::UBSceneCache()
     : mCachedSceneCount(0)
 {
+    mSettings = UBSettings::settings();
     // NOOP
 }
 
@@ -74,7 +75,7 @@ void UBSceneCache::insert (UBDocumentProxy* proxy, int pageIndex, UBGraphicsScen
     }
     else
     {
-        if (mCachedSceneCount >= UBSettings::settings()->pageCacheSize->get().toInt())
+        if (mCachedSceneCount >= mSettings->pageCacheSize->get().toInt())
         {
             compactCache();
         }

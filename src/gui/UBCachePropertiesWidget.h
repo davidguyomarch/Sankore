@@ -37,6 +37,8 @@
 #include "UBDockPaletteWidget.h"
 #include "tools/UBGraphicsCache.h"
 
+class UBSettings;
+
 class UBCachePreviewWidget : public QWidget
 {
 public:
@@ -96,6 +98,7 @@ private slots:
     void onZoomChanged(qreal newZoom);
 
 private:
+    UBSettings* mSettings;
     QVBoxLayout* mpLayout;
     QLabel* mpCachePropertiesLabel;
     QLabel* mpColorLabel;

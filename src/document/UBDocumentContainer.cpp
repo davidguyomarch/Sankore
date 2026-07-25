@@ -33,7 +33,8 @@
 UBDocumentContainer::UBDocumentContainer(QObject * parent)
     :QObject(parent)
     ,mCurrentDocument(nullptr)
-{}
+{
+    mSettings = UBSettings::settings();}
 
 UBDocumentContainer::~UBDocumentContainer()
 {

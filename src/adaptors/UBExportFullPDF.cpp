@@ -80,7 +80,7 @@ void UBExportFullPDF::saveOverlayPdf(UBDocumentProxy* pDocumentProxy, const QStr
     QPrinter pdfPrinter;
 
     pdfPrinter.setOutputFormat(QPrinter::PdfFormat);
-    pdfPrinter.setResolution(UBSettings::settings()->pdfResolution->get().toInt());
+    pdfPrinter.setResolution(pDocumentProxy->settings()->pdfResolution->get().toInt());
     pdfPrinter.setOutputFileName(filename);
     pdfPrinter.setFullPage(true);
 

@@ -135,6 +135,7 @@ class UBApplication : public QtSingleApplication
         void onScreenCountChanged(int newCount);
 
     private:
+        UBSettings* mSettings;
         void updateProtoActionsState();
         void setupTranslators(QStringList args);
         QList<QMenu*> mProtoMenus;

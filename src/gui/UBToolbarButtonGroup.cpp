@@ -46,6 +46,7 @@ UBToolbarButtonGroup::UBToolbarButtonGroup(QToolBar *toolBar, const QList<QActio
     , mDisplayLabel(true)
     , mActionGroup(0)
 {
+    mSettings = UBSettings::settings();
     Q_ASSERT(actions.size() > 0);
 
     mToolButton = qobject_cast<QToolButton*>(toolBar->layout()->itemAt(0)->widget());
@@ -199,24 +200,24 @@ void UBToolbarButtonGroup::paintEvent(QPaintEvent *)
 
 void UBToolbarButtonGroup::colorPaletteChanged()
 {
-    bool isDarkBackground = UBSettings::settings()->isDarkBackground();
+    bool isDarkBackground = mSettings->isDarkBackground();
 
     QList<QColor> colors;
 
 //    if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Pen
 //        || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line)
 //    {
-//        colors = UBSettings::settings()->penColors(isDarkBackground);
+//        colors = mSettings->penColors(isDarkBackground);
 //    }
 //    else if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
 //    {
-//        colors = UBSettings::settings()->markerColors(isDarkBackground);
+//        colors = mSettings->markerColors(isDarkBackground);
 //    }
 
-    colors = UBSettings::settings()->penColors(isDarkBackground);
+    colors = mSettings->penColors(isDarkBackground);
     if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
     {
-        colors = UBSettings::settings()->markerColors(isDarkBackground);
+        colors = mSettings->markerColors(isDarkBackground);
     }
 
     for (int i = 0; i < mButtons.size() && i < colors.size(); i++)

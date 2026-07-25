@@ -34,6 +34,8 @@ class UBGraphicsItemDelegate;
 class QGraphicsSvgItem;
 
 
+class UBSettings;
+
 class UBGraphicsDelegateFrame: public QGraphicsRectItem, public QObject
 {
     public:
@@ -67,6 +69,7 @@ class UBGraphicsDelegateFrame: public QGraphicsRectItem, public QObject
         QList<UBGraphicsDelegateFrame *> getLinkedFrames();
 
     private:
+    UBSettings* mSettings;
         QRectF bottomRightResizeGripRect() const;
         QRectF bottomResizeGripRect() const;
         QRectF leftResizeGripRect() const;

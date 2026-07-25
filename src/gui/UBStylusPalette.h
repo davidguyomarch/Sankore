@@ -29,6 +29,8 @@
 #include "UBActionPalette.h"
 
 
+class UBSettings;
+
 class UBStylusPalette : public UBActionPalette
 {
     Q_OBJECT
@@ -46,6 +48,7 @@ class UBStylusPalette : public UBActionPalette
         void stylusToolDoubleClicked();
 
     private:
+    UBSettings* mSettings;
         int mLastSelectedId;
 
     signals:

@@ -33,6 +33,8 @@
 
 #include "frameworks/UBPlatformUtils.h"
 
+class UBSettings;
+
 class UBKeyButton;
 class UBKeyboardButton;
 
@@ -153,6 +155,7 @@ protected:
 
 private:
 
+    UBSettings* mSettings;
     QRect originalRect;
 
     UBKeyButton** buttons;

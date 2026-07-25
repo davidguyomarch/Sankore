@@ -30,6 +30,8 @@
 
 #include "UBActionPalette.h"
 
+class UBSettings;
+
 class UBFavoriteToolPalette : public UBActionPalette
 {
     Q_OBJECT;
@@ -40,6 +42,9 @@ class UBFavoriteToolPalette : public UBActionPalette
 
     private slots:
         void addFavorite();
+
+    private:
+        UBSettings* mSettings;
 };
 
 #endif /* UBFAVORITETOOLPALETTE_H_ */

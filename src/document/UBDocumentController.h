@@ -376,6 +376,8 @@ class UBDocumentController : public UBDocumentContainer
         UBDocumentController(UBMainWindow* mainWindow);
         virtual ~UBDocumentController();
 
+        void setSettings(UBSettings* settings) { mSettings = settings; }
+
         void closing();
         QWidget* controlView();
         UBDocumentProxyTreeItem* findDocument(UBDocumentProxy* proxy);
@@ -474,6 +476,7 @@ protected:
         LastSelectedElementType mSelectionType;
 
     private:
+        UBSettings* mSettings;
         QWidget *mParentWidget;
         UBBoardController *mBoardController;
         Ui::documents* mDocumentUI;

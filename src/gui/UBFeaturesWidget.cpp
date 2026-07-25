@@ -53,6 +53,7 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
     : UBDockPaletteWidget(parent)
     , imageGatherer(nullptr)
 {
+    mSettings = UBSettings::settings();
     setObjectName(name);
     mName = "FeaturesWidget";
     mVisibleState = true;
@@ -73,7 +74,7 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
 
     centralWidget = new UBFeaturesCentralWidget(this);
     controller->assignFeaturesListView(centralWidget->listView());
-    centralWidget->setSliderPosition(UBSettings::settings()->featureSliderPosition->get().toInt());
+    centralWidget->setSliderPosition(mSettings->featureSliderPosition->get().toInt());
 
     //Bottom actionbar for DnD, quick search etc
     mActionBar = new UBFeaturesActionBar(controller, this);

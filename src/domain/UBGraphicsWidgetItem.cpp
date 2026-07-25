@@ -74,6 +74,7 @@ UBGraphicsWidgetItem::UBGraphicsWidgetItem(const QUrl &pWidgetUrl, QGraphicsItem
     , mUniboardAPI(0)
     , mProxyLoadingMessage(0)
 {
+    mSettings = UBSettings::settings();
     setData(UBGraphicsItemData::ItemLayerType, QVariant(itemLayerType::ObjectItem));
 
 #ifdef SANKORE_WEBENGINE

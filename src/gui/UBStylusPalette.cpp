@@ -42,6 +42,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     : UBActionPalette(Qt::TopRightCorner, parent, orient)
     , mLastSelectedId(-1)
 {
+    mSettings = UBSettings::settings();
     QList<QAction*> actions;
 
     actions << UBApplication::mainWindow->actionDrawing; // Issue 1684 (EV-7) - ALTI/AOU - 20140203 : add to the Stylus Palette a button to open the Drawing Palette.
@@ -102,7 +103,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 
 void UBStylusPalette::initPosition()
 {
-    if(!UBSettings::settings()->appToolBarOrientationVertical->get().toBool())
+    if(!mSettings->appToolBarOrientationVertical->get().toBool())
     {
         QWidget* pParentW = parentWidget();
         if(nullptr != pParentW)

@@ -42,6 +42,7 @@ UBIntranetPodcastPublisher::UBIntranetPodcastPublisher(QObject* pParent)
     : QObject(pParent)
     , mPublishingRequest(0)
 {
+    mSettings = UBSettings::settings();
     // NOOP
 }
 
@@ -61,7 +62,7 @@ void UBIntranetPodcastPublisher::publishVideo(const QString& videoFilePath, long
 
     pub.title->setText(QFileInfo(mVideoFilePath).completeBaseName());
 
-    QString defaultAuthor = UBSettings::settings()->intranetPodcastAuthor->get().toString();
+    QString defaultAuthor = mSettings->intranetPodcastAuthor->get().toString();
     pub.author->setText(defaultAuthor);
 
     if (pub.exec() == QDialog::Accepted)
@@ -70,7 +71,7 @@ void UBIntranetPodcastPublisher::publishVideo(const QString& videoFilePath, long
         mDescription = pub.description->toPlainText();
         mAuthor  = pub.author->text();
 
-        UBSettings::settings()->intranetPodcastAuthor->set(mAuthor);
+        mSettings->intranetPodcastAuthor->set(mAuthor);
 
         postVideoPublishingRequest();
     }
@@ -83,7 +84,7 @@ void UBIntranetPodcastPublisher::publishVideo(const QString& videoFilePath, long
 
 void UBIntranetPodcastPublisher::postVideoPublishingRequest()
 {
-    UBSetting *urlSetting = UBSettings::settings()->intranetPodcastPublishingUrl;
+    UBSetting *urlSetting = mSettings->intranetPodcastPublishingUrl;
 
     QString publishingUrl = urlSetting->get().toString();
 

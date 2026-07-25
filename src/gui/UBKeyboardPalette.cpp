@@ -44,6 +44,7 @@
 UBKeyboardPalette::UBKeyboardPalette(QWidget *parent)
         : UBActionPalette(Qt::TopRightCorner, parent)
 {
+    mSettings = UBSettings::settings();
 
   //  setWindowFlags(/*Qt::CustomizeWindowHint|*/Qt::WindowStaysOnTopHint|Qt::FramelessWindowHint);
 
@@ -76,7 +77,7 @@ UBKeyboardPalette::UBKeyboardPalette(QWidget *parent)
 
     createCtrlButtons();
 
-    nCurrentLocale = UBSettings::settings()->KeyboardLocale->get().toInt();
+    nCurrentLocale = mSettings->KeyboardLocale->get().toInt();
     if (nCurrentLocale < 0 || nCurrentLocale >= nLocalesCount)
         nCurrentLocale = 0;
     if (locales!=nullptr)
@@ -93,10 +94,10 @@ void UBKeyboardPalette::init()
     m_isVisible = false;
     setVisible(false);
 
-    setKeyButtonSize(UBSettings::settings()->boardKeyboardPaletteKeyBtnSize->get().toString());
+    setKeyButtonSize(mSettings->boardKeyboardPaletteKeyBtnSize->get().toString());
 
     connect(this, SIGNAL(keyboardActivated(bool)), this, SLOT(onActivated(bool)));
-    connect(UBSettings::settings()->boardKeyboardPaletteKeyBtnSize, SIGNAL(changed(QVariant)), this, SLOT(keyboardPaletteButtonSizeChanged(QVariant)));
+    connect(mSettings->boardKeyboardPaletteKeyBtnSize, SIGNAL(changed(QVariant)), this, SLOT(keyboardPaletteButtonSizeChanged(QVariant)));
     connect(UBApplication::mainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(showKeyboard(bool)));
     connect(this, SIGNAL(closed()), this, SLOT(hideKeyboard()));
 
@@ -194,7 +195,7 @@ void UBKeyboardPalette::setLocale(int nLocale)
         onLocaleChanged(locales[nCurrentLocale]);
         update();
 
-        UBSettings::settings()->KeyboardLocale->set(nCurrentLocale);
+        mSettings->KeyboardLocale->set(nCurrentLocale);
     }
     emit localeChanged(nLocale);
 }

@@ -97,6 +97,8 @@ class WBWebPage : public UBWebPage
         void handleUnsupportedContent(QNetworkReply *reply);
 
     private:
+class UBSettings;
+
         friend class WBWebView;
 
         // set the webview mousepressedevent
@@ -139,6 +141,7 @@ class WBWebView : public WBWebTrapWebView
         void openLinkInNewTab();
 
     private:
+    UBSettings* mSettings;
         QString mLastStatusBarText;
         QUrl mInitialUrl;
         int mProgress;

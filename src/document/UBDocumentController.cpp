@@ -1665,6 +1665,7 @@ UBDocumentController::UBDocumentController(UBMainWindow* mainWindow)
    , mCurrentTreeDocument(0)
    , mCurrentIndexMoved(false)
 {
+    mSettings = UBSettings::settings();
 
     setupViews();
     setupToolbar();
@@ -1926,7 +1927,7 @@ void UBDocumentController::setupViews()
 
         mDocumentUI->setupUi(mDocumentWidget);
 
-        int thumbWidth = UBSettings::settings()->documentThumbnailWidth->get().toInt();
+        int thumbWidth = mSettings->documentThumbnailWidth->get().toInt();
 
         mDocumentUI->documentZoomSlider->setValue(thumbWidth);
         mDocumentUI->thumbnailWidget->setThumbnailWidth(thumbWidth);
@@ -2562,16 +2563,16 @@ void UBDocumentController::documentZoomSliderValueChanged (int value)
 {
     mDocumentUI->thumbnailWidget->setThumbnailWidth(value);
 
-    UBSettings::settings()->documentThumbnailWidth->set(value);
+    mSettings->documentThumbnailWidth->set(value);
 }
 
 void UBDocumentController::importFile()
 {
     UBDocumentManager *docManager = UBDocumentManager::documentManager();
 
-    QString defaultPath = UBSettings::settings()->lastImportFilePath->get().toString();
+    QString defaultPath = mSettings->lastImportFilePath->get().toString();
     if(defaultPath.isDetached())
-        defaultPath = UBSettings::settings()->userDocumentDirectory();
+        defaultPath = mSettings->userDocumentDirectory();
     QString filePath = QFileDialog::getOpenFileName(mParentWidget, tr("Open Supported File"),
                                                     defaultPath, docManager->importFileFilter());
 
@@ -2583,7 +2584,7 @@ void UBDocumentController::importFile()
         UBPersistenceManager::persistenceManager()->createDocumentProxiesStructure(docManager->importUbx(filePath, UBSettings::userDocumentDirectory()), true);
 
     } else {
-        UBSettings::settings()->lastImportFilePath->set(QVariant(fileInfo.absolutePath()));
+        mSettings->lastImportFilePath->set(QVariant(fileInfo.absolutePath()));
 
         if (filePath.length() > 0)
         {
@@ -2619,13 +2620,13 @@ void UBDocumentController::addFolderOfImages()
 
     if (document)
     {
-        QString defaultPath = UBSettings::settings()->lastImportFolderPath->get().toString();
+        QString defaultPath = mSettings->lastImportFolderPath->get().toString();
 
         QString imagesDir = QFileDialog::getExistingDirectory(mParentWidget, tr("Import all Images from Folder"), defaultPath);
         QDir parentImageDir(imagesDir);
         parentImageDir.cdUp();
 
-        UBSettings::settings()->lastImportFolderPath->set(QVariant(parentImageDir.absolutePath()));
+        mSettings->lastImportFolderPath->set(QVariant(parentImageDir.absolutePath()));
 
         if (imagesDir.length() > 0)
         {
@@ -2664,14 +2665,14 @@ void UBDocumentController::addFileToDocument()
 
 bool UBDocumentController::addFileToDocument(UBDocumentProxy* document)
 {
-    QString defaultPath = UBSettings::settings()->lastImportFilePath->get().toString();
+    QString defaultPath = mSettings->lastImportFilePath->get().toString();
     QString filePath = QFileDialog::getOpenFileName(mParentWidget, tr("Open Supported File"), defaultPath, UBDocumentManager::documentManager()->importFileFilter(true));
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QApplication::processEvents();
 
     QFileInfo fileInfo(filePath);
-    UBSettings::settings()->lastImportFilePath->set(QVariant(fileInfo.absolutePath()));
+    mSettings->lastImportFilePath->set(QVariant(fileInfo.absolutePath()));
 
     bool success = false;
 
@@ -2910,11 +2911,11 @@ void UBDocumentController::addImages()
 
     if (document)
     {
-        QString defaultPath = UBSettings::settings()->lastImportFolderPath->get().toString();
+        QString defaultPath = mSettings->lastImportFolderPath->get().toString();
 
         QString extensions;
 
-        for (const QString& ext : UBSettings::settings()->imageFileExtensions)
+        for (const QString& ext : mSettings->imageFileExtensions)
         {
             extensions += " *.";
             extensions += ext;
@@ -2927,7 +2928,7 @@ void UBDocumentController::addImages()
         {
             QFileInfo firstImage(images.at(0));
 
-            UBSettings::settings()->lastImportFolderPath->set(QVariant(firstImage.absoluteDir().absolutePath()));
+            mSettings->lastImportFolderPath->set(QVariant(firstImage.absoluteDir().absolutePath()));
 
             int importedImageNumber
                 = UBDocumentManager::documentManager()->addFilesToDocument(document, images);
@@ -3225,7 +3226,7 @@ int UBDocumentController::getSelectedItemIndex()
 
 bool UBDocumentController::pageCanBeMovedUp(int page)
 {
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
+    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
         return page >= 2;
     else
         return page >= 1;
@@ -3233,7 +3234,7 @@ bool UBDocumentController::pageCanBeMovedUp(int page)
 
 bool UBDocumentController::pageCanBeMovedDown(int page)
 {
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
+    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
         return page != 0 && page < selectedDocument()->pageCount() - 1;
     else
         return page < selectedDocument()->pageCount() - 1;

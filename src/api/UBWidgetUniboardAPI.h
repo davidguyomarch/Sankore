@@ -38,6 +38,8 @@ class UBWidgetMessageAPI;
 class UBDatastoreAPI;
 class UBDocumentDatastoreAPI;
 
+class UBSettings;
+
 class UBWidgetUniboardAPI : public QObject
 {
     Q_OBJECT
@@ -328,6 +330,7 @@ private slots:
         void onDownloadFinished(bool pSuccess, sDownloadFileDesc desc, QByteArray pData);
 
 private:
+    UBSettings* mSettings;
         inline void registerIDWidget(int id){webDownloadIds.append(id);}
         inline bool takeIDWidget(int id);
 

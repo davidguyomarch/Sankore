@@ -88,6 +88,7 @@ UBWidgetUniboardAPI::UBWidgetUniboardAPI(UBGraphicsScene *pScene, UBGraphicsWidg
     , mMessagesAPI(0)
     , mDatastoreAPI(0)
  {
+    mSettings = UBSettings::settings();
     UBGraphicsW3CWidgetItem* w3CGraphicsWidget = dynamic_cast<UBGraphicsW3CWidgetItem*>(widget);
 
     if (w3CGraphicsWidget)
@@ -177,42 +178,42 @@ void UBWidgetUniboardAPI::setPenColor(const QString& penColor)
 
 void UBWidgetUniboardAPI::updateFontFamilyPreference(const QString& fontFamily)
 {
-    UBSettings::settings()->setFontFamily(fontFamily);
+    mSettings->setFontFamily(fontFamily);
 }
 
 void UBWidgetUniboardAPI::updateFontSizePreference(const QString& fontSize)
 {
-    UBSettings::settings()->setFontPointSize(fontSize.toInt());
+    mSettings->setFontPointSize(fontSize.toInt());
 }
 
 void UBWidgetUniboardAPI::updateFontBoldPreference()
 {
-    UBSettings::settings()->setBoldFont(!fontBoldPreference());
+    mSettings->setBoldFont(!fontBoldPreference());
 }
 
 void UBWidgetUniboardAPI::updateFontItalicPreference()
 {
-    UBSettings::settings()->setItalicFont(!fontItalicPreference());
+    mSettings->setItalicFont(!fontItalicPreference());
 }
 
 QString UBWidgetUniboardAPI::fontFamilyPreference()
 {
-    return UBSettings::settings()->fontFamily();
+    return mSettings->fontFamily();
 }
 
 QString UBWidgetUniboardAPI::fontSizePreference()
 {
-    return QString::number(UBSettings::settings()->fontPointSize());
+    return QString::number(mSettings->fontPointSize());
 }
 
 bool UBWidgetUniboardAPI::fontBoldPreference()
 {
-    return UBSettings::settings()->isBoldFont();
+    return mSettings->isBoldFont();
 }
 
 bool UBWidgetUniboardAPI::fontItalicPreference()
 {
-    return UBSettings::settings()->isItalicFont();
+    return mSettings->isItalicFont();
 }
 
 bool UBWidgetUniboardAPI::isDarkBackground()

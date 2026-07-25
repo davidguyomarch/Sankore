@@ -53,6 +53,7 @@ class UBGraphicsRuler;
 class UBGraphicsProtractor;
 class UBGraphicsCompass;
 class UBDocumentProxy;
+class UBSettings;
 class UBGraphicsCurtainItem;
 class UBGraphicsStroke;
 class UBMagnifierParams;
@@ -111,6 +112,8 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
     Q_OBJECT
 
     public:
+
+    void setSettings(UBSettings* settings) { mSettings = settings; }
 
     enum clearCase {
         clearItemsAndAnnotations = 0
@@ -410,6 +413,8 @@ public slots:
         void createEraiser();
         void createPointer();
         QString cleanHtml(const QString& _html);
+
+        UBSettings* mSettings;
 
         QGraphicsEllipseItem* mEraser;
         QGraphicsEllipseItem* mPointer;

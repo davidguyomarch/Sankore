@@ -60,7 +60,8 @@ UBDrawingController::UBDrawingController(QObject * parent)
     , mLatestDrawingTool((UBStylusTool::Enum)-1)
 	, mIsDesktopMode(false)
 {
-    connect(UBSettings::settings(), SIGNAL(colorContextChanged()), this, SIGNAL(colorPaletteChanged()));
+    mSettings = UBSettings::settings();
+    connect(mSettings, SIGNAL(colorContextChanged()), this, SIGNAL(colorPaletteChanged()));
 
     connect(UBApplication::mainWindow->actionPen, SIGNAL(triggered(bool)), this, SLOT(penToolSelected(bool)));
     connect(UBApplication::mainWindow->actionEraser, SIGNAL(triggered(bool)), this, SLOT(eraserToolSelected(bool)));
@@ -127,13 +128,13 @@ void UBDrawingController::setStylusTool(int tool)
 
         if (tool == UBStylusTool::Pen || tool == UBStylusTool::Line)
         {
-             emit lineWidthIndexChanged(UBSettings::settings()->penWidthIndex());
-             emit colorIndexChanged(UBSettings::settings()->penColorIndex());
+             emit lineWidthIndexChanged(mSettings->penWidthIndex());
+             emit colorIndexChanged(mSettings->penColorIndex());
         }
         else if (tool == UBStylusTool::Marker)
         {
-            emit lineWidthIndexChanged(UBSettings::settings()->markerWidthIndex());
-            emit colorIndexChanged(UBSettings::settings()->markerColorIndex());
+            emit lineWidthIndexChanged(mSettings->markerWidthIndex());
+            emit colorIndexChanged(mSettings->markerColorIndex());
         }
 
         mStylusTool = (UBStylusTool::Enum)tool;
@@ -228,11 +229,11 @@ int UBDrawingController::currentToolWidthIndex()
 {
     if (stylusTool() == UBStylusTool::Pen || stylusTool() == UBStylusTool::Line)
     {
-        return UBSettings::settings()->penWidthIndex();
+        return mSettings->penWidthIndex();
     }
     else if (stylusTool() == UBStylusTool::Marker)
     {
-        return UBSettings::settings()->markerWidthIndex();
+        return mSettings->markerWidthIndex();
     }
     else
     {
@@ -245,16 +246,16 @@ qreal UBDrawingController::currentToolWidth()
 {
     if (stylusTool() == UBStylusTool::Pen || stylusTool() == UBStylusTool::Line)
     {
-        return UBSettings::settings()->currentPenWidth();
+        return mSettings->currentPenWidth();
     }
     else if (stylusTool() == UBStylusTool::Marker)
     {
-        return UBSettings::settings()->currentMarkerWidth();
+        return mSettings->currentMarkerWidth();
     }
     else
     {
         //failsafe
-        return UBSettings::settings()->currentPenWidth();
+        return mSettings->currentPenWidth();
     }
 }
 
@@ -263,11 +264,11 @@ void UBDrawingController::setLineWidthIndex(int index)
 {
     if (stylusTool() == UBStylusTool::Marker)
     {
-        UBSettings::settings()->setMarkerWidthIndex(index);
+        mSettings->setMarkerWidthIndex(index);
     }
     else
     {
-        UBSettings::settings()->setPenWidthIndex(index);
+        mSettings->setPenWidthIndex(index);
 
         if(stylusTool() != UBStylusTool::Line
             && stylusTool() != UBStylusTool::Selector)
@@ -284,11 +285,11 @@ int UBDrawingController::currentToolColorIndex()
 {
     if (stylusTool() == UBStylusTool::Pen || stylusTool() == UBStylusTool::Line)
     {
-        return UBSettings::settings()->penColorIndex();
+        return mSettings->penColorIndex();
     }
     else if (stylusTool() == UBStylusTool::Marker)
     {
-        return UBSettings::settings()->markerColorIndex();
+        return mSettings->markerColorIndex();
     }
     else
     {
@@ -299,7 +300,7 @@ int UBDrawingController::currentToolColorIndex()
 
 QColor UBDrawingController::currentToolColor()
 {
-    return toolColor(UBSettings::settings()->isDarkBackground());
+    return toolColor(mSettings->isDarkBackground());
 }
 
 
@@ -307,11 +308,11 @@ QColor UBDrawingController::toolColor(bool onDarkBackground)
 {
     if (stylusTool() == UBStylusTool::Pen || stylusTool() == UBStylusTool::Line)
     {
-        return UBSettings::settings()->penColor(onDarkBackground);
+        return mSettings->penColor(onDarkBackground);
     }
     else if (stylusTool() == UBStylusTool::Marker)
     {
-        return UBSettings::settings()->markerColor(onDarkBackground);
+        return mSettings->markerColor(onDarkBackground);
     }
     else
     {
@@ -330,15 +331,15 @@ QColor UBDrawingController::toolColor(bool onDarkBackground)
 
 void UBDrawingController::setColorIndex(int index)
 {
-    Q_ASSERT(index >= 0 && index < UBSettings::settings()->colorPaletteSize);
+    Q_ASSERT(index >= 0 && index < mSettings->colorPaletteSize);
 
     if (stylusTool() == UBStylusTool::Marker)
     {
-        UBSettings::settings()->setMarkerColorIndex(index);
+        mSettings->setMarkerColorIndex(index);
     }
     else
     {
-        UBSettings::settings()->setPenColorIndex(index);
+        mSettings->setPenColorIndex(index);
     }
 
     emit colorIndexChanged(index);
@@ -348,18 +349,18 @@ void UBDrawingController::setColorIndex(int index)
 void UBDrawingController::setEraserWidthIndex(int index)
 {
     setStylusTool(UBStylusTool::Eraser);
-    UBSettings::settings()->setEraserWidthIndex(index);
+    mSettings->setEraserWidthIndex(index);
 }
 
 void UBDrawingController::setPenColor(bool onDarkBackground, const QColor& color, int pIndex)
 {
     if (onDarkBackground)
     {
-        UBSettings::settings()->boardPenDarkBackgroundSelectedColors->setColor(pIndex, color);
+        mSettings->boardPenDarkBackgroundSelectedColors->setColor(pIndex, color);
     }
     else
     {
-        UBSettings::settings()->boardPenLightBackgroundSelectedColors->setColor(pIndex, color);
+        mSettings->boardPenLightBackgroundSelectedColors->setColor(pIndex, color);
     }
 
     emit colorPaletteChanged();
@@ -370,11 +371,11 @@ void UBDrawingController::setMarkerColor(bool onDarkBackground, const QColor& co
 {
     if (onDarkBackground)
     {
-        UBSettings::settings()->boardMarkerDarkBackgroundSelectedColors->setColor(pIndex, color);
+        mSettings->boardMarkerDarkBackgroundSelectedColors->setColor(pIndex, color);
     }
     else
     {
-        UBSettings::settings()->boardMarkerLightBackgroundSelectedColors->setColor(pIndex, color);
+        mSettings->boardMarkerLightBackgroundSelectedColors->setColor(pIndex, color);
     }
 
     emit colorPaletteChanged();
@@ -383,13 +384,13 @@ void UBDrawingController::setMarkerColor(bool onDarkBackground, const QColor& co
 
 void UBDrawingController::setMarkerAlpha(qreal alpha)
 {
-    UBSettings::settings()->boardMarkerLightBackgroundColors->setAlpha(alpha);
-    UBSettings::settings()->boardMarkerLightBackgroundSelectedColors->setAlpha(alpha);
+    mSettings->boardMarkerLightBackgroundColors->setAlpha(alpha);
+    mSettings->boardMarkerLightBackgroundSelectedColors->setAlpha(alpha);
 
-    UBSettings::settings()->boardMarkerDarkBackgroundColors->setAlpha(alpha);
-    UBSettings::settings()->boardMarkerDarkBackgroundSelectedColors->setAlpha(alpha);
+    mSettings->boardMarkerDarkBackgroundColors->setAlpha(alpha);
+    mSettings->boardMarkerDarkBackgroundSelectedColors->setAlpha(alpha);
 
-    UBSettings::settings()->boardMarkerAlpha->set(alpha);
+    mSettings->boardMarkerAlpha->set(alpha);
 
     emit colorPaletteChanged();
 }

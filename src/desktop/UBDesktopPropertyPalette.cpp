@@ -34,7 +34,8 @@
 UBDesktopPropertyPalette::UBDesktopPropertyPalette(QWidget *parent, UBRightPalette* _rightPalette)
     :UBPropertyPalette(Qt::Horizontal, parent)
     ,rightPalette(_rightPalette)
-{}
+{
+    mSettings = UBSettings::settings();}
 
 int UBDesktopPropertyPalette::getParentRightOffset()
 {

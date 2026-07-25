@@ -72,6 +72,7 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
         , mBoardStylusTool(UBDrawingController::drawingController()->stylusTool())
         , mDesktopStylusTool(UBDrawingController::drawingController()->stylusTool())
 {
+    mSettings = UBSettings::settings();
 
     mTransparentDrawingView = new UBBoardView(UBApplication::boardController, static_cast<QWidget*>(0), false, true); // deleted in UBDesktopAnnotationController::destructor
     mTransparentDrawingView->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -132,10 +133,10 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
     mDesktopMarkerPalette = new UBDesktopMarkerPalette(mTransparentDrawingView, rightPalette);
     mDesktopEraserPalette = new UBDesktopEraserPalette(mTransparentDrawingView, rightPalette);
 
-    mDesktopPalette->setBackgroundBrush(UBSettings::settings()->opaquePaletteColor);
-    mDesktopPenPalette->setBackgroundBrush(UBSettings::settings()->opaquePaletteColor);
-    mDesktopMarkerPalette->setBackgroundBrush(UBSettings::settings()->opaquePaletteColor);
-    mDesktopEraserPalette->setBackgroundBrush(UBSettings::settings()->opaquePaletteColor);
+    mDesktopPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
+    mDesktopPenPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
+    mDesktopMarkerPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
+    mDesktopEraserPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
 
 
     // Hack : the size of the property palettes is computed the first time the palette is visible
@@ -295,7 +296,7 @@ void UBDesktopAnnotationController::showWindow()
 
     mDesktopPalette->show();
 
-    bool showDisplay = UBSettings::settings()->webShowPageImmediatelyOnMirroredScreen->get().toBool();
+    bool showDisplay = mSettings->webShowPageImmediatelyOnMirroredScreen->get().toBool();
 
     mDesktopPalette->showHideClick(showDisplay);
     mDesktopPalette->updateShowHideState(showDisplay);

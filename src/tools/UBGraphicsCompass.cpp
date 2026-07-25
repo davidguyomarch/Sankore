@@ -59,6 +59,7 @@ UBGraphicsCompass::UBGraphicsCompass()
     , mAntiScaleRatio(1.0)
     , mDrewCenterCross(false)
 {
+    mSettings = UBSettings::settings();
     setRect(sDefaultRect);
     //TODO claudio: remove code duplication
     QScreen* desktop = QGuiApplication::primaryScreen();
@@ -688,7 +689,7 @@ QPainterPath UBGraphicsCompass::hingeShape() const
 
 QPainterPath UBGraphicsCompass::pencilShape() const
 {
-    int penWidthIndex = UBSettings::settings()->penWidthIndex();
+    int penWidthIndex = mSettings->penWidthIndex();
     int logicalCompassPencilWidth = penWidthIndex > 1 ? 8 : (penWidthIndex > 0 ? 4 : 2);
     QPainterPath path;
     path.moveTo(rect().right() - sPencilLength, rect().center().y() - logicalCompassPencilWidth / 2);

@@ -157,6 +157,7 @@ private:
     void switchToWebView();    
 
 private:
+    UBSettings* mSettings;
     UBFeaturesController *controller;
     UBFeaturesListView *pathListView;
     QVBoxLayout *layout;

@@ -41,13 +41,14 @@
 UBStartupHintsPalette::UBStartupHintsPalette(QWidget *parent) :
     UBFloatingPalette(Qt::TopRightCorner,parent)
 {
+    mSettings = UBSettings::settings();
     setObjectName("UBStartupHintsPalette");
-    if(UBSettings::settings()->appStartupHintsEnabled->get().toBool()){
+    if(mSettings->appStartupHintsEnabled->get().toBool()){
         setFixedSize(700,450);
         mLayout = new QVBoxLayout();
         mLayout->setContentsMargins(10,28,10,10);
         setLayout(mLayout);
-        QString url = UBSettings::settings()->applicationStartupHintsDirectory() + "/index.html";
+        QString url = mSettings->applicationStartupHintsDirectory() + "/index.html";
 #ifdef SANKORE_WEBENGINE
         mpWebView = new QWebEngineView(this);
         mpSankoreAPI = new UBWidgetUniboardAPI(0);
@@ -105,7 +106,7 @@ void UBStartupHintsPalette::mouseReleaseEvent(QMouseEvent * event)
 
 void UBStartupHintsPalette::onShowNextTimeStateChanged(int state)
 {
-    UBSettings::settings()->appStartupHintsEnabled->setBool(state == Qt::Checked);
+    mSettings->appStartupHintsEnabled->setBool(state == Qt::Checked);
 }
 
 void UBStartupHintsPalette::showEvent(QShowEvent *event)

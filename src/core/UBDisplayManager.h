@@ -28,6 +28,8 @@
 #include <QApplication>
 #include <QPainter>
 
+class UBSettings;
+
 class UBBlackoutWidget;
 class UBBoardView;
 
@@ -98,6 +100,7 @@ class UBDisplayManager : public QObject
         void setRoleToScreen(DisplayRole role, int screenIndex);
 
     private:
+        UBSettings* mSettings;
 
         void positionScreens();
 

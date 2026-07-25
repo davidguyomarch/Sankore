@@ -159,6 +159,7 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     UBPlatformUtils::init();
 
     UBSettings *settings = UBSettings::settings();
+    mSettings = settings;
 
     connect(settings->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(toolBarPositionChanged(QVariant)));
     connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), this, SLOT(toolBarDisplayTextChanged(QVariant)));
@@ -239,7 +240,7 @@ void UBApplication::setupTranslators(QStringList args)
     if(args.contains("-lang"))
         forcedLanguage=args.at(args.indexOf("-lang") + 1);
     else{
-        QString setLanguage = UBSettings::settings()->appPreferredLanguage->get().toString();
+        QString setLanguage = mSettings->appPreferredLanguage->get().toString();
         if(!setLanguage.isEmpty())
             forcedLanguage = setLanguage;
     }
@@ -284,7 +285,7 @@ void UBApplication::setupTranslators(QStringList args)
     QLocale::setDefault(QLocale(language));
     qDebug() << "Running application in:" << language;
     //Claudio: hack to avoid the lost of translations.
-    UBSettings::settings()->init();
+    mSettings->init();
 }
 
 int UBApplication::exec(const QString& pFileToImport)
@@ -368,10 +369,10 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(mainWindow->actionSankoreEditor, SIGNAL(triggered()), applicationController, SLOT(showSankoreEditor()));
     connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
 
-    toolBarDisplayTextChanged(UBSettings::settings()->appToolBarDisplayText->get());
-    toolBarPositionChanged(UBSettings::settings()->appToolBarPositionedAtTop->get());
+    toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
+    toolBarPositionChanged(mSettings->appToolBarPositionedAtTop->get());
 
-    bool bUseMultiScreen = UBSettings::settings()->appUseMultiscreen->get().toBool();
+    bool bUseMultiScreen = mSettings->appUseMultiscreen->get().toBool();
     mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
     connect(mainWindow->actionMultiScreen, SIGNAL(triggered(bool)), applicationController, SLOT(useMultiScreen(bool)));
     connect(mainWindow->actionWidePageSize, SIGNAL(triggered(bool)), boardController, SLOT(setWidePageSize(bool)));
@@ -508,9 +509,9 @@ void UBApplication::closing()
     if (webController)
         webController->closing();
 
-    UBSettings::settings()->closing();
+    mSettings->closing();
 
-    UBSettings::settings()->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
+    mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
 
     quit();
 }
@@ -563,7 +564,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             menu->addAction(mainWindow->actionMultiScreen);
             // SANKORE-48: Hide the check update action if the setting
             // EnableAutomaticSoftwareUpdates is false in Uniboard.config
-            if(UBSettings::settings()->appEnableAutomaticSoftwareUpdates->get().toBool())
+            if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool())
                 menu->addAction(mainWindow->actionCheckUpdate);
             else
                 mainWindow->actionCheckUpdate->setEnabled(false);

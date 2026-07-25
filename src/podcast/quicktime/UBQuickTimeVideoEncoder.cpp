@@ -44,6 +44,7 @@ UBQuickTimeVideoEncoder::UBQuickTimeVideoEncoder(QObject* pParent)
     , mShouldRecordAudio(true)
 
 {
+    mSettings = UBSettings::settings();
     // NOOP
 }
 
@@ -56,7 +57,7 @@ UBQuickTimeVideoEncoder::~UBQuickTimeVideoEncoder()
 
 bool UBQuickTimeVideoEncoder::start()
 {
-    QString quality = UBSettings::settings()->podcastQuickTimeQuality->get().toString();
+    QString quality = mSettings->podcastQuickTimeQuality->get().toString();
 
     if(!mQuickTimeCompressionSession.init(videoFileName(), quality, framesPerSecond(), videoSize()
                 , mShouldRecordAudio, audioRecordingDevice()))

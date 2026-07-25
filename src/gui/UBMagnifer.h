@@ -29,6 +29,8 @@
 #include <QPainter>
 #include <QTimer>
 
+class UBSettings;
+
 class UBMagnifierParams
 {
 public :
@@ -111,6 +113,7 @@ protected:
     QCursor mResizeCursor;
 
 private:
+    UBSettings* mSettings;
     DrawingMode mDrawingMode;
 
     QTimer mRefreshTimer;

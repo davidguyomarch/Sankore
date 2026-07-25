@@ -42,6 +42,8 @@
 #include "gui/UBDrawingPalette.h"
 #include "gui/UBStylusPalette.h"
 
+class UBSettings;
+
 class UBWebToolsPalette;
 class UBStylusPalette;
 class UBClockPalette;
@@ -111,6 +113,7 @@ class UBBoardPaletteManager : public QObject
         void toggleImageBackgroundPalette(bool ckecked, bool isDefault);// Issue 1684 - CFA - 20131120
 
     private:
+        UBSettings* mSettings;
 
         void setupPalettes();
         void connectPalettes();

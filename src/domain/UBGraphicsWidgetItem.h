@@ -60,6 +60,8 @@ struct UBWidgetType
     };
 };
 
+class UBSettings;
+
 class UBGraphicsWidgetItem : public QGraphicsWebView, public UBItem, public UBResizableGraphicsItem, public UBGraphicsItem
 {
     Q_OBJECT
@@ -201,6 +203,7 @@ class UBGraphicsWidgetItem : public QGraphicsWebView, public UBItem, public UBRe
         void initialLayoutCompleted();
 
     private:
+    UBSettings* mSettings;
         bool mIsFrozen;
         bool mIsTakingSnapshot;
         bool mShouldMoveWidget;

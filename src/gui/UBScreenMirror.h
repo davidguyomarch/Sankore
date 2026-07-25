@@ -28,6 +28,8 @@
 #include <QApplication>
 #include <QPainter>
 
+class UBSettings;
+
 class UBScreenMirror : public QWidget
 {
     Q_OBJECT;
@@ -54,6 +56,7 @@ class UBScreenMirror : public QWidget
         void stop();
 
     private:
+    UBSettings* mSettings;
 
         void grabPixmap();
 

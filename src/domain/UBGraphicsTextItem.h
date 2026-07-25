@@ -34,6 +34,8 @@
 class UBGraphicsItemDelegate;
 class UBGraphicsScene;
 
+class UBSettings;
+
 class UBGraphicsTextItem : public QGraphicsTextItem, public UBItem, public UBResizableGraphicsItem, public UBGraphicsItem
 {
     Q_OBJECT
@@ -131,6 +133,7 @@ class UBGraphicsTextItem : public QGraphicsTextItem, public UBItem, public UBRes
             void changeHTMLMode();
 
     private:
+    UBSettings* mSettings;
         virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);

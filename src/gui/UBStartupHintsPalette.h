@@ -24,6 +24,8 @@
 #ifndef UBSTARTUPTIPSPALETTE_H
 #define UBSTARTUPTIPSPALETTE_H
 
+class UBSettings;
+
 class QCheckBox;
 class QVBoxLayout;
 class QHBoxLayout;
@@ -53,6 +55,7 @@ protected:
     virtual void showEvent(QShowEvent *event);
 
 private:
+    UBSettings* mSettings;
     void close();
     int border();
     QCheckBox* mShowNextTime;

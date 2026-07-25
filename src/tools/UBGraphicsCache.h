@@ -36,6 +36,8 @@ typedef enum
     eMaskShap_Rectangle
 }eMaskShape;
 
+class UBSettings;
+
 class UBGraphicsCache : public QGraphicsRectItem, public UBItem
 {
 
@@ -86,6 +88,7 @@ private:
     void drawHole(bool draw);
 
 private:
+    UBSettings* mSettings;
     static QMap<UBGraphicsScene*, UBGraphicsCache*> sInstances;
 
     QColor mMaskColor;

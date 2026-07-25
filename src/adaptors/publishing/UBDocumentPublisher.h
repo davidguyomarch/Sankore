@@ -88,6 +88,8 @@ private:
 };
 
 
+class UBSettings;
+
 class UBDocumentPublisher : public QObject
 {
     Q_OBJECT;
@@ -114,6 +116,7 @@ private slots:
     void onFinished(QNetworkReply* reply);
 
 private:
+    UBSettings* mSettings;
 
     UBDocumentProxy *mSourceDocument;
 

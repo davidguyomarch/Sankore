@@ -24,6 +24,8 @@
 #ifndef UBDOCKPALETTE_H
 #define UBDOCKPALETTE_H
 
+class UBSettings;
+
 class UBDocumentProxy;
 
 #include <QWidget>
@@ -213,6 +215,9 @@ private:
 private:
     eUBDockPaletteType mPaletteType;
     UBTabDockPalette *mTabPalette;
+
+protected:
+    UBSettings* mSettings;
 };
 
 #endif // UBDOCKPALETTE_H

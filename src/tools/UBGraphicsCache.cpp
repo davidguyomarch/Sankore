@@ -49,12 +49,13 @@ UBGraphicsCache::UBGraphicsCache(UBGraphicsScene *scene) : QGraphicsRectItem()
   , mScene(scene)
   , mShouldDrawAtHoverEnter(false)
 {
+    mSettings = UBSettings::settings();
     setMode(static_cast<int>(OnClick)); 
 
-    mHoleSize = UBSettings::settings()->casheLastHoleSize->get().toSize();
+    mHoleSize = mSettings->casheLastHoleSize->get().toSize();
     
     QColor cacheColor;
-    QStringList colors = UBSettings::settings()->cacheColor->get().toString().split(" ", Qt::SkipEmptyParts);
+    QStringList colors = mSettings->cacheColor->get().toString().split(" ", Qt::SkipEmptyParts);
     if (colors.count())
     {
         if (3 == colors.count())
@@ -279,19 +280,19 @@ int UBGraphicsCache::holeHeight()
 void UBGraphicsCache::setHoleWidth(int width)
 {
     mHoleSize.setWidth(width);   
-    UBSettings::settings()->casheLastHoleSize->set(mHoleSize);
+    mSettings->casheLastHoleSize->set(mHoleSize);
 }
 
 void UBGraphicsCache::setHoleHeight(int height)
 {
     mHoleSize.setHeight(height);
-    UBSettings::settings()->casheLastHoleSize->set(mHoleSize);
+    mSettings->casheLastHoleSize->set(mHoleSize);
 }
 
 void UBGraphicsCache::setHoleSize(QSize size)
 {
     mHoleSize = size/UBApplication::boardController->controlView()->viewportTransform().m11();
-    UBSettings::settings()->casheLastHoleSize->set(mHoleSize);
+    mSettings->casheLastHoleSize->set(mHoleSize);
 }
 
 QRectF UBGraphicsCache::updateRect(QPointF currentPoint)

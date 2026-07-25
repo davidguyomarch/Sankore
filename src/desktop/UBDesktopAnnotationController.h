@@ -31,6 +31,8 @@
 
 #include "gui/UBRightPalette.h"
 
+class UBSettings;
+
 class UBDesktopPalette;
 class UBBoardView;
 class UBGraphicsScene;
@@ -124,6 +126,7 @@ class UBDesktopAnnotationController : public QObject
         void onToolClicked();
 
     private:
+        UBSettings* mSettings;
         void setAssociatedPalettePosition(UBActionPalette* palette, const QString& actionName);
         void togglePropertyPalette(UBActionPalette* palette);
         void updateMask(bool bTransparent);

@@ -70,6 +70,7 @@ UBDocumentPublisher::UBDocumentPublisher(UBDocumentProxy* pDocument, QObject *pa
         , mPassword("")
         , bLoginCookieSet(false)
 {
+    mSettings = UBSettings::settings();
     init();
 }
 
@@ -82,7 +83,7 @@ UBDocumentPublisher::~UBDocumentPublisher()
 void UBDocumentPublisher::publish()
 {
             //check that the username and password are stored on preferences
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     if(settings->communityUsername().isEmpty() || settings->communityPassword().isEmpty()){
         UBApplication::showMessage(tr("Credentials has to not been filled out yet."));
@@ -212,7 +213,7 @@ void UBDocumentPublisher::updateGoogleMapApiKey()
 {
     QDir widgestDir(mPublishingPath + "/" + UBPersistenceManager::widgetDirectory);
 
-    QString uniboardWebGoogleMapApiKey = UBSettings::settings()->uniboardWebGoogleMapApiKey->get().toString();
+    QString uniboardWebGoogleMapApiKey = mSettings->uniboardWebGoogleMapApiKey->get().toString();
 
     for (const QFileInfo& dirInfo : widgestDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
     {

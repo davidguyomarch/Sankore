@@ -32,6 +32,8 @@
 
 class UBServerXMLHttpRequest;
 
+class UBSettings;
+
 class UBIntranetPodcastPublisher : public QObject
 {
     Q_OBJECT;
@@ -49,6 +51,7 @@ class UBIntranetPodcastPublisher : public QObject
         void progress(qint64 bytesSent, qint64 bytesTotal);
 
     private:
+    UBSettings* mSettings;
 
         QString metadata();
 

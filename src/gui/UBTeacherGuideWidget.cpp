@@ -1698,12 +1698,13 @@ UBTeacherGuideWidget::UBTeacherGuideWidget(QWidget* parent, const char* name) :
   , mpEditionWidget(nullptr)
   , mpPresentationWidget(nullptr)
 {
+    mSettings = UBSettings::settings();
     setObjectName(name);
-    if (UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool()) {
+    if (mSettings->teacherGuidePageZeroActivated->get().toBool()) {
         mpPageZeroWidget = new UBTeacherGuidePageZeroWidget(this);
         addWidget(mpPageZeroWidget);
     }
-    if (UBSettings::settings()->teacherGuideLessonPagesActivated->get().toBool()) {
+    if (mSettings->teacherGuideLessonPagesActivated->get().toBool()) {
         mpEditionWidget = new UBTeacherGuideEditionWidget(this);
         addWidget(mpEditionWidget);
         mpPresentationWidget = new UBTeacherGuidePresentationWidget(this);

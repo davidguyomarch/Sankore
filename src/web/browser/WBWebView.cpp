@@ -199,7 +199,7 @@ void WBWebPage::handleUnsupportedContent(QNetworkReply *reply)
     if (!isPDF && reply->error() == QNetworkReply::NoError)
     {
         if(contentType == "application/widget")
-            WBBrowserWindow::downloadManager()->handleUnsupportedContent(reply,false, UBSettings::settings()->userGipLibraryDirectory());
+            WBBrowserWindow::downloadManager()->handleUnsupportedContent(reply,false, mSettings->userGipLibraryDirectory());
         else
             WBBrowserWindow::downloadManager()->handleUnsupportedContent(reply);
         return;
@@ -254,6 +254,7 @@ WBWebView::WBWebView(QWidget* parent)
     , mProgress(0)
     , mPage(new WBWebPage(this))
 {
+    mSettings = UBSettings::settings();
     setObjectName("ubBrowserWebView");
 
     setPage(mPage);

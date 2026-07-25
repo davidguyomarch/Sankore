@@ -82,7 +82,7 @@ void UBExportPDF::persistsDocument(UBDocumentProxy* pDocumentProxy, const QStrin
     qDebug() << "exporting document to PDF" << filename;
 
     pdfPrinter.setOutputFormat(QPrinter::PdfFormat);
-    pdfPrinter.setResolution(UBSettings::settings()->pdfResolution->get().toInt());
+    pdfPrinter.setResolution(pDocumentProxy->settings()->pdfResolution->get().toInt());
     pdfPrinter.setOutputFileName(filename);
 	pdfPrinter.setFullPage(true);
 

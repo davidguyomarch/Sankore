@@ -104,6 +104,7 @@ class UBPreferencesController : public QObject
         void adjustScreens(int screen);
 
     private:
+        UBSettings* mSettings;
         static qreal sSliderRatio;
         static qreal sMinPenWidth;
         static qreal sMaxPenWidth;

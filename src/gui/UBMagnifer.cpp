@@ -42,6 +42,7 @@ UBMagnifier::UBMagnifier(QWidget *parent, bool isInteractive)
     , gView(0)
     , mView(0)
 {
+    mSettings = UBSettings::settings();
     isCusrsorAlreadyStored = false;
     setMouseTracking(true);
 
@@ -62,7 +63,7 @@ UBMagnifier::UBMagnifier(QWidget *parent, bool isInteractive)
     mResizeItem = new QPixmap(":/images/resize.svg");
     sChangeModePixmap = new QPixmap();
 
-    setDrawingMode(UBSettings::settings()->magnifierDrawingMode->get().toInt());
+    setDrawingMode(mSettings->magnifierDrawingMode->get().toInt());
 
     if (parent)
     {
@@ -482,5 +483,5 @@ void UBMagnifier::setDrawingMode(int mode)
 
     createMask();
 
-    UBSettings::settings()->magnifierDrawingMode->set(mode);
+    mSettings->magnifierDrawingMode->set(mode);
 }

@@ -58,6 +58,7 @@ UBGraphicsTextItemDelegate::UBGraphicsTextItemDelegate(UBGraphicsTextItem* pDele
     , mLinkPalette(new UBCreateHyperLinkPalette())
     , mCellPropertiesPalette(new UBCellPropertiesPalette())
 {
+    mSettings = UBSettings::settings();
     UBGraphicsProxyWidget* w = UBApplication::boardController->activeScene()->addWidget(mTablePalette);
     w->setParentItem(delegated());
     w->hide();
@@ -79,7 +80,7 @@ UBGraphicsTextItemDelegate::UBGraphicsTextItemDelegate(UBGraphicsTextItem* pDele
     QTextCursor curCursor = delegated()->textCursor();
     QTextCharFormat format;
     QFont font(createDefaultFont());
-    font.setPointSize(UBSettings::settings()->fontPointSize());
+    font.setPointSize(mSettings->fontPointSize());
 
     format.setFont(font);
     curCursor.mergeCharFormat(format);
@@ -107,20 +108,20 @@ QFont UBGraphicsTextItemDelegate::createDefaultFont()
 {
     QTextCharFormat textFormat;
 
-    QString fFamily = UBSettings::settings()->fontFamily();
+    QString fFamily = mSettings->fontFamily();
     if (!fFamily.isEmpty())
         textFormat.setFontFamily(fFamily);
 
-    bool bold = UBSettings::settings()->isBoldFont();
+    bool bold = mSettings->isBoldFont();
     if (bold)
         textFormat.setFontWeight(QFont::Bold);
 
-    bool italic = UBSettings::settings()->isItalicFont();
+    bool italic = mSettings->isItalicFont();
     if (italic)
         textFormat.setFontItalic(true);
 
     QFont font(fFamily, -1, bold ? QFont::Bold : -1, italic);
-    int pointSize = UBSettings::settings()->fontPointSize();
+    int pointSize = mSettings->fontPointSize();
     if (pointSize > 0) {
         font.setPointSize(pointSize);
     }
@@ -236,7 +237,7 @@ void UBGraphicsTextItemDelegate::customize(QFontDialog &fontDialog)
 {
     fontDialog.setOption(QFontDialog::DontUseNativeDialog);
 
-    if (UBSettings::settings()->isDarkBackground()) {
+    if (mSettings->isDarkBackground()) {
         fontDialog.setStyleSheet("background-color: white;");
     }
 
@@ -294,10 +295,10 @@ void UBGraphicsTextItemDelegate::pickFont()
         if (fontDialog.exec())
         {
             QFont selectedFont = fontDialog.selectedFont();
-            UBSettings::settings()->setFontFamily(selectedFont.family());
-            UBSettings::settings()->setBoldFont(selectedFont.bold());
-            UBSettings::settings()->setItalicFont(selectedFont.italic());
-            UBSettings::settings()->setFontPointSize(selectedFont.pointSize());
+            mSettings->setFontFamily(selectedFont.family());
+            mSettings->setBoldFont(selectedFont.bold());
+            mSettings->setItalicFont(selectedFont.italic());
+            mSettings->setFontPointSize(selectedFont.pointSize());
 
             //setting format for selected item
             QTextCursor curCursor = delegated()->textCursor();
@@ -328,7 +329,7 @@ void UBGraphicsTextItemDelegate::setFontBold()
 
     format.setFontWeight(cursor.charFormat().fontWeight() != QFont::Bold ? QFont::Bold : QFont::Normal);
 
-    //UBSettings::settings()->setBoldFont(format.fontWeight() > QFont::Normal);
+    //mSettings->setBoldFont(format.fontWeight() > QFont::Normal);
 
     if (cursor.selectedText().length() == 0)
     {
@@ -412,7 +413,7 @@ void UBGraphicsTextItemDelegate::pickColor()
     {
         QColorDialog colorDialog(delegated()->defaultTextColor(), mDelegated->scene()->views().at(0));
         colorDialog.setWindowTitle(tr("Text Color"));
-        if (UBSettings::settings()->isDarkBackground())
+        if (mSettings->isDarkBackground())
         {
             colorDialog.setStyleSheet("background-color: white;");
         }
@@ -442,7 +443,7 @@ void UBGraphicsTextItemDelegate::pickBackgroundColor()
     {
         QColorDialog colorDialog(delegated()->defaultTextColor(), mDelegated->scene()->views().at(0));
         colorDialog.setWindowTitle(tr("Background Color"));
-        if (UBSettings::settings()->isDarkBackground())
+        if (mSettings->isDarkBackground())
         {
             colorDialog.setStyleSheet("background-color: white;");
         }
@@ -727,7 +728,7 @@ void UBGraphicsTextItemDelegate::showMenuTable()
     p.setX(p.x() + mTableButton->pos().x() + mTableButton->boundingRect().size().width());
 
     // Take in account the toolbar :
-    if(UBSettings::settings()->appToolBarPositionedAtTop->get().toBool())
+    if(mSettings->appToolBarPositionedAtTop->get().toBool())
     {
         p.setY(p.y() + UBApplication::app()->toolBarHeight());
     }
@@ -1108,7 +1109,7 @@ void UBGraphicsTextItemDelegate::ChangeTextSize(qreal factor, textChangeMode cha
         cursor.setPosition (iCursorPos, QTextCursor::MoveAnchor);
     }
 
-    UBSettings::settings()->setFontPointSize(iPointSize);
+    mSettings->setFontPointSize(iPointSize);
     //returning initial selection
     cursor.setPosition (anchorPos, QTextCursor::MoveAnchor);
     cursor.setPosition (cursorPos, QTextCursor::KeepAnchor);

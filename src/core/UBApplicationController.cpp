@@ -87,6 +87,7 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
     , mIsShowingDesktop(false)
     
 {
+    mSettings = UBSettings::settings();
     mDisplayManager = new UBDisplayManager(this);
 
     mUninoteController = new UBDesktopAnnotationController(this, rightPalette);
@@ -330,7 +331,7 @@ void UBApplicationController::addCapturedEmbedCode(const QString& embedCode)
     {
         showBoard();
 
-        const QString userWidgetPath = UBSettings::settings()->userInteractiveDirectory() + "/" + tr("Web"); // TODO UB 4.x synch with w3cWidget
+        const QString userWidgetPath = mSettings->userInteractiveDirectory() + "/" + tr("Web"); // TODO UB 4.x synch with w3cWidget
         QDir userWidgetDir(userWidgetPath);
 
         int width = 300;
@@ -403,7 +404,7 @@ void UBApplicationController::showInternet()
         UBApplication::boardController->hide();
     }
 
-    if (UBSettings::settings()->webUseExternalBrowser->get().toBool())
+    if (mSettings->webUseExternalBrowser->get().toBool())
     {
         showDesktop(true);
         UBApplication::webController->show(UBWebController::WebBrowser);
@@ -507,7 +508,7 @@ void UBApplicationController::showTutorial()
         UBApplication::boardController->hide();
     }
 
-    if (UBSettings::settings()->webUseExternalBrowser->get().toBool())
+    if (mSettings->webUseExternalBrowser->get().toBool())
     {
         showDesktop(true);
         UBApplication::webController->show(UBWebController::Tutorial);
@@ -613,7 +614,7 @@ void UBApplicationController::downloadJsonFinished(QString currentJson)
 
 void UBApplicationController::checkUpdateAtLaunch()
 {
-    if(UBSettings::settings()->appEnableAutomaticSoftwareUpdates->get().toBool()){
+    if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool()){
         isNoUpdateDisplayed = false;
         checkUpdate ();
     }
@@ -768,7 +769,7 @@ void UBApplicationController::useMultiScreen(bool use)
 {
     mDisplayManager->setUseMultiScreen(use);
     mDisplayManager->adjustScreens(0);
-    UBSettings::settings()->appUseMultiscreen->set(use);
+    mSettings->appUseMultiscreen->set(use);
 
 }
 

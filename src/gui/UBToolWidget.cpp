@@ -51,6 +51,7 @@ UBToolWidget::UBToolWidget(const QUrl& pUrl, QWidget *pParent)
     , mFrameWidth(0)
 
 {
+    mSettings = UBSettings::settings();
     int widgetType = UBGraphicsWidgetItem::widgetType(pUrl);
     if (widgetType == UBWidgetType::Apple)
         mToolWidget = new UBGraphicsAppleWidgetItem(pUrl);
@@ -105,7 +106,7 @@ void UBToolWidget::initialize()
     mWebView = nullptr;
 #endif
 
-    mFrameWidth = UBSettings::settings()->objectFrameWidth;
+    mFrameWidth = mSettings->objectFrameWidth;
     mContentMargin = sClosePixmap->width() / 2 + mFrameWidth;
     setLayout(new QVBoxLayout());
     layout()->setContentsMargins(mContentMargin, mContentMargin, mContentMargin, mContentMargin);

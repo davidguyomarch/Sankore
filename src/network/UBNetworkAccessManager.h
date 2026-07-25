@@ -26,6 +26,8 @@
 
 #include <QtNetwork>
 
+class UBSettings;
+
 class UBNetworkAccessManager : public QNetworkAccessManager
 {
     Q_OBJECT;
@@ -42,6 +44,7 @@ class UBNetworkAccessManager : public QNetworkAccessManager
         virtual QNetworkReply * createRequest ( Operation op, const QNetworkRequest & req, QIODevice * outgoingData = 0 );
 
     private:
+        UBSettings* mSettings;
 
         QList<QString> sslTrustedHostList;
 

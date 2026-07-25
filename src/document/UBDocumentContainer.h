@@ -29,6 +29,8 @@
 #include <QPainter>
 #include "UBDocumentProxy.h"
 
+class UBSettings;
+
 class UBDocumentContainer : public QObject
 {
     Q_OBJECT
@@ -57,6 +59,7 @@ class UBDocumentContainer : public QObject
         void insertThumbPage(int index);
 
     private:
+        UBSettings* mSettings;
         UBDocumentProxy* mCurrentDocument;
         QList<const QPixmap*> mDocumentThumbs;
 
