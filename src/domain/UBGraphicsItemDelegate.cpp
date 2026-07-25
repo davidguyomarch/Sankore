@@ -181,7 +181,7 @@ UBGraphicsItemDelegate::UBGraphicsItemDelegate(QGraphicsItem* pDelegated, QObjec
     , mGotoContentSourceAction(0)
     , mRemoveAnAction(0)
     , mFrame(0)
-    , mFrameWidth(mSettings->objectFrameWidth)
+    , mFrameWidth(UBSettings::settings()->objectFrameWidth)
     , mAntiScaleRatio(1.0)
     , mToolBarItem(nullptr)
     , mAction(0)
