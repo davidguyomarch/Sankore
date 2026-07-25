@@ -37,9 +37,10 @@ UBResources* UBResources::sSingleton = 0;
 
 UBResources::UBResources(QObject* pParent)
  : QObject(pParent)
+ , mSettings(nullptr)
 {
-    mSettings = UBSettings::settings();
-    // NOOP
+    // mSettings initialized in buildFontList() — UBResources is created
+    // before UBSettings singleton exists
 }
 
 UBResources::~UBResources()
@@ -80,6 +81,8 @@ void UBResources::init()
 
 void UBResources::buildFontList()
 {
+    if (!mSettings)
+        mSettings = UBSettings::settings();
     QString customFontDirectory = mSettings->applicationCustomFontDirectory();
     QStringList fontFiles = UBFileSystemUtils::allFiles(customFontDirectory);
     for (const QString& fontFile : fontFiles){
