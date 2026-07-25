@@ -131,7 +131,7 @@ UBDesktopEraserPalette::UBDesktopEraserPalette(QWidget *parent, UBRightPalette* 
     connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, SIGNAL(triggered()), this, SLOT(close()));
 
     eraserWidthChoice->displayText(false);
-    eraserWidthChoice->setCurrentIndex(mSettings->eraserWidthIndex());
+    eraserWidthChoice->setCurrentIndex(UBSettings::settings()->eraserWidthIndex());
 
     layout()->addWidget(eraserWidthChoice);
 
