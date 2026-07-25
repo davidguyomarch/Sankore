@@ -37,11 +37,14 @@ class WBWebView;
 class UBPodcastRecordingPalette;
 
 
+class UBSettings;
+
 class UBPodcastController : public QObject
 {
     Q_OBJECT;
 
     private:
+    UBSettings* mSettings;
         UBPodcastController(QObject* pParent = 0);
         virtual ~UBPodcastController();
 

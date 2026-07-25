@@ -46,6 +46,7 @@ UBYouTubePublisher::UBYouTubePublisher(QObject* pParent)
     , mAuthRequest(0)
     , mUploadRequest(0)
 {
+    mSettings = UBSettings::settings();
     // NOOP
 }
 
@@ -65,10 +66,10 @@ void UBYouTubePublisher::uploadVideo(const QString& videoFilePath)
     pub.title->setText(QFileInfo(mVideoFilePath).completeBaseName());
     pub.keywords->setText(tr("Open-Sankore"));
 
-    QString defaultEMail = UBSettings::settings()->youTubeUserEMail->get().toString();
+    QString defaultEMail = mSettings->youTubeUserEMail->get().toString();
     pub.email->setText(defaultEMail);
 
-    QString defaultPassword = UBSettings::settings()->password(defaultEMail);
+    QString defaultPassword = mSettings->password(defaultEMail);
     pub.password->setText(defaultPassword);
 
     if (pub.exec() == QDialog::Accepted)
@@ -79,11 +80,11 @@ void UBYouTubePublisher::uploadVideo(const QString& videoFilePath)
         mKeywords = pub.keywords->text();
 
         QString email = pub.email->text();
-        UBSettings::settings()->youTubeUserEMail->set(email);
+        mSettings->youTubeUserEMail->set(email);
 
         QString password = pub.password->text();
 
-        UBSettings::settings()->setPassword(email, password);
+        mSettings->setPassword(email, password);
 
         postClientLoginRequest(email, password);
     }
@@ -347,19 +348,19 @@ UBYouTubePublishingDialog::UBYouTubePublishingDialog(const QString& videoFilePat
     dialogButtons->button(QDialogButtonBox::Ok)->setEnabled(false);
     dialogButtons->button(QDialogButtonBox::Ok)->setText(tr("Upload"));
 
-    UBSettings* settings = UBSettings::settings();
+    UBSettings* settings = mSettings;
 
     email->setText(settings->youTubeUserEMail->get().toString());
     password->setText(settings->password(email->text()));
 
-    youtubeCredentialsPersistence->setChecked(UBSettings::settings()->youTubeCredentialsPersistence->get().toBool());
+    youtubeCredentialsPersistence->setChecked(mSettings->youTubeCredentialsPersistence->get().toBool());
     updatePersistanceEnableState();
 }
 
 
 void UBYouTubePublishingDialog::updateCredentialPersistenceState()
 {
-    UBSettings::settings()->youTubeCredentialsPersistence->set(QVariant(youtubeCredentialsPersistence->checkState()));
+    mSettings->youTubeCredentialsPersistence->set(QVariant(youtubeCredentialsPersistence->checkState()));
 }
 
 void UBYouTubePublishingDialog::updatePersistanceEnableState()

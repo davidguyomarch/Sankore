@@ -32,6 +32,8 @@
 
 class UBServerXMLHttpRequest;
 
+class UBSettings;
+
 class UBYouTubePublisher : public QObject
 {
     Q_OBJECT;
@@ -58,6 +60,7 @@ class UBYouTubePublisher : public QObject
          void progress(qint64 bytesSent, qint64 bytesTotal);
 
     private:
+    UBSettings* mSettings;
 
         QString youtubeMetadata();
 

@@ -105,6 +105,7 @@ WBBrowserWindow::WBBrowserWindow(QWidget *parent, Ui::MainWindow* uniboardMainWi
         , mSearchAction(0)
         , mUniboardMainWindow(uniboardMainWindow)
 {
+    mSettings = UBSettings::settings();
     QWebEngineSettings *defaultSettings = QWebEngineProfile::defaultProfile()->settings();
     defaultSettings->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
     defaultSettings->setAttribute(QWebEngineSettings::PluginsEnabled, true);
@@ -477,7 +478,7 @@ void WBBrowserWindow::slotViewZoomTextOnly(bool enable)
 
 void WBBrowserWindow::slotHome()
 {
-    loadPage(UBSettings::settings()->webHomePage->get().toString());
+    loadPage(mSettings->webHomePage->get().toString());
 }
 
 
@@ -546,13 +547,13 @@ void WBBrowserWindow::tabCurrentChanged(int index)
 
 void WBBrowserWindow::bookmarks()
 {
-    loadPage(UBSettings::settings()->webBookmarksPage->get().toString());
+    loadPage(mSettings->webBookmarksPage->get().toString());
 }
 
 
 void WBBrowserWindow::addBookmark()
 {
-    loadPage(UBSettings::settings()->webAddBookmarkUrl->get().toString() + currentTabWebView()->url().toString());
+    loadPage(mSettings->webAddBookmarkUrl->get().toString() + currentTabWebView()->url().toString());
 }
 
 
@@ -578,7 +579,7 @@ void WBBrowserWindow::aboutToShowBackMenu()
     QWebEngineHistory *history = currentTabWebView()->history();
 
     int historyCount = history->count();
-    int historyLimit = history->backItems(historyCount).count() - UBSettings::settings()->historyLimit->get().toReal();
+    int historyLimit = history->backItems(historyCount).count() - mSettings->historyLimit->get().toReal();
     if (historyLimit < 0)
         historyLimit = 0;
 
@@ -613,8 +614,8 @@ void WBBrowserWindow::aboutToShowForwardMenu()
     int historyCount = history->count();
 
     int historyLimit = history->forwardItems(historyCount).count();
-    if (historyLimit > UBSettings::settings()->historyLimit->get().toReal())
-        historyLimit = UBSettings::settings()->historyLimit->get().toReal();
+    if (historyLimit > mSettings->historyLimit->get().toReal())
+        historyLimit = mSettings->historyLimit->get().toReal();
 
     for (int i = 0; i < historyLimit; ++i) 
     {

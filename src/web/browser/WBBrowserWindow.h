@@ -87,6 +87,8 @@ class UBCookieJar;
 
     Handles the tab widget and all the actions
  */
+class UBSettings;
+
 class WBBrowserWindow : public QWidget
 {
     Q_OBJECT;
@@ -158,6 +160,7 @@ class WBBrowserWindow : public QWidget
         void geometryChangeRequested(const QRect &geometry);
 
     private:
+    UBSettings* mSettings;
 
         static WBHistoryManager *sHistoryManager;
         static WBDownloadManager *sDownloadManager;
