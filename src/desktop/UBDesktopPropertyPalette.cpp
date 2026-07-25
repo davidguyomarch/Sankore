@@ -34,7 +34,8 @@
 UBDesktopPropertyPalette::UBDesktopPropertyPalette(QWidget *parent, UBRightPalette* _rightPalette)
     :UBPropertyPalette(Qt::Horizontal, parent)
     ,rightPalette(_rightPalette)
-{}
+{
+    mSettings = UBSettings::settings();}
 
 int UBDesktopPropertyPalette::getParentRightOffset()
 {
@@ -130,7 +131,7 @@ UBDesktopEraserPalette::UBDesktopEraserPalette(QWidget *parent, UBRightPalette* 
     connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, SIGNAL(triggered()), this, SLOT(close()));
 
     eraserWidthChoice->displayText(false);
-    eraserWidthChoice->setCurrentIndex(UBSettings::settings()->eraserWidthIndex());
+    eraserWidthChoice->setCurrentIndex(mSettings->eraserWidthIndex());
 
     layout()->addWidget(eraserWidthChoice);
 

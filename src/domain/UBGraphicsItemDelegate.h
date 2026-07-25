@@ -240,6 +240,8 @@ class UBGraphicsToolBarItem : public QGraphicsRectItem, public QObject
         QList<QGraphicsItem*> mItemsOnToolBar;
 };
 
+class UBSettings;
+
 class UBGraphicsItemDelegate : public QObject
 {
     Q_OBJECT
@@ -373,6 +375,7 @@ protected slots:
         virtual void gotoContentSource();
 
 private:
+    UBSettings* mSettings;
         void updateFrame();
         void updateButtons(bool showUpdated = false);
         inline void showHideRecurs(const QVariant &pShow, QGraphicsItem *pItem);

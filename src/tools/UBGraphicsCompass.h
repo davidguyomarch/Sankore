@@ -34,6 +34,8 @@
 
 class UBGraphicsScene;
 
+class UBSettings;
+
 class UBGraphicsCompass: public QObject, public QGraphicsRectItem, public UBItem
 {
     Q_OBJECT;
@@ -74,6 +76,7 @@ class UBGraphicsCompass: public QObject, public QGraphicsRectItem, public UBItem
         void lineWidthChanged();
 
     private:
+    UBSettings* mSettings;
         // Helpers
         void            paintAngleDisplay(QPainter *painter);
         void           paintRadiusDisplay(QPainter *painter);

@@ -41,6 +41,8 @@ class UBGraphicsScene;
 class QWebEngineView;
 #endif
 
+class UBSettings;
+
 class UBToolWidget : public QWidget
 {
     Q_OBJECT;
@@ -87,6 +89,9 @@ class UBToolWidget : public QWidget
         int mContentMargin;
         int mFrameWidth;
         QPointer<UBGraphicsScene> mScene;
+
+private:
+    UBSettings* mSettings;
 };
 
 #endif /* UBTOOLWIDGET_H_ */

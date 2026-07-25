@@ -181,7 +181,7 @@ UBGraphicsItemDelegate::UBGraphicsItemDelegate(QGraphicsItem* pDelegated, QObjec
     , mGotoContentSourceAction(0)
     , mRemoveAnAction(0)
     , mFrame(0)
-    , mFrameWidth(UBSettings::settings()->objectFrameWidth)
+    , mFrameWidth(mSettings->objectFrameWidth)
     , mAntiScaleRatio(1.0)
     , mToolBarItem(nullptr)
     , mAction(0)
@@ -196,6 +196,7 @@ UBGraphicsItemDelegate::UBGraphicsItemDelegate(QGraphicsItem* pDelegated, QObjec
     , mShowGoContentButton(showGoContentButton)
     , mMoved(false)
 {
+    mSettings = UBSettings::settings();
     connect(UBApplication::boardController, SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged()));
 }
 

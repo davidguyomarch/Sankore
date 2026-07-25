@@ -35,6 +35,8 @@
 #include "UBAudioQueueRecorder.h"
 
 
+class UBSettings;
+
 class UBQuickTimeVideoEncoder : public UBAbstractVideoEncoder
 {
     Q_OBJECT;
@@ -72,6 +74,7 @@ class UBQuickTimeVideoEncoder : public UBAbstractVideoEncoder
        void compressionFinished();
 
     private:
+    UBSettings* mSettings;
 
         struct ImageFrame
         {

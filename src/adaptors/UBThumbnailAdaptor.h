@@ -30,6 +30,8 @@ class UBDocument;
 class UBDocumentProxy;
 class UBGraphicsScene;
 
+class UBSettings;
+
 class UBThumbnailAdaptor //static class
 {
 	Q_DECLARE_TR_FUNCTIONS(UBThumbnailAdaptor)
@@ -44,6 +46,7 @@ public:
     static void clearThumbs(QList<const QPixmap*>& list);
 
 private:
+    UBSettings* mSettings;
     static void generateMissingThumbnails(UBDocumentProxy* proxy);
     static void updateDocumentToHandleZeroPage(UBDocumentProxy* proxy);
 

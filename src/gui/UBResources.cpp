@@ -38,6 +38,7 @@ UBResources* UBResources::sSingleton = 0;
 UBResources::UBResources(QObject* pParent)
  : QObject(pParent)
 {
+    mSettings = UBSettings::settings();
     // NOOP
 }
 
@@ -79,7 +80,7 @@ void UBResources::init()
 
 void UBResources::buildFontList()
 {
-    QString customFontDirectory = UBSettings::settings()->applicationCustomFontDirectory();
+    QString customFontDirectory = mSettings->applicationCustomFontDirectory();
     QStringList fontFiles = UBFileSystemUtils::allFiles(customFontDirectory);
     for (const QString& fontFile : fontFiles){
         int fontId = QFontDatabase::addApplicationFont(fontFile);

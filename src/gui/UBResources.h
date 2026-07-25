@@ -28,6 +28,8 @@
 #include <QApplication>
 #include <QPainter>
 
+class UBSettings;
+
 class UBResources : public QObject
 {
     Q_OBJECT;
@@ -38,6 +40,7 @@ class UBResources : public QObject
 
 
     private:
+    UBSettings* mSettings;
          UBResources(QObject* pParent = 0);
          virtual ~UBResources();
 

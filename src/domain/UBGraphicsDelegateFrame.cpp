@@ -65,7 +65,8 @@ UBGraphicsDelegateFrame::UBGraphicsDelegateFrame(UBGraphicsItemDelegate* pDelega
     , mMirrorX(false)
     , mMirrorY(false)
 {
-    mAngleTolerance = UBSettings::settings()->angleTolerance->get().toReal();
+    mSettings = UBSettings::settings();
+    mAngleTolerance = mSettings->angleTolerance->get().toReal();
 
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 

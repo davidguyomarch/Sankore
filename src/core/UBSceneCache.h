@@ -32,6 +32,8 @@ class UBDocumentProxy;
 class UBGraphicsScene;
 class UBGraphicsScene;
 
+class UBSettings;
+
 class UBSceneCacheID
 {
 
@@ -97,6 +99,7 @@ class UBSceneCache : public QHash<UBSceneCacheID, UBGraphicsScene*>
         void reassignDocProxy(UBDocumentProxy *newDocument, UBDocumentProxy *oldDocument);
 
     private:
+    UBSettings* mSettings;
 
         void internalMoveScene(UBDocumentProxy* proxy, int sourceIndex, int targetIndex);
 

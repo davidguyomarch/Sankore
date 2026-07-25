@@ -60,7 +60,8 @@ UBGraphicsTextItem::UBGraphicsTextItem(QGraphicsItem * parent) :
     , mLastMousePressTime(QTime::currentTime())
     , mBackgroundColor(QColor(Qt::transparent))
     , mHtmlIsInterpreted(false)
-{    
+{
+    mSettings = UBSettings::settings();    
     setDelegate(new UBGraphicsTextItemDelegate(this));
     Delegate()->init();
 
@@ -399,7 +400,7 @@ void UBGraphicsTextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
         painter->drawRect(boundingRect());
     }
 
-    QColor color = UBSettings::settings()->isDarkBackground() ? mColorOnDarkBackground : mColorOnLightBackground;
+    QColor color = mSettings->isDarkBackground() ? mColorOnDarkBackground : mColorOnLightBackground;
     setDefaultTextColor(color);
 
     // Never draw the rubber band, we draw our custom selection with the DelegateFrame

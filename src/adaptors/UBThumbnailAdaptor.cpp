@@ -94,7 +94,7 @@ const QPixmap* UBThumbnailAdaptor::get(UBDocumentProxy* proxy, int pageIndex)
 
 void UBThumbnailAdaptor::updateDocumentToHandleZeroPage(UBDocumentProxy* proxy)
 {
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool()){
+    if(mSettings->teacherGuidePageZeroActivated->get().toBool()){
     	QString fileName = proxy->persistencePath() + UBFileSystemUtils::digitFileFormat("/page%1.svg", 0);
     	QFile file(fileName);
     	if(!file.exists()){
