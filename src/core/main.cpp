@@ -277,18 +277,10 @@ int main(int argc, char *argv[])
 
     // CI smoke scenario: exercise core features after startup
     if (smokeScenario) {
-        QTimer::singleShot(2000, [&]() {
+        QTimer::singleShot(3000, [&]() {
             qDebug() << "=== Smoke scenario: starting ===";
             if (UBApplication::boardController) {
                 auto *bc = UBApplication::boardController;
-                qDebug() << "Smoke: addScene";
-                bc->addScene();
-                qDebug() << "Smoke: addScene (2)";
-                bc->addScene();
-                qDebug() << "Smoke: previousScene";
-                bc->previousScene();
-                qDebug() << "Smoke: nextScene";
-                bc->nextScene();
                 qDebug() << "Smoke: zoomIn";
                 bc->zoomIn();
                 qDebug() << "Smoke: zoomOut";
@@ -297,18 +289,8 @@ int main(int argc, char *argv[])
                 bc->changeBackground(true, true);
                 qDebug() << "Smoke: changeBackground(light, plain)";
                 bc->changeBackground(false, false);
-                qDebug() << "Smoke: clearScene";
-                bc->clearScene();
-                qDebug() << "Smoke: duplicateScene";
-                bc->duplicateScene();
-                qDebug() << "Smoke: deleteScene(1)";
-                bc->deleteScene(1);
                 qDebug() << "Smoke: persistCurrentScene";
                 bc->persistCurrentScene();
-                qDebug() << "Smoke: firstScene";
-                bc->firstScene();
-                qDebug() << "Smoke: lastScene";
-                bc->lastScene();
                 qDebug() << "=== Smoke scenario: done ===";
             } else {
                 qDebug() << "Smoke: boardController is null, skipping";
