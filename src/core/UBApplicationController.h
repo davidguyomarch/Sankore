@@ -42,6 +42,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 // class QHttp; -- removed in Qt6
 class UBRightPalette;
+class UBSettings;
 
 
 class UBApplicationController : public QObject
@@ -52,6 +53,8 @@ class UBApplicationController : public QObject
 
         UBApplicationController(UBBoardView *pControlView, UBBoardView *pDisplayView, UBMainWindow *pMainWindow, QObject* parent, UBRightPalette* rightPalette);
         virtual ~UBApplicationController();
+
+        void setSettings(UBSettings* settings) { mSettings = settings; }
 
         int initialHScroll() { return mInitialHScroll; }
         int initialVScroll() { return mInitialVScroll; }
@@ -164,6 +167,8 @@ class UBApplicationController : public QObject
         int mInitialHScroll, mInitialVScroll;
 
     private:
+
+        UBSettings* mSettings;
 
         MainMode mMainMode;
 
