@@ -151,15 +151,15 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
 
     setupTranslators(args);
 
+    UBSettings *settings = UBSettings::settings();
+    mSettings = settings;
+
     UBResources::resources();
 
     if (!undoStack)
         undoStack = new QUndoStack(staticMemoryCleaner);
 
     UBPlatformUtils::init();
-
-    UBSettings *settings = UBSettings::settings();
-    mSettings = settings;
 
     connect(settings->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(toolBarPositionChanged(QVariant)));
     connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), this, SLOT(toolBarDisplayTextChanged(QVariant)));
