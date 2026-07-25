@@ -35,9 +35,10 @@
 
 UBSceneCache::UBSceneCache()
     : mCachedSceneCount(0)
+    , mSettings(nullptr)
 {
-    mSettings = UBSettings::settings();
-    // NOOP
+    // mSettings initialized lazily — UBSceneCache may be constructed
+    // before UBSettings singleton is available
 }
 
 
@@ -75,6 +76,8 @@ void UBSceneCache::insert (UBDocumentProxy* proxy, int pageIndex, UBGraphicsScen
     }
     else
     {
+        if (!mSettings)
+            mSettings = UBSettings::settings();
         if (mCachedSceneCount >= mSettings->pageCacheSize->get().toInt())
         {
             compactCache();
