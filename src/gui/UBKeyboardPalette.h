@@ -155,6 +155,7 @@ protected:
 
 private:
 
+    UBSettings* mSettings;
     QRect originalRect;
 
     UBKeyButton** buttons;
@@ -249,7 +250,6 @@ public:
     virtual void paintContent(QPainter& painter);
 
 private:
-    UBSettings* mSettings;
     QString label;
     int code;
 };
