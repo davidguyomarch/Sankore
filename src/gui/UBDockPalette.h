@@ -24,6 +24,8 @@
 #ifndef UBDOCKPALETTE_H
 #define UBDOCKPALETTE_H
 
+class UBSettings;
+
 class UBDocumentProxy;
 
 #include <QWidget>
@@ -211,6 +213,7 @@ private:
     void resizeTabs();
 
 private:
+    UBSettings* mSettings;
     eUBDockPaletteType mPaletteType;
     UBTabDockPalette *mTabPalette;
 };

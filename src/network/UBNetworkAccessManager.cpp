@@ -57,6 +57,7 @@ UBNetworkAccessManager::UBNetworkAccessManager(QObject *parent)
     : QNetworkAccessManager(parent)
       , mProxyAuthenticationCount(0)
 {
+    mSettings = UBSettings::settings();
     connect(this, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
             SLOT(authenticationRequired(QNetworkReply*,QAuthenticator*)));
     connect(this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)),
@@ -64,7 +65,7 @@ UBNetworkAccessManager::UBNetworkAccessManager(QObject *parent)
     connect(this, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)),
             SLOT(sslErrors(QNetworkReply*, const QList<QSslError>&)));
 
-    QNetworkProxy* proxy = UBSettings::settings()->httpProxy();
+    QNetworkProxy* proxy = mSettings->httpProxy();
 
     if (proxy)
     {
@@ -133,8 +134,8 @@ void UBNetworkAccessManager::proxyAuthenticationRequired(const QNetworkProxy &pr
 {
     Q_UNUSED(proxy);
 
-    QString username = UBSettings::settings()->proxyUsername();
-    QString password = UBSettings::settings()->proxyPassword();
+    QString username = mSettings->proxyUsername();
+    QString password = mSettings->proxyPassword();
 
     if (username.length() > 0 || password.length() > 0)
     {

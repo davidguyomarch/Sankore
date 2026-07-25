@@ -33,7 +33,8 @@
 UBDocumentContainer::UBDocumentContainer(QObject * parent)
     :QObject(parent)
     ,mCurrentDocument(nullptr)
-{}
+{
+    mSettings = UBSettings::settings();}
 
 UBDocumentContainer::~UBDocumentContainer()
 {
@@ -146,14 +147,14 @@ void UBDocumentContainer::addPixmapAt(const QPixmap *pix, int index)
 
 int UBDocumentContainer::pageFromSceneIndex(int sceneIndex)
 {
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
+    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
         return sceneIndex;
     return sceneIndex+1;
 }
 
 int UBDocumentContainer::sceneIndexFromPage(int page)
 {
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
+    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
         return page;
     return page-1;
 }

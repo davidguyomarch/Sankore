@@ -102,6 +102,7 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mpTeacherGuideWidget(nullptr)
     , mDownloadInProgress(false)
 {
+    mSettings = UBSettings::settings();
     mTeacherResources = nullptr;
     setupPalettes();
     connectPalettes();
@@ -152,7 +153,7 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
 
     // Teacher Guide disabled - UBDockTeacherGuideWidget crashes (uses QWebEngineView stubs)
-    // if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool() || UBSettings::settings()->teacherGuideLessonPagesActivated->get().toBool()){
+    // if(mSettings->teacherGuidePageZeroActivated->get().toBool() || mSettings->teacherGuideLessonPagesActivated->get().toBool()){
     //     mpTeacherGuideWidget = new UBDockTeacherGuideWidget();
     //     mLeftPalette->registerWidget(mpTeacherGuideWidget);
     //     mLeftPalette->addTab(mpTeacherGuideWidget);
@@ -264,11 +265,11 @@ void UBBoardPaletteManager::setupPalettes()
 
 
     // Add the other palettes
-    mStylusPalette = new UBStylusPalette(mContainer, UBSettings::settings()->appToolBarOrientationVertical->get().toBool() ? Qt::Vertical : Qt::Horizontal);
+    mStylusPalette = new UBStylusPalette(mContainer, mSettings->appToolBarOrientationVertical->get().toBool() ? Qt::Vertical : Qt::Horizontal);
     connect(mStylusPalette, SIGNAL(stylusToolDoubleClicked(int)), UBApplication::boardController, SLOT(stylusToolDoubleClicked(int)));
     mStylusPalette->show(); // always show stylus palette at startup
 
-    mDrawingPalette = new UBDrawingPalette(mContainer, UBSettings::settings()->appDrawingPaletteOrientationHorizontal->get().toBool() ? Qt::Horizontal : Qt::Vertical);
+    mDrawingPalette = new UBDrawingPalette(mContainer, mSettings->appDrawingPaletteOrientationHorizontal->get().toBool() ? Qt::Horizontal : Qt::Vertical);
     mDrawingPalette->hide();
 
     mZoomPalette = new UBZoomPalette(mContainer);
@@ -360,7 +361,7 @@ void UBBoardPaletteManager::setupPalettes()
     mImageBackgroundPalette->hide();
     // Fin Issue 1684 - CFA - 20131120
 
-    connect(UBSettings::settings()->appToolBarOrientationVertical, SIGNAL(changed(QVariant)), this, SLOT(changeStylusPaletteOrientation(QVariant)));
+    connect(mSettings->appToolBarOrientationVertical, SIGNAL(changed(QVariant)), this, SLOT(changeStylusPaletteOrientation(QVariant)));
 }
 
 void UBBoardPaletteManager::pagePaletteButtonPressed()
@@ -850,7 +851,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 #ifdef Q_OS_WIN
                 if (rightPaletteVisible)
                 {
-                    if (UBSettings::settings()->appToolBarPositionedAtTop->get().toBool())
+                    if (mSettings->appToolBarPositionedAtTop->get().toBool())
                         mRightPalette->setAdditionalVOffset(30);
                     else
                     {

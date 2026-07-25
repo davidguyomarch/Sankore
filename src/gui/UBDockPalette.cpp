@@ -57,6 +57,7 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
 , mPaletteType(paletteType)
 , mTabPalette(new UBTabDockPalette(this, parent))
 {
+    mSettings = UBSettings::settings();
     setObjectName(name);
 
     mpLayout = new QVBoxLayout();
@@ -89,7 +90,7 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
 
     // Set the position of the tab
     onToolbarPosUpdated();
-    connect(UBSettings::settings()->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(onToolbarPosUpdated()));
+    connect(mSettings->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(onToolbarPosUpdated()));
     connect(UBDownloadManager::downloadManager(), SIGNAL(allDownloadsFinished()), this, SLOT(onAllDownloadsFinished()));
 
     connect(UBApplication::boardController,SIGNAL(documentSet(UBDocumentProxy*)),this,SLOT(onDocumentSet(UBDocumentProxy*)));
@@ -345,7 +346,7 @@ void UBDockPalette::setTabsOrientation(eUBDockTabOrientation orientation)
 void UBDockPalette::onToolbarPosUpdated()
 {
     // Get the position of the tab
-    if(UBSettings::settings()->appToolBarPositionedAtTop->get().toBool())
+    if(mSettings->appToolBarPositionedAtTop->get().toBool())
     {
         setTabsOrientation(eUBDockTabOrientation_Up);
     }

@@ -126,6 +126,7 @@ UBCachePropertiesWidget::UBCachePropertiesWidget(QWidget *parent, const char *na
   , mKeepAspectRatio(true)
   , mOtherSliderUsed(false)
 {
+    mSettings = UBSettings::settings();
     setObjectName(name);
 
     SET_STYLE_SHEET();
@@ -193,7 +194,7 @@ UBCachePropertiesWidget::UBCachePropertiesWidget(QWidget *parent, const char *na
     mpSizeLayout = new QVBoxLayout(0);
     mpGeometryLabel = new QLabel(tr("Geometry:"), mpProperties);
     mpSizeLayout->addWidget(mpGeometryLabel, 1);
-    mKeepAspectRatio = UBSettings::settings()->cacheKeepAspectRatio->get().toBool();
+    mKeepAspectRatio = mSettings->cacheKeepAspectRatio->get().toBool();
 
     mpWidthLabel = new QLabel(tr("Width: "), mpProperties);
     mpWidthSlider = new QSlider(Qt::Horizontal, mpProperties);
@@ -319,7 +320,7 @@ void UBCachePropertiesWidget::syncCacheColor(QColor color)
     }
 
     mpPreviewWidget->setMaskColor(mActualColor);
-    UBSettings::settings()->cacheColor->set(QString("%1 %2 %3 %4").arg(mActualColor.red()).arg(mActualColor.green()).arg(mActualColor.blue()).arg(mActualColor.alpha()));
+    mSettings->cacheColor->set(QString("%1 %2 %3 %4").arg(mActualColor.red()).arg(mActualColor.green()).arg(mActualColor.blue()).arg(mActualColor.alpha()));
 }
 
 void UBCachePropertiesWidget::onColorClicked()
@@ -390,7 +391,7 @@ void UBCachePropertiesWidget::updateCurrentCache()
                 mpHeightSlider->setValue(mpCurrentCache->holeHeight());
                 syncCacheColor(mpCurrentCache->maskColor());
                 mpPreviewWidget->setHoleSize(QSize(mpWidthSlider->value(), mpHeightSlider->value()));
-                mpCurrentCache->setMode(UBSettings::settings()->cacheMode->get().toInt());
+                mpCurrentCache->setMode(mSettings->cacheMode->get().toInt());
 
                 mActualShape = mpCurrentCache->maskshape();
                 switch(mActualShape)
@@ -484,7 +485,7 @@ void UBCachePropertiesWidget::onKeepAspectRatioChanged(int state)
     Qt::CheckState cur_state = static_cast<Qt::CheckState>(state);
     mKeepAspectRatio = Qt::Checked == cur_state;
 
-    UBSettings::settings()->cacheKeepAspectRatio->set(mKeepAspectRatio);
+    mSettings->cacheKeepAspectRatio->set(mKeepAspectRatio);
 
 }
 
@@ -496,7 +497,7 @@ void UBCachePropertiesWidget::onCacheEnabled()
 void UBCachePropertiesWidget::onModeChanged(int mode)
 {
     mpCurrentCache->setMode(mode);
-    UBSettings::settings()->cacheMode->set(mode);
+    mSettings->cacheMode->set(mode);
 }
 
 void UBCachePropertiesWidget::onAlphaChanged(int alpha)

@@ -36,6 +36,7 @@
 UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
     : UBActionPalette(Qt::Horizontal, parent)
 {
+    mSettings = UBSettings::settings();
     QWidget *container = new QWidget(this);
     container->setStyleSheet("QWidget {background-color: transparent}");
 
@@ -45,7 +46,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
 
     QList<QAction*> toolsActions;
 
-    QStringList favoritesToolUris = UBSettings::settings()->favoritesNativeToolUris->get().toStringList();
+    QStringList favoritesToolUris = mSettings->favoritesNativeToolUris->get().toStringList();
 
     for (const QString& uri : favoritesToolUris)
     {
@@ -62,7 +63,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
         }
     }
 
-    QDir favoritesDir(UBSettings::settings()->userInteractiveFavoritesDirectory());
+    QDir favoritesDir(mSettings->userInteractiveFavoritesDirectory());
     QStringList favoritesSubDirs =  favoritesDir.entryList(QStringList(), QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks, QDir::Name);
     QStringList appPathes;
 

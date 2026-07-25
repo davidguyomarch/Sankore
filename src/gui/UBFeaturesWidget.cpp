@@ -53,6 +53,7 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
     : UBDockPaletteWidget(parent)
     , imageGatherer(nullptr)
 {
+    mSettings = UBSettings::settings();
     setObjectName(name);
     mName = "FeaturesWidget";
     mVisibleState = true;
@@ -73,7 +74,7 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
 
     centralWidget = new UBFeaturesCentralWidget(this);
     controller->assignFeaturesListView(centralWidget->listView());
-    centralWidget->setSliderPosition(UBSettings::settings()->featureSliderPosition->get().toInt());
+    centralWidget->setSliderPosition(mSettings->featureSliderPosition->get().toInt());
 
     //Bottom actionbar for DnD, quick search etc
     mActionBar = new UBFeaturesActionBar(controller, this);
@@ -571,7 +572,7 @@ void UBFeaturesListView::thumbnailSizeChanged( int value )
     setIconSize(QSize(value, value));
     setGridSize(QSize(value + 20, value + 20 ));
 
-    UBSettings::settings()->featureSliderPosition->set(value);
+    mSettings->featureSliderPosition->set(value);
 }
 
 //issue 1474 - NNE - 20131118 : Add the menu for restoring the elements in the trash

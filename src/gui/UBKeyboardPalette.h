@@ -33,6 +33,8 @@
 
 #include "frameworks/UBPlatformUtils.h"
 
+class UBSettings;
+
 class UBKeyButton;
 class UBKeyboardButton;
 
@@ -247,6 +249,7 @@ public:
     virtual void paintContent(QPainter& painter);
 
 private:
+    UBSettings* mSettings;
     QString label;
     int code;
 };

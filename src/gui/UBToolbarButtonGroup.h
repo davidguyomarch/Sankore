@@ -31,6 +31,8 @@
 #include <QToolButton>
 #include <QToolBar>
 
+class UBSettings;
+
 class UBToolbarButtonGroup : public QWidget
 {
     Q_OBJECT;
@@ -47,6 +49,7 @@ class UBToolbarButtonGroup : public QWidget
         void paintEvent(QPaintEvent *);
 
     private:
+        UBSettings* mSettings;
         QToolButton         *mToolButton; // The first button in the toolbar
         QString              mLabel;
         QList<QAction*>      mActions;

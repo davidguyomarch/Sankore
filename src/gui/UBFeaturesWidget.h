@@ -577,6 +577,7 @@ public:
     virtual QString	displayText ( const QVariant & value, const QLocale & locale ) const;
     void paint( QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 private:
+    UBSettings* mSettings;
     QPixmap *arrowPixmap;
 };
 
