@@ -70,6 +70,8 @@ class UBBoardController : public UBDocumentContainer
         UBBoardController(UBMainWindow *mainWindow);
         virtual ~UBBoardController();
 
+        void setSettings(UBSettings* settings) { mSettings = settings; }
+
         void init();
         void setupLayout();
 
@@ -305,6 +307,8 @@ class UBBoardController : public UBDocumentContainer
         void updatePageSizeState();
         void saveViewState();
         void adjustDisplayViews();
+
+        UBSettings* mSettings;
 
         UBMainWindow *mMainWindow;
         UBGraphicsScene* mActiveScene;

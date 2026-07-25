@@ -124,20 +124,21 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     , mActionGroupText(tr("Group"))
     , mActionUngroupText(tr("Ungroup"))
 {
-    mZoomFactor = UBSettings::settings()->boardZoomFactor->get().toDouble();
+    mSettings = UBSettings::settings();
+    mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
 
-    int penColorIndex = UBSettings::settings()->penColorIndex();
-    int markerColorIndex = UBSettings::settings()->markerColorIndex();
+    int penColorIndex = mSettings->penColorIndex();
+    int markerColorIndex = mSettings->markerColorIndex();
 
-    mPenColorOnDarkBackground = UBSettings::settings()->penColors(true).at(penColorIndex);
-    mPenColorOnLightBackground = UBSettings::settings()->penColors(false).at(penColorIndex);
-    mMarkerColorOnDarkBackground = UBSettings::settings()->markerColors(true).at(markerColorIndex);
-    mMarkerColorOnLightBackground = UBSettings::settings()->markerColors(false).at(markerColorIndex);
+    mPenColorOnDarkBackground = mSettings->penColors(true).at(penColorIndex);
+    mPenColorOnLightBackground = mSettings->penColors(false).at(penColorIndex);
+    mMarkerColorOnDarkBackground = mSettings->markerColors(true).at(markerColorIndex);
+    mMarkerColorOnLightBackground = mSettings->markerColors(false).at(markerColorIndex);
 
     QScreen* desktop = QGuiApplication::primaryScreen();
     int dpiCommon = (desktop->physicalDotsPerInchX() + desktop->physicalDotsPerInchY()) / 2;
     int sPixelsPerMillimeter = qRound(dpiCommon / UBGeometryUtils::inchSize);
-    UBSettings::settings()->crossSize = 10*sPixelsPerMillimeter;
+    mSettings->crossSize = 10*sPixelsPerMillimeter;
 }
 
 
@@ -186,7 +187,7 @@ UBBoardController::~UBBoardController()
 
 int UBBoardController::currentPage()
 {
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool())
+    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
         return mActiveSceneIndex;
     return mActiveSceneIndex + 1;
 }
@@ -305,8 +306,6 @@ QRectF UBBoardController::controlGeometry()
 
 void UBBoardController::setupToolbar()
 {
-    UBSettings *settings = UBSettings::settings();
-
     // Setup color choice widget
     QList<QAction *> colorActions;
     colorActions.append(mMainWindow->actionColor0);
@@ -319,13 +318,13 @@ void UBBoardController::setupToolbar()
 
     mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
 
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), colorChoice, SLOT(displayText(QVariant)));
+    connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), colorChoice, SLOT(displayText(QVariant)));
     connect(colorChoice, SIGNAL(activated(int)), this, SLOT(setColorIndex(int)));
     connect(UBDrawingController::drawingController(), SIGNAL(colorIndexChanged(int)), colorChoice, SLOT(setCurrentIndex(int)));
     connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), colorChoice, SLOT(colorPaletteChanged()));
     connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), this, SLOT(colorPaletteChanged()));
 
-    colorChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
+    colorChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
     colorChoice->colorPaletteChanged();
 
     // Setup line width choice widget
@@ -337,7 +336,7 @@ void UBBoardController::setupToolbar()
     UBToolbarButtonGroup *lineWidthChoice =
             new UBToolbarButtonGroup(mMainWindow->boardToolBar, lineWidthActions);
 
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), lineWidthChoice, SLOT(displayText(QVariant)));
+    connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), lineWidthChoice, SLOT(displayText(QVariant)));
 
     connect(lineWidthChoice, SIGNAL(activated(int))
             , UBDrawingController::drawingController(), SLOT(setLineWidthIndex(int)));
@@ -345,7 +344,7 @@ void UBBoardController::setupToolbar()
     connect(UBDrawingController::drawingController(), SIGNAL(lineWidthIndexChanged(int))
             , lineWidthChoice, SLOT(setCurrentIndex(int)));
 
-    lineWidthChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
+    lineWidthChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
 
     mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
 
@@ -362,11 +361,11 @@ void UBBoardController::setupToolbar()
 
     mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, eraserWidthChoice);
 
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), eraserWidthChoice, SLOT(displayText(QVariant)));
+    connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), eraserWidthChoice, SLOT(displayText(QVariant)));
     connect(eraserWidthChoice, SIGNAL(activated(int)), UBDrawingController::drawingController(), SLOT(setEraserWidthIndex(int)));
 
-    eraserWidthChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
-    eraserWidthChoice->setCurrentIndex(settings->eraserWidthIndex());
+    eraserWidthChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
+    eraserWidthChoice->setCurrentIndex(mSettings->eraserWidthIndex());
 
     mMainWindow->boardToolBar->insertSeparator(mMainWindow->actionBackgrounds);
 
@@ -628,7 +627,7 @@ UBGraphicsItem *UBBoardController::duplicateItem(UBItem *item, bool bAsync, eIte
     QGraphicsItem *commonItem = dynamic_cast<QGraphicsItem*>(item);
     if (commonItem)
     {
-        qreal shifting = UBSettings::settings()->objectFrameWidth;
+        qreal shifting = mSettings->objectFrameWidth;
         itemPos = commonItem->pos() + QPointF(shifting,shifting);
         itemSize = commonItem->boundingRect().size();
         commonItem->setSelected(false);
@@ -1918,8 +1917,8 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
 
         adjustDisplayViews();
 
-        UBSettings::settings()->setDarkBackground(mActiveScene->isDarkBackground());
-        UBSettings::settings()->setCrossedBackground(mActiveScene->isCrossedBackground());
+        mSettings->setDarkBackground(mActiveScene->isDarkBackground());
+        mSettings->setCrossedBackground(mActiveScene->isCrossedBackground());
 
         freezeW3CWidgets(false);
     }
@@ -2041,8 +2040,8 @@ void UBBoardController::changeBackground(bool isDark, bool isCrossed)
 
     if ((isDark != currentIsDark) || (currentIsCrossed != isCrossed))
     {
-        UBSettings::settings()->setDarkBackground(isDark);
-        UBSettings::settings()->setCrossedBackground(isCrossed);
+        mSettings->setDarkBackground(isDark);
+        mSettings->setCrossedBackground(isCrossed);
 
         mActiveScene->setBackground(isDark, isCrossed);
 
@@ -2210,8 +2209,8 @@ void UBBoardController::setColorIndex(int pColorIndex)
             UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Text ||
             UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
     {
-        mPenColorOnDarkBackground = UBSettings::settings()->penColors(true).at(pColorIndex);
-        mPenColorOnLightBackground = UBSettings::settings()->penColors(false).at(pColorIndex);
+        mPenColorOnDarkBackground = mSettings->penColors(true).at(pColorIndex);
+        mPenColorOnLightBackground = mSettings->penColors(false).at(pColorIndex);
 
         if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
         {
@@ -2227,8 +2226,8 @@ void UBBoardController::setColorIndex(int pColorIndex)
     }
     else if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
     {
-        mMarkerColorOnDarkBackground = UBSettings::settings()->markerColors(true).at(pColorIndex);
-        mMarkerColorOnLightBackground = UBSettings::settings()->markerColors(false).at(pColorIndex);
+        mMarkerColorOnDarkBackground = mSettings->markerColors(true).at(pColorIndex);
+        mMarkerColorOnLightBackground = mSettings->markerColors(false).at(pColorIndex);
     }
 }
 
@@ -2257,10 +2256,10 @@ QColor UBBoardController::inferOpposite(const QColor &candidate, const char tool
     } break;
     }
 
-    int count = qMin((UBSettings::settings()->*fn)(true).count(), (UBSettings::settings()->*fn)(false).count());
+    int count = qMin((mSettings->*fn)(true).count(), (mSettings->*fn)(false).count());
     for (int i=0; i<count; i++) {
-        QColor dark = (UBSettings::settings()->*fn)(true).at(i);
-        QColor light = (UBSettings::settings()->*fn)(false).at(i);
+        QColor dark = (mSettings->*fn)(true).at(i);
+        QColor light = (mSettings->*fn)(false).at(i);
         if (sameRGB(candidate, dark)) {
             return light;
         } else if (sameRGB(candidate, light)) {
@@ -2279,10 +2278,10 @@ QColor UBBoardController::inferOpposite(const QColor &candidate, const char tool
 
 void UBBoardController::colorPaletteChanged()
 {
-    mPenColorOnDarkBackground = UBSettings::settings()->penColor(true);
-    mPenColorOnLightBackground = UBSettings::settings()->penColor(false);
-    mMarkerColorOnDarkBackground = UBSettings::settings()->markerColor(true);
-    mMarkerColorOnLightBackground = UBSettings::settings()->markerColor(false);
+    mPenColorOnDarkBackground = mSettings->penColor(true);
+    mPenColorOnLightBackground = mSettings->penColor(false);
+    mMarkerColorOnDarkBackground = mSettings->markerColor(true);
+    mMarkerColorOnLightBackground = mSettings->markerColor(false);
 }
 
 
@@ -2371,7 +2370,7 @@ void UBBoardController::updateSystemScaleFactor()
 void UBBoardController::setWidePageSize(bool checked)
 {
     Q_UNUSED(checked);
-    QSize newSize = UBSettings::settings()->documentSizes.value(DocumentSizeRatio::Ratio16_9);
+    QSize newSize = mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_9);
 
     if (mActiveScene->nominalSize() != newSize)
     {
@@ -2385,7 +2384,7 @@ void UBBoardController::setWidePageSize(bool checked)
 void UBBoardController::setWidePageSize16_10(bool checked)
 {
     Q_UNUSED(checked);
-    QSize newSize = UBSettings::settings()->documentSizes.value(DocumentSizeRatio::Ratio16_10);
+    QSize newSize = mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_10);
 
     if (mActiveScene->nominalSize() != newSize)
     {
@@ -2400,7 +2399,7 @@ void UBBoardController::setWidePageSize16_10(bool checked)
 void UBBoardController::setRegularPageSize(bool checked)
 {
     Q_UNUSED(checked);
-    QSize newSize = UBSettings::settings()->documentSizes.value(DocumentSizeRatio::Ratio4_3);
+    QSize newSize = mSettings->documentSizes.value(DocumentSizeRatio::Ratio4_3);
 
     if (mActiveScene->nominalSize() != newSize)
     {
@@ -2452,7 +2451,7 @@ void UBBoardController::setPageSize(QSize newSize)
 
         selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
-        UBSettings::settings()->pageSize->set(newSize);
+        mSettings->pageSize->set(newSize);
     }
 }
 
@@ -2471,15 +2470,15 @@ void UBBoardController::notifyCache(bool visible)
 
 void UBBoardController::updatePageSizeState()
 {    
-    if (mActiveScene->nominalSize() == UBSettings::settings()->documentSizes.value(DocumentSizeRatio::Ratio16_9))
+    if (mActiveScene->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_9))
     {
         mMainWindow->actionWidePageSize->setChecked(true);
     }
-    else if(mActiveScene->nominalSize() == UBSettings::settings()->documentSizes.value(DocumentSizeRatio::Ratio4_3))
+    else if(mActiveScene->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio4_3))
     {
         mMainWindow->actionRegularPageSize->setChecked(true);
     }
-    else if(mActiveScene->nominalSize() == UBSettings::settings()->documentSizes.value(DocumentSizeRatio::Ratio16_10))
+    else if(mActiveScene->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_10))
     {
         mMainWindow->actionWidePageSize_16_10->setChecked(true);
     }
@@ -2943,7 +2942,7 @@ void UBBoardController::updateBackgroundActionsState(bool isDark, bool isCrossed
 
 void UBBoardController::addItem()
 {
-    QString defaultPath = UBSettings::settings()->lastImportToLibraryPath->get().toString();
+    QString defaultPath = mSettings->lastImportToLibraryPath->get().toString();
 
     QString extensions;
     for (const QString& ext : UBSettings::imageFileExtensions)
@@ -2960,7 +2959,7 @@ void UBBoardController::addItem()
     {
         mPaletteManager->addItem(QUrl::fromLocalFile(filename));
         QFileInfo source(filename);
-        UBSettings::settings()->lastImportToLibraryPath->set(QVariant(source.absolutePath()));
+        mSettings->lastImportToLibraryPath->set(QVariant(source.absolutePath()));
     }
 }
 
