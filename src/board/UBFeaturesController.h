@@ -290,6 +290,8 @@ public:
     UBFeaturesController(QWidget *parentWidget);
     virtual ~UBFeaturesController();
 
+    void setSettings(UBSettings* settings) { mSettings = settings; }
+
     QList <UBFeature>* getFeatures() const {return featuresList;}
 
     void initHardcodedData();
@@ -434,6 +436,8 @@ public slots:
 //issue 1474 - NNE - 20131119 : END
 
 private:
+
+    UBSettings* mSettings;
 
     UBFeaturesItemDelegate *itemDelegate;
     UBFeaturesPathItemDelegate *pathItemDelegate;
