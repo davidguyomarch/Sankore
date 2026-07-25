@@ -348,19 +348,19 @@ UBYouTubePublishingDialog::UBYouTubePublishingDialog(const QString& videoFilePat
     dialogButtons->button(QDialogButtonBox::Ok)->setEnabled(false);
     dialogButtons->button(QDialogButtonBox::Ok)->setText(tr("Upload"));
 
-    UBSettings* settings = mSettings;
+    UBSettings* settings = UBSettings::settings();
 
     email->setText(settings->youTubeUserEMail->get().toString());
     password->setText(settings->password(email->text()));
 
-    youtubeCredentialsPersistence->setChecked(mSettings->youTubeCredentialsPersistence->get().toBool());
+    youtubeCredentialsPersistence->setChecked(UBSettings::settings()->youTubeCredentialsPersistence->get().toBool());
     updatePersistanceEnableState();
 }
 
 
 void UBYouTubePublishingDialog::updateCredentialPersistenceState()
 {
-    mSettings->youTubeCredentialsPersistence->set(QVariant(youtubeCredentialsPersistence->checkState()));
+    UBSettings::settings()->youTubeCredentialsPersistence->set(QVariant(youtubeCredentialsPersistence->checkState()));
 }
 
 void UBYouTubePublishingDialog::updatePersistanceEnableState()
