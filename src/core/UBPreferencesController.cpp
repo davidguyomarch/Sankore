@@ -620,7 +620,7 @@ UBBrushPropertiesFrame::UBBrushPropertiesFrame(QFrame* owner, const QList<QColor
     lightBackgroundColorPicker0->setSelectedColorIndex(0);
     lightBackgroundColorPickers.append(lightBackgroundColorPicker0);
 
-    for (int i = 1 ; i < mSettings->colorPaletteSize ; i++)
+    for (int i = 1 ; i < UBSettings::settings()->colorPaletteSize ; i++)
     {
         UBColorPicker *picker = new UBColorPicker(lightBackgroundFrame);
         picker->setObjectName(QString::fromUtf8("penLightBackgroundColor") + QString::number(i));
@@ -647,7 +647,7 @@ UBBrushPropertiesFrame::UBBrushPropertiesFrame(QFrame* owner, const QList<QColor
     darkBackgroundColorPicker0->setSelectedColorIndex(0);
     darkBackgroundColorPickers.append(darkBackgroundColorPicker0);
 
-    for (int i = 1 ; i < mSettings->colorPaletteSize ; i++)
+    for (int i = 1 ; i < UBSettings::settings()->colorPaletteSize ; i++)
     {
         UBColorPicker *picker = new UBColorPicker(darkBackgroundFrame);
         picker->setObjectName(QString::fromUtf8("penDarkBackgroundColor") + QString::number(i));
