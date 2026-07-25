@@ -58,7 +58,7 @@ QString UBExportAdaptor::askForFileName(UBDocumentProxy* pDocument, const QStrin
 
     defaultName = UBFileSystemUtils::cleanName(defaultName);
 
-    QString defaultPath = UBSettings::settings()->lastExportFilePath->get().toString() + "/" + defaultName;
+    QString defaultPath = pDocument->settings()->lastExportFilePath->get().toString() + "/" + defaultName;
 
     bool useNativeDialog = true;
 #ifdef Q_OS_MAC
@@ -81,7 +81,7 @@ QString UBExportAdaptor::askForFileName(UBDocumentProxy* pDocument, const QStrin
     {
         filename += exportExtention();
     }
-    UBSettings::settings()->lastExportFilePath->set(QVariant(fileNameInfo.absolutePath()));
+    pDocument->settings()->lastExportFilePath->set(QVariant(fileNameInfo.absolutePath()));
     QApplication::processEvents();
 
     return filename;
@@ -89,7 +89,7 @@ QString UBExportAdaptor::askForFileName(UBDocumentProxy* pDocument, const QStrin
 
 QString UBExportAdaptor::askForDirName(UBDocumentProxy* pDocument, const QString& pDialogTitle)
 {
-    QString defaultPath = UBSettings::settings()->lastExportDirPath->get().toString();
+    QString defaultPath = pDocument->settings()->lastExportDirPath->get().toString();
 
     QString container = QFileDialog::getExistingDirectory(UBApplication::mainWindow, pDialogTitle, defaultPath);
 
@@ -97,7 +97,7 @@ QString UBExportAdaptor::askForDirName(UBDocumentProxy* pDocument, const QString
 
     if (container.size() > 0)
     {
-        UBSettings::settings()->lastExportDirPath->set(QVariant(container));
+        pDocument->settings()->lastExportDirPath->set(QVariant(container));
 
         QString docname;
 

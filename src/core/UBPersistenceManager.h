@@ -51,6 +51,7 @@ class UBPersistenceManager : public QObject
         virtual ~UBPersistenceManager();
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
+        UBSettings* settings() const { return mSettings; }
 
         static const QString imageDirectory;
         static const QString objectDirectory;
