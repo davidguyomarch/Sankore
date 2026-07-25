@@ -77,6 +77,7 @@ UBPersistenceManager::UBPersistenceManager(QObject *pParent)
     : QObject(pParent)
     , mHasPurgedDocuments(false)
 {
+    mSettings = UBSettings::settings();
 
     xmlFolderStructureFilename = "model";
 
@@ -308,7 +309,7 @@ bool UBPersistenceManager::isSceneInCached(UBDocumentProxy *proxy, int index) co
 
 QStringList UBPersistenceManager::allShapes()
 {
-    QString shapeLibraryPath = UBSettings::settings()->applicationShapeLibraryDirectory();
+    QString shapeLibraryPath = mSettings->applicationShapeLibraryDirectory();
 
     QDir dir(shapeLibraryPath);
 
@@ -328,7 +329,7 @@ QStringList UBPersistenceManager::allShapes()
 
 QStringList UBPersistenceManager::allGips()
 {
-    QString gipLibraryPath = UBSettings::settings()->userGipLibraryDirectory();
+    QString gipLibraryPath = mSettings->userGipLibraryDirectory();
 
     QDir dir(gipLibraryPath);
 
@@ -339,7 +340,7 @@ QStringList UBPersistenceManager::allGips()
     {
         QFileInfo fi(file);
 
-        if (UBSettings::settings()->widgetFileExtensions.contains(fi.suffix()))
+        if (mSettings->widgetFileExtensions.contains(fi.suffix()))
             paths.append(dir.path() + QString("/") + file);
     }
 
@@ -392,7 +393,7 @@ QStringList UBPersistenceManager::allWidgets(const QDir& dir)
     {
         QFileInfo fi(file);
 
-        if (UBSettings::settings()->widgetFileExtensions.contains(fi.suffix()))
+        if (mSettings->widgetFileExtensions.contains(fi.suffix()))
             paths.append(dir.path() + QString("/") + file);
     }
 
@@ -782,8 +783,8 @@ UBGraphicsScene* UBPersistenceManager::createDocumentSceneAt(UBDocumentProxy* pr
 
     UBGraphicsScene *newScene = mSceneCache.createScene(proxy, index, useUndoRedoStack);
 
-    newScene->setBackground(UBSettings::settings()->isDarkBackground(),
-            UBSettings::settings()->UBSettings::isCrossedBackground());
+    newScene->setBackground(mSettings->isDarkBackground(),
+            mSettings->isCrossedBackground());
 
     // Skip persist on new empty scene - UBSvgSubsetAdaptor crashes on first scene
     // The scene will be persisted when the user actually modifies it
@@ -867,7 +868,7 @@ UBGraphicsScene* UBPersistenceManager::loadDocumentScene(UBDocumentProxy* proxy,
         return mSceneCache.value(proxy, sceneIndex);
     else {
         UBGraphicsScene* scene = UBSvgSubsetAdaptor::loadScene(proxy, sceneIndex);
-        if(!scene && UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool()){
+        if(!scene && mSettings->teacherGuidePageZeroActivated->get().toBool()){
             createDocumentSceneAt(proxy,0);
             scene = UBSvgSubsetAdaptor::loadScene(proxy, 0);
         }
@@ -977,7 +978,7 @@ int UBPersistenceManager::sceneCount(const UBDocumentProxy* proxy)
         }
         else
         {
-            if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool() && pageIndex == 0){
+            if(mSettings->teacherGuidePageZeroActivated->get().toBool() && pageIndex == 0){
                 // the document has no zero file but doesn't means that it hasn't any file
                 // at all. Just importing a document without the first page using a configuartion
                 // that enables zero page.

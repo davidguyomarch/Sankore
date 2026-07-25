@@ -36,6 +36,7 @@ class UBDocumentProxy;
 class UBGraphicsScene;
 class UBDocumentTreeNode;
 class UBDocumentTreeModel;
+class UBSettings;
 
 class UBPersistenceManager : public QObject
 {
@@ -48,6 +49,8 @@ class UBPersistenceManager : public QObject
     public:
 
         virtual ~UBPersistenceManager();
+
+        void setSettings(UBSettings* settings) { mSettings = settings; }
 
         static const QString imageDirectory;
         static const QString objectDirectory;
@@ -183,6 +186,8 @@ private:
         void loadFolderTreeFromXml(const QString &path, const QDomElement &element);
 
         QString xmlFolderStructureFilename;
+
+        UBSettings* mSettings;  // injected or defaults to UBSettings::settings()
 
         UBSceneCache mSceneCache;
         QStringList mDocumentSubDirectories;
