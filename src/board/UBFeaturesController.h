@@ -52,6 +52,7 @@ class UBFeaturesSearchProxyModel;
 class UBFeaturesPathProxyModel;
 class UBFeaturesListView;
 class UBFeature;
+class UBSettings;
 
 
 enum UBFeatureElementType
