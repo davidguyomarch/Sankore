@@ -62,7 +62,8 @@ jobs:
             pkg-config \
             lcov \
             rpm \
-            curl
+            curl \
+            file
 
       - name: Cache Qt 6.8.2
         id: cache-qt
