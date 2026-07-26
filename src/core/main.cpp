@@ -302,8 +302,10 @@ int main(int argc, char *argv[])
                 qDebug() << "Smoke: lastScene";
                 bc->lastScene();
 
-                // Phase 3: Visual operations
-                // NOTE: duplicateScene/deleteScene disabled — crash #63 under investigation
+                // Phase 3: Test duplicateScene alone
+                qDebug() << "Smoke: about to duplicateScene...";
+                bc->duplicateScene();
+                qDebug() << "Smoke: duplicateScene completed OK";
 
                 // Phase 4: Visual operations
                 qDebug() << "Smoke: zoomIn";
