@@ -382,9 +382,15 @@ jobs:
           chmod +x appimagetool
 
           # Build AppImage (--appimage-extract-and-run for container compatibility)
-          ./appimagetool --appimage-extract-and-run AppDir Open-Sankore-x86_64.AppImage || echo "AppImage build failed (non-blocking)"
+          ./appimagetool --appimage-extract-and-run AppDir Open-Sankore-x86_64.AppImage
 
           ls -la *.AppImage 2>/dev/null || echo "No AppImage produced"
+
+          # Verify AppImage was created
+          if [ ! -f Open-Sankore-x86_64.AppImage ]; then
+            echo "ERROR: AppImage not found after build"
+            exit 1
+          fi
 
       - name: Upload AppImage
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
