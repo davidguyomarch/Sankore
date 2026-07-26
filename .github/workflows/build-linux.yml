@@ -374,7 +374,10 @@ jobs:
           chmod +x AppDir/AppRun
 
           # Download appimagetool
-          wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O appimagetool
+          python3 -c "
+          import urllib.request
+          urllib.request.urlretrieve('https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage', 'appimagetool')
+          "
           chmod +x appimagetool
 
           # Build AppImage (--appimage-extract-and-run for container compatibility)
