@@ -137,6 +137,7 @@ jobs:
       - name: Smoke test (app coverage)
         run: |
           export QT_QPA_PLATFORM=offscreen
+          export LANG=C.UTF-8
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
           build/linux/release/product/Open-Sankore --quit-after=8 --smoke-scenario
