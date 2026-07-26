@@ -72,6 +72,7 @@ SOURCES += main.cpp \
            tst_UBMetadataDcSubsetAdaptor.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
+           tst_UBForeignObjectsHelper.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -83,7 +84,8 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBIniFileParser.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
-           premoc/moc_tst_UBSvgTransform.cpp
+           premoc/moc_tst_UBSvgTransform.cpp \
+           premoc/moc_tst_UBForeignObjectsHelper.cpp
 
 # Build output
 DESTDIR = build
