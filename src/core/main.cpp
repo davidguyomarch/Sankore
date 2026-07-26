@@ -151,6 +151,7 @@ static void unixSignalHandler(int sig)
 #include "board/UBBoardController.h"
 #include "board/UBDrawingController.h"
 #include "domain/UBGraphicsScene.h"
+#include "adaptors/UBExportPDF.h"
 
 /* Uncomment this for memory leaks detection */
 /*
@@ -335,7 +336,22 @@ int main(int argc, char *argv[])
                     qDebug() << "Smoke: stroke drawn, scene items:" << scene->items().count();
                 }
 
-                // Phase 5: Final persist
+                // Phase 5: Export PDF
+                qDebug() << "Smoke: export PDF";
+                {
+                    QString pdfPath = QDir::tempPath() + "/sankore-smoke-test.pdf";
+                    UBExportPDF pdfExporter;
+                    pdfExporter.persistsDocument(bc->selectedDocument(), pdfPath);
+                    QFileInfo fi(pdfPath);
+                    if (fi.exists() && fi.size() > 0) {
+                        qDebug() << "Smoke: PDF exported successfully," << fi.size() << "bytes";
+                    } else {
+                        qDebug() << "Smoke: PDF export FAILED";
+                    }
+                    QFile::remove(pdfPath);
+                }
+
+                // Phase 6: Final persist
                 qDebug() << "Smoke: persistCurrentScene (final)";
                 bc->persistCurrentScene();
                 qDebug() << "=== Smoke scenario: done ===";
