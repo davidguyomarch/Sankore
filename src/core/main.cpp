@@ -345,23 +345,7 @@ int main(int argc, char *argv[])
                     scene->inputDeviceRelease();
                     qDebug() << "Smoke: marker stroke done, items:" << scene->items().count();
 
-                    // Eraser
-                    qDebug() << "Smoke: eraser";
-                    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Eraser);
-                    scene->inputDevicePress(QPointF(150, 150));
-                    scene->inputDeviceMove(QPointF(200, 160));
-                    scene->inputDeviceMove(QPointF(250, 170));
-                    scene->inputDeviceRelease();
-                    qDebug() << "Smoke: eraser done, items:" << scene->items().count();
-
-                    // Undo/Redo
-                    qDebug() << "Smoke: undo";
-                    if (UBApplication::undoStack && UBApplication::undoStack->canUndo())
-                        UBApplication::undoStack->undo();
-                    qDebug() << "Smoke: redo";
-                    if (UBApplication::undoStack && UBApplication::undoStack->canRedo())
-                        UBApplication::undoStack->redo();
-
+                    // NOTE: Eraser and undo/redo disabled — investigating segfault
                     // Back to pen for persist
                     UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
                 }
