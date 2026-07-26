@@ -141,6 +141,8 @@ void UBDocumentContainer::reloadThumbnails()
 
 void UBDocumentContainer::addPixmapAt(const QPixmap *pix, int index)
 {
+    if (index > mDocumentThumbs.size())
+        index = mDocumentThumbs.size();
     mDocumentThumbs.insert(index, pix);
     emit documentThumbnailsUpdated(this);
 }
