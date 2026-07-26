@@ -322,8 +322,8 @@ int main(int argc, char *argv[])
                 qDebug() << "Smoke: changeBackground(light, plain)";
                 bc->changeBackground(false, false);
 
-                // Phase 4: Simulate a pen stroke
-                qDebug() << "Smoke: simulate drawing";
+                // Phase 4: Simulate drawing with multiple tools
+                qDebug() << "Smoke: pen stroke";
                 UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
                 UBGraphicsScene* scene = bc->activeScene();
                 if (scene) {
@@ -333,7 +333,37 @@ int main(int argc, char *argv[])
                     scene->inputDeviceMove(QPointF(250, 180));
                     scene->inputDeviceMove(QPointF(300, 200));
                     scene->inputDeviceRelease();
-                    qDebug() << "Smoke: stroke drawn, scene items:" << scene->items().count();
+                    qDebug() << "Smoke: pen stroke done, items:" << scene->items().count();
+
+                    // Marker stroke
+                    qDebug() << "Smoke: marker stroke";
+                    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Marker);
+                    scene->inputDevicePress(QPointF(100, 300));
+                    scene->inputDeviceMove(QPointF(200, 320));
+                    scene->inputDeviceMove(QPointF(300, 340));
+                    scene->inputDeviceMove(QPointF(400, 360));
+                    scene->inputDeviceRelease();
+                    qDebug() << "Smoke: marker stroke done, items:" << scene->items().count();
+
+                    // Eraser
+                    qDebug() << "Smoke: eraser";
+                    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Eraser);
+                    scene->inputDevicePress(QPointF(150, 150));
+                    scene->inputDeviceMove(QPointF(200, 160));
+                    scene->inputDeviceMove(QPointF(250, 170));
+                    scene->inputDeviceRelease();
+                    qDebug() << "Smoke: eraser done, items:" << scene->items().count();
+
+                    // Undo/Redo
+                    qDebug() << "Smoke: undo";
+                    if (UBApplication::undoStack && UBApplication::undoStack->canUndo())
+                        UBApplication::undoStack->undo();
+                    qDebug() << "Smoke: redo";
+                    if (UBApplication::undoStack && UBApplication::undoStack->canRedo())
+                        UBApplication::undoStack->redo();
+
+                    // Back to pen for persist
+                    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
                 }
 
                 // Phase 5: Export PDF
