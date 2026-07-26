@@ -62,7 +62,8 @@ jobs:
             pkg-config \
             lcov \
             rpm \
-            curl
+            curl \
+            file
 
       - name: Cache Qt 6.8.2
         id: cache-qt
@@ -305,4 +306,90 @@ jobs:
         with:
           name: open-sankore-rpm-x64
           path: build/packages/*.rpm
+          if-no-files-found: warn
+
+      - name: Build AppImage
+        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        run: |
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+
+          # Copy binary
+          cp build/linux/release/product/Open-Sankore AppDir/usr/bin/
+
+          # Copy Qt libraries and dependencies
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Core.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Gui.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Widgets.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Svg.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6SvgWidgets.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Xml.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Network.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Multimedia.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6MultimediaWidgets.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6PrintSupport.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Core5Compat.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6Qml.so.6 AppDir/usr/lib/
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6OpenGL.so.6 AppDir/usr/lib/ 2>/dev/null || true
+          cp /opt/qt/6.8.2/gcc_64/lib/libQt6DBus.so.6 AppDir/usr/lib/ 2>/dev/null || true
+          cp /usr/local/lib/libquazip1-qt6.so* AppDir/usr/lib/ 2>/dev/null || true
+
+          # Copy Qt plugins
+          mkdir -p AppDir/usr/plugins/platforms AppDir/usr/plugins/imageformats
+          cp /opt/qt/6.8.2/gcc_64/plugins/platforms/libqxcb.so AppDir/usr/plugins/platforms/ 2>/dev/null || true
+          cp /opt/qt/6.8.2/gcc_64/plugins/platforms/libqoffscreen.so AppDir/usr/plugins/platforms/ 2>/dev/null || true
+          cp /opt/qt/6.8.2/gcc_64/plugins/imageformats/*.so AppDir/usr/plugins/imageformats/ 2>/dev/null || true
+
+          # Create .desktop file
+          cat > AppDir/usr/share/applications/open-sankore.desktop << 'EOF'
+          [Desktop Entry]
+          Name=Open-Sankoré
+          Comment=Interactive whiteboard application
+          Exec=Open-Sankore
+          Icon=open-sankore
+          Terminal=false
+          Type=Application
+          Categories=Education;
+          EOF
+          cp AppDir/usr/share/applications/open-sankore.desktop AppDir/
+
+          # Create icon (use a placeholder if no icon available)
+          if [ -f resources/images/uniboard.png ]; then
+            cp resources/images/uniboard.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
+            cp resources/images/uniboard.png AppDir/open-sankore.png
+          else
+            # Generate a simple placeholder icon
+            convert -size 256x256 xc:blue -fill white -gravity center -pointsize 48 -annotate 0 "S" AppDir/open-sankore.png 2>/dev/null || touch AppDir/open-sankore.png
+          fi
+
+          # Create AppRun
+          cat > AppDir/AppRun << 'APPRUN'
+          #!/bin/bash
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export PATH="${HERE}/usr/bin:${PATH}"
+          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+          export QT_PLUGIN_PATH="${HERE}/usr/plugins"
+          exec "${HERE}/usr/bin/Open-Sankore" "$@"
+          APPRUN
+          chmod +x AppDir/AppRun
+
+          # Download appimagetool
+          python3 -c "
+          import urllib.request
+          urllib.request.urlretrieve('https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage', 'appimagetool')
+          "
+          chmod +x appimagetool
+
+          # Build AppImage (--appimage-extract-and-run for container compatibility)
+          ./appimagetool --appimage-extract-and-run AppDir Open-Sankore-x86_64.AppImage || echo "AppImage build failed (non-blocking)"
+
+          ls -la *.AppImage 2>/dev/null || echo "No AppImage produced"
+
+      - name: Upload AppImage
+        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        uses: actions/upload-artifact@v4
+        with:
+          name: Open-Sankore-Linux-x64-AppImage
+          path: Open-Sankore-x86_64.AppImage
           if-no-files-found: warn

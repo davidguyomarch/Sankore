@@ -1,0 +1,88 @@
+name: Build Linux ARM64
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      checks: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up QEMU for ARM64
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Build in ARM64 container
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and test in ARM64
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v ${{ github.workspace }}:/src \
+            -w /src \
+            arm64v8/ubuntu:22.04 bash -c '
+              set -e
+              echo "=== Installing dependencies ==="
+              apt-get update
+              apt-get install -y \
+                build-essential cmake git \
+                qt6-base-dev qt6-base-dev-tools \
+                qt6-declarative-dev libqt6svg6-dev \
+                qt6-multimedia-dev qt6-tools-dev \
+                qt6-tools-dev-tools qt6-l10n-tools \
+                libqt6opengl6-dev libqt6core5compat6-dev \
+                libgl1-mesa-dev libssl-dev zlib1g-dev \
+                libx11-dev libomp-dev pkg-config \
+                libpulse-dev
+
+              echo "=== Building QuaZip ==="
+              git clone --depth 1 --branch v1.4 https://github.com/stachenov/quazip.git /tmp/quazip-src
+              cmake -S /tmp/quazip-src -B /tmp/quazip-build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=/usr/local \
+                -DQUAZIP_QT_MAJOR_VERSION=6 \
+                -DBUILD_SHARED_LIBS=ON \
+                -DQUAZIP_BZIP2=OFF
+              cmake --build /tmp/quazip-build -j$(nproc)
+              cmake --install /tmp/quazip-build
+              ldconfig
+
+              echo "=== Generating git version ==="
+              echo "#define GIT_COMMIT \"arm64-ci\"" > src/core/git_version.h
+
+              echo "=== Running qmake ==="
+              mkdir -p build/linux/release/moc build/linux/release/objects build/linux/release/rcc build/linux/release/ui build/linux/release/product
+              qmake6 Sankore_3.1.pro CONFIG+=no_webengine
+
+              echo "=== Building ==="
+              make -j$(nproc)
+
+              echo "=== Smoke test ==="
+              export QT_QPA_PLATFORM=offscreen
+              export LANG=C.UTF-8
+              export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+              build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
+              echo "ARM64 smoke test passed!"
+            '
+
+      - name: Upload ARM64 binary
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Open-Sankore-Linux-arm64
+          path: build/linux/release/product/
+          if-no-files-found: warn
