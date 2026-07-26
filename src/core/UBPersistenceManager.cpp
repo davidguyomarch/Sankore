@@ -786,9 +786,8 @@ UBGraphicsScene* UBPersistenceManager::createDocumentSceneAt(UBDocumentProxy* pr
     newScene->setBackground(mSettings->isDarkBackground(),
             mSettings->isCrossedBackground());
 
-    // Skip persist on new empty scene - UBSvgSubsetAdaptor crashes on first scene
-    // The scene will be persisted when the user actually modifies it
-    // persistDocumentScene(proxy, newScene, index);
+    // Persist the new empty scene to disk so it can be reloaded later
+    persistDocumentScene(proxy, newScene, index);
 
     proxy->incPageCount();
 

@@ -905,7 +905,7 @@ UBTeacherGuidePageZeroWidget::UBTeacherGuidePageZeroWidget(QWidget* parent, cons
     mpSchoolLevelBox->setMinimumHeight(22);
     mpSchoolLevelBox->setMinimumWidth(LOWER_RESIZE_WIDTH);
     mpSchoolLevelBox->setObjectName("DockPaletteWidgetComboBox");
-    connect(mpSchoolLevelBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onSchoolLevelChanged(QString)));
+    connect(mpSchoolLevelBox, SIGNAL(currentTextChanged(QString)), this, SLOT(onSchoolLevelChanged(QString)));
     mpContainerWidgetLayout->addWidget(mpSchoolLevelBox);
     mpSchoolLevelValueLabel = new QLabel(this);
     mpContainerWidgetLayout->addWidget(mpSchoolLevelValueLabel);
