@@ -281,16 +281,34 @@ int main(int argc, char *argv[])
             qDebug() << "=== Smoke scenario: starting ===";
             if (UBApplication::boardController) {
                 auto *bc = UBApplication::boardController;
+
+                // Phase 1: Initial persist
                 qDebug() << "Smoke: persistCurrentScene (initial)";
                 bc->persistCurrentScene();
-                qDebug() << "Smoke: addScene";
+
+                // Phase 2: Add pages and navigate
+                qDebug() << "Smoke: addScene (page 2)";
                 bc->addScene();
-                qDebug() << "Smoke: persistCurrentScene (new page)";
-                bc->persistCurrentScene();
+                qDebug() << "Smoke: addScene (page 3)";
+                bc->addScene();
                 qDebug() << "Smoke: previousScene";
                 bc->previousScene();
                 qDebug() << "Smoke: nextScene";
                 bc->nextScene();
+                qDebug() << "Smoke: firstScene";
+                bc->firstScene();
+                qDebug() << "Smoke: lastScene";
+                bc->lastScene();
+
+                // Phase 3: Duplicate and delete
+                qDebug() << "Smoke: duplicateScene";
+                bc->duplicateScene();
+                qDebug() << "Smoke: persistCurrentScene (after duplicate)";
+                bc->persistCurrentScene();
+                qDebug() << "Smoke: deleteScene(2)";
+                bc->deleteScene(2);
+
+                // Phase 4: Visual operations
                 qDebug() << "Smoke: zoomIn";
                 bc->zoomIn();
                 qDebug() << "Smoke: zoomOut";
@@ -299,6 +317,8 @@ int main(int argc, char *argv[])
                 bc->changeBackground(true, true);
                 qDebug() << "Smoke: changeBackground(light, plain)";
                 bc->changeBackground(false, false);
+
+                // Phase 5: Final persist
                 qDebug() << "Smoke: persistCurrentScene (final)";
                 bc->persistCurrentScene();
                 qDebug() << "=== Smoke scenario: done ===";
