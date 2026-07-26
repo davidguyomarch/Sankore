@@ -302,15 +302,17 @@ int main(int argc, char *argv[])
                 qDebug() << "Smoke: lastScene";
                 bc->lastScene();
 
-                // Phase 3: Duplicate and delete
-                qDebug() << "Smoke: duplicateScene";
+                // Phase 3: Duplicate and delete (diagnostic — one at a time)
+                qDebug() << "Smoke: about to duplicateScene...";
                 bc->duplicateScene();
-                qDebug() << "Smoke: persistCurrentScene (after duplicate)";
+                qDebug() << "Smoke: duplicateScene OK";
                 bc->persistCurrentScene();
-                qDebug() << "Smoke: deleteScene(2)";
+                qDebug() << "Smoke: persist after duplicate OK";
+                qDebug() << "Smoke: about to deleteScene(2)...";
                 bc->deleteScene(2);
-                qDebug() << "Smoke: persistCurrentScene (after delete)";
+                qDebug() << "Smoke: deleteScene OK";
                 bc->persistCurrentScene();
+                qDebug() << "Smoke: persist after delete OK";
 
                 // Phase 4: Visual operations
                 qDebug() << "Smoke: zoomIn";
