@@ -79,7 +79,7 @@ UBPreferencesController::UBPreferencesController(QWidget *parent)
     adjustScreens(1);
         // screenCountChanged: use QGuiApplication::screens() in Qt6
 
-    connect(mPreferencesUI->languageComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(onLanguageChanged(QString)));
+    connect(mPreferencesUI->languageComboBox,SIGNAL(currentTextChanged(QString)),this,SLOT(onLanguageChanged(QString)));
 
     wire();
 }
@@ -130,7 +130,7 @@ void UBPreferencesController::wire()
         mPreferencesUI->keyboardPaletteKeyButtonSize->addItem(settings->supportedKeyboardSizes->at(i));
 
 
-    connect(mPreferencesUI->keyboardPaletteKeyButtonSize, SIGNAL(currentIndexChanged(const QString &)), settings->boardKeyboardPaletteKeyBtnSize, SLOT(setString(const QString &)));
+    connect(mPreferencesUI->keyboardPaletteKeyButtonSize, SIGNAL(currentTextChanged(const QString &)), settings->boardKeyboardPaletteKeyBtnSize, SLOT(setString(const QString &)));
     connect(mPreferencesUI->startModeComboBox, SIGNAL(currentIndexChanged(int)), settings->appStartMode, SLOT(setInt(int)));
 
 
