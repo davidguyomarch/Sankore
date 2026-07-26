@@ -140,13 +140,12 @@ jobs:
           export LANG=C.UTF-8
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
-          build/linux/release/product/Open-Sankore --quit-after=8 --smoke-scenario
+          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
           echo "App smoke test completed (clean exit)"
           GCDA_COUNT=$(find . -name "*.gcda" 2>/dev/null | wc -l)
           echo "Found $GCDA_COUNT .gcda files"
 
       - name: Collect app coverage
-        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
         continue-on-error: true
         run: |
           echo "=== Searching for .gcda files ==="
