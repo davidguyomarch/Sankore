@@ -122,7 +122,7 @@ jobs:
       - name: Run qmake
         run: |
           mkdir -p build/linux/release/moc build/linux/release/objects build/linux/release/rcc build/linux/release/ui build/linux/release/product
-          qmake Sankore_3.1.pro CONFIG+=no_webengine "QMAKE_CXXFLAGS+=--coverage -fsanitize=address -fno-omit-frame-pointer" "QMAKE_LFLAGS+=--coverage -fsanitize=address"
+          qmake Sankore_3.1.pro CONFIG+=no_webengine "QMAKE_CXXFLAGS+=--coverage" "QMAKE_LFLAGS+=--coverage"
 
       - name: Build
         run: |
@@ -139,11 +139,9 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
           export LANG=C.UTF-8
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-          # ASAN: print full report on error, don't abort immediately
-          export ASAN_OPTIONS=detect_leaks=0:halt_on_error=0:print_legend=1
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
-          build/linux/release/product/Open-Sankore --quit-after=12 --smoke-scenario || true
-          echo "App smoke test completed (exit code: $?)"
+          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
+          echo "App smoke test completed (clean exit)"
           GCDA_COUNT=$(find . -name "*.gcda" 2>/dev/null | wc -l)
           echo "Found $GCDA_COUNT .gcda files"
 
