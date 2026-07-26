@@ -285,3 +285,49 @@ void TestUBDocumentProxy::testExternalFilesClear_noLeak()
     proxy.externalFilesAdd(newFile);
     QCOMPARE(proxy.externalFiles()->size(), 1);
 }
+
+void TestUBDocumentProxy::testSettingsInjection()
+{
+    UBDocumentProxy proxy;
+
+    // By default, settings() returns the global singleton
+    QVERIFY(proxy.settings() != nullptr);
+    QCOMPARE(proxy.settings(), UBSettings::settings());
+
+    // Create a separate settings instance for injection
+    UBSettings customSettings;
+    customSettings.pageSize->set(QVariant(QSize(800, 600)));
+
+    // Inject custom settings
+    proxy.setSettings(&customSettings);
+    QCOMPARE(proxy.settings(), &customSettings);
+
+    // Restore default
+    proxy.setSettings(UBSettings::settings());
+    QCOMPARE(proxy.settings(), UBSettings::settings());
+}
+
+void TestUBDocumentProxy::testDefaultSizeUsesInjectedSettings()
+{
+    // Create a custom settings with a specific page size
+    UBSettings customSettings;
+    customSettings.pageSize->set(QVariant(QSize(640, 480)));
+
+    UBDocumentProxy proxy;
+
+    // Inject the custom settings
+    proxy.setSettings(&customSettings);
+
+    // Clear the document size metadata so it falls back to settings
+    proxy.setMetaData(UBSettings::documentSize, QVariant());
+
+    // defaultDocumentSize() should now use the injected settings
+    QSize size = proxy.defaultDocumentSize();
+    QCOMPARE(size, QSize(640, 480));
+
+    // Change the injected settings
+    customSettings.pageSize->set(QVariant(QSize(1920, 1080)));
+    proxy.setMetaData(UBSettings::documentSize, QVariant());
+    size = proxy.defaultDocumentSize();
+    QCOMPARE(size, QSize(1920, 1080));
+}

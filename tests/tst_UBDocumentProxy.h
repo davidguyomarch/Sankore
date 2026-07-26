@@ -24,6 +24,8 @@ private slots:
     void testDefaultImageBackground();
     void testExternalFiles();
     void testExternalFilesClear_noLeak();
+    void testSettingsInjection();
+    void testDefaultSizeUsesInjectedSettings();
 };
 
 #endif // TST_UBDOCUMENTPROXY_H

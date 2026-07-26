@@ -64,7 +64,8 @@ void UBDocumentProxy::init()
 
     setUuid(QUuid::createUuid());
 
-    setDefaultDocumentSize(UBSettings::settings()->pageSize->get().toSize());
+    mSettings = UBSettings::settings();
+    setDefaultDocumentSize(mSettings->pageSize->get().toSize());
 
     // teacherGuide metadata
     setMetaData(UBSettings::sessionTitle,"");
@@ -180,7 +181,7 @@ QSize UBDocumentProxy::defaultDocumentSize() const
     if (mMetaDatas.contains(UBSettings::documentSize))
         return metaData(UBSettings::documentSize).toSize();
     else
-        return UBSettings::settings()->pageSize->get().toSize();
+        return mSettings->pageSize->get().toSize();
 }
 
 void UBDocumentProxy::setDefaultDocumentSize(QSize pSize)

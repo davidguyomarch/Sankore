@@ -102,12 +102,17 @@ class UBDocumentProxy : public QObject
         int incPageCount();
         int decPageCount();
 
+        // Dependency injection (mirrors real UBDocumentProxy)
+        void setSettings(UBSettings* settings) { mSettings = settings; }
+        UBSettings* settings() const { return mSettings; }
+
     signals:
         void defaultDocumentSizeChanged();
 
     private:
         void init();
 
+        UBSettings* mSettings;
         QString mPersistencePath;
         QHash<QString, QVariant> mMetaDatas;
         bool mIsModified;
