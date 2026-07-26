@@ -19,6 +19,7 @@
 #include "tst_UBIniFileParser.h"
 #include "tst_UBMetadataDcSubsetAdaptor.h"
 #include "tst_UBOEmbedParser.h"
+#include "tst_UBSvgTransform.h"
 
 int main(int argc, char *argv[])
 {
@@ -79,6 +80,11 @@ int main(int argc, char *argv[])
 
     {
         TestUBOEmbedParser test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+
+    {
+        TestUBSvgTransform test;
         status |= QTest::qExec(&test, argc, argv);
     }
 
