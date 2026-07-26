@@ -302,12 +302,14 @@ int main(int argc, char *argv[])
                 qDebug() << "Smoke: lastScene";
                 bc->lastScene();
 
-                // Phase 3: duplicateScene (works in offscreen)
+                // Phase 3: duplicateScene + deleteScene (ASAN diagnostic)
                 qDebug() << "Smoke: duplicateScene";
                 bc->duplicateScene();
                 qDebug() << "Smoke: persistCurrentScene (after duplicate)";
                 bc->persistCurrentScene();
-                // NOTE: deleteScene disabled — memory corruption in offscreen (#63)
+                qDebug() << "Smoke: deleteScene(2) — ASAN will catch the bug";
+                bc->deleteScene(2);
+                qDebug() << "Smoke: deleteScene completed OK";
 
                 // Phase 4: Visual operations
                 qDebug() << "Smoke: zoomIn";
