@@ -281,6 +281,16 @@ int main(int argc, char *argv[])
             qDebug() << "=== Smoke scenario: starting ===";
             if (UBApplication::boardController) {
                 auto *bc = UBApplication::boardController;
+                qDebug() << "Smoke: persistCurrentScene (initial)";
+                bc->persistCurrentScene();
+                qDebug() << "Smoke: addScene";
+                bc->addScene();
+                qDebug() << "Smoke: persistCurrentScene (new page)";
+                bc->persistCurrentScene();
+                qDebug() << "Smoke: previousScene";
+                bc->previousScene();
+                qDebug() << "Smoke: nextScene";
+                bc->nextScene();
                 qDebug() << "Smoke: zoomIn";
                 bc->zoomIn();
                 qDebug() << "Smoke: zoomOut";
@@ -289,7 +299,7 @@ int main(int argc, char *argv[])
                 bc->changeBackground(true, true);
                 qDebug() << "Smoke: changeBackground(light, plain)";
                 bc->changeBackground(false, false);
-                qDebug() << "Smoke: persistCurrentScene";
+                qDebug() << "Smoke: persistCurrentScene (final)";
                 bc->persistCurrentScene();
                 qDebug() << "=== Smoke scenario: done ===";
             } else {
