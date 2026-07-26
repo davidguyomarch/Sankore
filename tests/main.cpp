@@ -20,6 +20,7 @@
 #include "tst_UBMetadataDcSubsetAdaptor.h"
 #include "tst_UBOEmbedParser.h"
 #include "tst_UBSvgTransform.h"
+#include "tst_UBForeignObjectsHelper.h"
 
 int main(int argc, char *argv[])
 {
@@ -85,6 +86,11 @@ int main(int argc, char *argv[])
 
     {
         TestUBSvgTransform test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+
+    {
+        TestUBForeignObjectsHelper test;
         status |= QTest::qExec(&test, argc, argv);
     }
 
