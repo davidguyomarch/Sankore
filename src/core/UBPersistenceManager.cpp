@@ -761,12 +761,14 @@ void UBPersistenceManager::copyDocumentScene(UBDocumentProxy *from, int fromInde
     QFile::remove(thumbTo);
     QFile::copy(thumbTmp, thumbTo);
 
-    Q_ASSERT(QFileInfo(thumbTmp).exists());
-    Q_ASSERT(QFileInfo(thumbTo).exists());
     const QPixmap *pix = new QPixmap(thumbTmp);
     UBDocumentController *ctrl = UBApplication::documentController;
-    ctrl->addPixmapAt(pix, toIndex);
-    ctrl->TreeViewSelectionChanged(ctrl->firstSelectedTreeIndex(), QModelIndex());
+    if (ctrl) {
+        ctrl->addPixmapAt(pix, toIndex);
+        ctrl->TreeViewSelectionChanged(ctrl->firstSelectedTreeIndex(), QModelIndex());
+    } else {
+        delete pix;
+    }
 
 //    emit documentSceneCreated(to, toIndex + 1);
 }
