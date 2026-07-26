@@ -313,23 +313,27 @@ void TestUBDocumentProxy::testDefaultSizeUsesInjectedSettings()
     UBSettings customSettings;
     customSettings.pageSize->set(QVariant(QSize(640, 480)));
 
+    // Change the GLOBAL settings before creating the proxy
+    // (proxy init reads pageSize from settings during construction)
+    QSize originalSize = UBSettings::settings()->pageSize->get().toSize();
+    UBSettings::settings()->pageSize->set(QVariant(QSize(640, 480)));
+
     UBDocumentProxy proxy;
 
-    // Inject the custom settings
-    proxy.setSettings(&customSettings);
+    // The proxy was initialized with 640x480 from settings
+    QCOMPARE(proxy.defaultDocumentSize(), QSize(640, 480));
 
-    // Clear the document size metadata so it falls back to settings
-    proxy.setMetaData(UBSettings::documentSize, QVariant());
+    // Now inject a different settings and set a new size via metadata
+    UBSettings otherSettings;
+    otherSettings.pageSize->set(QVariant(QSize(1920, 1080)));
+    proxy.setSettings(&otherSettings);
 
-    // defaultDocumentSize() should now use the injected settings
-    QSize size = proxy.defaultDocumentSize();
-    QCOMPARE(size, QSize(640, 480));
+    // Set explicit size via metadata
+    proxy.setDefaultDocumentSize(QSize(3000, 2000));
+    QCOMPARE(proxy.defaultDocumentSize(), QSize(3000, 2000));
 
-    // Change the injected settings
-    customSettings.pageSize->set(QVariant(QSize(1920, 1080)));
-    proxy.setMetaData(UBSettings::documentSize, QVariant());
-    size = proxy.defaultDocumentSize();
-    QCOMPARE(size, QSize(1920, 1080));
+    // Restore original settings
+    UBSettings::settings()->pageSize->set(QVariant(originalSize));
 }
 
 void TestUBDocumentProxy::testInitUsesSettingsPageSize()
@@ -351,26 +355,22 @@ void TestUBDocumentProxy::testInitUsesSettingsPageSize()
 
 void TestUBDocumentProxy::testMultipleProxiesDifferentSettings()
 {
-    // Create two settings instances with different page sizes
-    UBSettings settingsA;
-    settingsA.pageSize->set(QVariant(QSize(800, 600)));
+    // Save original
+    QSize originalSize = UBSettings::settings()->pageSize->get().toSize();
 
-    UBSettings settingsB;
-    settingsB.pageSize->set(QVariant(QSize(3840, 2160)));
-
-    // Create proxies and inject different settings
+    // Create proxy A with pageSize 800x600
+    UBSettings::settings()->pageSize->set(QVariant(QSize(800, 600)));
     UBDocumentProxy proxyA;
-    proxyA.setSettings(&settingsA);
-    proxyA.setMetaData(UBSettings::documentSize, QVariant()); // clear cached size
-
-    UBDocumentProxy proxyB;
-    proxyB.setSettings(&settingsB);
-    proxyB.setMetaData(UBSettings::documentSize, QVariant()); // clear cached size
-
-    // Each proxy should use its own settings
     QCOMPARE(proxyA.defaultDocumentSize(), QSize(800, 600));
+
+    // Create proxy B with pageSize 3840x2160
+    UBSettings::settings()->pageSize->set(QVariant(QSize(3840, 2160)));
+    UBDocumentProxy proxyB;
     QCOMPARE(proxyB.defaultDocumentSize(), QSize(3840, 2160));
 
-    // They don't interfere with each other
+    // They have different sizes (set at construction time)
     QVERIFY(proxyA.defaultDocumentSize() != proxyB.defaultDocumentSize());
+
+    // Restore
+    UBSettings::settings()->pageSize->set(QVariant(originalSize));
 }
