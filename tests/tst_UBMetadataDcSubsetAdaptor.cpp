@@ -229,3 +229,40 @@ void TestUBMetadataDcSubsetAdaptor::testLoadBackgroundImage()
     QCOMPARE(meta.value(UBSettings::documentDefaultBackgroundImage).toString(), QString("images/bg.png"));
     QCOMPARE(meta.value(UBSettings::documentDefaultBackgroundImageDisposition).toString(), QString("adjust"));
 }
+
+void TestUBMetadataDcSubsetAdaptor::testLoadSizeMigrationWithCustomSettings()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    // Document with old 1024x768 size — should be migrated to settings pageSize
+    writeMetadataRdf(dir.path(), minimalRdf("Old Doc", "Group", "2012-01-01", "1024x768"));
+
+    // Create custom settings with a non-default page size
+    UBSettings customSettings;
+    customSettings.pageSize->set(QVariant(QSize(1600, 1200)));
+
+    // Load with injected custom settings
+    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path(), &customSettings);
+
+    // Should use the CUSTOM pageSize (1600x1200), not the default (1280x960)
+    QSize size = meta.value(UBSettings::documentSize).toSize();
+    QCOMPARE(size, QSize(1600, 1200));
+}
+
+void TestUBMetadataDcSubsetAdaptor::testLoadWithNullSettings()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    // Document with old 1024x768 size
+    writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01", "1024x768"));
+
+    // Load with nullptr settings — should fall back to singleton
+    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path(), nullptr);
+
+    // Should use the singleton's default pageSize
+    QSize size = meta.value(UBSettings::documentSize).toSize();
+    QSize expectedSize = UBSettings::settings()->pageSize->get().toSize();
+    QCOMPARE(size, expectedSize);
+}

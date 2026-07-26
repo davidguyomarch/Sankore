@@ -26,6 +26,8 @@ private slots:
     void testExternalFilesClear_noLeak();
     void testSettingsInjection();
     void testDefaultSizeUsesInjectedSettings();
+    void testInitUsesSettingsPageSize();
+    void testMultipleProxiesDifferentSettings();
 };
 
 #endif // TST_UBDOCUMENTPROXY_H

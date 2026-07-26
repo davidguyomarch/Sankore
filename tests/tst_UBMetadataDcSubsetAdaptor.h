@@ -20,6 +20,8 @@ private slots:
     void testLoadMissingSize();
     void testLoadIdentifier();
     void testLoadBackgroundImage();
+    void testLoadSizeMigrationWithCustomSettings();
+    void testLoadWithNullSettings();
 };
 
 #endif // TST_UBMETADATADCSUBSETADAPTOR_H

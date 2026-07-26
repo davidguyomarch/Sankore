@@ -331,3 +331,46 @@ void TestUBDocumentProxy::testDefaultSizeUsesInjectedSettings()
     size = proxy.defaultDocumentSize();
     QCOMPARE(size, QSize(1920, 1080));
 }
+
+void TestUBDocumentProxy::testInitUsesSettingsPageSize()
+{
+    // The default proxy init should use UBSettings::settings()->pageSize
+    UBDocumentProxy proxy;
+
+    QSize expectedSize = UBSettings::settings()->pageSize->get().toSize();
+    QCOMPARE(proxy.defaultDocumentSize(), expectedSize);
+
+    // Now change the singleton's pageSize and create a new proxy
+    UBSettings::settings()->pageSize->set(QVariant(QSize(2560, 1440)));
+    UBDocumentProxy proxy2;
+    QCOMPARE(proxy2.defaultDocumentSize(), QSize(2560, 1440));
+
+    // Restore default for other tests
+    UBSettings::settings()->pageSize->set(QVariant(QSize(1280, 960)));
+}
+
+void TestUBDocumentProxy::testMultipleProxiesDifferentSettings()
+{
+    // Create two settings instances with different page sizes
+    UBSettings settingsA;
+    settingsA.pageSize->set(QVariant(QSize(800, 600)));
+
+    UBSettings settingsB;
+    settingsB.pageSize->set(QVariant(QSize(3840, 2160)));
+
+    // Create proxies and inject different settings
+    UBDocumentProxy proxyA;
+    proxyA.setSettings(&settingsA);
+    proxyA.setMetaData(UBSettings::documentSize, QVariant()); // clear cached size
+
+    UBDocumentProxy proxyB;
+    proxyB.setSettings(&settingsB);
+    proxyB.setMetaData(UBSettings::documentSize, QVariant()); // clear cached size
+
+    // Each proxy should use its own settings
+    QCOMPARE(proxyA.defaultDocumentSize(), QSize(800, 600));
+    QCOMPARE(proxyB.defaultDocumentSize(), QSize(3840, 2160));
+
+    // They don't interfere with each other
+    QVERIFY(proxyA.defaultDocumentSize() != proxyB.defaultDocumentSize());
+}
