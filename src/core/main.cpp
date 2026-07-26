@@ -149,6 +149,8 @@ static void unixSignalHandler(int sig)
 #include "UBApplication.h"
 #include "UBSettings.h"
 #include "board/UBBoardController.h"
+#include "board/UBDrawingController.h"
+#include "domain/UBGraphicsScene.h"
 
 /* Uncomment this for memory leaks detection */
 /*
@@ -310,7 +312,21 @@ int main(int argc, char *argv[])
                 qDebug() << "Smoke: changeBackground(light, plain)";
                 bc->changeBackground(false, false);
 
-                // Phase 4: Final persist
+                // Phase 4: Simulate a pen stroke
+                qDebug() << "Smoke: simulate drawing";
+                UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
+                UBGraphicsScene* scene = bc->activeScene();
+                if (scene) {
+                    scene->inputDevicePress(QPointF(100, 100));
+                    scene->inputDeviceMove(QPointF(150, 120));
+                    scene->inputDeviceMove(QPointF(200, 150));
+                    scene->inputDeviceMove(QPointF(250, 180));
+                    scene->inputDeviceMove(QPointF(300, 200));
+                    scene->inputDeviceRelease();
+                    qDebug() << "Smoke: stroke drawn, scene items:" << scene->items().count();
+                }
+
+                // Phase 5: Final persist
                 qDebug() << "Smoke: persistCurrentScene (final)";
                 bc->persistCurrentScene();
                 qDebug() << "=== Smoke scenario: done ===";
