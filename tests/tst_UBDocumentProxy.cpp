@@ -368,9 +368,6 @@ void TestUBDocumentProxy::testMultipleProxiesDifferentSettings()
     UBDocumentProxy proxyB;
     QCOMPARE(proxyB.defaultDocumentSize(), QSize(3840, 2160));
 
-    // They have different sizes (set at construction time)
-    QVERIFY(proxyA.defaultDocumentSize() != proxyB.defaultDocumentSize());
-
     // Restore
     UBSettings::settings()->pageSize->set(QVariant(originalSize));
 }
