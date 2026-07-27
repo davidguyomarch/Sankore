@@ -1,4 +1,4 @@
-TARGET = OpenSankoreTests
+  TARGET = OpenSankoreTests
 TEMPLATE = app
 
 CONFIG += testcase console c++17
@@ -78,7 +78,6 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
-           tst_UBTextDelegateDialogHandler.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -91,8 +90,7 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp \
-           premoc/moc_tst_UBTextDelegateDialogHandler.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp
 
 # Build output
 DESTDIR = build
