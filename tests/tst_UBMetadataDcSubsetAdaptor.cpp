@@ -1,5 +1,5 @@
 #include "tst_UBMetadataDcSubsetAdaptor.h"
-#include "../src/adaptors/UBMetadataDcSubsetAdaptor.h"
+#include "adaptors/UBMetadataLoader.h"
 #include "stubs/UBSettings_stub.h"
 #include <QTemporaryDir>
 #include <QFile>
@@ -48,7 +48,7 @@ static QString minimalRdf(const QString& title = "Test Document",
 
 void TestUBMetadataDcSubsetAdaptor::testLoadNonExistentPath()
 {
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load("/nonexistent/path");
+    QMap<QString, QVariant> meta = UBMetadataLoader::load("/nonexistent/path");
     // Should return metadata with default size (no file found)
     QVERIFY(meta.contains(UBSettings::documentSize));
 }
@@ -60,7 +60,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadBasicMetadata()
 
     writeMetadataRdf(dir.path(), minimalRdf("Mon cours de maths", "Sciences", "2024-03-20T14:00:00Z"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QCOMPARE(meta.value(UBSettings::documentName).toString(), QString("Mon cours de maths"));
     QCOMPARE(meta.value(UBSettings::documentGroupName).toString(), QString("Sciences"));
@@ -74,7 +74,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadDocumentSize()
 
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01", "1920x1080"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QVERIFY(meta.contains(UBSettings::documentSize));
     QSize size = meta.value(UBSettings::documentSize).toSize();
@@ -90,7 +90,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadSizeMigration1024x768()
     // Old documents with 1024x768 should be migrated to pageSize setting
     writeMetadataRdf(dir.path(), minimalRdf("Old Doc", "Group", "2012-01-01", "1024x768"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QSize size = meta.value(UBSettings::documentSize).toSize();
     // Should use UBSettings::settings()->pageSize (default in stub is 1280x960)
@@ -105,7 +105,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadVersion()
 
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01", "1920x1080", "4.7"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QCOMPARE(meta.value(UBSettings::documentVersion).toString(), QString("4.7"));
 }
@@ -117,7 +117,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadUpdatedAt()
 
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01", "1920x1080", "", "2024-06-15T09:30:00Z"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QCOMPARE(meta.value(UBSettings::documentUpdatedAt).toString(), QString("2024-06-15T09:30:00Z"));
 }
@@ -149,7 +149,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadSessionFields()
 
     writeMetadataRdf(dir.path(), xml);
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QCOMPARE(meta.value(UBSettings::sessionTitle).toString(), QString("Introduction aux fractions"));
     QCOMPARE(meta.value(UBSettings::sessionAuthors).toString(), QString("M. Dupont"));
@@ -169,7 +169,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadDateFormatShort()
     // Short date (< 10 chars) should get T00:00:00Z appended
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01", "1920x1080"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     // The documentDate is set from the raw date element at the end
     QCOMPARE(meta.value(UBSettings::documentDate).toString(), QString("2024-01"));
@@ -183,7 +183,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadMissingSize()
     // No size in XML — should use default screen size
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QVERIFY(meta.contains(UBSettings::documentSize));
     QSize size = meta.value(UBSettings::documentSize).toSize();
@@ -198,7 +198,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadIdentifier()
 
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01", "1920x1080", "", "", "urn:uuid:12345-abcde"));
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QCOMPARE(meta.value(UBSettings::documentIdentifer).toString(), QString("urn:uuid:12345-abcde"));
 }
@@ -224,7 +224,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadBackgroundImage()
 
     writeMetadataRdf(dir.path(), xml);
 
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path());
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path());
 
     QCOMPARE(meta.value(UBSettings::documentDefaultBackgroundImage).toString(), QString("images/bg.png"));
     QCOMPARE(meta.value(UBSettings::documentDefaultBackgroundImageDisposition).toString(), QString("adjust"));
@@ -243,7 +243,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadSizeMigrationWithCustomSettings()
     customSettings.pageSize->set(QVariant(QSize(1600, 1200)));
 
     // Load with injected custom settings
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path(), &customSettings);
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path(), &customSettings);
 
     // Should use the CUSTOM pageSize (1600x1200), not the default (1280x960)
     QSize size = meta.value(UBSettings::documentSize).toSize();
@@ -259,7 +259,7 @@ void TestUBMetadataDcSubsetAdaptor::testLoadWithNullSettings()
     writeMetadataRdf(dir.path(), minimalRdf("Test", "Group", "2024-01-01", "1024x768"));
 
     // Load with nullptr settings — should fall back to singleton
-    QMap<QString, QVariant> meta = UBMetadataDcSubsetAdaptor::load(dir.path(), nullptr);
+    QMap<QString, QVariant> meta = UBMetadataLoader::load(dir.path(), nullptr);
 
     // Should use the singleton's default pageSize
     QSize size = meta.value(UBSettings::documentSize).toSize();

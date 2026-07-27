@@ -5,6 +5,7 @@ HEADERS      += src/adaptors/UBExportAdaptor.h\
                 src/adaptors/UBExportDocument.h \
                 src/adaptors/UBSvgSubsetAdaptor.h \
                 src/adaptors/UBSvgTransformUtils.h \
+                src/adaptors/UBMetadataLoader.h \
                 src/adaptors/UBMetadataDcSubsetAdaptor.h \
                 src/adaptors/UBImportAdaptor.h \
                 src/adaptors/UBImportDocument.h \
@@ -29,6 +30,7 @@ SOURCES      += src/adaptors/UBExportAdaptor.cpp\
                 src/adaptors/UBExportDocument.cpp \
                 src/adaptors/UBSvgSubsetAdaptor.cpp \
                 src/adaptors/UBSvgTransformUtils.cpp \
+                src/adaptors/UBMetadataLoader.cpp \
                 src/adaptors/UBMetadataDcSubsetAdaptor.cpp \
                 src/adaptors/UBImportAdaptor.cpp \
                 src/adaptors/UBImportDocument.cpp \

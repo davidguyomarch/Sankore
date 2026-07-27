@@ -6,9 +6,9 @@ CONFIG -= app_bundle
 
 QT += core gui widgets testlib xml network
 
-# Paths
-INCLUDEPATH += ../src
+# Paths — tests/ shims take priority over ../src for stubbed headers
 INCLUDEPATH += .
+INCLUDEPATH += ../src
 
 # We only compile the utility sources under test (no app dependencies)
 # This avoids pulling in UBApplication, UBPersistenceManager, etc.
@@ -20,7 +20,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/frameworks/UBBase32.h \
            ../src/core/UB.h \
            ../src/web/UBOEmbedUtils.h \
-           ../src/adaptors/UBSvgTransformUtils.h
+           ../src/adaptors/UBSvgTransformUtils.h \
+           ../src/adaptors/UBMetadataLoader.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -42,8 +43,8 @@ SOURCES += stubs/UBCryptoUtils_stub.cpp
 # UBOEmbedParser — tests compile the real UBOEmbedUtils.cpp (parsing logic)
 SOURCES += ../src/web/UBOEmbedUtils.cpp
 
-# UBMetadataDcSubsetAdaptor stub (only load(), no persist())
-SOURCES += stubs/UBMetadataDcSubsetAdaptor_stub.cpp
+# UBMetadataDcSubsetAdaptor — tests compile the real UBMetadataLoader.cpp (load logic)
+SOURCES += ../src/adaptors/UBMetadataLoader.cpp
 
 # UBDocumentProxy stubs — pre-generated moc files used to avoid moc parsing issues on Linux
 # To regenerate: moc -I../src -I. -Istubs stubs/UBSettings_stub.h -o premoc/moc_UBSettings_stub.cpp
