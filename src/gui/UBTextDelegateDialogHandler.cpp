@@ -28,7 +28,7 @@
 #include <QStringListModel>
 
 #include "core/UBSettings.h"
-#include "frameworks/UBResources.h"
+#include "UBResources.h"
 #include "domain/UBGraphicsTextItemDelegate.h"
 
 UBTextDelegateDialogHandler::UBTextDelegateDialogHandler(QWidget* parentWidget, UBSettings* settings, QObject* parent)
