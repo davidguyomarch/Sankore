@@ -20,7 +20,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/frameworks/UBBase32.h \
            ../src/core/UB.h \
            ../src/web/UBOEmbedParser.h \
-           ../src/web/UBOEmbedUtils.h
+           ../src/web/UBOEmbedUtils.h \
+           ../src/adaptors/UBSvgTransformUtils.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -28,6 +29,7 @@ SOURCES += ../src/frameworks/UBStringUtils.cpp \
            ../src/frameworks/UBVersion.cpp \
            ../src/frameworks/UBBase32.cpp \
            ../src/adaptors/UBIniFileParser.cpp \
+           ../src/adaptors/UBSvgTransformUtils.cpp \
            ../src/core/UBForeignObjectsUtils.cpp
 
 # For UBFileSystemUtils we need a minimal version without OpenSSL/QuaZip deps
