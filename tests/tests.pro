@@ -21,8 +21,7 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/core/UB.h \
            ../src/web/UBOEmbedUtils.h \
            ../src/adaptors/UBSvgTransformUtils.h \
-           ../src/adaptors/UBMetadataLoader.h \
-           tst_UBTextDelegateDialogHandler.h
+           ../src/adaptors/UBMetadataLoader.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -92,7 +91,8 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp \
+           premoc/moc_tst_UBTextDelegateDialogHandler.cpp
 
 # Build output
 DESTDIR = build

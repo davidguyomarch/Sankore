@@ -8,11 +8,11 @@ class TestUBTextDelegateDialogHandler : public QObject
     Q_OBJECT
 
 private slots:
-    void testConnectDisconnect();
-    void testSignalEmissionTriggersHandler();
     void testApplyFontModifiesTextItem();
     void testApplyTextColorModifiesTextItem();
     void testApplyBackgroundColorModifiesTextItem();
+    void testFontRoundtrip();
+    void testColorDoesNotAffectOtherProperties();
 };
 
 #endif // TST_UBTEXTDELEGATEDIALOGHANDLER_H
