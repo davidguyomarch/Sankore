@@ -19,7 +19,6 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/frameworks/UBVersion.h \
            ../src/frameworks/UBBase32.h \
            ../src/core/UB.h \
-           ../src/web/UBOEmbedParser.h \
            ../src/web/UBOEmbedUtils.h \
            ../src/adaptors/UBSvgTransformUtils.h
 
