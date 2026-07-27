@@ -46,11 +46,11 @@ SOURCES += ../src/web/UBOEmbedUtils.cpp
 # UBMetadataDcSubsetAdaptor — tests compile the real UBMetadataLoader.cpp (load logic)
 SOURCES += ../src/adaptors/UBMetadataLoader.cpp
 
-# UBDocumentProxy stubs — pre-generated moc files used to avoid moc parsing issues on Linux
-# To regenerate: moc -I../src -I. -Istubs stubs/UBSettings_stub.h -o premoc/moc_UBSettings_stub.cpp
+# UBDocumentProxy — compile real source with header shims for deps
+# To regenerate moc: moc -I. -I../src ../src/document/UBDocumentProxy.h -o premoc/moc_UBDocumentProxy.cpp
 SOURCES += stubs/UBSettings_stub.cpp \
            stubs/UBDocumentManager_stub.cpp \
-           stubs/UBDocumentProxy_stub.cpp \
+           ../src/document/UBDocumentProxy.cpp \
            premoc/moc_UBSettings_stub.cpp \
            premoc/moc_UBDocumentManager_stub.cpp \
            premoc/moc_UBDocumentProxy_stub.cpp
