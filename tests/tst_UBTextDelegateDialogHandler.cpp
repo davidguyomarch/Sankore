@@ -2,6 +2,9 @@
 
 #include <QGraphicsTextItem>
 #include <QGraphicsScene>
+#include <QTextCursor>
+#include <QTextCharFormat>
+#include <QTextDocument>
 #include <QSignalSpy>
 #include <QFont>
 #include <QColor>
