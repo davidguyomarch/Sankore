@@ -4,71 +4,13 @@
 #include <QTemporaryDir>
 #include <QRegularExpression>
 
-// Standalone implementations (same as UBForeignObjectsHandler.cpp static functions)
+// Include the real utility functions from src/
+#include "core/UBForeignObjectsUtils.h"
 
-static QString strIdFrom(const QString &filePath)
-{
-    if (filePath.isEmpty())
-        return QString();
-
-    QRegularExpression rx("\\{.(?!.*\\{).*\\}");
-    QRegularExpressionMatch match = rx.match(filePath);
-    if (!match.hasMatch())
-        return QString();
-
-    return match.captured();
-}
-
-static bool rm_r(const QString &rmPath)
-{
-    QFileInfo fi(rmPath);
-    if (!fi.exists()) return false;
-    if (fi.isFile()) return QFile::remove(rmPath);
-    if (fi.isDir()) {
-        QFileInfoList fList = QDir(rmPath).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
-        for (const QFileInfo& sub : fList)
-            rm_r(sub.absoluteFilePath());
-        return QDir().rmdir(rmPath);
-    }
-    return false;
-}
-
-static bool cp_rf(const QString &what, const QString &where)
-{
-    QFileInfo whatFi(what);
-    QFileInfo whereFi(where);
-
-    if (!whatFi.exists()) return false;
-    if (whatFi.isFile()) {
-        QString whereDir = where.section("/", 0, -2, QString::SectionSkipEmpty | QString::SectionIncludeLeadingSep);
-        QString newFilePath = where;
-        if (!whereFi.exists())
-            QDir().mkpath(whereDir);
-        else if (whereFi.isDir())
-            newFilePath = whereDir + "/" + whatFi.fileName();
-        if (QFile::exists(newFilePath))
-            QFile::remove(newFilePath);
-        return QFile::copy(what, newFilePath);
-    }
-    if (whatFi.isDir()) {
-        if (whereFi.isFile()) return false;
-        if (whereFi.isDir()) rm_r(where);
-        QDir().mkpath(where);
-        QFileInfoList fList = QDir(what).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
-        for (const QFileInfo& sub : fList) {
-            if (!cp_rf(sub.absoluteFilePath(), where + "/" + sub.fileName()))
-                return false;
-        }
-        return true;
-    }
-    return true;
-}
-
-static QStringList getSceneFileNames(const QString& folder)
-{
-    QDir dir(folder, "page???.svg", QDir::Name, QDir::Files);
-    return dir.entryList();
-}
+using UBForeignObjectsUtils::strIdFrom;
+using UBForeignObjectsUtils::rm_r;
+using UBForeignObjectsUtils::cp_rf;
+using UBForeignObjectsUtils::getSceneFileNames;
 
 // --- Tests ---
 

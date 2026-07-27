@@ -25,7 +25,8 @@ SOURCES += ../src/frameworks/UBStringUtils.cpp \
            ../src/frameworks/UBGeometryUtils.cpp \
            ../src/frameworks/UBVersion.cpp \
            ../src/frameworks/UBBase32.cpp \
-           ../src/adaptors/UBIniFileParser.cpp
+           ../src/adaptors/UBIniFileParser.cpp \
+           ../src/core/UBForeignObjectsUtils.cpp
 
 # For UBFileSystemUtils we need a minimal version without OpenSSL/QuaZip deps
 # We provide a test stub instead (not in HEADERS to avoid moc issues on Linux)
