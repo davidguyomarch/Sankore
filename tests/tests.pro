@@ -4,7 +4,7 @@ TEMPLATE = app
 CONFIG += testcase console c++17
 CONFIG -= app_bundle
 
-QT += core gui widgets testlib xml
+QT += core gui widgets testlib xml network
 
 # Paths
 INCLUDEPATH += ../src
@@ -18,7 +18,9 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/frameworks/UBGeometryUtils.h \
            ../src/frameworks/UBVersion.h \
            ../src/frameworks/UBBase32.h \
-           ../src/core/UB.h
+           ../src/core/UB.h \
+           ../src/web/UBOEmbedParser.h \
+           ../src/web/UBOEmbedUtils.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -36,8 +38,8 @@ SOURCES += stubs/UBFileSystemUtils_stub.cpp
 # Not in HEADERS to avoid moc parsing system headers on Linux
 SOURCES += stubs/UBCryptoUtils_stub.cpp
 
-# UBOEmbedParser stub (parsing only, no network/signals)
-# NOT compiled — too complex for moc. Test uses standalone parsing functions instead.
+# UBOEmbedParser — tests compile the real UBOEmbedUtils.cpp (parsing logic)
+SOURCES += ../src/web/UBOEmbedUtils.cpp
 
 # UBMetadataDcSubsetAdaptor stub (only load(), no persist())
 SOURCES += stubs/UBMetadataDcSubsetAdaptor_stub.cpp

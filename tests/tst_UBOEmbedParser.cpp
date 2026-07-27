@@ -1,5 +1,5 @@
 #include "tst_UBOEmbedParser.h"
-#include "stubs/UBOEmbedParser_testable.h"
+#include "web/UBOEmbedUtils.h"
 
 void TestUBOEmbedParser::testGetJSONInfos_video()
 {
@@ -19,7 +19,7 @@ void TestUBOEmbedParser::testGetJSONInfos_video()
         "thumbnail_height": 360
     })";
 
-    sOEmbedContentTest content = oembedParseJSON(json);
+    sOEmbedContent content = UBOEmbedUtils::parseJSON(json);
 
     QCOMPARE(content.providerUrl, QString("http://www.youtube.com/"));
     QCOMPARE(content.title, QString("My Video Title"));
@@ -49,7 +49,7 @@ void TestUBOEmbedParser::testGetJSONInfos_photo()
         "thumbnail_height": 75
     })";
 
-    sOEmbedContentTest content = oembedParseJSON(json);
+    sOEmbedContent content = UBOEmbedUtils::parseJSON(json);
 
     QCOMPARE(content.type, QString("photo"));
     QCOMPARE(content.url, QString("http://farm4.static.flickr.com/photo.jpg"));
@@ -60,7 +60,7 @@ void TestUBOEmbedParser::testGetJSONInfos_photo()
 
 void TestUBOEmbedParser::testGetJSONInfos_emptyJson()
 {
-    sOEmbedContentTest content = oembedParseJSON("{}");
+    sOEmbedContent content = UBOEmbedUtils::parseJSON("{}");
 
     QCOMPARE(content.title, QString(""));
     QCOMPARE(content.width, 0);
@@ -88,7 +88,7 @@ void TestUBOEmbedParser::testGetXMLInfos_video()
         </oembed>
     )";
 
-    sOEmbedContentTest content = oembedParseXML(xml);
+    sOEmbedContent content = UBOEmbedUtils::parseXML(xml);
 
     QCOMPARE(content.providerUrl, QString("http://www.youtube.com/"));
     QCOMPARE(content.title, QString("XML Video Test"));
@@ -114,7 +114,7 @@ void TestUBOEmbedParser::testGetXMLInfos_photo()
         </oembed>
     )";
 
-    sOEmbedContentTest content = oembedParseXML(xml);
+    sOEmbedContent content = UBOEmbedUtils::parseXML(xml);
 
     QCOMPARE(content.type, QString("photo"));
     QCOMPARE(content.url, QString("http://example.com/photo.jpg"));
@@ -124,7 +124,7 @@ void TestUBOEmbedParser::testGetXMLInfos_photo()
 
 void TestUBOEmbedParser::testGetXMLInfos_emptyXml()
 {
-    sOEmbedContentTest content = oembedParseXML("<oembed></oembed>");
+    sOEmbedContent content = UBOEmbedUtils::parseXML("<oembed></oembed>");
 
     QCOMPARE(content.title, QString(""));
     QCOMPARE(content.width, 0);
@@ -139,7 +139,7 @@ void TestUBOEmbedParser::testGetJSONInfos_partialData()
         "html": "<div>content</div>"
     })";
 
-    sOEmbedContentTest content = oembedParseJSON(json);
+    sOEmbedContent content = UBOEmbedUtils::parseJSON(json);
 
     QCOMPARE(content.title, QString("Partial"));
     QCOMPARE(content.type, QString("rich"));
@@ -167,7 +167,7 @@ void TestUBOEmbedParser::testGetXMLInfos_allFields()
         </oembed>
     )";
 
-    sOEmbedContentTest content = oembedParseXML(xml);
+    sOEmbedContent content = UBOEmbedUtils::parseXML(xml);
 
     QCOMPARE(content.providerUrl, QString("http://vimeo.com/"));
     QCOMPARE(content.title, QString("Complete Test"));
