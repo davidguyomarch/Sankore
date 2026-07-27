@@ -4,11 +4,11 @@ TEMPLATE = app
 CONFIG += testcase console c++17
 CONFIG -= app_bundle
 
-QT += core gui widgets testlib xml
+QT += core gui widgets testlib xml network
 
-# Paths
-INCLUDEPATH += ../src
+# Paths — tests/ shims take priority over ../src for stubbed headers
 INCLUDEPATH += .
+INCLUDEPATH += ../src
 
 # We only compile the utility sources under test (no app dependencies)
 # This avoids pulling in UBApplication, UBPersistenceManager, etc.
@@ -18,14 +18,19 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/frameworks/UBGeometryUtils.h \
            ../src/frameworks/UBVersion.h \
            ../src/frameworks/UBBase32.h \
-           ../src/core/UB.h
+           ../src/core/UB.h \
+           ../src/web/UBOEmbedUtils.h \
+           ../src/adaptors/UBSvgTransformUtils.h \
+           ../src/adaptors/UBMetadataLoader.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
            ../src/frameworks/UBGeometryUtils.cpp \
            ../src/frameworks/UBVersion.cpp \
            ../src/frameworks/UBBase32.cpp \
-           ../src/adaptors/UBIniFileParser.cpp
+           ../src/adaptors/UBIniFileParser.cpp \
+           ../src/adaptors/UBSvgTransformUtils.cpp \
+           ../src/core/UBForeignObjectsUtils.cpp
 
 # For UBFileSystemUtils we need a minimal version without OpenSSL/QuaZip deps
 # We provide a test stub instead (not in HEADERS to avoid moc issues on Linux)
@@ -35,17 +40,17 @@ SOURCES += stubs/UBFileSystemUtils_stub.cpp
 # Not in HEADERS to avoid moc parsing system headers on Linux
 SOURCES += stubs/UBCryptoUtils_stub.cpp
 
-# UBOEmbedParser stub (parsing only, no network/signals)
-# NOT compiled — too complex for moc. Test uses standalone parsing functions instead.
+# UBOEmbedParser — tests compile the real UBOEmbedUtils.cpp (parsing logic)
+SOURCES += ../src/web/UBOEmbedUtils.cpp
 
-# UBMetadataDcSubsetAdaptor stub (only load(), no persist())
-SOURCES += stubs/UBMetadataDcSubsetAdaptor_stub.cpp
+# UBMetadataDcSubsetAdaptor — tests compile the real UBMetadataLoader.cpp (load logic)
+SOURCES += ../src/adaptors/UBMetadataLoader.cpp
 
-# UBDocumentProxy stubs — pre-generated moc files used to avoid moc parsing issues on Linux
-# To regenerate: moc -I../src -I. -Istubs stubs/UBSettings_stub.h -o premoc/moc_UBSettings_stub.cpp
+# UBDocumentProxy — compile real source with header shims for deps
+# To regenerate moc: moc -I. -I../src ../src/document/UBDocumentProxy.h -o premoc/moc_UBDocumentProxy.cpp
 SOURCES += stubs/UBSettings_stub.cpp \
            stubs/UBDocumentManager_stub.cpp \
-           stubs/UBDocumentProxy_stub.cpp \
+           ../src/document/UBDocumentProxy.cpp \
            premoc/moc_UBSettings_stub.cpp \
            premoc/moc_UBDocumentManager_stub.cpp \
            premoc/moc_UBDocumentProxy_stub.cpp

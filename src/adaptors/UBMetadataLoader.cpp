@@ -1,48 +1,39 @@
-/**
- * @file UBMetadataDcSubsetAdaptor_stub.cpp
- * @brief Stub that compiles UBMetadataDcSubsetAdaptor::load() for testing
- *        without pulling in UBApplication/UBBoardController.
+/*
+ * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
  *
- * We redefine the includes to use our test stubs instead of the real ones.
+ * This file is part of Open-Sankoré.
+ *
+ * Open-Sankoré is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License,
+ * with a specific linking exception for the OpenSSL project's
+ * "OpenSSL" library (or with modified versions of it that use the
+ * same license as the "OpenSSL" library).
+ *
+ * Open-Sankoré is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Provide stub headers before the real source
-#include "stubs/UBSettings_stub.h"
+#include "UBMetadataLoader.h"
+#include "core/UBSettings.h"
 
-// Fake UBApplication.h and UBBoardController.h content (only needed for persist())
-namespace { struct FakeApp {}; }
-
-// We only need load(), not persist(). Provide a no-op persist().
-// Trick: include the header then define persist as no-op.
-
-#include <QWidget>
-#include <QApplication>
-#include <QPainter>
+#include <QFile>
 #include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QDebug>
 
-#include "stubs/UBDocumentProxy_stub.h"
-#include "../src/frameworks/UBStringUtils.h"
-
-// Replicate the class definition and implement load() from the real source
-#include "../src/adaptors/UBMetadataDcSubsetAdaptor.h"
-
-const QString UBMetadataDcSubsetAdaptor::nsRdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-const QString UBMetadataDcSubsetAdaptor::nsDc = "http://purl.org/dc/elements/1.1/";
-const QString UBMetadataDcSubsetAdaptor::metadataFilename = "metadata.rdf";
-const QString UBMetadataDcSubsetAdaptor::rdfIdentifierDomain = "http://www.mnemis.com/uniboard";
-
-UBMetadataDcSubsetAdaptor::UBMetadataDcSubsetAdaptor() {}
-UBMetadataDcSubsetAdaptor::~UBMetadataDcSubsetAdaptor() {}
-
-void UBMetadataDcSubsetAdaptor::persist(UBDocumentProxy* /*proxy*/)
+namespace UBMetadataLoader
 {
-    // No-op in test stub — persist() requires UBApplication/UBBoardController
-}
 
-QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSettings* settings)
+const QString metadataFilename = "metadata.rdf";
+
+QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
 {
     if (!settings)
         settings = UBSettings::settings();
@@ -65,7 +56,7 @@ QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSetting
             return metadata;
         }
 
-        QString docVersion = "4.1";
+        QString docVersion = "4.1"; // untagged doc version 4.1
         metadata.insert(UBSettings::documentVersion, docVersion);
 
         QXmlStreamReader xml(&file);
@@ -113,7 +104,7 @@ QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSetting
 
                         QSize docSize(width, height);
 
-                        if (width == 1024 && height == 768)
+                        if (width == 1024 && height == 768) // migrate from 1024/768 to pageSize
                         {
                             docSize = settings->pageSize->get().toSize();
                         }
@@ -124,6 +115,7 @@ QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSetting
                     {
                         qWarning() << "Invalid document size:" << size;
                     }
+
                     sizeFound = true;
                 }
                 else if (xml.name() == QLatin1String("updated-at")
@@ -195,17 +187,16 @@ QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSetting
 
     if (!sizeFound)
     {
-        // In test mode, use a default size instead of querying the screen
-        QSize docSize(1280, 960);
+        QSize docSize(1280, 960); // sensible default
         QScreen* primaryScreen = QGuiApplication::primaryScreen();
         if (primaryScreen) {
             docSize = primaryScreen->geometry().size();
-            docSize.setHeight(docSize.height() - 70);
+            docSize.setHeight(docSize.height() - 70); // 70 = toolbar height
         }
         metadata.insert(UBSettings::documentSize, QVariant(docSize));
     }
 
-    // Update old files date
+    // Update old files date format
     QString dateString = metadata.value(UBSettings::documentDate).toString();
     if (dateString.length() < 10) {
         metadata.remove(UBSettings::documentDate);
@@ -220,3 +211,5 @@ QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSetting
 
     return metadata;
 }
+
+} // namespace UBMetadataLoader

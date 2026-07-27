@@ -22,6 +22,7 @@
 
 
 #include "UBSvgSubsetAdaptor.h"
+#include "UBSvgTransformUtils.h"
 
 #include <QtCore>
 #include <QtXml>
@@ -115,39 +116,13 @@ QMap<QString,IDataStorage*> UBSvgSubsetAdaptor::additionalElementToStore;
 
 QString UBSvgSubsetAdaptor::toSvgTransform(const QTransform& matrix)
 {
-    return QString("matrix(%1, %2, %3, %4, %5, %6)")
-           .arg(matrix.m11(), 0 , 'g')
-           .arg(matrix.m12(), 0 , 'g')
-           .arg(matrix.m21(), 0 , 'g')
-           .arg(matrix.m22(), 0 , 'g')
-           .arg(matrix.dx(), 0 , 'g')
-           .arg(matrix.dy(), 0 , 'g');
+    return UBSvgTransformUtils::toSvgTransform(matrix);
 }
 
 
 QTransform UBSvgSubsetAdaptor::fromSvgTransform(const QString& transform)
 {
-    QTransform matrix;
-    QString ts = transform;
-    ts.replace("matrix(", "");
-    ts.replace(")", "");
-    QStringList sl = ts.split(",");
-
-    if (sl.size() >= 6)
-    {
-        matrix.setMatrix(
-            sl.at(0).toFloat(),
-            sl.at(1).toFloat(),
-            0,
-            sl.at(2).toFloat(),
-            sl.at(3).toFloat(),
-            0,
-            sl.at(4).toFloat(),
-            sl.at(5).toFloat(),
-            1);
-    }
-
-    return matrix;
+    return UBSvgTransformUtils::fromSvgTransform(transform);
 }
 
 

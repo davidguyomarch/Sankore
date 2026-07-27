@@ -1,5 +1,5 @@
 #include "tst_UBDocumentProxy.h"
-#include "stubs/UBDocumentProxy_stub.h"
+#include "document/UBDocumentProxy.h"
 
 #include <QDir>
 #include <QUuid>

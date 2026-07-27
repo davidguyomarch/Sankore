@@ -33,6 +33,7 @@
 #include <QDebug>
 
 #include "UBOEmbedParser.h"
+#include "UBOEmbedUtils.h"
 
 
 UBOEmbedParser::UBOEmbedParser(QObject *parent, const char* name)
@@ -111,52 +112,7 @@ void UBOEmbedParser::parse(const QString& html)
   */
 sOEmbedContent UBOEmbedParser::getJSONInfos(const QString &json)
 {
-    sOEmbedContent content;
-
-    // Qt6: QScriptEngine removed, use QJsonDocument for JSON parsing
-    QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
-    QJsonObject obj = doc.object();
-
-    QString providerUrl = obj.value("provider_url").toString();
-    QString title = obj.value("title").toString();
-    QString html = obj.value("html").toString();
-    QString authorName = obj.value("author_name").toString();
-    int height = obj.value("height").toInt();
-    int thumbnailWidth = obj.value("thumbnail_width").toInt();
-    int width = obj.value("width").toInt();
-    float version = obj.value("version").toString().toFloat();
-    QString authorUrl = obj.value("author_url").toString();
-    QString providerName = obj.value("provider_name").toString();
-    QString thumbnailUrl = obj.value("thumbnail_url").toString();
-    QString type = obj.value("type").toString();
-    int thumbnailHeight = obj.value("thumbnail_height").toInt();
-
-    content.providerUrl = providerUrl;
-    content.title = title;
-    content.html = html;
-    content.author = authorName;
-    content.height = height;
-    content.thumbWidth = thumbnailWidth;
-    content.width = width;
-    content.version = version;
-    content.authorUrl = authorUrl;
-    content.providerName = providerName;
-    content.thumbUrl = thumbnailUrl;
-    content.type = type;
-    content.thumbHeight = QString::number(thumbnailHeight);
-
-    if("photo" == content.type){
-        content.url = obj.value("url").toString();
-    }else if("video" == content.type){
-        QStringList strl = content.html.split('\"');
-        for(int i=0; i<strl.size(); i++){
-            if(strl.at(i).endsWith("src=") && strl.size() > (i+1)){
-                content.url = strl.at(i+1);
-            }
-        }
-    }
-
-    return content;
+    return UBOEmbedUtils::parseJSON(json);
 }
 
 /**
@@ -165,59 +121,7 @@ sOEmbedContent UBOEmbedParser::getJSONInfos(const QString &json)
   */
 sOEmbedContent UBOEmbedParser::getXMLInfos(const QString &xml)
 {
-    sOEmbedContent content;
-
-    QDomDocument domDoc;
-    domDoc.setContent(xml);
-    QDomNode oembed = domDoc.documentElement();
-
-    QDomNodeList children = oembed.toElement().childNodes();
-
-    for(int i=0; i<children.size(); i++){
-        QDomNode node = children.at(i);
-        QString tag = node.nodeName();
-        QString value = node.toElement().text();
-        if("provider_url" == tag){
-            content.providerUrl = value;
-        }else if("title" == tag){
-            content.title = value;
-        }else if("html" == tag){
-            content.html = value;
-        }else if("author_name" == tag){
-            content.author = value;
-        }else if("height" == tag){
-            content.height = value.toInt();
-        }else if("thumbnail_width" == tag){
-            content.thumbWidth = value.toInt();
-        }else if("width" == tag){
-            content.width = value.toInt();
-        }else if("version" == tag){
-            content.version = value.toFloat();
-        }else if("author_url" == tag){
-            content.authorUrl = value;
-        }else if("provider_name" == tag){
-            content.providerName = value;
-        }else if("thumbnail_url" == tag){
-            content.thumbUrl = value;
-        }else if("type" == tag){
-            content.type = value;
-        }else if("thumbnail_height" == tag){
-            content.thumbHeight = value;
-        }else if("url" == tag){
-            content.url = value; // This case appears only for type = photo
-        }
-    }
-
-    if("video" == content.type){
-        QStringList strl = content.html.split('\"');
-        for(int i=0; i<strl.size(); i++){
-            if(strl.at(i).endsWith("src=") && strl.size() > (i+1)){
-                content.url = strl.at(i+1);
-            }
-        }
-    }
-
-    return content;
+    return UBOEmbedUtils::parseXML(xml);
 }
 
 void UBOEmbedParser::onParseContent(QString url)
