@@ -27,7 +27,6 @@
 #include <QtSvg>
 #include <QDrag>
 #include <QMenu>
-#include <QColorDialog>
 #include <QComboBox>
 
 #include "UBGraphicsItemDelegate.h"

@@ -103,6 +103,9 @@
 
 #include "web/UBWebController.h"
 
+#include "gui/UBTextDelegateDialogHandler.h"
+#include "domain/UBGraphicsTextItemDelegate.h"
+
 UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     : UBDocumentContainer(mainWindow->centralWidget())
     , mMainWindow(mainWindow)
@@ -147,6 +150,8 @@ void UBBoardController::init()
 {
     setupViews();
     setupToolbar();
+
+    mTextDelegateDialogHandler = new UBTextDelegateDialogHandler(mControlContainer, UBSettings::settings(), this);
 
     connect(UBApplication::undoStack, SIGNAL(canUndoChanged(bool))
             , this, SLOT(undoRedoStateChange(bool)));
@@ -1912,6 +1917,10 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
         mControlView->setScene(mActiveScene);
         mDisplayView->setScene(mActiveScene);
         mActiveScene->setBackgroundZoomFactor(mControlView->transform().m11());
+
+        // Wire text delegate dialog handler for new text items in this scene
+        connect(mActiveScene, &UBGraphicsScene::textItemAdded,
+                this, &UBBoardController::onTextItemAdded, Qt::UniqueConnection);
         pDocumentProxy->setDefaultDocumentSize(mActiveScene->nominalSize());
         updatePageSizeState();
 
@@ -3031,5 +3040,18 @@ void UBBoardController::freezeW3CWidget(QGraphicsItem *item, bool freeze)
             item_casted->load(QUrl(UBGraphicsW3CWidgetItem::freezedWidgetFilePath()));
         } else
             item_casted->loadMainHtml();
+    }
+}
+
+void UBBoardController::onTextItemAdded(UBGraphicsTextItem* textItem)
+{
+    if (textItem && textItem->Delegate())
+    {
+        UBGraphicsTextItemDelegate* delegate =
+            dynamic_cast<UBGraphicsTextItemDelegate*>(textItem->Delegate());
+        if (delegate)
+        {
+            mTextDelegateDialogHandler->connectToDelegate(delegate);
+        }
     }
 }

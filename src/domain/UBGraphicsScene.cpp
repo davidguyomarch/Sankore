@@ -1656,6 +1656,8 @@ UBGraphicsTextItem* UBGraphicsScene::addTextWithFont(const QString& pString, con
 
     setDocumentUpdated();
 
+    emit textItemAdded(textItem);
+
     return textItem;
 }
 
@@ -1686,6 +1688,8 @@ UBGraphicsTextItem *UBGraphicsScene::addTextHtml(const QString &pString, const Q
     textItem->setPos(pTopLeft);
 
     setDocumentUpdated();
+
+    emit textItemAdded(textItem);
 
     return textItem;
 }

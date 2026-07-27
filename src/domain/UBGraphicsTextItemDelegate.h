@@ -27,7 +27,6 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QFontDialog>
 
 #include <QtSvg>
 
@@ -75,6 +74,17 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         void alternHtmlMode();
         void duplicate();
 
+        // Apply results from GUI-layer dialogs
+        void applyFont(const QFont& font);
+        void applyTextColor(const QColor& color);
+        void applyBackgroundColor(const QColor& color);
+
+    signals:
+        // Emitted when user requests a font/color change — GUI layer opens the dialog
+        void fontChangeRequested(const QFont& currentFont);
+        void textColorChangeRequested(const QColor& currentColor);
+        void backgroundColorChangeRequested(const QColor& currentColor);
+
     protected:
         virtual void buildButtons();
         virtual void decorateMenu(QMenu *menu);
@@ -115,7 +125,6 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         static const int sMinPointSize;
 
     private:
-        void customize(QFontDialog &fontDialog);
         void ChangeTextSize(qreal factor, textChangeMode changeMode);
 
         QFont createDefaultFont();

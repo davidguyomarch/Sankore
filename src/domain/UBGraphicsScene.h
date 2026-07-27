@@ -385,6 +385,7 @@ public slots:
     signals:
 
        void pageSizeChanged();
+       void textItemAdded(UBGraphicsTextItem* textItem);
 
     protected:
         UBGraphicsPolygonItem* lineToPolygonItem(const QLineF& pLine, const qreal& pWidth);
