@@ -971,8 +971,8 @@
   <action name="actionSleep">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/blackout.png</normaloff>
-     <normalon>:/images/extraPalette/blackoutOn.png</normalon>:/images/extraPalette/blackout.png</iconset>
+     <normaloff>:/images/extraPalette/svg/blackout.svg</normaloff>
+     <normalon>:/images/extraPalette/blackoutOn.png</normalon>:/images/extraPalette/svg/blackout.svg</iconset>
    </property>
    <property name="text">
     <string>Sleep</string>
@@ -987,8 +987,8 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/keyboard.png</normaloff>
-     <normalon>:/images/extraPalette/keyboardOn.png</normalon>:/images/extraPalette/keyboard.png</iconset>
+     <normaloff>:/images/extraPalette/svg/keyboard.svg</normaloff>
+     <normalon>:/images/extraPalette/keyboardOn.png</normalon>:/images/extraPalette/svg/keyboard.svg</iconset>
    </property>
    <property name="text">
     <string>Virtual Keyboard</string>
@@ -1458,8 +1458,8 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/webTrap.png</normaloff>
-     <normalon>:/images/extraPalette/webTrapEnabled.png</normalon>:/images/extraPalette/webTrap.png</iconset>
+     <normaloff>:/images/extraPalette/svg/webTrap.svg</normaloff>
+     <normalon>:/images/extraPalette/webTrapEnabled.png</normalon>:/images/extraPalette/svg/webTrap.svg</iconset>
    </property>
    <property name="text">
     <string>Web Trap</string>

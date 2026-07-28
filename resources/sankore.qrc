@@ -552,6 +552,9 @@
         <file>images/drawingPalette/svg/endArrowStyleArrow.svg</file>
         <file>images/drawingPalette/svg/endArrowStyleRound.svg</file>
         <file>images/drawingPalette/svg/endArrowStyleNone.svg</file>
+        <file>images/extraPalette/svg/blackout.svg</file>
+        <file>images/extraPalette/svg/keyboard.svg</file>
+        <file>images/extraPalette/svg/webTrap.svg</file>
         <file>images/toolbar/svg/web.svg</file>
         <file>images/toolbar/svg/library.svg</file>
         <file>images/toolbar/svg/reload.svg</file>
