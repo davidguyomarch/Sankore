@@ -16,8 +16,8 @@ jobs:
       - name: Install Qt 6 via aqtinstall
         shell: pwsh
         run: |
-          pip install aqtinstall==3.1.18
-          aqt install-qt windows desktop 6.8.2 win64_msvc2022_64 -m qt5compat qtmultimedia qtsvg --outputdir C:\Qt
+          pip install "aqtinstall>=3.1,<3.2" "py7zr<1.0"
+          aqt install-qt windows desktop 6.8.2 win64_msvc2022_64 -m qt5compat qtmultimedia --outputdir C:\Qt
           echo "C:\Qt\6.8.2\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Setup MSVC
@@ -83,31 +83,58 @@ jobs:
             build/installer/Open-Sankore-*-setup.exe
 
   build-linux:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
+    container:
+      image: ubuntu:22.04
+      options: --user root
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            git build-essential cmake python3 python3-pip \
+            libgl1-mesa-dev libglib2.0-dev libfontconfig1-dev \
+            libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev \
+            libxfixes-dev libxi-dev libxrender-dev libxcb1-dev \
+            libxcb-cursor-dev libxcb-glx0-dev libxcb-keysyms1-dev \
+            libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev \
+            libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev \
+            libxcb-randr0-dev libxcb-render-util0-dev libxcb-xinerama0-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev \
+            libssl-dev zlib1g-dev libomp-dev \
+            pkg-config rpm fuse libfuse2
+
+      - name: Install Qt 6.8.2 via aqtinstall
+        run: |
+          pip3 install aqtinstall
+          aqt install-qt linux desktop 6.8.2 linux_gcc_64 -m qt5compat qtmultimedia --outputdir /opt/qt
+          echo "/opt/qt/6.8.2/gcc_64/bin" >> $GITHUB_PATH
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Build QuaZip
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential qt6-base-dev qt6-base-dev-tools \
-            libqt6svg6-dev qt6-svg-dev qt6-multimedia-dev \
-            qt6-declarative-dev \
-            libqt6core5compat6-dev \
-            qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools \
-            libqt6opengl6-dev libgl1-mesa-dev \
-            libssl-dev zlib1g-dev libx11-dev \
-            libquazip1-qt6-dev libomp-dev \
-            qmake6 pkg-config rpm
+          git clone --depth 1 --branch v1.4 https://github.com/stachenov/quazip.git /tmp/quazip-src
+          cmake -S /tmp/quazip-src -B /tmp/quazip-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH=/opt/qt/6.8.2/gcc_64 \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DQUAZIP_QT_MAJOR_VERSION=6 \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DQUAZIP_BZIP2=OFF
+          cmake --build /tmp/quazip-build -j$(nproc)
+          cmake --install /tmp/quazip-build
 
       - name: Build
         run: |
           echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
           mkdir -p build/linux/release/{moc,objects,rcc,ui,product}
-          qmake6 Sankore_3.1.pro CONFIG+=no_webengine
+          qmake Sankore_3.1.pro CONFIG+=no_webengine
           make -j$(nproc)
 
       - name: Package
