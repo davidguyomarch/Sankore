@@ -25,16 +25,13 @@
 #include <QApplication>
 #include <QPainter>
 #include <QtSvg>
-#include <QColorDialog>
 #include <QComboBox>
-#include <QListView>
 #include <QMenu>
 
 #include "core/UBApplication.h"
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItemDelegate.h"
 #include "UBGraphicsScene.h"
-#include "gui/UBResources.h"
 #include "gui/UBMainWindow.h"
 
 #include "domain/UBGraphicsTextItem.h"
@@ -233,89 +230,37 @@ void UBGraphicsTextItemDelegate::duplicate()
 
 // This method is used to filter the available fonts. Only the web-compliant fonts
 // will remain in the font list.
-void UBGraphicsTextItemDelegate::customize(QFontDialog &fontDialog)
-{
-    fontDialog.setOption(QFontDialog::DontUseNativeDialog);
-
-    if (mSettings->isDarkBackground()) {
-        fontDialog.setStyleSheet("background-color: white;");
-    }
-
-    QListView *fontNameListView;
-    QList<QListView*> listViews = fontDialog.findChildren<QListView*>();
-    if (listViews.count() > 0)
-    {
-        fontNameListView = listViews.at(0);
-        for (QListView* listView : listViews)
-        {
-            if (listView->pos().x() < fontNameListView->pos().x())
-                fontNameListView = listView;
-        }
-    }
-    if (fontNameListView)
-    {
-        QStringListModel *stringListModel = dynamic_cast<QStringListModel*>(fontNameListView->model());
-        if (stringListModel)
-        {
-            QStringList dialogFontNames = stringListModel->stringList();
-            QStringList safeWebFontNames;
-            safeWebFontNames.append("Arial");
-            safeWebFontNames.append("Arial Black");
-            safeWebFontNames.append("Comic Sans MS");
-            safeWebFontNames.append("Courier New");
-            safeWebFontNames.append("Georgia");
-            safeWebFontNames.append("Impact");
-            safeWebFontNames.append("Times New Roman");
-            safeWebFontNames.append("Trebuchet MS");
-            safeWebFontNames.append("Verdana");
-
-            QStringList customFontList =  UBResources::resources()->customFontList();
-            int index = 0;
-            for (const QString& dialogFontName : dialogFontNames){
-                if (safeWebFontNames.contains(dialogFontName, Qt::CaseInsensitive) || customFontList.contains(dialogFontName, Qt::CaseSensitive))
-                    index++;
-                else
-                    stringListModel->removeRow(index);
-            }
-        }
-    }
-    QList<QComboBox*> comboBoxes = fontDialog.findChildren<QComboBox*>();
-    if (comboBoxes.count() > 0)
-        comboBoxes.at(0)->setEnabled(false);
-}
-
-
 void UBGraphicsTextItemDelegate::pickFont()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
     {
-        QFontDialog fontDialog(delegated()->textCursor().charFormat().font(), mDelegated->scene()->views().at(0));
-        customize(fontDialog);
-
-        if (fontDialog.exec())
-        {
-            QFont selectedFont = fontDialog.selectedFont();
-            mSettings->setFontFamily(selectedFont.family());
-            mSettings->setBoldFont(selectedFont.bold());
-            mSettings->setItalicFont(selectedFont.italic());
-            mSettings->setFontPointSize(selectedFont.pointSize());
-
-            //setting format for selected item
-            QTextCursor curCursor = delegated()->textCursor();
-            QTextCharFormat format;
-            format.setFont(selectedFont);
-            curCursor.mergeCharFormat(format);
-
-            delegated()->setTextCursor(curCursor);
-            delegated()->setFont(selectedFont);
-            delegated()->setSelected(true);
-//          disabled and replaced by the next line because of not optimum result (text splits to two lines when that is not necessary)
-    //          delegated()->adjustSize();
-                delegated()->resize(delegated()->document()->idealWidth(), delegated()->size().height());
-                delegated()->contentsChanged();
-            }
-        }
+        QFont currentFont = delegated()->textCursor().charFormat().font();
+        emit fontChangeRequested(currentFont);
     }
+}
+
+void UBGraphicsTextItemDelegate::applyFont(const QFont& selectedFont)
+{
+    if (!mDelegated)
+        return;
+
+    mSettings->setFontFamily(selectedFont.family());
+    mSettings->setBoldFont(selectedFont.bold());
+    mSettings->setItalicFont(selectedFont.italic());
+    mSettings->setFontPointSize(selectedFont.pointSize());
+
+    //setting format for selected item
+    QTextCursor curCursor = delegated()->textCursor();
+    QTextCharFormat format;
+    format.setFont(selectedFont);
+    curCursor.mergeCharFormat(format);
+
+    delegated()->setTextCursor(curCursor);
+    delegated()->setFont(selectedFont);
+    delegated()->setSelected(true);
+    delegated()->resize(delegated()->document()->idealWidth(), delegated()->size().height());
+    delegated()->contentsChanged();
+}
 
 void UBGraphicsTextItemDelegate::setFontBold()
 {
@@ -411,52 +356,48 @@ void UBGraphicsTextItemDelegate::pickColor()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
     {
-        QColorDialog colorDialog(delegated()->defaultTextColor(), mDelegated->scene()->views().at(0));
-        colorDialog.setWindowTitle(tr("Text Color"));
-        if (mSettings->isDarkBackground())
-        {
-            colorDialog.setStyleSheet("background-color: white;");
-        }
-
-        if (colorDialog.exec())
-        {
-            QColor selectedColor = colorDialog.selectedColor();
-            delegated()->setDefaultTextColor(selectedColor);
-            QTextCursor curCursor = delegated()->textCursor();
-            QTextCharFormat format;
-            format.setForeground(QBrush(selectedColor));
-            curCursor.mergeCharFormat(format);
-            delegated()->setTextCursor(curCursor);
-
-            UBGraphicsTextItem::lastUsedTextColor = selectedColor;
-
-            delegated()->setSelected(true);            
-            delegated()->contentsChanged();
-            delegated()->setFocus();
-        }
+        QColor currentColor = delegated()->defaultTextColor();
+        emit textColorChangeRequested(currentColor);
     }
+}
+
+void UBGraphicsTextItemDelegate::applyTextColor(const QColor& selectedColor)
+{
+    if (!mDelegated)
+        return;
+
+    delegated()->setDefaultTextColor(selectedColor);
+    QTextCursor curCursor = delegated()->textCursor();
+    QTextCharFormat format;
+    format.setForeground(QBrush(selectedColor));
+    curCursor.mergeCharFormat(format);
+    delegated()->setTextCursor(curCursor);
+
+    UBGraphicsTextItem::lastUsedTextColor = selectedColor;
+
+    delegated()->setSelected(true);
+    delegated()->contentsChanged();
+    delegated()->setFocus();
 }
 
 void UBGraphicsTextItemDelegate::pickBackgroundColor()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
     {
-        QColorDialog colorDialog(delegated()->defaultTextColor(), mDelegated->scene()->views().at(0));
-        colorDialog.setWindowTitle(tr("Background Color"));
-        if (mSettings->isDarkBackground())
-        {
-            colorDialog.setStyleSheet("background-color: white;");
-        }
-
-        if (colorDialog.exec())
-        {
-            QColor selectedColor = colorDialog.selectedColor();
-            delegated()->setBackgroundColor(selectedColor);
-            delegated()->setSelected(true);
-            delegated()->contentsChanged();
-            delegated()->setFocus();
-        }
+        QColor currentColor = delegated()->defaultTextColor();
+        emit backgroundColorChangeRequested(currentColor);
     }
+}
+
+void UBGraphicsTextItemDelegate::applyBackgroundColor(const QColor& selectedColor)
+{
+    if (!mDelegated)
+        return;
+
+    delegated()->setBackgroundColor(selectedColor);
+    delegated()->setSelected(true);
+    delegated()->contentsChanged();
+    delegated()->setFocus();
 }
 
 void UBGraphicsTextItemDelegate::insertTable()

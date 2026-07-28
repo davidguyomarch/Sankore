@@ -54,6 +54,8 @@ class UBBoardPaletteManager;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
+class UBTextDelegateDialogHandler;
+class UBGraphicsTextItem;
 
 
 typedef enum{
@@ -320,6 +322,7 @@ class UBBoardController : public UBDocumentContainer
         UBBoardView *mDisplayView;
         QWidget *mControlContainer;
         UBDocumentNavigator *mDocumentNavigator;
+        UBTextDelegateDialogHandler* mTextDelegateDialogHandler;
         qreal mZoomFactor;
         bool mIsClosing;
         QColor mPenColorOnDarkBackground;
@@ -349,6 +352,7 @@ class UBBoardController : public UBDocumentContainer
         void libraryDialogClosed(int ret);
         void lastWindowClosed();
         void onDownloadModalFinished();
+        void onTextItemAdded(UBGraphicsTextItem* textItem);
 
 };
 

@@ -1,4 +1,4 @@
-TARGET = OpenSankoreTests
+  TARGET = OpenSankoreTests
 TEMPLATE = app
 
 CONFIG += testcase console c++17
