@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/uniboard.png</file>
-        <file>images/bigUniboard.png</file>
         <file>images/icon-proposal-1-letter-S.svg</file>
         <file>images/icon-proposal-2-board-stylus.svg</file>
         <file>images/icon-proposal-3-open-book-pen.svg</file>
@@ -16,7 +14,6 @@
         <file>images/flash.svg</file>
         <file>images/soundOn.svg</file>
         <file>images/soundOff.svg</file>
-        <file>images/shape.png</file>
         <file>images/font.svg</file>
         <file>images/color.svg</file>
         <file>images/eyeOpened.svg</file>
@@ -55,107 +52,20 @@
         <file>images/reload.svg</file>
         <file>images/frozen.svg</file>
         <file>images/unfrozen.svg</file>
-        <file>images/toolbar/group.png</file>
-        <file>images/toolbar/ungroup.png</file>
-        <file>images/toolbar/window.png</file>
-        <file>images/toolbar/plusBlack.png</file>
-        <file>images/toolbar/plusBlackOn.png</file>
-        <file>images/toolbar/quit.png</file>
-        <file>images/toolbar/quitOn.png</file>
         <file>images/toolbar/background.png</file>
-        <file>images/toolbar/documents.png</file>
-        <file>images/toolbar/newPage.png</file>
-        <file>images/toolbar/nextPage.png</file>
-        <file>images/toolbar/nextPageOn.png</file>
-        <file>images/toolbar/previousPage.png</file>
-        <file>images/toolbar/previousPageOn.png</file>
-        <file>images/toolbar/redo.png</file>
-        <file>images/toolbar/redoOn.png</file>
-        <file>images/toolbar/stylus.png</file>
-        <file>images/toolbar/undo.png</file>
         <file>images/toolbar/undoOn.png</file>
-        <file>images/toolbar/smallPen.png</file>
-        <file>images/toolbar/mediumPen.png</file>
-        <file>images/toolbar/largePen.png</file>
-        <file>images/toolbar/color.png</file>
-        <file>images/toolbar/smallEraser.png</file>
-        <file>images/toolbar/mediumEraser.png</file>
-        <file>images/toolbar/largeEraser.png</file>
-        <file>images/toolbar/web.png</file>
         <file>images/toolbar/board.png</file>
         <file>images/toolbar/home.png</file>
-        <file>images/toolbar/profile.png</file>
-        <file>images/toolbar/library.png</file>
-        <file>images/toolbar/clearPage.png</file>
-        <file>images/toolbar/reload.png</file>
-        <file>images/toolbar/addBookmark.png</file>
-        <file>images/toolbar/bookmarks.png</file>
-        <file>images/toolbar/settings.png</file>
-        <file>images/toolbar/eyeClosed.png</file>
-        <file>images/toolbar/eyeOpened.png</file>
-        <file>images/toolbar/pdf.png</file>
         <file>images/toolbar/deleteDocument.png</file>
-        <file>images/toolbar/deleteFolder.png</file>
-        <file>images/toolbar/newDocument.png</file>
-        <file>images/toolbar/newFolder.png</file>
-        <file>images/toolbar/addToLibrary.png</file>
-        <file>images/toolbar/addInteractiveToLibrary.png</file>
-        <file>images/toolbar/addToolToLibrary.png</file>
-        <file>images/toolbar/duplicate.png</file>
-        <file>images/toolbar/export.png</file>
-        <file>images/toolbar/import.png</file>
-        <file>images/toolbar/setBackground.png</file>
-        <file>images/toolbar/removeBackground.png</file>
         <file>images/toolbar/open.png</file>
-        <file>images/toolbar/addToPage.png</file>
-        <file>images/toolbar/menu.png</file>
-        <file>images/toolbar/addToDocument.png</file>
-        <file>images/toolbar/print.png</file>
-        <file>images/toolbar/addToWorkingDoc.png</file>
-        <file>images/toolbar/rename.png</file>
-        <file>images/toolbar/captureArea.png</file>
         <file>images/toolbar/captureScreen.png</file>
-        <file>images/toolbar/captureWindow.png</file>
-        <file>images/toolbar/extraTool.png</file>
-        <file>images/toolbar/webUpload.png</file>
-        <file>images/toolbar/stop.png</file>
-        <file>images/toolbar/pause.png</file>
-        <file>images/toolbar/cut.png</file>
-        <file>images/toolbar/copy.png</file>
-        <file>images/toolbar/paste.png</file>
-        <file>images/toolbar/proto.png</file>
-        <file>images/toolbar/mic.png</file>
-        <file>images/toolbar/micOff.png</file>
-        <file>images/toolbar/remove.png</file>
-        <file>images/toolbar/pageSize.png</file>
-        <file>images/toolbar/eraserTool.png</file>
-        <file>images/toolbar/lineTool.png</file>
-        <file>images/toolbar/tools.png</file>
         <file>images/stylusPalette/arrow.png</file>
-        <file>images/stylusPalette/arrowOn.png</file>
-        <file>images/stylusPalette/handPlay.png</file>
-        <file>images/stylusPalette/handPlayOn.png</file>
         <file>images/stylusPalette/eraser.png</file>
-        <file>images/stylusPalette/eraserOn.png</file>
-        <file>images/stylusPalette/hand.png</file>
-        <file>images/stylusPalette/handOn.png</file>
         <file>images/stylusPalette/laser.png</file>
-        <file>images/stylusPalette/laserOn.png</file>
         <file>images/stylusPalette/marker.png</file>
-        <file>images/stylusPalette/markerOn.png</file>
         <file>images/stylusPalette/pen.png</file>
-        <file>images/stylusPalette/penOn.png</file>
-        <file>images/stylusPalette/line.png</file>
-        <file>images/stylusPalette/lineOn.png</file>
         <file>images/stylusPalette/zoomOut.png</file>
-        <file>images/stylusPalette/zoomOutOn.png</file>
         <file>images/stylusPalette/zoomIn.png</file>
-        <file>images/stylusPalette/zoomInOn.png</file>
-        <file>images/stylusPalette/restoreZoom.png</file>
-        <file>images/stylusPalette/text.png</file>
-        <file>images/stylusPalette/textOn.png</file>
-        <file>images/stylusPalette/captureArea.png</file>
-        <file>images/stylusPalette/captureAreaOn.png</file>
         <file>images/stylusPalette/svg/pen.svg</file>
         <file>images/stylusPalette/svg/eraser.svg</file>
         <file>images/stylusPalette/svg/marker.svg</file>
@@ -188,12 +98,6 @@
         <file>images/toolPalette/aristoTool.png</file>
         <file>images/toolPalette/maskTool.png</file>
         <file>images/toolPalette/magnifierTool.png</file>
-        <file>images/extraPalette/blackout.png</file>
-        <file>images/extraPalette/keyboard.png</file>
-        <file>images/extraPalette/trapFlash.png</file>
-        <file>images/extraPalette/webTrap.png</file>
-        <file>images/extraPalette/webTrapEnabled.png</file>
-        <file>images/extraPalette/oEmbed.png</file>
         <file>images/erasePalette/eraseAll.svg</file>
         <file>images/erasePalette/eraseItem.svg</file>
         <file>images/erasePalette/eraseAnnotation.svg</file>
@@ -208,22 +112,11 @@
         <file>images/cursors/drawCompass.png</file>
         <file>images/cursors/drawRulerLine.png</file>
         <file>images/cursors/play.png</file>
-        <file>images/print/onepage.png</file>
-        <file>images/print/thumbnails.png</file>
-        <file>images/print/twopages.png</file>
         <file>images/defaultWidgetIcon.png</file>
-        <file>images/favorites.png</file>
-        <file>images/myContent.png</file>
-        <file>images/myFolder.png</file>
-        <file>images/online.png</file>
-        <file>images/tools.png</file>
         <file>images/folder.png</file>
         <file>images/addItemToCurrentPage.svg</file>
         <file>images/addItemToNewPage.svg</file>
         <file>images/addItemToLibrary.svg</file>
-        <file>style/treeview-branch-closed.png</file>
-        <file>style/treeview-branch-open.png</file>
-        <file>webbrowser/closetab.png</file>
         <file>webbrowser/loading.gif</file>
         <file>webbrowser/notfound.html</file>
         <file>webbrowser/object-wrapper.html</file>
@@ -231,72 +124,22 @@
         <file>macx/upgrade.sh</file>
         <file>podcast/uniboard.prx</file>
         <file>www/uniboard-web-player.html</file>
-        <file>images/toolbar/tutorial.png</file>
         <file>images/edit-mode.svg</file>
         <file>images/save.svg</file>
         <file>images/libpalette/social.png</file>
         <file>images/navig_arrow.png</file>
-        <file>images/flags/ar.png</file>
-        <file>images/flags/bg.png</file>
-        <file>images/flags/ca.png</file>
-        <file>images/flags/cs.png</file>
-        <file>images/flags/da.png</file>
         <file>images/flags/de.png</file>
-        <file>images/flags/el.png</file>
         <file>images/flags/en.png</file>
-        <file>images/flags/eo.png</file>
         <file>images/flags/es.png</file>
         <file>images/flags/et.png</file>
-        <file>images/flags/eu.png</file>
-        <file>images/flags/fa.png</file>
-        <file>images/flags/fi.png</file>
-        <file>images/flags/fo.png</file>
         <file>images/flags/fr.png</file>
-        <file>images/flags/ga.png</file>
-        <file>images/flags/gl.png</file>
-        <file>images/flags/he.png</file>
-        <file>images/flags/hr.png</file>
-        <file>images/flags/hu.png</file>
-        <file>images/flags/id.png</file>
-        <file>images/flags/is.png</file>
-        <file>images/flags/it.png</file>
-        <file>images/flags/ja.png</file>
-        <file>images/flags/km.png</file>
-        <file>images/flags/lb.png</file>
         <file>images/flags/lt.png</file>
-        <file>images/flags/lv.png</file>
-        <file>images/flags/nb.png</file>
-        <file>images/flags/nl.png</file>
-        <file>images/flags/nn.png</file>
-        <file>images/flags/pl.png</file>
-        <file>images/flags/pt-br.png</file>
-        <file>images/flags/pt-pt.png</file>
-        <file>images/flags/ro.png</file>
         <file>images/flags/ru.png</file>
-        <file>images/flags/sco.png</file>
         <file>images/flags/se.png</file>
         <file>images/flags/sk.png</file>
-        <file>images/flags/sl.png</file>
-        <file>images/flags/sq.png</file>
-        <file>images/flags/sv.png</file>
-        <file>images/flags/tg.png</file>
-        <file>images/flags/th.png</file>
-        <file>images/flags/tl.png</file>
-        <file>images/flags/tr.png</file>
-        <file>images/flags/uk.png</file>
-        <file>images/flags/vi.png</file>
-        <file>images/flags/zh-hans.png</file>
-        <file>images/flags/zh-hant.png</file>
         <file>images/libpalette/notFound.png</file>
         <file>images/libpalette/trash_favorite.svg</file>
-        <file>images/libpalette/back.png</file>
         <file>images/libpalette/loading.png</file>
-        <file>images/stylusPalette/eraserArrow.png</file>
-        <file>images/stylusPalette/eraserOnArrow.png</file>
-        <file>images/stylusPalette/markerArrow.png</file>
-        <file>images/stylusPalette/markerOnArrow.png</file>
-        <file>images/stylusPalette/penArrow.png</file>
-        <file>images/stylusPalette/penOnArrow.png</file>
         <file>images/libpalette/AudiosCategory.svg</file>
         <file>images/libpalette/PicturesCategory.svg</file>
         <file>images/libpalette/ShapesCategory.svg</file>
@@ -312,13 +155,6 @@
         <file>images/libpalette/miniNewFolder.png</file>
         <file>images/libpalette/miniFavorite.png</file>
         <file>images/libpalette/home.png</file>
-        <file>images/toolbar/updates.png</file>
-        <file>images/paletteLibrary.png</file>
-        <file>images/paletteNavigator.png</file>
-        <file>images/toolbar/paraschool.png</file>
-        <file>images/toolbar/display.png</file>
-        <file>images/toolbar/hide.png</file>
-        <file>images/toolbar/record.png</file>
         <file>images/libpalette/MoviesCategory.svg</file>
         <file>images/virtual.keyboard/41/centre-passive.png</file>
         <file>images/virtual.keyboard/41/left-passive.png</file>
@@ -326,20 +162,12 @@
         <file>images/virtual.keyboard/41/centre-active.png</file>
         <file>images/virtual.keyboard/41/left-active.png</file>
         <file>images/virtual.keyboard/41/right-active.png</file>
-        <file>images/virtual.keyboard/41/backspace.png</file>
-        <file>images/virtual.keyboard/41/capslock.png</file>
-        <file>images/virtual.keyboard/41/shift.png</file>
-        <file>images/virtual.keyboard/41/tab.png</file>
         <file>images/virtual.keyboard/29/centre-passive.png</file>
         <file>images/virtual.keyboard/29/left-passive.png</file>
         <file>images/virtual.keyboard/29/right-passive.png</file>
         <file>images/virtual.keyboard/29/centre-active.png</file>
         <file>images/virtual.keyboard/29/left-active.png</file>
         <file>images/virtual.keyboard/29/right-active.png</file>
-        <file>images/virtual.keyboard/29/backspace.png</file>
-        <file>images/virtual.keyboard/29/capslock.png</file>
-        <file>images/virtual.keyboard/29/shift.png</file>
-        <file>images/virtual.keyboard/29/tab.png</file>
         <file>images/toolPalette/cacheTool.png</file>
         <file>images/libpalette/FlashCategory.svg</file>
         <file>images/libpalette/FlashIcon.svg</file>
@@ -348,28 +176,21 @@
         <file>images/library_open.png</file>
         <file>images/pages_close.png</file>
         <file>images/pages_open.png</file>
-        <file>images/cache_close.png</file>
         <file>images/cache_open.png</file>
         <file>images/cache_circle.png</file>
         <file>images/cache_square.png</file>
         <file>images/down_arrow.png</file>
         <file>images/up_arrow.png</file>
-        <file>images/left_arrow.png</file>
-        <file>images/right_arrow.png</file>
         <file>images/moveUp.svg</file>
         <file>images/closeDisabled.svg</file>
         <file>images/menuDisabled.svg</file>
         <file>images/moveUpDisabled.svg</file>
         <file>images/teacher_close.png</file>
-        <file>images/teacher_open.png</file>
         <file>style.qss</file>
         <file>images/libpalette/WebSearchCategory.svg</file>
         <file>images/download_close.png</file>
         <file>images/download_open.png</file>
         <file>images/tab_mask.png</file>
-        <file>images/duration1.png</file>
-        <file>images/duration2.png</file>
-        <file>images/duration3.png</file>
         <file>images/licenses/ccby.png</file>
         <file>images/licenses/ccbync.png</file>
         <file>images/licenses/ccbyncnd.png</file>
@@ -390,7 +211,6 @@
         <file>images/createLinkPalette/PlayAudio.svg</file>
         <file>images/libpalette/BookmarkCategory.svg</file>
         <file>images/libpalette/bookmarkIcon.svg</file>
-        <file>images/toolbar/bookmark.png</file>
         <file>images/toolbar/bookmark.svg</file>
         <file>images/trapFlashPalette/downloadToBoard.svg</file>
         <file>images/trapFlashPalette/downloadToLibrary.svg</file>
@@ -409,57 +229,7 @@
         <file>images/teacherGuide/document_large_warning.gif</file>
         <file>images/teacherGuideResources_close.png</file>
         <file>images/teacherGuideResources_open.png</file>
-        <file>images/stylusPalette/richTextEditor.png</file>
-        <file>images/stylusPalette/richTextEditorOn.png</file>
-        <file>images/drawingPalette/ellipse.png</file>
-        <file>images/drawingPalette/ellipseON.png</file>
-        <file>images/drawingPalette/cercle.png</file>
-        <file>images/drawingPalette/cercleON.png</file>
         <file>images/drawingPalette/square.png</file>
-        <file>images/drawingPalette/squareON.png</file>
-        <file>images/drawingPalette/triangle.png</file>
-        <file>images/drawingPalette/triangleON.png</file>
-        <file>images/drawingPalette/hepta.png</file>
-        <file>images/drawingPalette/heptaON.png</file>
-        <file>images/drawingPalette/hexa.png</file>
-        <file>images/drawingPalette/hexaON.png</file>
-        <file>images/drawingPalette/octo.png</file>
-        <file>images/drawingPalette/octoON.png</file>
-        <file>images/drawingPalette/Penta.png</file>
-        <file>images/drawingPalette/PentaON.png</file>
-        <file>images/drawingPalette/strokeStyleDotLine .png</file>
-        <file>images/drawingPalette/strokeStyleSolidLine.png</file>
-        <file>images/drawingPalette/fill-dotted.png</file>
-        <file>images/drawingPalette/fill-gradient.png</file>
-        <file>images/drawingPalette/fill-plain.png</file>
-        <file>images/drawingPalette/fill-stripes.png</file>
-        <file>images/drawingPalette/free-shape.png</file>
-        <file>images/drawingPalette/free-shapeOn.png</file>
-        <file>images/drawingPalette/paint-bucket.png</file>
-        <file>images/drawingPalette/paint-bucketOn.png</file>
-        <file>images/drawingPalette/paint-palette.png</file>
-        <file>images/drawingPalette/paint-paletteOn.png</file>
-        <file>images/drawingPalette/fill-transparent.png</file>
-        <file>images/drawingPalette/rectangle.png</file>
-        <file>images/drawingPalette/fill-modes.png</file>
-        <file>images/drawingPalette/line-thickness.png</file>
-        <file>images/drawingPalette/rectangleON.png</file>
-        <file>images/drawingPalette/freeHand.png</file>
-        <file>images/drawingPalette/freeHandOn.png</file>
-        <file>images/drawingPalette/strokeStyleCustomDash.png</file>
-        <file>images/drawingPalette/align-bottom.png</file>
-        <file>images/drawingPalette/align-center.png</file>
-        <file>images/drawingPalette/align-left.png</file>
-        <file>images/drawingPalette/align-middle.png</file>
-        <file>images/drawingPalette/align-right.png</file>
-        <file>images/drawingPalette/align-top.png</file>
-        <file>images/drawingPalette/endArrowStyleArrow.png</file>
-        <file>images/drawingPalette/endArrowStyleRound.png</file>
-        <file>images/drawingPalette/startArrowStyleArrow.png</file>
-        <file>images/drawingPalette/startArrowStyleRound.png</file>
-        <file>images/drawingPalette/endArrowStyleNone.png</file>
-        <file>images/drawingPalette/startArrowStyleNone.png</file>
-        <file>images/drawingPalette/arrowsProperties.png</file>
         <file>images/bold.svg</file>
         <file>images/italic.svg</file>
         <file>images/underline.svg</file>
