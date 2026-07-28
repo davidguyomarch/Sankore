@@ -59,13 +59,6 @@
         <file>images/toolbar/deleteDocument.png</file>
         <file>images/toolbar/open.png</file>
         <file>images/toolbar/captureScreen.png</file>
-        <file>images/stylusPalette/arrow.png</file>
-        <file>images/stylusPalette/eraser.png</file>
-        <file>images/stylusPalette/laser.png</file>
-        <file>images/stylusPalette/marker.png</file>
-        <file>images/stylusPalette/pen.png</file>
-        <file>images/stylusPalette/zoomOut.png</file>
-        <file>images/stylusPalette/zoomIn.png</file>
         <file>images/stylusPalette/svg/pen.svg</file>
         <file>images/stylusPalette/svg/eraser.svg</file>
         <file>images/stylusPalette/svg/marker.svg</file>
@@ -229,7 +222,6 @@
         <file>images/teacherGuide/document_large_warning.gif</file>
         <file>images/teacherGuideResources_close.png</file>
         <file>images/teacherGuideResources_open.png</file>
-        <file>images/drawingPalette/square.png</file>
         <file>images/bold.svg</file>
         <file>images/italic.svg</file>
         <file>images/underline.svg</file>

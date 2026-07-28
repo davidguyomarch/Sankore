@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <!-- Proposal 2: Whiteboard with stylus drawing -->
+  <!-- Proposal 2: Whiteboard with stylus drawing an S -->
   <rect x="24" y="40" width="208" height="152" rx="12" fill="#4A90D9"/>
   <rect x="36" y="52" width="184" height="128" rx="4" fill="white"/>
-  <!-- Stylus drawing a curve -->
-  <path d="M60,148 Q100,80 140,120 T200,72" fill="none" stroke="#4A90D9" stroke-width="8" stroke-linecap="round"/>
+  <!-- S drawn with a pen stroke, slightly imperfect like handwriting -->
+  <path d="M188,66 C148,60 88,74 88,98 C88,120 172,116 172,138 C172,160 108,168 56,160" fill="none" stroke="#4A90D9" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- Board stand -->
   <rect x="96" y="192" width="64" height="12" rx="6" fill="#4A90D9"/>
   <rect x="116" y="200" width="24" height="32" rx="4" fill="#4A90D9"/>
