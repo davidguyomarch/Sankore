@@ -45,7 +45,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -91,7 +91,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -137,7 +137,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -189,7 +189,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -971,8 +971,7 @@
   <action name="actionSleep">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/svg/blackout.svg</normaloff>
-     <normalon>:/images/extraPalette/blackoutOn.png</normalon>:/images/extraPalette/svg/blackout.svg</iconset>
+     <normaloff>:/images/extraPalette/svg/blackout.svg</normaloff>:/images/extraPalette/svg/blackout.svg</iconset>
    </property>
    <property name="text">
     <string>Sleep</string>
@@ -987,8 +986,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/svg/keyboard.svg</normaloff>
-     <normalon>:/images/extraPalette/keyboardOn.png</normalon>:/images/extraPalette/svg/keyboard.svg</iconset>
+     <normaloff>:/images/extraPalette/svg/keyboard.svg</normaloff>:/images/extraPalette/svg/keyboard.svg</iconset>
    </property>
    <property name="text">
     <string>Virtual Keyboard</string>
@@ -1003,8 +1001,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background1.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background1On.svg</normalon>:/images/backgroundPalette/background1.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background1.svg</normaloff>:/images/backgroundPalette/background1.svg</iconset>
    </property>
    <property name="text">
     <string>Plain Light Background</string>
@@ -1022,8 +1019,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background2.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background2On.svg</normalon>:/images/backgroundPalette/background2.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background2.svg</normaloff>:/images/backgroundPalette/background2.svg</iconset>
    </property>
    <property name="text">
     <string>Grid Light Background</string>
@@ -1041,8 +1037,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background3.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background3On.svg</normalon>:/images/backgroundPalette/background3.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background3.svg</normaloff>:/images/backgroundPalette/background3.svg</iconset>
    </property>
    <property name="text">
     <string>Plain Dark Background</string>
@@ -1060,8 +1055,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background4.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background4On.svg</normalon>:/images/backgroundPalette/background4.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background4.svg</normaloff>:/images/backgroundPalette/background4.svg</iconset>
    </property>
    <property name="text">
     <string>Grid Dark Background</string>
@@ -1094,8 +1088,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/record.svg</normaloff>
-     <normalon>:/images/toolbar/stop.png</normalon>:/images/toolbar/svg/record.svg</iconset>
+     <normaloff>:/images/toolbar/svg/record.svg</normaloff>:/images/toolbar/svg/record.svg</iconset>
    </property>
    <property name="text">
     <string>Record</string>
@@ -1458,8 +1451,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/svg/webTrap.svg</normaloff>
-     <normalon>:/images/extraPalette/webTrapEnabled.png</normalon>:/images/extraPalette/svg/webTrap.svg</iconset>
+     <normaloff>:/images/extraPalette/svg/webTrap.svg</normaloff>:/images/extraPalette/svg/webTrap.svg</iconset>
    </property>
    <property name="text">
     <string>Web Trap</string>
@@ -1498,8 +1490,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/eyeClosed.svg</normaloff>
-     <normalon>:/images/toolbar/eyeOpened.png</normalon>:/images/toolbar/svg/eyeClosed.svg</iconset>
+     <normaloff>:/images/toolbar/svg/eyeClosed.svg</normaloff>:/images/toolbar/svg/eyeClosed.svg</iconset>
    </property>
    <property name="text">
     <string>Show on Display</string>
@@ -1595,8 +1586,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/group.svg</normaloff>
-     <normalon>:/images/toolbar/ungroup.png</normalon>:/images/toolbar/svg/group.svg</iconset>
+     <normaloff>:/images/toolbar/svg/group.svg</normaloff>:/images/toolbar/svg/group.svg</iconset>
    </property>
    <property name="text">
     <string>Group</string>
@@ -1740,8 +1730,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/adjustBackground.png</normaloff>
-     <normalon>../images/imageBackgroundPalette/adjustBackground.png</normalon>../images/imageBackgroundPalette/adjustBackground.png</iconset>
+     <normaloff>../images/imageBackgroundPalette/adjustBackground.png</normaloff>../images/imageBackgroundPalette/adjustBackground.png</iconset>
    </property>
    <property name="text">
     <string>Adjust</string>
@@ -1771,8 +1760,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/fillBackground.png</normaloff>
-     <normalon>../images/imageBackgroundPalette/fillBackground.png</normalon>../images/imageBackgroundPalette/fillBackground.png</iconset>
+     <normaloff>../images/imageBackgroundPalette/fillBackground.png</normaloff>../images/imageBackgroundPalette/fillBackground.png</iconset>
    </property>
    <property name="text">
     <string>Fill</string>
@@ -1787,8 +1775,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/mosaicBackground.png</normaloff>
-     <normalon>../images/imageBackgroundPalette/mosaicBackground.png</normalon>../images/imageBackgroundPalette/mosaicBackground.png</iconset>
+     <normaloff>../images/imageBackgroundPalette/mosaicBackground.png</normaloff>../images/imageBackgroundPalette/mosaicBackground.png</iconset>
    </property>
    <property name="text">
     <string>Mosaic</string>
@@ -1839,8 +1826,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/ellipse.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/ellipse.svg</normalon>:/images/drawingPalette/svg/ellipse.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/ellipse.svg</normaloff>:/images/drawingPalette/svg/ellipse.svg</iconset>
    </property>
    <property name="text">
     <string>Ellipse</string>
@@ -1855,8 +1841,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/paint-bucket.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/paint-bucket.svg</normalon>:/images/drawingPalette/svg/paint-bucket.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/paint-bucket.svg</normaloff>:/images/drawingPalette/svg/paint-bucket.svg</iconset>
    </property>
    <property name="text">
     <string>Change Filling Color</string>
@@ -1868,8 +1853,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/free-shape.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/free-shape.svg</normalon>:/images/drawingPalette/svg/free-shape.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/free-shape.svg</normaloff>:/images/drawingPalette/svg/free-shape.svg</iconset>
    </property>
    <property name="text">
     <string>Polygon</string>
@@ -1905,8 +1889,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/circle.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/circle.svg</normalon>:/images/drawingPalette/svg/circle.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/circle.svg</normaloff>:/images/drawingPalette/svg/circle.svg</iconset>
    </property>
    <property name="text">
     <string>Circle</string>
@@ -1921,8 +1904,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/rectangle.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/rectangle.svg</normalon>:/images/drawingPalette/svg/rectangle.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/rectangle.svg</normaloff>:/images/drawingPalette/svg/rectangle.svg</iconset>
    </property>
    <property name="text">
     <string>Rectangle</string>
@@ -1937,8 +1919,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/square.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/square.svg</normalon>:/images/drawingPalette/svg/square.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/square.svg</normaloff>:/images/drawingPalette/svg/square.svg</iconset>
    </property>
    <property name="text">
     <string>Square</string>
@@ -1960,8 +1941,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/freeHand.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/freeHand.svg</normalon>:/images/drawingPalette/svg/freeHand.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/freeHand.svg</normaloff>:/images/drawingPalette/svg/freeHand.svg</iconset>
    </property>
    <property name="text">
     <string>Freehand Drawing</string>
@@ -1991,8 +1971,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/triangle.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/triangle.svg</normalon>:/images/drawingPalette/svg/triangle.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/triangle.svg</normaloff>:/images/drawingPalette/svg/triangle.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Shapes</string>
@@ -2007,8 +1986,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/triangle.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/triangle.svg</normalon>:/images/drawingPalette/svg/triangle.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/triangle.svg</normaloff>:/images/drawingPalette/svg/triangle.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Triangle</string>
@@ -2023,8 +2001,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/square.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/square.svg</normalon>:/images/drawingPalette/svg/square.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/square.svg</normaloff>:/images/drawingPalette/svg/square.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Square</string>
@@ -2039,8 +2016,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/pentagon.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/pentagon.svg</normalon>:/images/drawingPalette/svg/pentagon.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/pentagon.svg</normaloff>:/images/drawingPalette/svg/pentagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Pentagon</string>
@@ -2055,8 +2031,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/hexagon.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/hexagon.svg</normalon>:/images/drawingPalette/svg/hexagon.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/hexagon.svg</normaloff>:/images/drawingPalette/svg/hexagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Hexagon</string>
@@ -2071,8 +2046,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/heptagon.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/heptagon.svg</normalon>:/images/drawingPalette/svg/heptagon.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/heptagon.svg</normaloff>:/images/drawingPalette/svg/heptagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Heptagon</string>
@@ -2087,8 +2061,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/octagon.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/octagon.svg</normalon>:/images/drawingPalette/svg/octagon.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/octagon.svg</normaloff>:/images/drawingPalette/svg/octagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Octogon</string>
@@ -2202,8 +2175,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/fill-transparent.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/fill-transparent.svg</normalon>:/images/drawingPalette/svg/fill-transparent.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-transparent.svg</normaloff>:/images/drawingPalette/svg/fill-transparent.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Transparent</string>
@@ -2218,8 +2190,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/fill-gradient.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/fill-gradient.svg</normalon>:/images/drawingPalette/svg/fill-gradient.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-gradient.svg</normaloff>:/images/drawingPalette/svg/fill-gradient.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Gradient</string>
@@ -2234,8 +2205,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/fill-plain.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/fill-plain.svg</normalon>:/images/drawingPalette/svg/fill-plain.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-plain.svg</normaloff>:/images/drawingPalette/svg/fill-plain.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Full</string>
@@ -2250,8 +2220,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/fill-dotted.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/fill-dotted.svg</normalon>:/images/drawingPalette/svg/fill-dotted.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-dotted.svg</normaloff>:/images/drawingPalette/svg/fill-dotted.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Dense</string>
@@ -2266,8 +2235,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/svg/fill-stripes.svg</normaloff>
-     <normalon>:/images/drawingPalette/svg/fill-stripes.svg</normalon>:/images/drawingPalette/svg/fill-stripes.svg</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-stripes.svg</normaloff>:/images/drawingPalette/svg/fill-stripes.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Diagonal</string>
