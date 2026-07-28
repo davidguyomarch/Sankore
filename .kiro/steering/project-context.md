@@ -26,7 +26,7 @@ Linux builds (x64/arm64) are next.
 - **Target platforms**: Windows x64 (MSVC 2022), Linux x64 (GCC 11), Linux arm64 (planned)
 - **CI**: GitHub Actions (`build-windows.yml`, `build-linux.yml`, `release.yml`)
 - **Docker dev**: `sankore-qt6` image (Ubuntu 24.04, Qt 6, aarch64)
-- **Issue tracking**: GitHub Issues (https://github.com/davidguyomarch/Sankore-3.1/issues)
+- **Issue tracking**: GitHub Issues (https://github.com/davidguyomarch/Sankore/issues)
 - **CI/CD doc**: `.kiro/steering/ci-cd.md`
 
 ## Key Directories
@@ -110,8 +110,8 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.p
 
 - Main branch: `master`
 - CI triggers on push to `master` and `atx-result-*` branches
-- Repo: `git@github.com:davidguyomarch/Sankore-3.1.git`
-- Issues: https://github.com/davidguyomarch/Sankore-3.1/issues
+- Repo: `git@github.com:davidguyomarch/Sankore.git`
+- Issues: https://github.com/davidguyomarch/Sankore/issues
 
 ## GitHub Issues (Backlog)
 

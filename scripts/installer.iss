@@ -4,7 +4,7 @@
 #define MyAppName "Open-Sankoré"
 #define MyAppVersion "4.0.0"
 #define MyAppPublisher "Open-Sankoré Project"
-#define MyAppURL "https://github.com/davidguyomarch/Sankore-3.1"
+#define MyAppURL "https://github.com/davidguyomarch/Sankore"
 #define MyAppExeName "Open-Sankore.exe"
 
 [Setup]

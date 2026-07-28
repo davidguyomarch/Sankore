@@ -84,7 +84,7 @@ Description: Open-Sankoré interactive whiteboard
  Open-Sankoré is an open-source interactive whiteboard application
  for digital teaching. It supports pen drawing, geometric tools,
  document annotation, and multimedia content.
-Homepage: https://github.com/davidguyomarch/Sankore-3.1
+Homepage: https://github.com/davidguyomarch/Sankore
 EOF
 
 # Build .deb
@@ -126,7 +126,7 @@ Version:        $VERSION
 Release:        1%{?dist}
 Summary:        Interactive whiteboard application
 License:        GPLv3
-URL:            https://github.com/davidguyomarch/Sankore-3.1
+URL:            https://github.com/davidguyomarch/Sankore
 Source0:        open-sankore-%{version}.tar.gz
 BuildArch:      $RPM_ARCH
 

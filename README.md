@@ -1,7 +1,7 @@
 # Open-Sankoré 3.1
 
-![Build Windows](https://github.com/davidguyomarch/Sankore-3.1/actions/workflows/build-windows.yml/badge.svg)
-![Build Linux](https://github.com/davidguyomarch/Sankore-3.1/actions/workflows/build-linux.yml/badge.svg)
+![Build Windows](https://github.com/davidguyomarch/Sankore/actions/workflows/build-windows.yml/badge.svg)
+![Build Linux](https://github.com/davidguyomarch/Sankore/actions/workflows/build-linux.yml/badge.svg)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/davidguyomarch/0b042ec6f4db15ba496d37215c18a649/raw/coverage.json)
 
 Interactive whiteboard application for education, migrated to Qt 6.
@@ -33,7 +33,7 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.p
 
 ## Downloads
 
-See [Releases](https://github.com/davidguyomarch/Sankore-3.1/releases) for pre-built packages:
+See [Releases](https://github.com/davidguyomarch/Sankore/releases) for pre-built packages:
 - Windows: `.exe` installer + `.zip` portable
 - Linux x64: `.deb` (Debian/Ubuntu) + `.rpm` (Fedora/RedHat)
 

@@ -3,7 +3,7 @@
 ## Top-Level Organization
 
 ```
-Sankore-3.1/
+Sankore/
 ├── OpenSankore.pro          # Main project file (qmake)
 ├── src/                     # Source code (19 modules)
 │   ├── adaptors/            # Import/Export format adaptors

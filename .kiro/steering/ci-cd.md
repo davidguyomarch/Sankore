@@ -153,8 +153,8 @@ Sur GitHub Actions Linux, moc ne parvient pas à parser les headers système C++
 ## Badges README
 
 ```markdown
-![Build Windows](https://github.com/davidguyomarch/Sankore-3.1/actions/workflows/build-windows.yml/badge.svg)
-![Build Linux](https://github.com/davidguyomarch/Sankore-3.1/actions/workflows/build-linux.yml/badge.svg)
+![Build Windows](https://github.com/davidguyomarch/Sankore/actions/workflows/build-windows.yml/badge.svg)
+![Build Linux](https://github.com/davidguyomarch/Sankore/actions/workflows/build-linux.yml/badge.svg)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/davidguyomarch/0b042ec6f4db15ba496d37215c18a649/raw/coverage.json)
 ```
 
