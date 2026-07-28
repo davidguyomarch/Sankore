@@ -357,10 +357,10 @@ jobs:
           EOF
           cp AppDir/usr/share/applications/open-sankore.desktop AppDir/
 
-          # Create icon (use a placeholder if no icon available)
-          if [ -f resources/images/uniboard.png ]; then
-            cp resources/images/uniboard.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
-            cp resources/images/uniboard.png AppDir/open-sankore.png
+          # Create icon
+          if [ -f resources/images/sankore-icon.png ]; then
+            cp resources/images/sankore-icon.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
+            cp resources/images/sankore-icon.png AppDir/open-sankore.png
           else
             # Generate a simple placeholder icon
             convert -size 256x256 xc:blue -fill white -gravity center -pointsize 48 -annotate 0 "S" AppDir/open-sankore.png 2>/dev/null || touch AppDir/open-sankore.png
