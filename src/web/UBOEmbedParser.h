@@ -55,14 +55,14 @@
     <thumbnail_height>360</thumbnail_height>
   </oembed>
 ***********************************************************************************/
-typedef struct{
+struct sOEmbedContent {
     QString providerUrl;
     QString title;
     QString author;
-    int height;
-    int width;
-    int thumbWidth;
-    float version;
+    int height = 0;
+    int width = 0;
+    int thumbWidth = 0;
+    float version = 0.0f;
     QString authorUrl;
     QString providerName;
     QString thumbUrl;
@@ -70,7 +70,7 @@ typedef struct{
     QString thumbHeight;
     QString html;
     QString url;
-}sOEmbedContent;
+};
 
 class UBOEmbedParser : public QObject
 {
