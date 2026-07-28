@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../sankore.qrc">
-    <normaloff>:/images/uniboard.png</normaloff>:/images/uniboard.png</iconset>
+    <normaloff>:/images/icon-proposal-2-board-stylus.svg</normaloff>:/images/icon-proposal-2-board-stylus.svg</iconset>
   </property>
   <property name="iconSize">
    <size>

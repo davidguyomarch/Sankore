@@ -166,7 +166,7 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     updateProtoActionsState();
 
 #ifndef Q_OS_MACOS
-    setWindowIcon(QIcon(":/images/uniboard.png"));
+    setWindowIcon(QIcon(":/images/icon-proposal-2-board-stylus.svg"));
 #endif
 
     setStyle(new UBStyle()); // Style is owned and deleted by the application

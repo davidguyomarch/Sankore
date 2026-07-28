@@ -2,6 +2,9 @@
     <qresource prefix="/">
         <file>images/uniboard.png</file>
         <file>images/bigUniboard.png</file>
+        <file>images/icon-proposal-1-letter-S.svg</file>
+        <file>images/icon-proposal-2-board-stylus.svg</file>
+        <file>images/icon-proposal-3-open-book-pen.svg</file>
         <file>images/close.svg</file>
         <file>images/increase.svg</file>
         <file>images/decrease.svg</file>
