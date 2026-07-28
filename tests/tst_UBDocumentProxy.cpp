@@ -42,7 +42,7 @@ void TestUBDocumentProxy::testMetadataGetSet()
 
 void TestUBDocumentProxy::testPageCountOperations()
 {
-    UBDocumentProxy proxy;
+    UBDocumentProxyTestHelper proxy;
 
     // Initial page count is 0
     QCOMPARE(proxy.pageCount(), 0);
@@ -116,7 +116,7 @@ void TestUBDocumentProxy::testUuidGenerationUniqueness()
 
 void TestUBDocumentProxy::testCopyConstructor()
 {
-    UBDocumentProxy original;
+    UBDocumentProxyTestHelper original;
     original.setPersistencePath("/tmp/test_original");
     original.setMetaData(UBSettings::documentName, "Test Document");
     original.setPageCount(5);
