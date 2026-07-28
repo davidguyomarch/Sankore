@@ -2297,8 +2297,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-left.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-left.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-left.svg</normaloff>:/images/drawingPalette/svg/align-left.svg</iconset>
    </property>
    <property name="text">
     <string>Align objects</string>
@@ -2313,8 +2312,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-left.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-left.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-left.svg</normaloff>:/images/drawingPalette/svg/align-left.svg</iconset>
    </property>
    <property name="text">
     <string>Align Left</string>
@@ -2329,8 +2327,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-center.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-center.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-center.svg</normaloff>:/images/drawingPalette/svg/align-center.svg</iconset>
    </property>
    <property name="text">
     <string>Align Center Vertically</string>
@@ -2345,8 +2342,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-right.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-right.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-right.svg</normaloff>:/images/drawingPalette/svg/align-right.svg</iconset>
    </property>
    <property name="text">
     <string>Align Right</string>
@@ -2361,8 +2357,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-top.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-top.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-top.svg</normaloff>:/images/drawingPalette/svg/align-top.svg</iconset>
    </property>
    <property name="text">
     <string>Align Top</string>
@@ -2377,8 +2372,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-middle.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-middle.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-middle.svg</normaloff>:/images/drawingPalette/svg/align-middle.svg</iconset>
    </property>
    <property name="text">
     <string>Align Center Horizontally</string>
@@ -2390,8 +2384,7 @@
   <action name="actionAlignToBottom">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-bottom.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-bottom.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-bottom.svg</normaloff>:/images/drawingPalette/svg/align-bottom.svg</iconset>
    </property>
    <property name="text">
     <string>Align Bottom</string>

@@ -539,6 +539,12 @@
         <file>images/toolbar/svg/smallPen.svg</file>
         <file>images/toolbar/svg/tutorial.svg</file>
         <file>images/toolbar/svg/updates.svg</file>
+        <file>images/drawingPalette/svg/align-left.svg</file>
+        <file>images/drawingPalette/svg/align-center.svg</file>
+        <file>images/drawingPalette/svg/align-right.svg</file>
+        <file>images/drawingPalette/svg/align-top.svg</file>
+        <file>images/drawingPalette/svg/align-middle.svg</file>
+        <file>images/drawingPalette/svg/align-bottom.svg</file>
         <file>images/toolbar/svg/web.svg</file>
         <file>images/toolbar/svg/library.svg</file>
         <file>images/toolbar/svg/reload.svg</file>
