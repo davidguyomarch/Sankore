@@ -653,7 +653,7 @@
   <action name="actionWebBigger">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomIn.png</normaloff>:/images/stylusPalette/zoomIn.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomIn.svg</normaloff>:/images/stylusPalette/svg/zoomIn.svg</iconset>
    </property>
    <property name="text">
     <string>Bigger</string>
@@ -668,7 +668,7 @@
   <action name="actionWebSmaller">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomOut.png</normaloff>:/images/stylusPalette/zoomOut.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomOut.svg</normaloff>:/images/stylusPalette/svg/zoomOut.svg</iconset>
    </property>
    <property name="text">
     <string>Smaller</string>
@@ -1158,8 +1158,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/pen.png</normaloff>
-     <normalon>:/images/stylusPalette/penOn.png</normalon>:/images/stylusPalette/pen.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/pen.svg</normaloff>:/images/stylusPalette/svg/pen.svg</iconset>
    </property>
    <property name="text">
     <string>Pen</string>
@@ -1177,8 +1176,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/eraser.png</normaloff>
-     <normalon>:/images/stylusPalette/eraserOn.png</normalon>:/images/stylusPalette/eraser.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/eraser.svg</normaloff>:/images/stylusPalette/svg/eraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -1196,8 +1194,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/marker.png</normaloff>
-     <normalon>:/images/stylusPalette/markerOn.png</normalon>:/images/stylusPalette/marker.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/marker.svg</normaloff>:/images/stylusPalette/svg/marker.svg</iconset>
    </property>
    <property name="text">
     <string>Marker</string>
@@ -1215,8 +1212,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/arrow.png</normaloff>
-     <normalon>:/images/stylusPalette/arrowOn.png</normalon>:/images/stylusPalette/arrow.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/selector.svg</normaloff>:/images/stylusPalette/svg/selector.svg</iconset>
    </property>
    <property name="text">
     <string>Selector</string>
@@ -1234,8 +1230,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/hand.png</normaloff>
-     <normalon>:/images/stylusPalette/handOn.png</normalon>:/images/stylusPalette/hand.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/hand.svg</normaloff>:/images/stylusPalette/svg/hand.svg</iconset>
    </property>
    <property name="text">
     <string>Hand</string>
@@ -1250,8 +1245,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomIn.png</normaloff>
-     <normalon>:/images/stylusPalette/zoomInOn.png</normalon>:/images/stylusPalette/zoomIn.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomIn.svg</normaloff>:/images/stylusPalette/svg/zoomIn.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -1263,8 +1257,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomOut.png</normaloff>
-     <normalon>:/images/stylusPalette/zoomOutOn.png</normalon>:/images/stylusPalette/zoomOut.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomOut.svg</normaloff>:/images/stylusPalette/svg/zoomOut.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -1276,8 +1269,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/laser.png</normaloff>
-     <normalon>:/images/stylusPalette/laserOn.png</normalon>:/images/stylusPalette/laser.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/pointer.svg</normaloff>:/images/stylusPalette/svg/pointer.svg</iconset>
    </property>
    <property name="text">
     <string>Laser Pointer</string>
@@ -1295,8 +1287,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/line.png</normaloff>
-     <normalon>:/images/stylusPalette/lineOn.png</normalon>:/images/stylusPalette/line.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/line.svg</normaloff>:/images/stylusPalette/svg/line.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -1314,8 +1305,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/text.png</normaloff>
-     <normalon>:/images/stylusPalette/textOn.png</normalon>:/images/stylusPalette/text.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/text.svg</normaloff>:/images/stylusPalette/svg/text.svg</iconset>
    </property>
    <property name="text">
     <string>Text</string>
@@ -1333,8 +1323,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/captureArea.png</normaloff>
-     <normalon>:/images/stylusPalette/captureAreaOn.png</normalon>:/images/stylusPalette/captureArea.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/capture.svg</normaloff>:/images/stylusPalette/svg/capture.svg</iconset>
    </property>
    <property name="text">
     <string>Capture</string>
@@ -1622,8 +1611,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/handPlay.png</normaloff>
-     <normalon>:/images/stylusPalette/handPlayOn.png</normalon>:/images/stylusPalette/handPlay.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/play.svg</normaloff>:/images/stylusPalette/svg/play.svg</iconset>
    </property>
    <property name="text">
     <string>Play</string>
@@ -1836,8 +1824,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/richTextEditor.png</normaloff>
-     <normalon>:/images/stylusPalette/richTextEditorOn.png</normalon>:/images/stylusPalette/richTextEditor.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/richText.svg</normaloff>:/images/stylusPalette/svg/richText.svg</iconset>
    </property>
    <property name="text">
     <string>Rich Text Editor</string>
@@ -1900,8 +1887,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/paint-palette.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-paletteOn.png</normalon>:/images/drawingPalette/paint-palette.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/drawing.svg</normaloff>:/images/stylusPalette/svg/drawing.svg</iconset>
    </property>
    <property name="text">
     <string>Drawing</string>
@@ -1970,8 +1956,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/pen.png</normaloff>
-     <normalon>:/images/stylusPalette/penOn.png</normalon>:/images/stylusPalette/pen.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/pen.svg</normaloff>:/images/stylusPalette/svg/pen.svg</iconset>
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
@@ -1991,8 +1976,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/line.png</normaloff>
-     <normalon>:/images/stylusPalette/lineOn.png</normalon>:/images/stylusPalette/line.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/line.svg</normaloff>:/images/stylusPalette/svg/line.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>

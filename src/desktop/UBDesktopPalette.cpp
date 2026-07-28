@@ -200,36 +200,17 @@ void UBDesktopPalette::maximizeMe()
 void UBDesktopPalette::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
-    QIcon penIcon;
-    QIcon markerIcon;
-    QIcon eraserIcon;
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/penArrow.png"), QIcon::Normal, QIcon::Off);
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/penOnArrow.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionPen->setIcon(penIcon);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/markerArrow.png"), QIcon::Normal, QIcon::Off);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/markerOnArrow.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionMarker->setIcon(markerIcon);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraserArrow.png"), QIcon::Normal, QIcon::Off);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraserOnArrow.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionEraser->setIcon(eraserIcon);
-
+    UBApplication::mainWindow->actionPen->setIcon(QIcon(":/images/stylusPalette/svg/pen.svg"));
+    UBApplication::mainWindow->actionMarker->setIcon(QIcon(":/images/stylusPalette/svg/marker.svg"));
+    UBApplication::mainWindow->actionEraser->setIcon(QIcon(":/images/stylusPalette/svg/eraser.svg"));
 }
 
 void UBDesktopPalette::hideEvent(QHideEvent *event)
 {
     Q_UNUSED(event);
-    QIcon penIcon;
-    QIcon markerIcon;
-    QIcon eraserIcon;
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/pen.png"), QIcon::Normal, QIcon::Off);
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/penOn.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionPen->setIcon(penIcon);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/marker.png"), QIcon::Normal, QIcon::Off);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/markerOn.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionMarker->setIcon(markerIcon);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraser.png"), QIcon::Normal, QIcon::Off);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraserOn.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionEraser->setIcon(eraserIcon);
+    UBApplication::mainWindow->actionPen->setIcon(QIcon(":/images/stylusPalette/svg/pen.svg"));
+    UBApplication::mainWindow->actionMarker->setIcon(QIcon(":/images/stylusPalette/svg/marker.svg"));
+    UBApplication::mainWindow->actionEraser->setIcon(QIcon(":/images/stylusPalette/svg/eraser.svg"));
 }
 
 QPoint UBDesktopPalette::buttonPos(QAction *action)
