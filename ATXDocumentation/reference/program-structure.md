@@ -4,7 +4,7 @@
 
 ```
 Sankore-3.1/
-├── Sankore_3.1.pro          # Main project file (qmake)
+├── OpenSankore.pro          # Main project file (qmake)
 ├── src/                     # Source code (19 modules)
 │   ├── adaptors/            # Import/Export format adaptors
 │   ├── api/                 # JavaScript widget API

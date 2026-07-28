@@ -127,7 +127,7 @@ jobs:
       - name: Run qmake
         run: |
           mkdir -p build/linux/release/moc build/linux/release/objects build/linux/release/rcc build/linux/release/ui build/linux/release/product
-          qmake Sankore_3.1.pro CONFIG+=no_webengine "QMAKE_CXXFLAGS+=--coverage" "QMAKE_LFLAGS+=--coverage"
+          qmake OpenSankore.pro CONFIG+=no_webengine "QMAKE_CXXFLAGS+=--coverage" "QMAKE_LFLAGS+=--coverage"
 
       - name: Build
         run: |

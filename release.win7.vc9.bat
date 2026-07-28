@@ -53,9 +53,9 @@ IF NOT EXIST "%QT_DIR%\lib\QtCore4.dll" GOTO EXIT_WITH_ERROR
 rmdir /S /Q %BUILD_DIR%
 rmdir /S /Q install
 
-"%QT_BIN%\qmake.exe" Sankore_3.1.pro
+"%QT_BIN%\qmake.exe" OpenSankore.pro
 
-%LRELEASE% Sankore_3.1.pro
+%LRELEASE% OpenSankore.pro
 %LRELEASE% %BASE_QT_TRANSLATIONS_DIRECTORY%\translations.pro
 
 set /p VERSION= < build\win32\release\version

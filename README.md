@@ -20,7 +20,7 @@ Interactive whiteboard application for education, migrated to Qt 6.
 ### Windows (CI)
 
 ```bash
-qmake Sankore_3.1.pro CONFIG+=no_webengine
+qmake OpenSankore.pro CONFIG+=no_webengine
 nmake release
 windeployqt --release build\win32\release\product\Open-Sankore.exe
 ```
@@ -28,7 +28,7 @@ windeployqt --release build\win32\release\product\Open-Sankore.exe
 ### Linux (Docker)
 
 ```bash
-docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 Sankore_3.1.pro CONFIG+=no_webengine && make -j$(nproc)'
+docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'
 ```
 
 ## Downloads

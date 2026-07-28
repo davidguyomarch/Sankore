@@ -96,14 +96,14 @@ Files in `src/frameworks/` providing empty implementations:
 
 ### Windows (CI — GitHub Actions)
 ```
-qmake Sankore_3.1.pro
+qmake OpenSankore.pro
 nmake release
 windeployqt --release build\win32\release\product\Open-Sankore.exe
 ```
 
 ### Linux (Docker)
 ```
-docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 Sankore_3.1.pro && make -j4'
+docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro && make -j4'
 ```
 
 ## Git Workflow

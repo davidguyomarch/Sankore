@@ -71,7 +71,7 @@ jobs:
               echo "=== Running qmake ==="
               export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
               mkdir -p build/linux/release/moc build/linux/release/objects build/linux/release/rcc build/linux/release/ui build/linux/release/product
-              qmake6 Sankore_3.1.pro CONFIG+=no_webengine
+              qmake6 OpenSankore.pro CONFIG+=no_webengine
 
               echo "=== Building ==="
               make -j$(nproc)

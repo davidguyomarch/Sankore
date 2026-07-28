@@ -14,7 +14,7 @@
 |-------|-----------|----------------|
 | Language | C++ | Pre-C++11 (circa 2010-2013) |
 | Framework | Qt | Qt 4.x (uses QtWebKit, Phonon, QPlastiqueStyle) |
-| Build System | qmake | Qt project file (Sankore_3.1.pro) |
+| Build System | qmake | Qt project file (OpenSankore.pro) |
 | GUI | Qt Widgets + QGraphicsView | Custom palette system |
 | Web Engine | QtWebKit | For embedded web content |
 | Multimedia | Phonon | Audio/video playback |

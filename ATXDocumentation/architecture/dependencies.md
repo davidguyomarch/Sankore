@@ -83,7 +83,7 @@ UBApplication (core)
 ## Build System Dependencies
 
 ### qmake Configuration
-- **Project file**: `Sankore_3.1.pro` (TEMPLATE = app)
+- **Project file**: `OpenSankore.pro` (TEMPLATE = app)
 - **Third-party path**: `../Sankore-ThirdParty` (relative, external)
 - **Include mechanism**: `.pri` files per module
 - **Build output**: `build/{platform}/{debug|release}/`

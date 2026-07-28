@@ -106,12 +106,12 @@ rm -rf "$BUILD_DIR"
 
 # application translations
 notify "Generating applications translatons"
-$LRELEASE "Sankore_3.1.pro"
+$LRELEASE "OpenSankore.pro"
 
 # generate Makefiles
 notify "Generating Makefile ..."
 
-QMAKE_CMD="$QMAKE Sankore_3.1.pro -spec macx-g++"
+QMAKE_CMD="$QMAKE OpenSankore.pro -spec macx-g++"
 
 $QMAKE_CMD
 

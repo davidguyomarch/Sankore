@@ -94,7 +94,7 @@ Migration should proceed from the lowest-dependency layers upward, ensuring each
 ## Phase 8: Build System & Packaging
 
 ### 8.1 Build system migration
-- **Action**: Replace Sankore_3.1.pro with CMakeLists.txt
+- **Action**: Replace OpenSankore.pro with CMakeLists.txt
 - **Include**: All module .pri files → CMake targets
 
 ### 8.2 Third-party dependency management

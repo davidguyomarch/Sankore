@@ -118,7 +118,7 @@ Open-Sankore/
 │   ├── macx/               # Ressources macOS
 │   ├── linux/              # Ressources Linux
 │   └── sankore.qrc         # Fichier de ressources Qt
-├── Sankore_3.1.pro         # Fichier projet principal
+├── OpenSankore.pro         # Fichier projet principal
 ├── buildDebianPackage.sh   # Script de build Linux
 ├── release.macx.sh         # Script de build macOS
 ├── release.win7.vc9.bat    # Script de build Windows
@@ -171,7 +171,7 @@ Le répertoire `src/` est organisé en modules indépendants, chacun avec son fi
 
 ## Système de build
 
-### Fichier projet principal : `Sankore_3.1.pro`
+### Fichier projet principal : `OpenSankore.pro`
 
 Le projet utilise **qmake** avec un système modulaire de fichiers `.pri` :
 
@@ -366,7 +366,7 @@ Les fichiers de traduction (`.ts`) sont dans `resources/i18n/` et compilés en `
 
 ```bash
 # Générer le Makefile
-qmake Sankore_3.1.pro
+qmake OpenSankore.pro
 
 # Compiler
 make -j$(nproc)

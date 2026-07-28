@@ -150,7 +150,7 @@ rm -rf "build/linux/release"
 rm -rf install
 
 notifyProgress "QT" "Internalization"
-$LRELEASES Sankore_3.1.pro
+$LRELEASES OpenSankore.pro
 cd $GUI_TRANSLATIONS_DIRECTORY_PATH
 $LRELEASES translations.pro
 cd -
@@ -158,9 +158,9 @@ cd -
 notifyProgress "Open-Sankore" "Building Open-Sankore"
 
 if [ "$ARCHITECTURE" == "amd64" ]; then
-    $QMAKE_PATH Sankore_3.1.pro -spec linux-g++-64
+    $QMAKE_PATH OpenSankore.pro -spec linux-g++-64
 else
-    $QMAKE_PATH Sankore_3.1.pro -spec linux-g++
+    $QMAKE_PATH OpenSankore.pro -spec linux-g++
 fi
 
 make -j 4 release-install
