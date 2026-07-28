@@ -16,8 +16,8 @@ jobs:
       - name: Install Qt 6 via aqtinstall
         shell: pwsh
         run: |
-          pip install aqtinstall
-          aqt install-qt windows desktop 6.8.2 win64_msvc2022_64 -m qt5compat qtmultimedia --outputdir C:\Qt
+          pip install aqtinstall==3.1.18
+          aqt install-qt windows desktop 6.8.2 win64_msvc2022_64 -m qt5compat qtmultimedia qtsvg --outputdir C:\Qt
           echo "C:\Qt\6.8.2\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Setup MSVC
