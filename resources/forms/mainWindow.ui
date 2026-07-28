@@ -1562,7 +1562,7 @@
   <action name="actionSankoreEditor">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/paraschool.png</normaloff>:/images/toolbar/paraschool.png</iconset>
+     <normaloff>:/images/toolbar/svg/tutorial.svg</normaloff>:/images/toolbar/svg/tutorial.svg</iconset>
    </property>
    <property name="text">
     <string>Open-Sankoré Editor</string>
