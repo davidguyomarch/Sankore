@@ -95,6 +95,8 @@ jobs:
           sudo apt-get install -y \
             build-essential qt6-base-dev qt6-base-dev-tools \
             libqt6svg6-dev qt6-svg-dev qt6-multimedia-dev \
+            qt6-declarative-dev \
+            libqt6core5compat6-dev \
             qt6-tools-dev qt6-tools-dev-tools qt6-l10n-tools \
             libqt6opengl6-dev libgl1-mesa-dev \
             libssl-dev zlib1g-dev libx11-dev \
