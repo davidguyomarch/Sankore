@@ -2399,7 +2399,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/endArrowStyleArrow.png</normaloff>:/images/drawingPalette/endArrowStyleArrow.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/endArrowStyleArrow.svg</normaloff>:/images/drawingPalette/svg/endArrowStyleArrow.svg</iconset>
    </property>
    <property name="text">
     <string>End arrow style : Arrow</string>
@@ -2414,7 +2414,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/startArrowStyleArrow.png</normaloff>:/images/drawingPalette/startArrowStyleArrow.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/startArrowStyleArrow.svg</normaloff>:/images/drawingPalette/svg/startArrowStyleArrow.svg</iconset>
    </property>
    <property name="text">
     <string>Start arrow style : Arrow</string>
@@ -2429,7 +2429,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/endArrowStyleRound.png</normaloff>:/images/drawingPalette/endArrowStyleRound.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/endArrowStyleRound.svg</normaloff>:/images/drawingPalette/svg/endArrowStyleRound.svg</iconset>
    </property>
    <property name="text">
     <string>End arrow style : Round</string>
@@ -2444,7 +2444,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/startArrowStyleRound.png</normaloff>:/images/drawingPalette/startArrowStyleRound.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/startArrowStyleRound.svg</normaloff>:/images/drawingPalette/svg/startArrowStyleRound.svg</iconset>
    </property>
    <property name="text">
     <string>Start arrow style : Round</string>
@@ -2459,7 +2459,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/endArrowStyleNone.png</normaloff>:/images/drawingPalette/endArrowStyleNone.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/endArrowStyleNone.svg</normaloff>:/images/drawingPalette/svg/endArrowStyleNone.svg</iconset>
    </property>
    <property name="text">
     <string>End arrow style : None</string>
@@ -2474,7 +2474,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/startArrowStyleNone.png</normaloff>:/images/drawingPalette/startArrowStyleNone.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/startArrowStyleNone.svg</normaloff>:/images/drawingPalette/svg/startArrowStyleNone.svg</iconset>
    </property>
    <property name="text">
     <string>Start arrow style : None</string>
@@ -2486,7 +2486,7 @@
   <action name="actionArrowProperties">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/arrowsProperties.png</normaloff>:/images/drawingPalette/arrowsProperties.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/arrowsProperties.svg</normaloff>:/images/drawingPalette/svg/arrowsProperties.svg</iconset>
    </property>
    <property name="text">
     <string>Arrows Properties</string>

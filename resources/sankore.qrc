@@ -545,6 +545,13 @@
         <file>images/drawingPalette/svg/align-top.svg</file>
         <file>images/drawingPalette/svg/align-middle.svg</file>
         <file>images/drawingPalette/svg/align-bottom.svg</file>
+        <file>images/drawingPalette/svg/arrowsProperties.svg</file>
+        <file>images/drawingPalette/svg/startArrowStyleArrow.svg</file>
+        <file>images/drawingPalette/svg/startArrowStyleRound.svg</file>
+        <file>images/drawingPalette/svg/startArrowStyleNone.svg</file>
+        <file>images/drawingPalette/svg/endArrowStyleArrow.svg</file>
+        <file>images/drawingPalette/svg/endArrowStyleRound.svg</file>
+        <file>images/drawingPalette/svg/endArrowStyleNone.svg</file>
         <file>images/toolbar/svg/web.svg</file>
         <file>images/toolbar/svg/library.svg</file>
         <file>images/toolbar/svg/reload.svg</file>
