@@ -341,7 +341,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/smallPen.png</normaloff>:/images/toolbar/smallPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/smallPen.svg</normaloff>:/images/toolbar/svg/smallPen.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -356,7 +356,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/mediumPen.png</normaloff>:/images/toolbar/mediumPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/mediumPen.svg</normaloff>:/images/toolbar/svg/mediumPen.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -371,7 +371,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/largePen.png</normaloff>:/images/toolbar/largePen.png</iconset>
+     <normaloff>:/images/toolbar/svg/largePen.svg</normaloff>:/images/toolbar/svg/largePen.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -404,7 +404,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/smallEraser.png</normaloff>:/images/toolbar/smallEraser.png</iconset>
+     <normaloff>:/images/toolbar/svg/smallEraser.svg</normaloff>:/images/toolbar/svg/smallEraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -422,7 +422,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/mediumEraser.png</normaloff>:/images/toolbar/mediumEraser.png</iconset>
+     <normaloff>:/images/toolbar/svg/mediumEraser.svg</normaloff>:/images/toolbar/svg/mediumEraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -437,7 +437,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/largeEraser.png</normaloff>:/images/toolbar/largeEraser.png</iconset>
+     <normaloff>:/images/toolbar/svg/largeEraser.svg</normaloff>:/images/toolbar/svg/largeEraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -518,7 +518,7 @@
   <action name="actionWebReload">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/reload.png</normaloff>:/images/toolbar/reload.png</iconset>
+     <normaloff>:/images/toolbar/svg/reload.svg</normaloff>:/images/toolbar/svg/reload.svg</iconset>
    </property>
    <property name="text">
     <string>Reload</string>
@@ -530,7 +530,7 @@
   <action name="actionHome">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/home.png</normaloff>:/images/toolbar/home.png</iconset>
+     <normaloff>:/images/toolbar/svg/home.svg</normaloff>:/images/toolbar/svg/home.svg</iconset>
    </property>
    <property name="text">
     <string>Home</string>
@@ -542,7 +542,7 @@
   <action name="actionBookmarks">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/bookmarks.png</normaloff>:/images/toolbar/bookmarks.png</iconset>
+     <normaloff>:/images/toolbar/svg/bookmarks.svg</normaloff>:/images/toolbar/svg/bookmarks.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmarks</string>
@@ -554,7 +554,7 @@
   <action name="actionAddBookmark">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addBookmark.png</normaloff>:/images/toolbar/addBookmark.png</iconset>
+     <normaloff>:/images/toolbar/svg/addBookmark.svg</normaloff>:/images/toolbar/svg/addBookmark.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmark</string>
@@ -566,7 +566,7 @@
   <action name="actionBoard">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/board.png</normaloff>:/images/toolbar/board.png</iconset>
+     <normaloff>:/images/toolbar/svg/board.svg</normaloff>:/images/toolbar/svg/board.svg</iconset>
    </property>
    <property name="text">
     <string>Board</string>
@@ -584,7 +584,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/clearPage.png</normaloff>:/images/toolbar/clearPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/clearPage.svg</normaloff>:/images/toolbar/svg/clearPage.svg</iconset>
    </property>
    <property name="text">
     <string>Erase</string>
@@ -596,7 +596,7 @@
   <action name="actionPreferences">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/settings.png</normaloff>:/images/toolbar/settings.png</iconset>
+     <normaloff>:/images/toolbar/svg/settings.svg</normaloff>:/images/toolbar/svg/settings.svg</iconset>
    </property>
    <property name="text">
     <string>Preferences</string>
@@ -611,7 +611,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/library.png</normaloff>:/images/toolbar/library.png</iconset>
+     <normaloff>:/images/toolbar/svg/library.svg</normaloff>:/images/toolbar/svg/library.svg</iconset>
    </property>
    <property name="text">
     <string>Library</string>
@@ -626,7 +626,7 @@
   <action name="actionMenu">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/menu.png</normaloff>:/images/toolbar/menu.png</iconset>
+     <normaloff>:/images/toolbar/svg/menu.svg</normaloff>:/images/toolbar/svg/menu.svg</iconset>
    </property>
    <property name="text">
     <string>Open-Sankoré</string>
@@ -638,7 +638,7 @@
   <action name="actionDesktop">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/display.png</normaloff>:/images/toolbar/display.png</iconset>
+     <normaloff>:/images/toolbar/svg/display.svg</normaloff>:/images/toolbar/svg/display.svg</iconset>
    </property>
    <property name="text">
     <string>Show Desktop</string>
@@ -683,7 +683,7 @@
   <action name="actionNewFolder">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/newFolder.png</normaloff>:/images/toolbar/newFolder.png</iconset>
+     <normaloff>:/images/toolbar/svg/newFolder.svg</normaloff>:/images/toolbar/svg/newFolder.svg</iconset>
    </property>
    <property name="text">
     <string>New Folder</string>
@@ -695,7 +695,7 @@
   <action name="actionNewDocument">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/newDocument.png</normaloff>:/images/toolbar/newDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/newDocument.svg</normaloff>:/images/toolbar/svg/newDocument.svg</iconset>
    </property>
    <property name="text">
     <string>New Document</string>
@@ -707,7 +707,7 @@
   <action name="actionImport">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/import.png</normaloff>:/images/toolbar/import.png</iconset>
+     <normaloff>:/images/toolbar/svg/import.svg</normaloff>:/images/toolbar/svg/import.svg</iconset>
    </property>
    <property name="text">
     <string>Import</string>
@@ -719,7 +719,7 @@
   <action name="actionExport">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/export.png</normaloff>:/images/toolbar/export.png</iconset>
+     <normaloff>:/images/toolbar/svg/export.svg</normaloff>:/images/toolbar/svg/export.svg</iconset>
    </property>
    <property name="text">
     <string>Export</string>
@@ -731,7 +731,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/open.png</normaloff>:/images/toolbar/open.png</iconset>
+     <normaloff>:/images/toolbar/svg/open.svg</normaloff>:/images/toolbar/svg/open.svg</iconset>
    </property>
    <property name="text">
     <string>Open in Board</string>
@@ -746,7 +746,7 @@
   <action name="actionDuplicate">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/duplicate.png</normaloff>:/images/toolbar/duplicate.png</iconset>
+     <normaloff>:/images/toolbar/svg/duplicate.svg</normaloff>:/images/toolbar/svg/duplicate.svg</iconset>
    </property>
    <property name="text">
     <string>Duplicate</string>
@@ -758,7 +758,7 @@
   <action name="actionDelete">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/deleteDocument.png</normaloff>:/images/toolbar/deleteDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/remove.svg</normaloff>:/images/toolbar/svg/remove.svg</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -773,7 +773,7 @@
   <action name="actionAddToWorkingDocument">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToWorkingDoc.png</normaloff>:/images/toolbar/addToWorkingDoc.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToWorkingDoc.svg</normaloff>:/images/toolbar/svg/addToWorkingDoc.svg</iconset>
    </property>
    <property name="text">
     <string>Add to Working Document</string>
@@ -785,7 +785,7 @@
   <action name="actionDocumentAdd">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Add</string>
@@ -797,7 +797,7 @@
   <action name="actionRename">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/rename.png</normaloff>:/images/toolbar/rename.png</iconset>
+     <normaloff>:/images/toolbar/svg/rename.svg</normaloff>:/images/toolbar/svg/rename.svg</iconset>
    </property>
    <property name="text">
     <string>Rename</string>
@@ -812,7 +812,7 @@
   <action name="actionDocumentTools">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/tools.png</normaloff>:/images/toolbar/tools.png</iconset>
+     <normaloff>:/images/toolbar/svg/tools.svg</normaloff>:/images/toolbar/svg/tools.svg</iconset>
    </property>
    <property name="text">
     <string>Tools</string>
@@ -827,7 +827,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/tools.png</normaloff>:/images/toolbar/tools.png</iconset>
+     <normaloff>:/images/toolbar/svg/tools.svg</normaloff>:/images/toolbar/svg/tools.svg</iconset>
    </property>
    <property name="text">
     <string>Tools</string>
@@ -845,7 +845,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/display.png</normaloff>:/images/toolbar/display.png</iconset>
+     <normaloff>:/images/toolbar/svg/display.svg</normaloff>:/images/toolbar/svg/display.svg</iconset>
    </property>
    <property name="text">
     <string>Multi Screen</string>
@@ -857,7 +857,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Wide Size (16/9)</string>
@@ -878,7 +878,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Size (4/3)</string>
@@ -902,7 +902,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Custom Size</string>
@@ -920,7 +920,7 @@
   <action name="actionStopLoading">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/deleteDocument.png</normaloff>:/images/toolbar/deleteDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/remove.svg</normaloff>:/images/toolbar/svg/remove.svg</iconset>
    </property>
    <property name="text">
     <string>Stop Loading</string>
@@ -932,7 +932,7 @@
   <action name="actionCut">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/cut.png</normaloff>:/images/toolbar/cut.png</iconset>
+     <normaloff>:/images/toolbar/svg/cut.svg</normaloff>:/images/toolbar/svg/cut.svg</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -944,7 +944,7 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/copy.png</normaloff>:/images/toolbar/copy.png</iconset>
+     <normaloff>:/images/toolbar/svg/copy.svg</normaloff>:/images/toolbar/svg/copy.svg</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -956,7 +956,7 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/paste.png</normaloff>:/images/toolbar/paste.png</iconset>
+     <normaloff>:/images/toolbar/svg/paste.svg</normaloff>:/images/toolbar/svg/paste.svg</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -1079,7 +1079,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/record.png</normaloff>:/images/toolbar/record.png</iconset>
+     <normaloff>:/images/toolbar/svg/record.svg</normaloff>:/images/toolbar/svg/record.svg</iconset>
    </property>
    <property name="text">
     <string>Podcast</string>
@@ -1094,8 +1094,8 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/record.png</normaloff>
-     <normalon>:/images/toolbar/stop.png</normalon>:/images/toolbar/record.png</iconset>
+     <normaloff>:/images/toolbar/svg/record.svg</normaloff>
+     <normalon>:/images/toolbar/stop.png</normalon>:/images/toolbar/svg/record.svg</iconset>
    </property>
    <property name="text">
     <string>Record</string>
@@ -1143,7 +1143,7 @@
   <action name="actionAdd">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Add</string>
@@ -1377,7 +1377,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/newDocument.png</normaloff>:/images/toolbar/newDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/newDocument.svg</normaloff>:/images/toolbar/svg/newDocument.svg</iconset>
    </property>
    <property name="text">
     <string>Pages</string>
@@ -1431,7 +1431,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/pause.png</normaloff>:/images/toolbar/pause.png</iconset>
+     <normaloff>:/images/toolbar/svg/pause.svg</normaloff>:/images/toolbar/svg/pause.svg</iconset>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -1443,7 +1443,7 @@
   <action name="actionPodcastConfig">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/settings.png</normaloff>:/images/toolbar/settings.png</iconset>
+     <normaloff>:/images/toolbar/svg/settings.svg</normaloff>:/images/toolbar/svg/settings.svg</iconset>
    </property>
    <property name="text">
     <string>Podcast Config</string>
@@ -1471,7 +1471,7 @@
   <action name="actionWebCustomCapture">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/captureArea.png</normaloff>:/images/toolbar/captureArea.png</iconset>
+     <normaloff>:/images/toolbar/svg/captureArea.svg</normaloff>:/images/toolbar/svg/captureArea.svg</iconset>
    </property>
    <property name="text">
     <string>Custom Capture</string>
@@ -1483,7 +1483,7 @@
   <action name="actionWebWindowCapture">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/captureWindow.png</normaloff>:/images/toolbar/captureWindow.png</iconset>
+     <normaloff>:/images/toolbar/svg/captureWindow.svg</normaloff>:/images/toolbar/svg/captureWindow.svg</iconset>
    </property>
    <property name="text">
     <string>Window Capture</string>
@@ -1498,8 +1498,8 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/eyeClosed.png</normaloff>
-     <normalon>:/images/toolbar/eyeOpened.png</normalon>:/images/toolbar/eyeClosed.png</iconset>
+     <normaloff>:/images/toolbar/svg/eyeClosed.svg</normaloff>
+     <normalon>:/images/toolbar/eyeOpened.png</normalon>:/images/toolbar/svg/eyeClosed.svg</iconset>
    </property>
    <property name="text">
     <string>Show on Display</string>
@@ -1529,7 +1529,7 @@
   <action name="actionEduMedia">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToolToLibrary.png</normaloff>:/images/toolbar/addToolToLibrary.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToolToLibrary.svg</normaloff>:/images/toolbar/svg/addToolToLibrary.svg</iconset>
    </property>
    <property name="text">
     <string>eduMedia</string>
@@ -1541,7 +1541,7 @@
   <action name="actionTutorial">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/tutorial.png</normaloff>:/images/toolbar/tutorial.png</iconset>
+     <normaloff>:/images/toolbar/svg/tutorial.svg</normaloff>:/images/toolbar/svg/tutorial.svg</iconset>
    </property>
    <property name="text">
     <string>Tutorial</string>
@@ -1553,7 +1553,7 @@
   <action name="actionCheckUpdate">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/updates.png</normaloff>:/images/toolbar/updates.png</iconset>
+     <normaloff>:/images/toolbar/svg/updates.svg</normaloff>:/images/toolbar/svg/updates.svg</iconset>
    </property>
    <property name="text">
     <string>Check Update</string>
@@ -1574,7 +1574,7 @@
   <action name="actionHideApplication">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/hide.png</normaloff>:/images/toolbar/hide.png</iconset>
+     <normaloff>:/images/toolbar/svg/hide.svg</normaloff>:/images/toolbar/svg/hide.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Open-Sankoré</string>
@@ -1595,8 +1595,8 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/group.png</normaloff>
-     <normalon>:/images/toolbar/ungroup.png</normalon>:/images/toolbar/group.png</iconset>
+     <normaloff>:/images/toolbar/svg/group.svg</normaloff>
+     <normalon>:/images/toolbar/ungroup.png</normalon>:/images/toolbar/svg/group.svg</iconset>
    </property>
    <property name="text">
     <string>Group</string>
@@ -1635,7 +1635,7 @@
   <action name="actionBookmark">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/bookmark.png</normaloff>:/images/toolbar/bookmark.png</iconset>
+     <normaloff>:/images/toolbar/svg/bookmark.svg</normaloff>:/images/toolbar/svg/bookmark.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmark</string>
@@ -1653,7 +1653,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToolToLibrary.png</normaloff>:/images/toolbar/addToolToLibrary.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToolToLibrary.svg</normaloff>:/images/toolbar/svg/addToolToLibrary.svg</iconset>
    </property>
    <property name="text">
     <string>Web Trap</string>
@@ -1803,7 +1803,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Wide Size (16/10)</string>
@@ -2127,7 +2127,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/smallPen.png</normaloff>:/images/toolbar/smallPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/smallPen.svg</normaloff>:/images/toolbar/svg/smallPen.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Thickness</string>
@@ -2142,7 +2142,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/mediumPen.png</normaloff>:/images/toolbar/mediumPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/mediumPen.svg</normaloff>:/images/toolbar/svg/mediumPen.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Thickness</string>
@@ -2157,7 +2157,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/largePen.png</normaloff>:/images/toolbar/largePen.png</iconset>
+     <normaloff>:/images/toolbar/svg/largePen.svg</normaloff>:/images/toolbar/svg/largePen.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Thickness</string>

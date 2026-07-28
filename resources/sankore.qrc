@@ -517,6 +517,28 @@
         <file>images/toolbar/svg/stop.svg</file>
         <file>images/toolbar/svg/pause.svg</file>
         <file>images/toolbar/svg/window.svg</file>
+        <file>images/toolbar/svg/addBookmark.svg</file>
+        <file>images/toolbar/svg/addToPage.svg</file>
+        <file>images/toolbar/svg/addToWorkingDoc.svg</file>
+        <file>images/toolbar/svg/addToolToLibrary.svg</file>
+        <file>images/toolbar/svg/bookmarks.svg</file>
+        <file>images/toolbar/svg/captureArea.svg</file>
+        <file>images/toolbar/svg/captureWindow.svg</file>
+        <file>images/toolbar/svg/copy.svg</file>
+        <file>images/toolbar/svg/group.svg</file>
+        <file>images/toolbar/svg/hide.svg</file>
+        <file>images/toolbar/svg/largeEraser.svg</file>
+        <file>images/toolbar/svg/largePen.svg</file>
+        <file>images/toolbar/svg/mediumEraser.svg</file>
+        <file>images/toolbar/svg/mediumPen.svg</file>
+        <file>images/toolbar/svg/menu.svg</file>
+        <file>images/toolbar/svg/newDocument.svg</file>
+        <file>images/toolbar/svg/newFolder.svg</file>
+        <file>images/toolbar/svg/open.svg</file>
+        <file>images/toolbar/svg/smallEraser.svg</file>
+        <file>images/toolbar/svg/smallPen.svg</file>
+        <file>images/toolbar/svg/tutorial.svg</file>
+        <file>images/toolbar/svg/updates.svg</file>
         <file>images/toolbar/svg/web.svg</file>
         <file>images/toolbar/svg/library.svg</file>
         <file>images/toolbar/svg/reload.svg</file>
