@@ -47,7 +47,7 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
 {
     QList<QAction*> actions;
 
-    mActionUniboard = new QAction(QIcon(":/images/toolbar/board.png"), tr("Show Open-Sankore"), this);
+    mActionUniboard = new QAction(QIcon(":/images/toolbar/svg/board.svg"), tr("Show Open-Sankore"), this);
     connect(mActionUniboard, SIGNAL(triggered()), this, SIGNAL(uniboardClick()));
     actions << mActionUniboard;
 
@@ -61,7 +61,7 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     if (UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;
 
-    mActionCustomSelect = new QAction(QIcon(":/images/toolbar/captureArea.png"), tr("Capture Part of the Screen"), this);
+    mActionCustomSelect = new QAction(QIcon(":/images/toolbar/svg/window.svg"), tr("Capture Part of the Screen"), this);
     connect(mActionCustomSelect, SIGNAL(triggered()), this, SIGNAL(customClick()));
     actions << mActionCustomSelect;
 
@@ -70,8 +70,8 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     actions << mDisplaySelectAction;
 
     QIcon showHideIcon;
-    showHideIcon.addPixmap(QPixmap(":/images/toolbar/eyeOpened.png"), QIcon::Normal , QIcon::On);
-    showHideIcon.addPixmap(QPixmap(":/images/toolbar/eyeClosed.png"), QIcon::Normal , QIcon::Off);
+    showHideIcon.addPixmap(QPixmap(":/images/toolbar/svg/eyeOpened.svg"), QIcon::Normal , QIcon::On);
+    showHideIcon.addPixmap(QPixmap(":/images/toolbar/svg/eyeClosed.svg"), QIcon::Normal , QIcon::Off);
     mShowHideAction = new QAction(showHideIcon, "", this);
     mShowHideAction->setCheckable(true);
 

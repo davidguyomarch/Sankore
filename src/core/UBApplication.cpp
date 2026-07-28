@@ -548,7 +548,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             pageSizeGroup->addAction(mainWindow->actionRegularPageSize);
             pageSizeGroup->addAction(mainWindow->actionCustomPageSize);
 
-            QMenu* documentSizeMenu = menu->addMenu(QIcon(":/images/toolbar/pageSize.png"),tr("Page Size"));
+            QMenu* documentSizeMenu = menu->addMenu(QIcon(":/images/toolbar/svg/display.svg"),tr("Page Size"));
             documentSizeMenu->addAction(mainWindow->actionWidePageSize);
             documentSizeMenu->addAction(mainWindow->actionWidePageSize_16_10);
             documentSizeMenu->addAction(mainWindow->actionRegularPageSize);

@@ -218,7 +218,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/stylus.png</normaloff>:/images/toolbar/stylus.png</iconset>
+     <normaloff>:/images/toolbar/svg/stylus.svg</normaloff>:/images/toolbar/svg/stylus.svg</iconset>
    </property>
    <property name="text">
     <string>Stylus</string>
@@ -236,7 +236,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/background.png</normaloff>:/images/toolbar/background.png</iconset>
+     <normaloff>:/images/toolbar/svg/background.svg</normaloff>:/images/toolbar/svg/background.svg</iconset>
    </property>
    <property name="text">
     <string>Backgrounds</string>
@@ -248,7 +248,7 @@
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/undoOn.png</normaloff>:/images/toolbar/undoOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/undo.svg</normaloff>:/images/toolbar/svg/undo.svg</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -260,7 +260,7 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/redoOn.png</normaloff>:/images/toolbar/redoOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/redo.svg</normaloff>:/images/toolbar/svg/redo.svg</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -272,7 +272,7 @@
   <action name="actionBack">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/previousPageOn.png</normaloff>:/images/toolbar/previousPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/previousPage.svg</normaloff>:/images/toolbar/svg/previousPage.svg</iconset>
    </property>
    <property name="text">
     <string>Previous</string>
@@ -287,7 +287,7 @@
   <action name="actionForward">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/nextPageOn.png</normaloff>:/images/toolbar/nextPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/nextPage.svg</normaloff>:/images/toolbar/svg/nextPage.svg</iconset>
    </property>
    <property name="text">
     <string>Next</string>
@@ -305,7 +305,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/documents.png</normaloff>:/images/toolbar/documents.png</iconset>
+     <normaloff>:/images/toolbar/svg/documents.svg</normaloff>:/images/toolbar/svg/documents.svg</iconset>
    </property>
    <property name="text">
     <string>Documents</string>
@@ -320,7 +320,7 @@
   <action name="actionWeb">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/web.png</normaloff>:/images/toolbar/web.png</iconset>
+     <normaloff>:/images/toolbar/svg/web.svg</normaloff>:/images/toolbar/svg/web.svg</iconset>
    </property>
    <property name="text">
     <string>Web</string>
@@ -383,7 +383,7 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/quitOn.png</normaloff>:/images/toolbar/quitOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/quit.svg</normaloff>:/images/toolbar/svg/quit.svg</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -449,7 +449,7 @@
   <action name="actionColor0">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -461,7 +461,7 @@
   <action name="actionColor1">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -470,7 +470,7 @@
   <action name="actionColor2">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -479,7 +479,7 @@
   <action name="actionColor3">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -488,7 +488,7 @@
   <action name="actionWebBack">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/previousPageOn.png</normaloff>:/images/toolbar/previousPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/previousPage.svg</normaloff>:/images/toolbar/svg/previousPage.svg</iconset>
    </property>
    <property name="text">
     <string>Back</string>
@@ -503,7 +503,7 @@
   <action name="actionWebForward">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/nextPageOn.png</normaloff>:/images/toolbar/nextPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/nextPage.svg</normaloff>:/images/toolbar/svg/nextPage.svg</iconset>
    </property>
    <property name="text">
     <string>Forward</string>

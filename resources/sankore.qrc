@@ -473,5 +473,45 @@
         <file>images/textEditor/link.svg</file>
         <file>images/collapse-all.png</file>
         <file>images/expand-all.png</file>
+        <file>images/toolbar/svg/stylus.svg</file>
+        <file>images/toolbar/svg/eraserTool.svg</file>
+        <file>images/toolbar/svg/newPage.svg</file>
+        <file>images/toolbar/svg/nextPage.svg</file>
+        <file>images/toolbar/svg/previousPage.svg</file>
+        <file>images/toolbar/svg/undo.svg</file>
+        <file>images/toolbar/svg/redo.svg</file>
+        <file>images/toolbar/svg/board.svg</file>
+        <file>images/toolbar/svg/documents.svg</file>
+        <file>images/toolbar/svg/settings.svg</file>
+        <file>images/toolbar/svg/quit.svg</file>
+        <file>images/toolbar/svg/clearPage.svg</file>
+        <file>images/toolbar/svg/duplicate.svg</file>
+        <file>images/toolbar/svg/background.svg</file>
+        <file>images/toolbar/svg/export.svg</file>
+        <file>images/toolbar/svg/import.svg</file>
+        <file>images/toolbar/svg/home.svg</file>
+        <file>images/toolbar/svg/tools.svg</file>
+        <file>images/toolbar/svg/lineTool.svg</file>
+        <file>images/toolbar/svg/color.svg</file>
+        <file>images/toolbar/svg/display.svg</file>
+        <file>images/toolbar/svg/print.svg</file>
+        <file>images/toolbar/svg/pdf.svg</file>
+        <file>images/toolbar/svg/mic.svg</file>
+        <file>images/toolbar/svg/micOff.svg</file>
+        <file>images/toolbar/svg/record.svg</file>
+        <file>images/toolbar/svg/stop.svg</file>
+        <file>images/toolbar/svg/pause.svg</file>
+        <file>images/toolbar/svg/window.svg</file>
+        <file>images/toolbar/svg/web.svg</file>
+        <file>images/toolbar/svg/library.svg</file>
+        <file>images/toolbar/svg/reload.svg</file>
+        <file>images/toolbar/svg/eyeOpened.svg</file>
+        <file>images/toolbar/svg/eyeClosed.svg</file>
+        <file>images/toolbar/svg/remove.svg</file>
+        <file>images/toolbar/svg/plusBlack.svg</file>
+        <file>images/toolbar/svg/rename.svg</file>
+        <file>images/toolbar/svg/paste.svg</file>
+        <file>images/toolbar/svg/cut.svg</file>
+        <file>images/toolbar/svg/bookmark.svg</file>
     </qresource>
 </RCC>
