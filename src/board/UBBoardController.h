@@ -73,6 +73,7 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 
         // IUBBoardContext override to resolve ambiguity with UBDocumentContainer
         UBDocumentProxy* selectedDocument() override { return UBDocumentContainer::selectedDocument(); }
+        QObject* asQObject() override { return this; }
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
 

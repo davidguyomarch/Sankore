@@ -14,6 +14,7 @@
 #include <QSize>
 #include <QPointF>
 #include <QUrl>
+#include <QObject>
 
 #include "core/UBTypes.h"
 
@@ -45,6 +46,9 @@ class IUBBoardContext
 {
 public:
     virtual ~IUBBoardContext() = default;
+
+    // --- QObject access for signal/slot connections ---
+    virtual QObject* asQObject() = 0;
 
     // --- Read-only state accessors ---
     virtual UBGraphicsScene* activeScene() = 0;

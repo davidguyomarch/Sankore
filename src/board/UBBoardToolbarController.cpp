@@ -50,10 +50,10 @@ void UBBoardToolbarController::setupToolbar()
     mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
 
     connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), colorChoice, SLOT(displayText(QVariant)));
-    connect(colorChoice, SIGNAL(activated(int)), mBoardController, SLOT(setColorIndex(int)));
+    connect(colorChoice, SIGNAL(activated(int)), mBoardController->asQObject(), SLOT(setColorIndex(int)));
     connect(UBDrawingController::drawingController(), SIGNAL(colorIndexChanged(int)), colorChoice, SLOT(setCurrentIndex(int)));
     connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), colorChoice, SLOT(colorPaletteChanged()));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), mBoardController, SLOT(colorPaletteChanged()));
+    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), mBoardController->asQObject(), SLOT(colorPaletteChanged()));
 
     colorChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
     colorChoice->colorPaletteChanged();
@@ -113,30 +113,30 @@ void UBBoardToolbarController::setupToolbar()
 
 void UBBoardToolbarController::connectToolbar()
 {
-    connect(mMainWindow->actionAdd, SIGNAL(triggered()), mBoardController, SLOT(addItem()));
-    connect(mMainWindow->actionNewPage, SIGNAL(triggered()), mBoardController, SLOT(addScene()));
-    connect(mMainWindow->actionDuplicatePage, SIGNAL(triggered()), mBoardController, SLOT(duplicateScene()));
+    connect(mMainWindow->actionAdd, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(addItem()));
+    connect(mMainWindow->actionNewPage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(addScene()));
+    connect(mMainWindow->actionDuplicatePage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(duplicateScene()));
 
-    connect(mMainWindow->actionClearPage, SIGNAL(triggered()), mBoardController, SLOT(clearScene()));
-    connect(mMainWindow->actionEraseItems, SIGNAL(triggered()), mBoardController, SLOT(clearSceneItems()));
-    connect(mMainWindow->actionEraseAnnotations, SIGNAL(triggered()), mBoardController, SLOT(clearSceneAnnotation()));
-    connect(mMainWindow->actionEraseBackground, SIGNAL(triggered()), mBoardController, SLOT(clearSceneBackground()));
+    connect(mMainWindow->actionClearPage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearScene()));
+    connect(mMainWindow->actionEraseItems, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearSceneItems()));
+    connect(mMainWindow->actionEraseAnnotations, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearSceneAnnotation()));
+    connect(mMainWindow->actionEraseBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearSceneBackground()));
 
-    connect(mMainWindow->actionCenterImageBackground, SIGNAL(triggered()), mBoardController, SLOT(centerImageBackground()));
-    connect(mMainWindow->actionAdjustImageBackground, SIGNAL(triggered()), mBoardController, SLOT(adjustImageBackground()));
-    connect(mMainWindow->actionMosaicImageBackground, SIGNAL(triggered()), mBoardController, SLOT(mosaicImageBackground()));
-    connect(mMainWindow->actionFillImageBackground, SIGNAL(triggered()), mBoardController, SLOT(fillImageBackground()));
-    connect(mMainWindow->actionExtendImageBackground, SIGNAL(triggered()), mBoardController, SLOT(extendImageBackground()));
+    connect(mMainWindow->actionCenterImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(centerImageBackground()));
+    connect(mMainWindow->actionAdjustImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(adjustImageBackground()));
+    connect(mMainWindow->actionMosaicImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(mosaicImageBackground()));
+    connect(mMainWindow->actionFillImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(fillImageBackground()));
+    connect(mMainWindow->actionExtendImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(extendImageBackground()));
 
     connect(mMainWindow->actionUndo, SIGNAL(triggered()), UBApplication::undoStack, SLOT(undo()));
     connect(mMainWindow->actionRedo, SIGNAL(triggered()), UBApplication::undoStack, SLOT(redo()));
-    connect(mMainWindow->actionRedo, SIGNAL(triggered()), mBoardController, SLOT(startScript()));
-    connect(mMainWindow->actionBack, SIGNAL(triggered()), mBoardController, SLOT(previousScene()));
-    connect(mMainWindow->actionForward, SIGNAL(triggered()), mBoardController, SLOT(nextScene()));
-    connect(mMainWindow->actionSleep, SIGNAL(triggered()), mBoardController, SLOT(stopScript()));
-    connect(mMainWindow->actionSleep, SIGNAL(triggered()), mBoardController, SLOT(blackout()));
-    connect(mMainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), mBoardController, SLOT(showKeyboard(bool)));
-    connect(mMainWindow->actionImportPage, SIGNAL(triggered()), mBoardController, SLOT(importPage()));
+    connect(mMainWindow->actionRedo, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(startScript()));
+    connect(mMainWindow->actionBack, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(previousScene()));
+    connect(mMainWindow->actionForward, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(nextScene()));
+    connect(mMainWindow->actionSleep, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(stopScript()));
+    connect(mMainWindow->actionSleep, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(blackout()));
+    connect(mMainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), mBoardController->asQObject(), SLOT(showKeyboard(bool)));
+    connect(mMainWindow->actionImportPage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(importPage()));
 }
 
 void UBBoardToolbarController::initToolbarTexts()
