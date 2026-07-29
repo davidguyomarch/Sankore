@@ -48,6 +48,10 @@ namespace UBSettingsData
     inline const QString sessionGradeLevel = "sessionGradeLevel";
     inline const QString sessionSubjects = "sessionSubjects";
     inline const QString sessionType = "sessionType";
+    inline const QString sessionLicence = "sessionLicence";
+
+    // --- Document date ---
+    inline const QString documentDate = "documentDate";
 
     // --- Default dimensions ---
     inline constexpr int maxThumbnailWidth = 400;

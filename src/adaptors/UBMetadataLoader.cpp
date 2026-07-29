@@ -21,6 +21,7 @@
 
 #include "UBMetadataLoader.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 
 #include <QFile>
 #include <QXmlStreamReader>
@@ -57,7 +58,7 @@ QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
         }
 
         QString docVersion = "4.1"; // untagged doc version 4.1
-        metadata.insert(UBSettings::documentVersion, docVersion);
+        metadata.insert(UBSettingsData::documentVersion, docVersion);
 
         QXmlStreamReader xml(&file);
 
@@ -69,11 +70,11 @@ QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
             {
                 if (xml.name() == QLatin1String("title"))
                 {
-                    metadata.insert(UBSettings::documentName, xml.readElementText());
+                    metadata.insert(UBSettingsData::documentName, xml.readElementText());
                 }
                 else if (xml.name() == QLatin1String("type"))
                 {
-                    metadata.insert(UBSettings::documentGroupName, xml.readElementText());
+                    metadata.insert(UBSettingsData::documentGroupName, xml.readElementText());
                 }
                 else if (xml.name() == QLatin1String("date"))
                 {
@@ -81,13 +82,13 @@ QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
                 }
                 else if (xml.name() == QLatin1String("identifier"))
                 {
-                    metadata.insert(UBSettings::documentIdentifer, xml.readElementText());
+                    metadata.insert(UBSettingsData::documentIdentifer, xml.readElementText());
                 }
                 else if (xml.name() == QLatin1String("version")
                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
                     docVersion = xml.readElementText();
-                    metadata.insert(UBSettings::documentVersion, docVersion);
+                    metadata.insert(UBSettingsData::documentVersion, docVersion);
                 }
                 else if (xml.name() == QLatin1String("size")
                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
@@ -109,7 +110,7 @@ QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
                             docSize = settings->pageSize->get().toSize();
                         }
 
-                        metadata.insert(UBSettings::documentSize, QVariant(docSize));
+                        metadata.insert(UBSettingsData::documentSize, QVariant(docSize));
                     }
                     if (!ok)
                     {
@@ -121,58 +122,58 @@ QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
                 else if (xml.name() == QLatin1String("updated-at")
                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::documentUpdatedAt, xml.readElementText());
+                    metadata.insert(UBSettingsData::documentUpdatedAt, xml.readElementText());
                     updatedAtFound = true;
                 }
-                else if (xml.name() == UBSettings::sessionTitle
+                else if (xml.name() == UBSettingsData::sessionTitle
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionTitle, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionTitle, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionAuthors
+                else if (xml.name() == UBSettingsData::sessionAuthors
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionAuthors, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionAuthors, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionObjectives
+                else if (xml.name() == UBSettingsData::sessionObjectives
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionObjectives, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionObjectives, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionKeywords
+                else if (xml.name() == UBSettingsData::sessionKeywords
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionKeywords, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionKeywords, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionGradeLevel
+                else if (xml.name() == UBSettingsData::sessionGradeLevel
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionGradeLevel, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionGradeLevel, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionSubjects
+                else if (xml.name() == UBSettingsData::sessionSubjects
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionSubjects, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionSubjects, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionType
+                else if (xml.name() == UBSettingsData::sessionType
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionType, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionType, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::sessionLicence
+                else if (xml.name() == UBSettingsData::sessionLicence
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::sessionLicence, xml.readElementText());
+                    metadata.insert(UBSettingsData::sessionLicence, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::documentDefaultBackgroundImage
+                else if (xml.name() == UBSettingsData::documentDefaultBackgroundImage
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::documentDefaultBackgroundImage, xml.readElementText());
+                    metadata.insert(UBSettingsData::documentDefaultBackgroundImage, xml.readElementText());
                 }
-                else if (xml.name() == UBSettings::documentDefaultBackgroundImageDisposition
+                else if (xml.name() == UBSettingsData::documentDefaultBackgroundImageDisposition
                          && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
                 {
-                    metadata.insert(UBSettings::documentDefaultBackgroundImageDisposition, xml.readElementText());
+                    metadata.insert(UBSettingsData::documentDefaultBackgroundImageDisposition, xml.readElementText());
                 }
             }
 
@@ -193,21 +194,21 @@ QMap<QString, QVariant> load(const QString& pPath, UBSettings* settings)
             docSize = primaryScreen->geometry().size();
             docSize.setHeight(docSize.height() - 70); // 70 = toolbar height
         }
-        metadata.insert(UBSettings::documentSize, QVariant(docSize));
+        metadata.insert(UBSettingsData::documentSize, QVariant(docSize));
     }
 
     // Update old files date format
-    QString dateString = metadata.value(UBSettings::documentDate).toString();
+    QString dateString = metadata.value(UBSettingsData::documentDate).toString();
     if (dateString.length() < 10) {
-        metadata.remove(UBSettings::documentDate);
-        metadata.insert(UBSettings::documentDate, dateString + "T00:00:00Z");
+        metadata.remove(UBSettingsData::documentDate);
+        metadata.insert(UBSettingsData::documentDate, dateString + "T00:00:00Z");
     }
 
     if (!updatedAtFound) {
-        metadata.insert(UBSettings::documentUpdatedAt, dateString);
+        metadata.insert(UBSettingsData::documentUpdatedAt, dateString);
     }
 
-    metadata.insert(UBSettings::documentDate, QVariant(date));
+    metadata.insert(UBSettingsData::documentDate, QVariant(date));
 
     return metadata;
 }
