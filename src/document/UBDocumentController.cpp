@@ -3120,7 +3120,7 @@ void UBDocumentController::updateActions()
     switch (static_cast<int>(deletionForSelection)) {
     case MoveToTrash :
     case DeletePage :
-        mMainWindow->actionDelete->setIcon(QIcon(":/images/trash.png"));
+        mMainWindow->actionDelete->setIcon(QIcon(":/images/svg/trash.svg"));
         mMainWindow->actionDelete->setText(tr("Trash"));
         break;
     case CompleteDelete :
@@ -3128,7 +3128,7 @@ void UBDocumentController::updateActions()
         mMainWindow->actionDelete->setText(tr("Delete"));
         break;
     case EmptyFolder :
-        mMainWindow->actionDelete->setIcon(QIcon(":/images/trash.png"));
+        mMainWindow->actionDelete->setIcon(QIcon(":/images/svg/trash.svg"));
         mMainWindow->actionDelete->setText(tr("Empty"));
         break;
     case EmptyTrash :

@@ -352,7 +352,7 @@ void UBFeaturesWidget::onDisplayMetadata( QMap<QString,QString> metadata )
     }
 
     if (!widgetsThumbsUrl.isNull()) {
-        previewImageUrl = ":/images/libpalette/loading.png";
+        previewImageUrl = ":/images/svg/loading.svg";
         if (!imageGatherer)
             imageGatherer = new UBDownloadHttpFile(0, this);
 
