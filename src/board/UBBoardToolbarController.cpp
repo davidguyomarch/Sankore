@@ -21,6 +21,7 @@
 #include "core/UBSetting.h"
 #include "gui/UBMainWindow.h"
 #include "gui/UBToolbarButtonGroup.h"
+#include "domain/UBGraphicsScene.h"
 
 UBBoardToolbarController::UBBoardToolbarController(UBBoardController* boardController,
                                                    UBMainWindow* mainWindow,
