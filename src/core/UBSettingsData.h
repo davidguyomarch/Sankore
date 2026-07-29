@@ -31,14 +31,14 @@
 namespace UBSettingsData
 {
     // --- Document metadata keys ---
-    inline const QString documentGroupName = "documentGroupName";
-    inline const QString documentName = "documentName";
-    inline const QString documentSize = "documentSize";
-    inline const QString documentIdentifer = "documentIdentifer";
-    inline const QString documentVersion = "documentVersion";
-    inline const QString documentUpdatedAt = "documentUpdatedAt";
-    inline const QString documentDefaultBackgroundImage = "documentDefaultBackgroundImage";
-    inline const QString documentDefaultBackgroundImageDisposition = "documentDefaultBackgroundImageDisposition";
+    inline const QString documentGroupName = "Subject";
+    inline const QString documentName = "Lesson";
+    inline const QString documentSize = "Size";
+    inline const QString documentIdentifer = "ID";
+    inline const QString documentVersion = "Version";
+    inline const QString documentUpdatedAt = "UpdatedAt";
+    inline const QString documentDefaultBackgroundImage = "defaultBackgroundImage";
+    inline const QString documentDefaultBackgroundImageDisposition = "defaultBackgroundImageDisposition";
 
     // --- Session metadata keys ---
     inline const QString sessionTitle = "sessionTitle";
@@ -51,8 +51,8 @@ namespace UBSettingsData
     inline const QString sessionLicence = "sessionLicence";
 
     // --- Document date ---
-    inline const QString documentDate = "documentDate";
-    inline const QString documentTagVersion = "documentTagVersion";
+    inline const QString documentDate = "date";
+    inline const QString documentTagVersion = "versionCreation";
 
     // --- Default dimensions ---
     inline constexpr int maxThumbnailWidth = 400;
