@@ -469,7 +469,14 @@ void UBApplicationController::showDocument()
 
 void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 {
-    int desktopWidgetIndex = 0; // In Qt6, use mMainWindow->screen() to find screen index
+    // Use the screen where the main window is currently displayed
+    QScreen *currentScreen = mMainWindow->screen();
+    if (!currentScreen)
+        currentScreen = QGuiApplication::primaryScreen();
+
+    int desktopWidgetIndex = QGuiApplication::screens().indexOf(currentScreen);
+    if (desktopWidgetIndex < 0)
+        desktopWidgetIndex = 0;
 
     if (UBApplication::boardController)
         UBApplication::boardController->hide();

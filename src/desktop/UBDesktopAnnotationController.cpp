@@ -317,11 +317,24 @@ void UBDesktopAnnotationController::showWindow()
 
     UBDrawingController::drawingController()->setStylusTool(mDesktopStylusTool);
 
-#ifndef Q_OS_LINUX
+#ifdef Q_OS_WIN
+    // On Windows, WA_TranslucentBackground may not work reliably with DWM.
+    // Capture the desktop screenshot and use it as background instead of
+    // relying on window transparency.
+    {
+        QPixmap desktopPixmap = getScreenPixmap();
+        if (!desktopPixmap.isNull())
+        {
+            mTransparentDrawingView->setStyleSheet(QString());
+            mTransparentDrawingScene->setBackgroundBrush(QBrush(desktopPixmap));
+        }
+    }
     mTransparentDrawingView->showFullScreen();
-#else
+#elif defined(Q_OS_LINUX)
     // this is necessary to avoid unity to hide the panels
     mTransparentDrawingView->show();
+#else
+    mTransparentDrawingView->showFullScreen();
 #endif
     UBPlatformUtils::setDesktopMode(true);
 
@@ -485,12 +498,16 @@ void UBDesktopAnnotationController::screenCapture()
 
 QPixmap UBDesktopAnnotationController::getScreenPixmap()
 {
-    // QDesktopWidget removed in Qt6
+    // Capture the screen where the transparent drawing view is displayed
+    QScreen *screen = nullptr;
+    if (mTransparentDrawingView && mTransparentDrawingView->screen())
+        screen = mTransparentDrawingView->screen();
+    if (!screen)
+        screen = QGuiApplication::primaryScreen();
 
-    // we capture the screen in which the mouse is.
-    const QRect primaryScreenRect = QGuiApplication::primaryScreen()->geometry();
+    const QRect screenRect = screen->geometry();
     QCoreApplication::processEvents();
-    return QGuiApplication::primaryScreen()->grabWindow(0, primaryScreenRect.x(), primaryScreenRect.y(), primaryScreenRect.width(), primaryScreenRect.height());
+    return screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
 
 
 
