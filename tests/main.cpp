@@ -95,10 +95,11 @@ int main(int argc, char *argv[])
         status |= QTest::qExec(&test, argc, argv);
     }
 
-    {
-//         TestUBBoardSubControllers test;
-//         status |= QTest::qExec(&test, argc, argv);
-//     }
+    // TestUBBoardSubControllers disabled until premoc is fixed
+    // {
+    //     TestUBBoardSubControllers test;
+    //     status |= QTest::qExec(&test, argc, argv);
+    // }
 
     return status;
 }
