@@ -172,7 +172,7 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
 
     // Load global stylesheet based on saved theme preference
     QString theme = UBSettings::settings()->appTheme->get().toString();
-    QString qssResource = (theme == "classic") ? ":/style-classic.qss" : ":/style.qss";
+    QString qssResource = ":/themes/" + theme + "/style.qss";
     QFile styleFile(qssResource);
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -380,6 +380,9 @@ int UBApplication::exec(const QString& pFileToImport)
     toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
     toolBarPositionChanged(mSettings->appToolBarPositionedAtTop->get());
 
+    // Apply theme icons at startup
+    reloadThemeIcons(mSettings->appTheme->get().toString());
+
     bool bUseMultiScreen = mSettings->appUseMultiscreen->get().toBool();
     mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
     connect(mainWindow->actionMultiScreen, SIGNAL(triggered(bool)), applicationController, SLOT(useMultiScreen(bool)));
@@ -503,18 +506,58 @@ void UBApplication::themeChanged(QAction* action)
     QString theme = action->data().toString();
     mSettings->appTheme->set(theme);
 
-    // Reload stylesheet
-    QString qssPath;
-    if (theme == "classic")
-        qssPath = ":/style-classic.qss";
-    else
-        qssPath = ":/style.qss";
-
+    // Reload stylesheet from theme directory
+    QString qssPath = ":/themes/" + theme + "/style.qss";
     QFile styleFile(qssPath);
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         setStyleSheet(styleFile.readAll());
         styleFile.close();
+    }
+
+    // Reload toolbar icons from theme directory
+    reloadThemeIcons(theme);
+}
+
+void UBApplication::reloadThemeIcons(const QString& theme)
+{
+    QString iconPrefix = ":/themes/" + theme + "/icons/";
+
+    // Reload icons for all toolbar actions by matching icon filenames
+    QList<QToolBar*> toolbars = {mainWindow->boardToolBar, mainWindow->webToolBar, mainWindow->documentToolBar};
+
+    for (QToolBar* toolbar : toolbars)
+    {
+        for (QAction* action : toolbar->actions())
+        {
+            if (action->isSeparator() || action->icon().isNull())
+                continue;
+
+            // Try to find the icon in the theme directory using the icon name
+            // stored as dynamic property (set on first load)
+            QString iconName = action->property("themeIconName").toString();
+
+            if (iconName.isEmpty())
+            {
+                // First time: extract icon name from the current resource path
+                // Qt doesn't expose the resource path from QIcon, so we use
+                // a lookup based on the action's icon resource set in mainWindow.ui
+                // We'll try the action name mapping
+                QString actionName = action->objectName();
+                if (actionName.startsWith("action"))
+                    actionName = actionName.mid(6);
+                if (!actionName.isEmpty())
+                    actionName[0] = actionName[0].toLower();
+                iconName = actionName;
+                action->setProperty("themeIconName", iconName);
+            }
+
+            QString iconPath = iconPrefix + iconName + ".svg";
+            if (QFile::exists(iconPath))
+            {
+                action->setIcon(QIcon(iconPath));
+            }
+        }
     }
 }
 
