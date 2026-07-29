@@ -28,6 +28,7 @@
 #include <QPainterPath>
 
 #include "UBFloatingPalette.h"
+#include "core/UBTheme.h"
 
 #include "frameworks/UBPlatformUtils.h"
 
@@ -266,7 +267,7 @@ void UBFloatingPalette::paintEvent(QPaintEvent *)
 
     if(mbGrip)
     {
-        painter.setBrush(QBrush(QColor(255, 255, 255, 40)));
+        painter.setBrush(QBrush(UBTheme::borderSubtle()));
         QPainterPath borderPath;
         borderPath.addRoundedRect(0, 0, width(), height(), radius(), radius());
         borderPath.addRoundedRect(border(), border(), width() - 2 * border(), height() - 2 * border(), radius(), radius());

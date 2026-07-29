@@ -30,6 +30,7 @@
 #include "frameworks/UBPlatformUtils.h"
 
 #include "core/UBSettings.h"
+#include "core/UBTheme.h"
 #include "core/UBApplication.h"
 #include "core/UBPreferencesController.h"
 #include "core/UBDownloadManager.h"
@@ -656,7 +657,7 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         QPixmap transparencyPix(":/images/tab_mask.png");
         if (dock->mCurrentTab != i) {
             iconPixmap; // setAlphaChannel removed in Qt6;
-            QColor color(60, 60, 60, 160);
+            QColor color = UBTheme::tabInactive();
             painter.setBrush(QBrush(color));
         }
 

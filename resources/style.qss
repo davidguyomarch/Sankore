@@ -1,4 +1,15 @@
-/* Open-Sankoré — Modern flat stylesheet */
+/* Open-Sankoré — Modern flat stylesheet
+ *
+ * Color tokens (from src/core/UBTheme.h):
+ *   surface:         #2A2A2ADC  → UBTheme::surface()
+ *   surfaceVariant:  #3A3A3A    → UBTheme::surfaceVariant()
+ *   surfaceHover:    #4A4A4A    → UBTheme::surfaceHover()
+ *   onSurface:       #FFFFFF    → UBTheme::onSurface()
+ *   onSurfaceDim:    #DDDDDD    → UBTheme::onSurfaceDim()
+ *   primary:         #4A90D9    → UBTheme::primary()
+ *   border:          rgba(255,255,255,25) → UBTheme::border()
+ *   scrollHandle:    rgba(255,255,255,80) → UBTheme::scrollHandle()
+ */
 
 QWidget#DockPaletteWidgetBox,
 QWidget#documentNavigator,
