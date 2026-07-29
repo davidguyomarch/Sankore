@@ -193,7 +193,7 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
 void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMode mainMode)
 {
-//    Board = 0, Internet, Document, Tutorial, WebDocument
+//    Board = 0, Internet, Document, WebDocument
 
     switch( mainMode )
     {
@@ -202,13 +202,6 @@ void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMod
                 // call changeMode only when switch NOT from desktop mode
                 if(!UBApplication::applicationController->isShowingDesktop())
                     changeMode(eUBDockPaletteWidget_BOARD);
-            }
-            break;
-
-        case UBApplicationController::Tutorial:
-            {
-                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
-                    mKeyboardPalette->hide();
             }
             break;
 

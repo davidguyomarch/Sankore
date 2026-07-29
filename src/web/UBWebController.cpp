@@ -98,7 +98,6 @@ void UBWebController::webTrapContent() {}
 void UBWebController::onOEmbedParsed(QVector<sOEmbedContent>) {}
 void UBWebController::onActionBookmark() {}
 void UBWebController::initialiazemOEmbedProviders() {}
-void UBWebController::tutorialWebInstance() {}
 void UBWebController::webBrowserInstance() {}
 void UBWebController::lookForEmbedContent(QString*, QString, QString, QList<QUrl>*) {}
 void UBWebController::checkForOEmbed(QString*) {}

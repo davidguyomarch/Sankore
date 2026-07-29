@@ -374,7 +374,6 @@ int UBApplication::exec(const QString& pFileToImport)
     mPreferencesController = new UBPreferencesController(mainWindow);
 
     connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
-    connect(mainWindow->actionTutorial, SIGNAL(triggered()), applicationController, SLOT(showTutorial()));
     connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
 
     toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
@@ -481,7 +480,6 @@ void UBApplication::toolBarPositionChanged(QVariant topOrBottom)
     mainWindow->addToolBar(area, mainWindow->boardToolBar);
     mainWindow->addToolBar(area, mainWindow->webToolBar);
     mainWindow->addToolBar(area, mainWindow->documentToolBar);
-    mainWindow->addToolBar(area, mainWindow->tutorialToolBar);
 
     webController->showTabAtTop(topOrBottom.toBool());
 
@@ -494,7 +492,6 @@ void UBApplication::toolBarDisplayTextChanged(QVariant display)
     mainWindow->boardToolBar->setToolButtonStyle(toolButtonStyle);
     mainWindow->webToolBar->setToolButtonStyle(toolButtonStyle);
     mainWindow->documentToolBar->setToolButtonStyle(toolButtonStyle);
-    mainWindow->tutorialToolBar->setToolButtonStyle(toolButtonStyle);
 }
 
 
@@ -578,7 +575,6 @@ void UBApplication::decorateActionMenu(QAction* action)
                 mainWindow->actionCheckUpdate->setEnabled(false);
 
             menu->addSeparator();
-            menu->addAction(mainWindow->actionTutorial);
 
 #ifndef Q_OS_LINUX // No Podcast on Linux yet
             menu->addAction(mainWindow->actionPodcast);

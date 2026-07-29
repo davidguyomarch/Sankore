@@ -97,7 +97,7 @@ class UBApplicationController : public QObject
 
         enum MainMode
         {
-            Board = 0, Internet, Document, Tutorial, WebDocument
+            Board = 0, Internet, Document, WebDocument
         };
 
         MainMode displayMode()
@@ -140,8 +140,6 @@ class UBApplicationController : public QObject
         void actionCut();
         void actionCopy();
         void actionPaste();
-
-        void showTutorial();
 
         void checkUpdateRequest();
         void checkUpdateAtLaunch();
