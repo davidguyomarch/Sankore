@@ -27,6 +27,7 @@
 
 #include "core/UBDocumentManager.h"
 #include "core/UBApplication.h"
+#include "core/UBSettingsData.h"
 
 #include "document/UBDocumentProxy.h"
 #include "document/UBDocumentController.h"

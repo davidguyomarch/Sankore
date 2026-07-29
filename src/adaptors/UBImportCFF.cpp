@@ -25,6 +25,7 @@
 #include <QList>
 
 #include "core/UBApplication.h"
+#include "core/UBSettingsData.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBDocumentManager.h"
 #include "core/UBPersistenceManager.h"
