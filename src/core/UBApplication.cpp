@@ -26,6 +26,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QFile>
 
 #include "transition/UniboardSankoreTransition.h"
 
@@ -168,6 +169,14 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
 #ifndef Q_OS_MACOS
     setWindowIcon(QIcon(":/images/icon-proposal-2-board-stylus.svg"));
 #endif
+
+    // Load global stylesheet
+    QFile styleFile(":/style.qss");
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        setStyleSheet(styleFile.readAll());
+        styleFile.close();
+    }
 
     setStyle(new UBStyle()); // Style is owned and deleted by the application
 
