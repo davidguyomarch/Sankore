@@ -2504,7 +2504,14 @@ UBGraphicsPDFItem* UBSvgSubsetAdaptor::UBSvgSubsetReader::pdfItemFromPDF()
     QUuid uuid(QFileInfo(pdfPath).baseName());
     int pageNumber = parts[1].toInt();
 
-    pdfItem = new UBGraphicsPDFItem(PDFRenderer::rendererForUuid(uuid, mDocumentPath + "/" + UBFileSystemUtils::normalizeFilePath(pdfPath)), pageNumber);
+    PDFRenderer *renderer = PDFRenderer::rendererForUuid(uuid, mDocumentPath + "/" + UBFileSystemUtils::normalizeFilePath(pdfPath));
+    if (!renderer)
+    {
+        qWarning() << "PDF renderer unavailable for" << pdfPath;
+        return pdfItem;
+    }
+
+    pdfItem = new UBGraphicsPDFItem(renderer, pageNumber);
 
     graphicsItemFromSvg(pdfItem);
 
