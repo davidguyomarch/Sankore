@@ -1,39 +1,19 @@
 /*
- * Stub implementation for UBSettings - provides static constants and
- * a minimal settings() accessor for testing.
+ * Stub implementation for UBSettings - provides minimal singleton
+ * and non-string-key members needed by test code.
+ *
+ * String constants (documentName, sessionTitle, etc.) are now in
+ * UBSettingsData.h (header-only) — no stub needed for those.
  */
 #include "UBSettings_stub.h"
 #include <QDir>
 
 UBSettings* UBSettings::sInstance = 0;
 
-// Static string constants
-QString UBSettings::documentGroupName = "GroupName";
-QString UBSettings::documentName = "Title";
-QString UBSettings::documentSize = "Size";
-QString UBSettings::documentIdentifer = "Identifer";
-QString UBSettings::documentVersion = "Version";
-QString UBSettings::documentUpdatedAt = "UpdatedAt";
-QString UBSettings::documentDate = "CreationDate";
-
-QString UBSettings::sessionTitle = "SessionTitle";
-QString UBSettings::sessionAuthors = "SessionAuthors";
-QString UBSettings::sessionObjectives = "SessionObjectives";
-QString UBSettings::sessionKeywords = "SessionKeywords";
-QString UBSettings::sessionGradeLevel = "SessionGradeLevel";
-QString UBSettings::sessionSubjects = "SessionSubjects";
-QString UBSettings::sessionType = "SessionType";
-QString UBSettings::sessionLicence = "SessionLicence";
-
-QString UBSettings::documentDefaultBackgroundImage = "DocumentDefaultBackgroundImage";
-QString UBSettings::documentDefaultBackgroundImageDisposition = "DocumentDefaultBackgroundImageDisposition";
-
+// Non-string statics still needed by some test code paths
 QString UBSettings::uniboardDocumentNamespaceUri = "http://uniboard.mnemis.com/document";
-
 QString UBSettings::trashedDocumentGroupNamePrefix = "Trash:";
 QString UBSettings::currentFileVersion = "4.7.0";
-QString UBSettings::documentTagVersion = "DocumentTagVersion";
-
 int UBSettings::pointerDiameter = 40;
 int UBSettings::boardMargin = 10;
 
