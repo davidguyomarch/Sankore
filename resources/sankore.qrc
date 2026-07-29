@@ -143,6 +143,7 @@
         <file>images/moveUpDisabled.svg</file>
         <file>images/teacher_close.png</file>
         <file>style.qss</file>
+        <file>style-classic.qss</file>
         <file>images/libpalette/WebSearchCategory.svg</file>
         <file>images/tab_mask.png</file>
         <file>images/licenses/ccby.png</file>

@@ -170,8 +170,10 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     setWindowIcon(QIcon(":/images/icon-proposal-2-board-stylus.svg"));
 #endif
 
-    // Load global stylesheet
-    QFile styleFile(":/style.qss");
+    // Load global stylesheet based on saved theme preference
+    QString theme = UBSettings::settings()->appTheme->get().toString();
+    QString qssResource = (theme == "classic") ? ":/style-classic.qss" : ":/style.qss";
+    QFile styleFile(qssResource);
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         setStyleSheet(styleFile.readAll());
@@ -493,6 +495,29 @@ void UBApplication::toolBarDisplayTextChanged(QVariant display)
     mainWindow->documentToolBar->setToolButtonStyle(toolButtonStyle);
 }
 
+void UBApplication::themeChanged(QAction* action)
+{
+    if (!action)
+        return;
+
+    QString theme = action->data().toString();
+    mSettings->appTheme->set(theme);
+
+    // Reload stylesheet
+    QString qssPath;
+    if (theme == "classic")
+        qssPath = ":/style-classic.qss";
+    else
+        qssPath = ":/style.qss";
+
+    QFile styleFile(qssPath);
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        setStyleSheet(styleFile.readAll());
+        styleFile.close();
+    }
+}
+
 
 void UBApplication::closeEvent(QCloseEvent *event)
 {
@@ -565,6 +590,30 @@ void UBApplication::decorateActionMenu(QAction* action)
 
             menu->addSeparator();
             menu->addAction(mainWindow->actionPreferences);
+
+            // Theme sub-menu
+            QMenu* themeMenu = menu->addMenu(tr("Theme"));
+            QActionGroup* themeGroup = new QActionGroup(themeMenu);
+            themeGroup->setExclusive(true);
+
+            QAction* actionThemeDark = themeMenu->addAction(tr("Dark (default)"));
+            actionThemeDark->setCheckable(true);
+            actionThemeDark->setData("dark");
+            themeGroup->addAction(actionThemeDark);
+
+            QAction* actionThemeClassic = themeMenu->addAction(tr("Classic (light)"));
+            actionThemeClassic->setCheckable(true);
+            actionThemeClassic->setData("classic");
+            themeGroup->addAction(actionThemeClassic);
+
+            QString currentTheme = mSettings->appTheme->get().toString();
+            if (currentTheme == "classic")
+                actionThemeClassic->setChecked(true);
+            else
+                actionThemeDark->setChecked(true);
+
+            connect(themeGroup, SIGNAL(triggered(QAction*)), this, SLOT(themeChanged(QAction*)));
+
             menu->addAction(mainWindow->actionMultiScreen);
 
             menu->addSeparator();
