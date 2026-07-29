@@ -230,5 +230,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Open-Sankore-Windows-x64-Setup
-          path: build/installer/Open-Sankore-*-setup.exe
+          path: build/installer/Open-Sankore-*-installer.exe
           if-no-files-found: warn
