@@ -15,6 +15,8 @@
 #include <QPointF>
 #include <QUrl>
 
+#include "core/UBTypes.h"
+
 class UBGraphicsScene;
 class UBDocumentProxy;
 class UBBoardView;
@@ -23,8 +25,11 @@ class UBItem;
 class UBGraphicsItem;
 class UBGraphicsWidgetItem;
 
-enum eItemActionType;
-enum UBFeatureBackgroundDisposition;
+typedef enum{
+    eItemActionType_Default,
+    eItemActionType_Duplicate,
+    eItemActionType_Paste
+}eItemActionType;
 
 /**
  * @brief Abstract interface exposing UBBoardController accessors.

@@ -63,12 +63,6 @@ class UBTextDelegateDialogHandler;
 class UBGraphicsTextItem;
 
 
-typedef enum{
-    eItemActionType_Default,
-    eItemActionType_Duplicate,
-    eItemActionType_Paste
-}eItemActionType;
-
 class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 {
     Q_OBJECT
@@ -76,6 +70,9 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
     public:
         UBBoardController(UBMainWindow *mainWindow);
         virtual ~UBBoardController();
+
+        // IUBBoardContext override to resolve ambiguity with UBDocumentContainer
+        UBDocumentProxy* selectedDocument() override { return UBDocumentContainer::selectedDocument(); }
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
 
