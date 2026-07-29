@@ -150,6 +150,40 @@ Sur GitHub Actions Linux, moc ne parvient pas à parser les headers système C++
 | `scripts/package-linux.sh` | Crée .deb et .rpm à partir du binaire compilé |
 | `scripts/installer.iss` | Script Inno Setup pour l'installeur Windows |
 
+## Tester une branche feature (Windows)
+
+Le build Windows supporte `workflow_dispatch` : on peut lancer un build manuellement sur n'importe quelle branche, avec génération des artefacts (exe + installeur).
+
+### Depuis le terminal (recommandé)
+
+```bash
+# 1. Lancer le build sur la branche
+gh workflow run build-windows.yml --ref feature/ma-branche
+
+# 2. Trouver le run ID du dernier build réussi
+gh run list --workflow=build-windows.yml --branch=feature/ma-branche --status=success --limit=1
+
+# 3. Télécharger l'artefact (~25 min après le lancement)
+./scripts/deploy-latest.sh <run-id>
+
+# 4. Dans la VM Windows : Z:\sankore-install\run-test.bat
+```
+
+### Depuis l'interface GitHub
+
+1. Aller sur https://github.com/davidguyomarch/Sankore/actions/workflows/build-windows.yml
+2. Cliquer **"Run workflow"** (bouton en haut à droite)
+3. Choisir la branche dans le dropdown
+4. Cliquer **"Run workflow"**
+5. Une fois terminé, cliquer sur le run → le numéro est dans l'URL : `.../actions/runs/30427643945`
+6. Ou télécharger directement les artefacts depuis l'onglet "Artifacts" en bas du run
+
+### Notes
+
+- Les artefacts sont générés pour : `workflow_dispatch`, `pull_request`, et push sur `master`
+- Un build prend ~25 min (compilation + tests + packaging)
+- Les artefacts expirent après 90 jours sur GitHub Actions
+
 ## Badges README
 
 ```markdown
