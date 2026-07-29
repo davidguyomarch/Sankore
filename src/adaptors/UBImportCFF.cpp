@@ -259,12 +259,12 @@ UBDocumentProxy* UBImportCFF::importFile(const QFile& pFile, const QString& pGro
         QDir dir;
         dir.mkdir(destDocument->persistencePath());
         if (pGroup.length() > 0)
-            destDocument->setMetaData(UBSettings::documentGroupName, pGroup);
+            destDocument->setMetaData(UBSettingsData::documentGroupName, pGroup);
         if (fi.baseName().toInt() > 0)
-            destDocument->setMetaData(UBSettings::documentName, fi.baseName());
+            destDocument->setMetaData(UBSettingsData::documentName, fi.baseName());
 
-        destDocument->setMetaData(UBSettings::documentVersion, UBSettings::currentFileVersion);
-        destDocument->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        destDocument->setMetaData(UBSettingsData::documentVersion, UBSettings::currentFileVersion);
+        destDocument->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
         UBDocumentProxy* newDocument = nullptr;
         //try to import cff to document

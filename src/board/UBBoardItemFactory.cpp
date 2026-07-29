@@ -23,6 +23,7 @@
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBMimeData.h"
 #include "core/UBPersistenceManager.h"
 
@@ -67,7 +68,7 @@ UBGraphicsMediaItem* UBBoardItemFactory::addVideo(const QUrl& pSourceUrl, bool s
     }
 
     UBGraphicsMediaItem* vi = mBoardController->activeScene()->addMedia(concreteUrl, startPlay, pos);
-    mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+    mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
     if (vi) {
         vi->setUuid(uuid);
@@ -99,7 +100,7 @@ UBGraphicsMediaItem* UBBoardItemFactory::addAudio(const QUrl& pSourceUrl, bool s
     }
 
     UBGraphicsMediaItem* ai = mBoardController->activeScene()->addMedia(concreteUrl, startPlay, pos);
-    mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+    mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
     if (ai){
         ai->setUuid(uuid);
@@ -208,7 +209,7 @@ void UBBoardItemFactory::paste()
     QPointF pos(xPosition - 200, yPosition - 100);
     processMimeData(clipboard->mimeData(), pos, eItemActionType_Paste);
 
-    mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+    mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 }
 
 void UBBoardItemFactory::processMimeData(const QMimeData* pMimeData, const QPointF& pPos, eItemActionType actionType)
@@ -340,6 +341,6 @@ void UBBoardItemFactory::grabScene(const QRectF& pSceneRect)
         mBoardController->activeScene()->setRenderingQuality(UBItem::RenderingQualityNormal);
 
         mBoardController->paletteManager()->addItem(QPixmap::fromImage(image));
-        mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
     }
 }

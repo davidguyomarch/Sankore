@@ -52,6 +52,7 @@ namespace UBSettingsData
 
     // --- Document date ---
     inline const QString documentDate = "documentDate";
+    inline const QString documentTagVersion = "documentTagVersion";
 
     // --- Default dimensions ---
     inline constexpr int maxThumbnailWidth = 400;

@@ -20,6 +20,7 @@
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBDocumentManager.h"
 #include "core/UBDownloadManager.h"
@@ -108,14 +109,14 @@ void UBBoardNavigationController::addScene()
 
     mBoardController->addPage(mBoardController->activeSceneIndex() + 1);
 
-    mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+    mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
     mBoardController->reloadThumbnails();
     mBoardController->setActiveDocumentScene(mBoardController->activeSceneIndex() + 1);
 
     // Handle default background image
-    QString backgroundImage = mBoardController->selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
-    UBFeatureBackgroundDisposition backgroundImageDisposition = static_cast<UBFeatureBackgroundDisposition>(mBoardController->selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImageDisposition).toInt());
+    QString backgroundImage = mBoardController->selectedDocument()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString();
+    UBFeatureBackgroundDisposition backgroundImageDisposition = static_cast<UBFeatureBackgroundDisposition>(mBoardController->selectedDocument()->metaData(UBSettingsData::documentDefaultBackgroundImageDisposition).toInt());
     if (!backgroundImage.isEmpty())
     {
         QString sUrl = "file:///" + mBoardController->selectedDocument()->persistencePath() + "/" + UBPersistenceManager::imageDirectory + "/" + backgroundImage;
@@ -155,7 +156,7 @@ void UBBoardNavigationController::addScene(UBGraphicsScene* scene, bool replaceA
             mBoardController->setActiveDocumentScene(mBoardController->activeSceneIndex() + 1);
         }
 
-        mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
     }
 }
 
@@ -178,7 +179,7 @@ void UBBoardNavigationController::duplicateScene(int nIndex)
     mBoardController->duplicatePages(scIndexes);
     mBoardController->insertThumbPage(nIndex);
     emit mBoardController->documentThumbnailsUpdated(mBoardController);
-    mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+    mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
     mBoardController->setActiveDocumentScene(nIndex + 1);
     QApplication::restoreOverrideCursor();
@@ -204,7 +205,7 @@ void UBBoardNavigationController::deleteScene(int nIndex)
 
         QList<int> scIndexes;
         scIndexes << nIndex;
-        mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
         if (nIndex >= mBoardController->pageCount())
             nIndex = mBoardController->pageCount() - 1;
@@ -224,7 +225,7 @@ void UBBoardNavigationController::moveSceneToIndex(int source, int target)
 
         mBoardController->movePageToIndex(source, target);
 
-        mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
         UBMetadataDcSubsetAdaptor::persist(mBoardController->selectedDocument());
         mBoardController->setActiveDocumentScene(target);
 

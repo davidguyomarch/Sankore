@@ -32,6 +32,7 @@
 #include "board/UBBoardView.h"
 #include "UBFeaturesController.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "tools/UBToolsManager.h"
 #include "frameworks/UBFileSystemUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -1215,7 +1216,7 @@ void UBFeaturesController::addItemAsDefaultBackground(UBFeature &item, bool isFr
 
     // Issue 1684 - ALTI/AOU - 20131210
     // Si metaData "background" deja existante, avant de l'écraser, supprimer le fichier dans /doc/images/
-    QString metaDataBackgroundImage = UBApplication::boardController->selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
+    QString metaDataBackgroundImage = UBApplication::boardController->selectedDocument()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString();
     if ( ! metaDataBackgroundImage.isEmpty() )
     {
         QFile fichier(UBApplication::boardController->selectedDocument()->persistencePath() + "/" + UBPersistenceManager::imageDirectory + "/" + metaDataBackgroundImage);
@@ -1226,10 +1227,10 @@ void UBFeaturesController::addItemAsDefaultBackground(UBFeature &item, bool isFr
     }
 
     if (QFileInfo(item.getFullPath().toString()).suffix() == "svg")
-        UBApplication::boardController->selectedDocument()->setMetaData(UBSettings::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".svg");
+        UBApplication::boardController->selectedDocument()->setMetaData(UBSettingsData::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".svg");
     else
-        UBApplication::boardController->selectedDocument()->setMetaData(UBSettings::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".png");
-    UBApplication::boardController->selectedDocument()->setMetaData(UBSettings::documentDefaultBackgroundImageDisposition, item.backgroundDisposition());
+        UBApplication::boardController->selectedDocument()->setMetaData(UBSettingsData::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".png");
+    UBApplication::boardController->selectedDocument()->setMetaData(UBSettingsData::documentDefaultBackgroundImageDisposition, item.backgroundDisposition());
     // Fin Issue 1684 - ALTI/AOU - 20131210
 
     int currentPageIndex = UBApplication::boardController->activeSceneIndex();

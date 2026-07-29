@@ -39,6 +39,8 @@
 #include "core/UBDocumentManager.h"
 #include "core/UBApplicationController.h"
 #include "core/UBSettings.h"
+#include "core/UBTheme.h"
+#include "core/UBSettingsData.h"
 #include "core/UBSetting.h"
 #include "core/UBMimeData.h"
 #include "core/UBForeignObjectsHandler.h"
@@ -459,9 +461,9 @@ QVariant UBDocumentTreeModel::data(const QModelIndex &index, int role) const
                 QDateTime d;
 
                 if(index.column() == 1){
-                    d = proxy->metaData(UBSettings::documentDate).toDateTime();
+                    d = proxy->metaData(UBSettingsData::documentDate).toDateTime();
                 }else if(index.column() == 2){
-                    d = proxy->metaData(UBSettings::documentUpdatedAt).toDateTime();
+                    d = proxy->metaData(UBSettingsData::documentUpdatedAt).toDateTime();
                 }
 
                 displayText = d.toString("dd/MM/yyyy hh:mm");
@@ -473,11 +475,11 @@ QVariant UBDocumentTreeModel::data(const QModelIndex &index, int role) const
     }
 
     if(role == UBDocumentTreeModel::CreationDate){
-        return findNodeDate(dataNode, UBSettings::documentDate);
+        return findNodeDate(dataNode, UBSettingsData::documentDate);
     }
 
     if(role == UBDocumentTreeModel::UpdateDate){
-        return findNodeDate(dataNode, UBSettings::documentUpdatedAt);
+        return findNodeDate(dataNode, UBSettingsData::documentUpdatedAt);
     }
 
     if(role == Qt::BackgroundRole){
@@ -567,9 +569,9 @@ Qt::ItemFlags UBDocumentTreeModel::flags (const QModelIndex &index) const
 //N/C - NNE -20140407
 QDateTime UBDocumentTreeModel::findNodeDate(UBDocumentTreeNode *node, QString type) const
 {
-    if(type == UBSettings::documentDate){
+    if(type == UBSettingsData::documentDate){
         return findCatalogCreationDate(node);
-    }else if(type == UBSettings::documentUpdatedAt){
+    }else if(type == UBSettingsData::documentUpdatedAt){
         return findCatalogUpdatedDate(node);
     }
 
@@ -581,7 +583,7 @@ QDateTime UBDocumentTreeModel::findCatalogUpdatedDate(UBDocumentTreeNode *node) 
     UBDocumentProxy *proxy = node->proxyData();
 
     if(proxy){
-        return proxy->metaData(UBSettings::documentUpdatedAt).toDateTime();
+        return proxy->metaData(UBSettingsData::documentUpdatedAt).toDateTime();
     }else if(node->children().size() > 0){
         QDateTime d = findCatalogUpdatedDate(node->children().at(0));
 
@@ -609,7 +611,7 @@ QDateTime UBDocumentTreeModel::findCatalogCreationDate(UBDocumentTreeNode *node)
     UBDocumentProxy *proxy = node->proxyData();
 
     if(proxy){
-        return proxy->metaData(UBSettings::documentDate).toDateTime();
+        return proxy->metaData(UBSettingsData::documentDate).toDateTime();
     }else if(node->children().size() > 0){
         QDateTime d = findCatalogCreationDate(node->children().at(0));
 
@@ -853,7 +855,7 @@ QPersistentModelIndex UBDocumentTreeModel::copyIndexToNewParent(const QModelInde
         UBDocumentProxy* duplicatedProxy = 0;
         if (nodeSource->nodeType() == UBDocumentTreeNode::Document && nodeSource->proxyData()) {
             duplicatedProxy = UBPersistenceManager::persistenceManager()->duplicateDocument(nodeSource->proxyData());
-            duplicatedProxy->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+            duplicatedProxy->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
             UBMetadataDcSubsetAdaptor::persist(duplicatedProxy);
         }
         clonedNodeSource = new UBDocumentTreeNode(nodeSource->nodeType()
@@ -873,8 +875,8 @@ QPersistentModelIndex UBDocumentTreeModel::copyIndexToNewParent(const QModelInde
     }
 
     if (clonedNodeSource->proxyData()) {
-        clonedNodeSource->proxyData()->setMetaData(UBSettings::documentGroupName, virtualPathForIndex(newParent));
-        clonedNodeSource->proxyData()->setMetaData(UBSettings::documentName, newName);
+        clonedNodeSource->proxyData()->setMetaData(UBSettingsData::documentGroupName, virtualPathForIndex(newParent));
+        clonedNodeSource->proxyData()->setMetaData(UBSettingsData::documentName, newName);
         UBPersistenceManager::persistenceManager()->persistDocumentMetadata(clonedNodeSource->proxyData());
     }
 
@@ -1096,8 +1098,8 @@ void UBDocumentTreeModel::addDocument(UBDocumentProxy *pProxyData, const QModelI
     if (!pProxyData) {
         return;
     }
-    QString docName = pProxyData->metaData(UBSettings::documentName).toString();
-    QString docGroupName = pProxyData->metaData(UBSettings::documentGroupName).toString();
+    QString docName = pProxyData->metaData(UBSettingsData::documentName).toString();
+    QString docGroupName = pProxyData->metaData(UBSettingsData::documentGroupName).toString();
 
     if (docName.isEmpty()) {
         return;
@@ -1158,10 +1160,10 @@ void UBDocumentTreeModel::setNewName(const QModelIndex &index, const QString &ne
         int prefixIndex = newName.lastIndexOf(magicSeparator);
         if (prefixIndex != -1) {
             QString newDocumentGroupName = newName.left(prefixIndex).replace(magicSeparator, "/");
-            indexNode->proxyData()->setMetaData(UBSettings::documentGroupName, newDocumentGroupName);
+            indexNode->proxyData()->setMetaData(UBSettingsData::documentGroupName, newDocumentGroupName);
         } else {
             indexNode->setNodeName(newName);
-            indexNode->proxyData()->setMetaData(UBSettings::documentName, newName);
+            indexNode->proxyData()->setMetaData(UBSettingsData::documentName, newName);
         }
 
         UBPersistenceManager::persistenceManager()->persistDocumentMetadata(indexNode->proxyData());
@@ -1205,8 +1207,8 @@ void UBDocumentTreeModel::updateIndexNameBindings(UBDocumentTreeNode *nd)
             updateIndexNameBindings(lnd);
         }
     } else if (nd->proxyData()) {
-        nd->proxyData()->setMetaData(UBSettings::documentGroupName, virtualPathForIndex(indexForNode(nd->parentNode())));
-        nd->proxyData()->setMetaData(UBSettings::documentName, nd->nodeName());
+        nd->proxyData()->setMetaData(UBSettingsData::documentGroupName, virtualPathForIndex(indexForNode(nd->parentNode())));
+        nd->proxyData()->setMetaData(UBSettingsData::documentName, nd->nodeName());
         UBPersistenceManager::persistenceManager()->persistDocumentMetadata(nd->proxyData());
     }
 }
@@ -2053,7 +2055,7 @@ void UBDocumentController::setupViews()
         connect(UBPersistenceManager::persistenceManager(), SIGNAL(documentSceneCreated(UBDocumentProxy*, int)), this, SLOT(documentSceneChanged(UBDocumentProxy*, int)));
         connect(UBPersistenceManager::persistenceManager(), SIGNAL(documentSceneWillBeDeleted(UBDocumentProxy*, int)), this, SLOT(documentSceneChanged(UBDocumentProxy*, int)));
 
-        mDocumentUI->thumbnailWidget->setBackgroundBrush(UBSettings::documentViewLightColor);
+        mDocumentUI->thumbnailWidget->setBackgroundBrush(UBTheme::documentViewLight());
 
         #ifdef Q_OS_MACOSX
             mMessageWindow = new UBMessageWindow(nullptr);
@@ -2236,7 +2238,7 @@ void UBDocumentController::duplicateSelectedItem()
         {
             duplicatePages(selectedSceneIndexes);
             emit documentThumbnailsUpdated(this);
-            selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+            selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
             UBMetadataDcSubsetAdaptor::persist(selectedDocument());
             int selectedThumbnail = selectedSceneIndexes.last() + selectedSceneIndexes.size();
             mDocumentUI->thumbnailWidget->selectItemAt(selectedThumbnail);
@@ -2642,7 +2644,7 @@ void UBDocumentController::addFolderOfImages()
             }
             else
             {
-                document->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+                document->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
                 UBMetadataDcSubsetAdaptor::persist(document);
                 reloadThumbnails();
             }
@@ -2689,7 +2691,7 @@ bool UBDocumentController::addFileToDocument(UBDocumentProxy* document)
 
         if (success)
         {
-            document->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+            document->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
             UBMetadataDcSubsetAdaptor::persist(document);
         }
         else
@@ -2708,7 +2710,7 @@ void UBDocumentController::moveSceneToIndex(UBDocumentProxy* proxy, int source, 
 {
     if (UBDocumentContainer::movePageToIndex(source, target))
     {
-        proxy->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        proxy->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
         UBMetadataDcSubsetAdaptor::persist(proxy);
 
         mDocumentUI->thumbnailWidget->hightlightItem(target);
@@ -2829,7 +2831,7 @@ void UBDocumentController::addToDocument()
         int newActiveSceneIndex = selectedItems.count() == mBoardController->selectedDocument()->pageCount() ? 0 : oldActiveSceneIndex + 1;
         mDocumentUI->thumbnailWidget->selectItemAt(newActiveSceneIndex, false);
         selectDocument(mBoardController->selectedDocument());
-        mBoardController->selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
         UBMetadataDcSubsetAdaptor::persist(mBoardController->selectedDocument());
         mBoardController->reloadThumbnails();
 
@@ -2853,7 +2855,7 @@ void UBDocumentController::renameSelectedItem()
 bool UBDocumentController::isOKToOpenDocument(UBDocumentProxy* proxy)
 {
     //check version
-    QString docVersion = proxy->metaData(UBSettings::documentVersion).toString();
+    QString docVersion = proxy->metaData(UBSettingsData::documentVersion).toString();
 
     if (docVersion.isEmpty() || docVersion.startsWith("4.1") || docVersion.startsWith("4.2")
             || docVersion.startsWith("4.3") || docVersion.startsWith("4.4") || docVersion.startsWith("4.5")
@@ -2865,7 +2867,7 @@ bool UBDocumentController::isOKToOpenDocument(UBDocumentProxy* proxy)
     {
         if (UBApplication::mainWindow->yesNoQuestion(tr("Open Document"),
                 tr("The document '%1' has been generated with a newer version of Sankore (%2). By opening it, you may lose some information. Do you want to proceed?")
-                    .arg(proxy->metaData(UBSettings::documentName).toString())
+                    .arg(proxy->metaData(UBSettingsData::documentName).toString())
                     .arg(docVersion)))
         {
             return true;
@@ -2940,7 +2942,7 @@ void UBDocumentController::addImages()
             }
             else
             {
-                document->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+                document->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
                 UBMetadataDcSubsetAdaptor::persist(document);
                 reloadThumbnails();
             }
@@ -3192,12 +3194,12 @@ void UBDocumentController::deletePages(QList<QGraphicsItem *> itemsToDelete)
             }
         }
 
-        if(UBApplication::mainWindow->yesNoQuestion(tr("Remove Page"),tr("This is an irreversible action!") +"\n\n" + tr("Are you sure you want to remove %n page(s) from the selected document '%1'?", "", sceneIndexes.count()).arg(proxy->metaData(UBSettings::documentName).toString())))
+        if(UBApplication::mainWindow->yesNoQuestion(tr("Remove Page"),tr("This is an irreversible action!") +"\n\n" + tr("Are you sure you want to remove %n page(s) from the selected document '%1'?", "", sceneIndexes.count()).arg(proxy->metaData(UBSettingsData::documentName).toString())))
         {
             UBDocumentContainer::deletePages(sceneIndexes);
             mBoardController->regenerateThumbnails();
 
-            proxy->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+            proxy->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
             UBMetadataDcSubsetAdaptor::persist(proxy);
 
             int minIndex = proxy->pageCount() - 1;

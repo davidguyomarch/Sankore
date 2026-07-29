@@ -72,9 +72,9 @@ void UBImageUtils::drawGreyRect(QPainter *painter, const qreal& m11, bool darkBa
               QColor docSizeColor;
 
               if (darkBackground)
-                docSizeColor = UBSettings::documentSizeMarkColorDarkBackground;
+                docSizeColor = UBSettingsData::documentSizeMarkColorDarkBackground;
               else
-                docSizeColor = UBSettings::documentSizeMarkColorLightBackground;
+                docSizeColor = UBSettingsData::documentSizeMarkColorLightBackground;
 
               QPen pen (docSizeColor);
               pen.setWidth (penWidth);

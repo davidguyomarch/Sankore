@@ -42,6 +42,7 @@
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBSetting.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBApplicationController.h"
@@ -103,6 +104,7 @@
 #include "UBBoardItemFactory.h"
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 
 
 #include "web/UBWebController.h"
@@ -1386,7 +1388,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
         }
 
         if (result){
-            selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+            selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
         }
     }
     else if (UBMimeType::UniboardTool == itemMimeType)
@@ -2077,7 +2079,7 @@ void UBBoardController::setPageSize(QSize newSize)
 
         // Fin Issue 1684 - CFA - 20131128
 
-        selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+        selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
         mSettings->pageSize->set(newSize);
     }

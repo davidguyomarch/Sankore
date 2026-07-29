@@ -32,6 +32,7 @@
 #include <QGuiApplication>
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 
@@ -107,15 +108,15 @@ void UBMetadataDcSubsetAdaptor::persist(UBDocumentProxy* proxy)
     xmlWriter.writeStartElement("RDF");
 
     xmlWriter.writeStartElement("Description");
-    xmlWriter.writeAttribute("about", proxy->metaData(UBSettings::documentIdentifer).toString());
+    xmlWriter.writeAttribute("about", proxy->metaData(UBSettingsData::documentIdentifer).toString());
 
-    xmlWriter.writeTextElement(nsDc, "title", proxy->metaData(UBSettings::documentName).toString());
-    xmlWriter.writeTextElement(nsDc, "type", proxy->metaData(UBSettings::documentGroupName).toString());
-    xmlWriter.writeTextElement(nsDc, "date", proxy->metaData(UBSettings::documentDate).toString());
+    xmlWriter.writeTextElement(nsDc, "title", proxy->metaData(UBSettingsData::documentName).toString());
+    xmlWriter.writeTextElement(nsDc, "type", proxy->metaData(UBSettingsData::documentGroupName).toString());
+    xmlWriter.writeTextElement(nsDc, "date", proxy->metaData(UBSettingsData::documentDate).toString());
     xmlWriter.writeTextElement(nsDc, "format", "image/svg+xml");
 
     // introduced in UB 4.2
-    xmlWriter.writeTextElement(nsDc, "identifier", proxy->metaData(UBSettings::documentIdentifer).toString());
+    xmlWriter.writeTextElement(nsDc, "identifier", proxy->metaData(UBSettingsData::documentIdentifer).toString());
     xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, "version", UBSettings::currentFileVersion);
     QString width = QString::number(proxy->defaultDocumentSize().width());
     QString height = QString::number(proxy->defaultDocumentSize().height());
@@ -124,22 +125,22 @@ void UBMetadataDcSubsetAdaptor::persist(UBDocumentProxy* proxy)
     // introduced in UB 4.4
     xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, "updated-at", UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTimeUtc()));
     // introduced in OpenSankore 1.40.00
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionTitle,proxy->metaData(UBSettings::sessionTitle).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionAuthors,proxy->metaData(UBSettings::sessionAuthors).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionObjectives,proxy->metaData(UBSettings::sessionObjectives).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionKeywords,proxy->metaData(UBSettings::sessionKeywords).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionGradeLevel,proxy->metaData(UBSettings::sessionGradeLevel).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionSubjects,proxy->metaData(UBSettings::sessionSubjects).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionType,proxy->metaData(UBSettings::sessionType).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionLicence,proxy->metaData(UBSettings::sessionLicence).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionTitle,proxy->metaData(UBSettingsData::sessionTitle).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionAuthors,proxy->metaData(UBSettingsData::sessionAuthors).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionObjectives,proxy->metaData(UBSettingsData::sessionObjectives).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionKeywords,proxy->metaData(UBSettingsData::sessionKeywords).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionGradeLevel,proxy->metaData(UBSettingsData::sessionGradeLevel).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionSubjects,proxy->metaData(UBSettingsData::sessionSubjects).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionType,proxy->metaData(UBSettingsData::sessionType).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionLicence,proxy->metaData(UBSettingsData::sessionLicence).toString());
     // Issue 1684 - ALTI/AOU - 20131210
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::documentDefaultBackgroundImage, proxy->metaData(UBSettings::documentDefaultBackgroundImage).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::documentDefaultBackgroundImageDisposition, proxy->metaData(UBSettings::documentDefaultBackgroundImageDisposition).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::documentDefaultBackgroundImage, proxy->metaData(UBSettingsData::documentDefaultBackgroundImage).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::documentDefaultBackgroundImageDisposition, proxy->metaData(UBSettingsData::documentDefaultBackgroundImageDisposition).toString());
     // Fin Issue 1684 - ALTI/AOU - 20131210
 
     //Issue N/C - NNE - 20140526
-    if(proxy->metaData(UBSettings::documentTagVersion).toString().isEmpty() == false)
-        xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, UBSettings::documentTagVersion, proxy->metaData(UBSettings::documentTagVersion).toString());
+    if(proxy->metaData(UBSettingsData::documentTagVersion).toString().isEmpty() == false)
+        xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, UBSettingsData::documentTagVersion, proxy->metaData(UBSettingsData::documentTagVersion).toString());
     //Issue N/C - NNE - 20140526 : END
 
     xmlWriter.writeEndElement(); //dc:Description

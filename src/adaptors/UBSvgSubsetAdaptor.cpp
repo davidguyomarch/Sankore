@@ -72,6 +72,7 @@
 #include "frameworks/UBFileSystemUtils.h"
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBSetting.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBApplication.h"
@@ -2292,9 +2293,9 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::pixmapItemToLinkedImage(UBGraphicsPi
     mXmlWriter.writeStartElement("image");
     QString fileName;
     if (isBackground // Issue 1684 - CFA - 20131128 : specify isBackground
-        && ( ! mScene->document()->metaData(UBSettings::documentDefaultBackgroundImage).toString().isEmpty())) // Issue 1684 - ALTI/AOU - 20131210 : Si il y a une image par défaut définie, on utilise son uuid :
+        && ( ! mScene->document()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString().isEmpty())) // Issue 1684 - ALTI/AOU - 20131210 : Si il y a une image par défaut définie, on utilise son uuid :
     {
-        fileName = UBPersistenceManager::imageDirectory + "/" + mScene->document()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
+        fileName = UBPersistenceManager::imageDirectory + "/" + mScene->document()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString();
     }
     else
         fileName = UBPersistenceManager::imageDirectory + "/" + pixmapItem->uuid().toString() + ".png";
@@ -2398,9 +2399,9 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::svgItemToLinkedSvg(UBGraphicsSvgItem
 
     QString fileName;
     if (isBackground
-            && ( ! mScene->document()->metaData(UBSettings::documentDefaultBackgroundImage).toString().isEmpty())) // Issue 1684 - ALTI/AOU - 20131210 : Si il y a une image par défaut définie, on utilise son uuid :
+            && ( ! mScene->document()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString().isEmpty())) // Issue 1684 - ALTI/AOU - 20131210 : Si il y a une image par défaut définie, on utilise son uuid :
     {
-        fileName = UBPersistenceManager::imageDirectory + "/" + mScene->document()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
+        fileName = UBPersistenceManager::imageDirectory + "/" + mScene->document()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString();
     }
     else
         fileName = UBPersistenceManager::imageDirectory + "/" + svgItem->uuid().toString() + ".svg";

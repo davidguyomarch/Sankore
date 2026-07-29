@@ -35,6 +35,7 @@
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBSetting.h"
 #include "core/UBForeignObjectsHandler.h"
 
@@ -166,8 +167,8 @@ void UBPersistenceManager::createDocumentProxiesStructure(const QFileInfoList &c
         if (dir.entryList(QDir::Files | QDir::NoDotAndDotDot).size() > 0)
         {
             QMap<QString, QVariant> metadatas = UBMetadataDcSubsetAdaptor::load(fullPath);
-            QString docGroupName = metadatas.value(UBSettings::documentGroupName, QString()).toString();
-            QString docName = metadatas.value(UBSettings::documentName, QString()).toString();
+            QString docGroupName = metadatas.value(UBSettingsData::documentGroupName, QString()).toString();
+            QString docName = metadatas.value(UBSettingsData::documentName, QString()).toString();
 
             if (docName.isEmpty()) {
                 qDebug() << "Group name and document name are empty in UBPersistenceManager::createDocumentProxiesStructure()";
@@ -184,7 +185,7 @@ void UBPersistenceManager::createDocumentProxiesStructure(const QFileInfoList &c
                 docProxy->setMetaData(key, metadatas.value(key));
             }
 
-            if ( ! docProxy->metaData(UBSettings::documentDefaultBackgroundImage).toString().isEmpty()) // Issue 1684 - ALTI/AOU - 20131213
+            if ( ! docProxy->metaData(UBSettingsData::documentDefaultBackgroundImage).toString().isEmpty()) // Issue 1684 - ALTI/AOU - 20131213
             {
                 docProxy->setHasDefaultImageBackground(true);
             }
@@ -218,7 +219,7 @@ QDialog::DialogCode UBPersistenceManager::processInteractiveReplacementDialog(UB
 
     if (UBApplication::documentController
             && UBApplication::documentController->mainWidget()) {
-        QString docGroupName = pProxy->metaData(UBSettings::documentGroupName).toString();
+        QString docGroupName = pProxy->metaData(UBSettingsData::documentGroupName).toString();
         QModelIndex parentIndex = mDocumentTreeStructureModel->goTo(docGroupName);
         if (!parentIndex.isValid()) {
             UBApplication::overrideCursor()->setShape(saveShape);
@@ -226,7 +227,7 @@ QDialog::DialogCode UBPersistenceManager::processInteractiveReplacementDialog(UB
         }
 
         QStringList docList = mDocumentTreeStructureModel->nodeNameList(parentIndex);
-        QString docName = pProxy->metaData(UBSettings::documentName).toString();
+        QString docName = pProxy->metaData(UBSettingsData::documentName).toString();
 
         if (docList.contains(docName)) {
             UBDocumentReplaceDialog *replaceDialog = new UBDocumentReplaceDialog(docName
@@ -247,7 +248,7 @@ QDialog::DialogCode UBPersistenceManager::processInteractiveReplacementDialog(UB
                         mDocumentTreeStructureModel->removeRow(i, parentIndex);
                     }
                 }
-                pProxy->setMetaData(UBSettings::documentName, resultName);
+                pProxy->setMetaData(UBSettingsData::documentName, resultName);
             }
             replaceDialog->setParent(0);
             delete replaceDialog;
@@ -421,23 +422,23 @@ UBDocumentProxy* UBPersistenceManager::createDocument(const QString& pGroupName
 
     if (pGroupName.length() > 0)
     {
-        doc->setMetaData(UBSettings::documentGroupName, pGroupName);
+        doc->setMetaData(UBSettingsData::documentGroupName, pGroupName);
     }
 
     if (pName.length() > 0)
     {
-        doc->setMetaData(UBSettings::documentName, pName);
+        doc->setMetaData(UBSettingsData::documentName, pName);
     }
 
-    doc->setMetaData(UBSettings::documentVersion, UBSettings::currentFileVersion);
+    doc->setMetaData(UBSettingsData::documentVersion, UBSettings::currentFileVersion);
     QString currentDate =  UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime());
-    doc->setMetaData(UBSettings::documentUpdatedAt,currentDate);
-    doc->setMetaData(UBSettings::documentDate,currentDate);
+    doc->setMetaData(UBSettingsData::documentUpdatedAt,currentDate);
+    doc->setMetaData(UBSettingsData::documentDate,currentDate);
 
     //Issue N/C - NNE - 20140526
     QString version = UBApplication::applicationVersion();
     version.chop(1);
-    doc->setMetaData(UBSettings::documentTagVersion, version);
+    doc->setMetaData(UBSettingsData::documentTagVersion, version);
     //Issue N/C - NNE - 20140526 : END
 
     if (withEmptyPage) {
@@ -498,17 +499,17 @@ UBDocumentProxy* UBPersistenceManager::createDocumentFromDir(const QString& pDoc
 
     if (pGroupName.length() > 0)
     {
-        doc->setMetaData(UBSettings::documentGroupName, pGroupName);
+        doc->setMetaData(UBSettingsData::documentGroupName, pGroupName);
     }
 
     if (pName.length() > 0)
     {
-        doc->setMetaData(UBSettings::documentName, pName);
+        doc->setMetaData(UBSettingsData::documentName, pName);
     }
 
     QMap<QString, QVariant> metadatas = UBMetadataDcSubsetAdaptor::load(pDocumentDirectory);
 
-    if ( ! metadatas.value(UBSettings::documentDefaultBackgroundImage).toString().isEmpty()) // Issue 1684 - ALTI/AOU - 20131213
+    if ( ! metadatas.value(UBSettingsData::documentDefaultBackgroundImage).toString().isEmpty()) // Issue 1684 - ALTI/AOU - 20131213
     {
         doc->setHasDefaultImageBackground(true);
     }
@@ -586,18 +587,18 @@ UBDocumentProxy* UBPersistenceManager::duplicateDocument(UBDocumentProxy* pDocum
         copy->setMetaData(key, pDocumentProxy->metaDatas().value(key));
     }    
 
-    copy->setMetaData(UBSettings::documentName,
-            pDocumentProxy->metaData(UBSettings::documentName).toString() + " " + tr("(copy)"));
+    copy->setMetaData(UBSettingsData::documentName,
+            pDocumentProxy->metaData(UBSettingsData::documentName).toString() + " " + tr("(copy)"));
 
     copy->setUuid(QUuid::createUuid());
 
     //Issue N/C - NNE - 20140526
     QString version = UBApplication::applicationVersion();
     version.chop(1);
-    copy->setMetaData(UBSettings::documentTagVersion, version);
+    copy->setMetaData(UBSettingsData::documentTagVersion, version);
     //Issue N/C - NNE - 20140526 : END
 
-    if (!copy->metaDatas().value(UBSettings::documentDefaultBackgroundImage).toString().isEmpty()) //Issue 1684 - CFA - 20131217
+    if (!copy->metaDatas().value(UBSettingsData::documentDefaultBackgroundImage).toString().isEmpty()) //Issue 1684 - CFA - 20131217
         copy->setHasDefaultImageBackground(true);
 
     persistDocumentMetadata(copy);
@@ -641,13 +642,13 @@ void UBPersistenceManager::deleteDocumentScenes(UBDocumentProxy* proxy, const QL
         emit documentSceneWillBeDeleted(proxy, index);
     }
 
-    QString sourceName = proxy->metaData(UBSettings::documentName).toString();
+    QString sourceName = proxy->metaData(UBSettingsData::documentName).toString();
     UBDocumentProxy *trashDocProxy = createDocument(UBSettings::trashedDocumentGroupNamePrefix/* + sourceGroupName*/, sourceName, false);
 
     // Issue 1684 - ALTI/AOU - 20131210
     // Dupliquer dans le document _Trash les metaData qui doivent suivre :
-    trashDocProxy->setMetaData(UBSettings::documentDefaultBackgroundImage, proxy->metaData(UBSettings::documentDefaultBackgroundImage));
-    trashDocProxy->setMetaData(UBSettings::documentDefaultBackgroundImageDisposition, proxy->metaData(UBSettings::documentDefaultBackgroundImageDisposition));
+    trashDocProxy->setMetaData(UBSettingsData::documentDefaultBackgroundImage, proxy->metaData(UBSettingsData::documentDefaultBackgroundImage));
+    trashDocProxy->setMetaData(UBSettingsData::documentDefaultBackgroundImageDisposition, proxy->metaData(UBSettingsData::documentDefaultBackgroundImageDisposition));
     // Fin Issue 1684 - ALTI/AOU - 20131210
 
     for (int index : compactedIndexes)
@@ -1102,13 +1103,13 @@ void UBPersistenceManager::purgeEmptyDocuments()
     for (UBDocumentProxy* docProxy : mDocumentTreeStructureModel->newDocuments())
     {
         if (isEmpty(docProxy)
-            && !docProxy->metaData(UBSettings::sessionTitle).toString().size()
-            && !docProxy->metaData(UBSettings::sessionAuthors).toString().size()
-            && !docProxy->metaData(UBSettings::sessionObjectives).toString().size()
-            && !docProxy->metaData(UBSettings::sessionKeywords).toString().size()
-            && !docProxy->metaData(UBSettings::sessionGradeLevel).toString().size()
-            && !docProxy->metaData(UBSettings::sessionSubjects).toString().size()
-            && !docProxy->metaData(UBSettings::sessionType).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionTitle).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionAuthors).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionObjectives).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionKeywords).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionGradeLevel).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionSubjects).toString().size()
+            && !docProxy->metaData(UBSettingsData::sessionType).toString().size()
             && !docProxy->externalFiles()->count() // Issue 1683 - ALTI/AOU - 20131212
             )
         {

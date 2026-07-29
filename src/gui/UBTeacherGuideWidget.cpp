@@ -37,6 +37,7 @@
 #include "core/UBApplication.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 
 #include "globals/UBGlobals.h"
 
@@ -300,7 +301,7 @@ void UBTeacherGuideEditionWidget::onActiveSceneChanged()
         mpPageNumberLabel->setText(tr("Page: %0").arg(currentPage));
         UBDocumentProxy* documentProxy = UBApplication::boardController->selectedDocument();
         if (mpDocumentTitle)
-            mpDocumentTitle->setText(documentProxy->metaData(UBSettings::sessionTitle).toString());
+            mpDocumentTitle->setText(documentProxy->metaData(UBSettingsData::sessionTitle).toString());
     }
     //Issue 1454 - CFA - 20140306 : correction des raccourcis clavier fleches gauche et droite
     UBApplication::boardController->controlView()->setFocus();
@@ -589,7 +590,7 @@ void UBTeacherGuidePresentationWidget::onActiveSceneChanged()
     mpPageNumberLabel->setText(tr("Page: %0").arg(UBApplication::boardController->currentPage()));
     UBDocumentProxy* documentProxy = UBApplication::boardController->selectedDocument();
     if (mpDocumentTitle)
-        mpDocumentTitle->setText( documentProxy->metaData(UBSettings::sessionTitle).toString());
+        mpDocumentTitle->setText( documentProxy->metaData(UBSettingsData::sessionTitle).toString());
 }
 
 void UBTeacherGuidePresentationWidget::createMediaButtonItem()
@@ -1212,21 +1213,21 @@ void UBTeacherGuidePageZeroWidget::loadData()
     //UBDocumentProxy* documentProxy = UBApplication::boardController->selectedDocument();
     mCurrentDocument = UBApplication::boardController->selectedDocument();
     UBDocumentProxy* documentProxy = mCurrentDocument;
-    mpSessionTitle->setText( documentProxy->metaData(UBSettings::sessionTitle).toString());
-    mpAuthors->setText( documentProxy->metaData(UBSettings::sessionAuthors).toString());
-    mpObjectives->setText( documentProxy->metaData(UBSettings::sessionObjectives).toString());
-    mpKeywords->setText( documentProxy->metaData(UBSettings::sessionKeywords).toString());
+    mpSessionTitle->setText( documentProxy->metaData(UBSettingsData::sessionTitle).toString());
+    mpAuthors->setText( documentProxy->metaData(UBSettingsData::sessionAuthors).toString());
+    mpObjectives->setText( documentProxy->metaData(UBSettingsData::sessionObjectives).toString());
+    mpKeywords->setText( documentProxy->metaData(UBSettingsData::sessionKeywords).toString());
 
-    int currentIndex = mpSchoolLevelBox->findText(documentProxy->metaData(UBSettings::sessionGradeLevel).toString());
+    int currentIndex = mpSchoolLevelBox->findText(documentProxy->metaData(UBSettingsData::sessionGradeLevel).toString());
     mpSchoolLevelBox->setCurrentIndex((currentIndex != -1) ? currentIndex : 0);
 
-    currentIndex = mpSchoolSubjectsBox->findText(documentProxy->metaData(UBSettings::sessionSubjects).toString());
+    currentIndex = mpSchoolSubjectsBox->findText(documentProxy->metaData(UBSettingsData::sessionSubjects).toString());
     mpSchoolSubjectsBox->setCurrentIndex((currentIndex != -1) ? currentIndex : 0);
 
-    currentIndex = mpSchoolTypeBox->findText(documentProxy->metaData(UBSettings::sessionType).toString());
+    currentIndex = mpSchoolTypeBox->findText(documentProxy->metaData(UBSettingsData::sessionType).toString());
     mpSchoolTypeBox->setCurrentIndex((currentIndex != -1) ? currentIndex : 0);
 
-    currentIndex = documentProxy->metaData(UBSettings::sessionLicence).toInt();
+    currentIndex = documentProxy->metaData(UBSettingsData::sessionLicence).toInt();
     mpLicenceBox->setCurrentIndex((currentIndex != -1) ? currentIndex : 0);
 
     setIsModified(false);
@@ -1246,14 +1247,14 @@ void UBTeacherGuidePageZeroWidget::persistData()
             return;
         }
 
-        documentProxy->setMetaData(UBSettings::sessionTitle, mpSessionTitle->text());
-        documentProxy->setMetaData(UBSettings::sessionAuthors, mpAuthors->text());
-        documentProxy->setMetaData(UBSettings::sessionObjectives, mpObjectives->text());
-        documentProxy->setMetaData(UBSettings::sessionKeywords, mpKeywords->text());
-        documentProxy->setMetaData(UBSettings::sessionGradeLevel, mpSchoolLevelBox->currentText());
-        documentProxy->setMetaData(UBSettings::sessionSubjects, mpSchoolSubjectsBox->currentText());
-        documentProxy->setMetaData(UBSettings::sessionType, mpSchoolTypeBox->currentText());
-        documentProxy->setMetaData(UBSettings::sessionLicence, mpLicenceBox->currentIndex());
+        documentProxy->setMetaData(UBSettingsData::sessionTitle, mpSessionTitle->text());
+        documentProxy->setMetaData(UBSettingsData::sessionAuthors, mpAuthors->text());
+        documentProxy->setMetaData(UBSettingsData::sessionObjectives, mpObjectives->text());
+        documentProxy->setMetaData(UBSettingsData::sessionKeywords, mpKeywords->text());
+        documentProxy->setMetaData(UBSettingsData::sessionGradeLevel, mpSchoolLevelBox->currentText());
+        documentProxy->setMetaData(UBSettingsData::sessionSubjects, mpSchoolSubjectsBox->currentText());
+        documentProxy->setMetaData(UBSettingsData::sessionType, mpSchoolTypeBox->currentText());
+        documentProxy->setMetaData(UBSettingsData::sessionLicence, mpLicenceBox->currentIndex());
         //Issue 1683 (Evolution) - CFA - 20140124 : a la modifications des infos de la teacher guide apres reimport de l'ubz, les external files (DocumentProxy) n'etaient pas recharges.
         //A la persistence dans subset adaptor, on perdait les fichiers dans le svg a la reecriture
         if(mpAddAFileItem->childCount() > 0)

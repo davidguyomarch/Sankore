@@ -47,6 +47,7 @@
 
 #include "UBApplication.h"
 #include "UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "UBPersistenceManager.h"
 
 #include "../adaptors/UBExportWeb.h"
@@ -324,8 +325,8 @@ UBDocumentProxy* UBDocumentManager::importDir(const QDir& pDir, const QString& p
 
     if (result > 0)
     {
-        doc->setMetaData(UBSettings::documentGroupName, pGroup);
-        doc->setMetaData(UBSettings::documentName, pDir.dirName());
+        doc->setMetaData(UBSettingsData::documentGroupName, pGroup);
+        doc->setMetaData(UBSettingsData::documentName, pDir.dirName());
 
         UBPersistenceManager::persistenceManager()->persistDocumentMetadata(doc);
 

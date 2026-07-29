@@ -37,6 +37,7 @@
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBApplicationController.h"
 #include "core/UBDisplayManager.h"
 #include "core/UBPersistenceManager.h"
@@ -2542,7 +2543,7 @@ void UBGraphicsScene::keyReleaseEvent(QKeyEvent * keyEvent)
 void UBGraphicsScene::setDocumentUpdated()
 {
     if (document())
-        document()->setMetaData(UBSettings::documentUpdatedAt
+        document()->setMetaData(UBSettingsData::documentUpdatedAt
                 , UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 }
 
