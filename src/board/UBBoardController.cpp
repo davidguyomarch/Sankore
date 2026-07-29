@@ -97,6 +97,7 @@
 #include "adaptors/UBThumbnailAdaptor.h"
 
 #include "UBBoardPaletteManager.h"
+#include "UBBoardNavigationController.h"
 
 #include "core/UBSettings.h"
 
@@ -112,6 +113,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     , mActiveScene(0)
     , mActiveSceneIndex(-1)
     , mPaletteManager(0)
+    , mNavigationController(0)
     , mSoftwareUpdateDialog(0)
     , mMessageWindow(0)
     , mControlView(0)
@@ -128,6 +130,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     , mActionUngroupText(tr("Ungroup"))
 {
     mSettings = UBSettings::settings();
+    mNavigationController = new UBBoardNavigationController(this, this);
     mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
 
     int penColorIndex = mSettings->penColorIndex();
@@ -513,102 +516,28 @@ void UBBoardController::stylusToolDoubleClicked(int tool)
 
 void UBBoardController::addScene()
 {
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    persistViewPositionOnCurrentScene();// Issue 1598/1605 - CFA - 20131028
-    persistCurrentScene();
-
-    UBDocumentContainer::addPage(mActiveSceneIndex + 1);
-
-    selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-
-    reloadThumbnails(); // Issue 1026 - AOU - 20131028 : (commentaire du 20130925) - synchro des thumbnails présentés en mode Board et en mode Documents.
-
-    setActiveDocumentScene(mActiveSceneIndex + 1);
-
-    // Issue 1684 - CFA - 20131127 : handle default background // Issue 1684 - ALTI/AOU - 20131210
-    QString backgroundImage = selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
-    qDebug() << backgroundImage;
-    UBFeatureBackgroundDisposition backgroundImageDisposition = static_cast<UBFeatureBackgroundDisposition>(selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImageDisposition).toInt());
-    if ( ! backgroundImage.isEmpty())
-    {
-        QString sUrl = "file:///" + selectedDocument()->persistencePath() + "/" + UBPersistenceManager::imageDirectory + "/" + backgroundImage;
-        QUrl urlImage(sUrl);
-        downloadURL( urlImage, QString(), QPointF(), QSize(), true, false, backgroundImageDisposition);
-    }
-
-    QApplication::restoreOverrideCursor();
+    mNavigationController->addScene();
 }
 
 void UBBoardController::addScene(UBGraphicsScene* scene, bool replaceActiveIfEmpty)
 {
-    if (scene)
-    {
-        if (scene->document() && (scene->document() != selectedDocument()))
-        {
-            for (const QUrl& relativeFile : scene->relativeDependencies())
-            {
-                QString source = scene->document()->persistencePath() + "/" + relativeFile.toString();
-                QString target = selectedDocument()->persistencePath() + "/" + relativeFile.toString();
-
-                QFileInfo fi(target);
-                QDir d = fi.dir();
-
-                d.mkpath(d.absolutePath());
-                QFile::copy(source, target);
-            }
-        }
-
-        if (replaceActiveIfEmpty && mActiveScene->isEmpty())
-        {
-            setActiveDocumentScene(mActiveSceneIndex);
-        }
-        else
-        {
-            persistCurrentScene();
-            UBPersistenceManager::persistenceManager()->insertDocumentSceneAt(selectedDocument(), scene, mActiveSceneIndex + 1);
-            setActiveDocumentScene(mActiveSceneIndex + 1);
-        }
-
-        selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-    }
+    mNavigationController->addScene(scene, replaceActiveIfEmpty);
 }
 
 
 void UBBoardController::addScene(UBDocumentProxy* proxy, int sceneIndex, bool replaceActiveIfEmpty)
 {
-    UBGraphicsScene* scene = UBPersistenceManager::persistenceManager()->loadDocumentScene(proxy, sceneIndex);
-
-    if (scene)
-    {
-        addScene(scene, replaceActiveIfEmpty);
-    }
+    mNavigationController->addScene(proxy, sceneIndex, replaceActiveIfEmpty);
 }
 
 void UBBoardController::duplicateScene(int nIndex)
 {
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    persistCurrentScene();
-
-    QList<int> scIndexes;
-    scIndexes << nIndex;
-    duplicatePages(scIndexes);
-    insertThumbPage(nIndex);
-    emit documentThumbnailsUpdated(this);
-    selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-
-    setActiveDocumentScene(nIndex + 1);
-    QApplication::restoreOverrideCursor();
-
-    emit pageChanged();
-
-    reloadThumbnails(); // Issue 1026 - AOU - 20131031
+    mNavigationController->duplicateScene(nIndex);
 }
 
 void UBBoardController::duplicateScene()
 {
-    if (UBApplication::applicationController->displayMode() != UBApplicationController::Board)
-        return;
-    duplicateScene(mActiveSceneIndex);
+    mNavigationController->duplicateScene();
 }
 
 UBGraphicsItem *UBBoardController::duplicateItem(UBItem *item, bool bAsync, eItemActionType actionType)
@@ -812,26 +741,7 @@ UBGraphicsItem *UBBoardController::duplicateItem(UBItem *item, bool bAsync, eIte
 
 void UBBoardController::deleteScene(int nIndex)
 {
-    if (selectedDocument()->pageCount()>=2)
-    {
-        mDeletingSceneIndex = nIndex;
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        persistCurrentScene();
-        showMessage(tr("Delete page %1 from document").arg(nIndex+1), true);
-
-        QList<int> scIndexes;
-        scIndexes << nIndex;
-        selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-
-        if (nIndex >= pageCount())
-            nIndex = pageCount()-1;
-        setActiveDocumentScene(nIndex-1);
-        deletePages(scIndexes);
-        reloadThumbnails(); // Issue 1026 - AOU - 20131028 : (commentaire du 20130925) - synchro des thumbnails présentés en mode Board et en mode Documents.
-        showMessage(tr("Page %1 deleted").arg(nIndex));
-        QApplication::restoreOverrideCursor();
-        mDeletingSceneIndex = -1;
-    }
+    mNavigationController->deleteScene(nIndex);
 }
 
 void UBBoardController::regenerateThumbnails()
@@ -1096,72 +1006,25 @@ void UBBoardController::persistViewPositionOnCurrentScene()
 
 void UBBoardController::previousScene()
 {
-    if (mActiveSceneIndex > 0)
-    {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        persistViewPositionOnCurrentScene();// Issue 1598/1605 - CFA - 20131028
-        persistCurrentScene();
-        setActiveDocumentScene(mActiveSceneIndex - 1);
-        mControlView->centerOn(mActiveScene->lastCenter());// Issue 1598/1605 - CFA - 20131028
-        QApplication::restoreOverrideCursor();
-    }
-
-    updateActionStates();
-    emit pageChanged();
+    mNavigationController->previousScene();
 }
 
 
 void UBBoardController::nextScene()
 {
-    if (mActiveSceneIndex < selectedDocument()->pageCount() - 1)
-    {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        persistViewPositionOnCurrentScene();// Issue 1598/1605 - CFA - 20131028
-        persistCurrentScene();
-        setActiveDocumentScene(mActiveSceneIndex + 1);
-        mControlView->centerOn(mActiveScene->lastCenter());// Issue 1598/1605 - CFA - 20131028
-        QApplication::restoreOverrideCursor();
-    }
-
-    updateActionStates();
-    emit pageChanged();
+    mNavigationController->nextScene();
 }
 
 
 void UBBoardController::firstScene()
 {
-
-    if (mActiveSceneIndex > 0)
-    {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        persistViewPositionOnCurrentScene();// Issue 1598/1605 - CFA - 20131028
-        persistCurrentScene();
-        setActiveDocumentScene(0);
-        mControlView->centerOn(mActiveScene->lastCenter());// Issue 1598/1605 - CFA - 20131028
-        QApplication::restoreOverrideCursor();
-    }
-
-
-    updateActionStates();
-    emit pageChanged();
+    mNavigationController->firstScene();
 }
 
 
 void UBBoardController::lastScene()
 {
-
-    if (mActiveSceneIndex < selectedDocument()->pageCount() - 1)
-    {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        persistViewPositionOnCurrentScene();// Issue 1598/1605 - CFA - 20131028
-        persistCurrentScene();
-        setActiveDocumentScene(selectedDocument()->pageCount() - 1);
-        mControlView->centerOn(mActiveScene->lastCenter());// Issue 1598/1605 - CFA - 20131028
-        QApplication::restoreOverrideCursor();
-    }
-
-    updateActionStates();
-    emit pageChanged();
+    mNavigationController->lastScene();
 }
 
 void UBBoardController::groupButtonClicked()
@@ -1951,22 +1814,7 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
 
 void UBBoardController::moveSceneToIndex(int source, int target)
 {
-    if (selectedDocument())
-    {
-
-        persistCurrentScene();
-
-        UBDocumentContainer::movePageToIndex(source, target);
-
-        selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-        UBMetadataDcSubsetAdaptor::persist(selectedDocument());
-        mMovingSceneIndex = source;
-        mActiveSceneIndex = target;
-        setActiveDocumentScene(target);
-        mMovingSceneIndex = -1;
-
-        emit activeSceneChanged(); // Issue 1026 - AOU - 20131018 : generate Thumbnails
-    }
+    mNavigationController->moveSceneToIndex(source, target);
 }
 
 void UBBoardController::ClearUndoStack()
@@ -2972,11 +2820,7 @@ void UBBoardController::addItem()
 
 void UBBoardController::importPage()
 {
-    int pageCount = selectedDocument()->pageCount();
-    if (UBApplication::documentController->addFileToDocument(selectedDocument()))
-    {
-        setActiveDocumentScene(selectedDocument(), pageCount, true);
-    }
+    mNavigationController->importPage();
 }
 
 void UBBoardController::notifyPageChanged()

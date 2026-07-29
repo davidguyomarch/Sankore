@@ -51,6 +51,7 @@ class UBGraphicsVideoItem;
 class UBGraphicsAudioItem;
 class UBGraphicsWidgetItem;
 class UBBoardPaletteManager;
+class UBBoardNavigationController;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
@@ -179,6 +180,11 @@ class UBBoardController : public UBDocumentContainer
         UBBoardPaletteManager *paletteManager()
         {
             return mPaletteManager;
+        }
+
+        UBBoardNavigationController *navigationController()
+        {
+            return mNavigationController;
         }
 
         void notifyCache(bool visible);
@@ -316,6 +322,7 @@ class UBBoardController : public UBDocumentContainer
         UBGraphicsScene* mActiveScene;
         int mActiveSceneIndex;
         UBBoardPaletteManager *mPaletteManager;
+        UBBoardNavigationController *mNavigationController;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
         UBMessageWindow *mMessageWindow;
         UBBoardView *mControlView;
