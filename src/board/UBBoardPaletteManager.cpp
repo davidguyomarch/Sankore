@@ -449,6 +449,9 @@ void UBBoardPaletteManager::connectPalettes()
     connect(UBApplication::mainWindow->actionDrawing, SIGNAL(toggled(bool)), this, SLOT(toggleDrawingPalette(bool)));
     connect(UBApplication::mainWindow->actionStylus, SIGNAL(toggled(bool)), this, SLOT(toggleStylusPalette(bool)));
 
+    // Close all popup palettes when any toolbar action is triggered
+    connect(UBApplication::mainWindow->boardToolBar, SIGNAL(actionTriggered(QAction*)), this, SLOT(closeAllPopupPalettes()));
+
     for (QWidget *widget : UBApplication::mainWindow->actionZoomIn->associatedWidgets())
     {
         QAbstractButton *button = qobject_cast<QAbstractButton*>(widget);
@@ -1121,3 +1124,17 @@ UBCreateLinkPalette* UBBoardPaletteManager::linkPalette()
     return mLinkPalette;
 }
 
+
+void UBBoardPaletteManager::closeAllPopupPalettes()
+{
+    if (mAddItemPalette && mAddItemPalette->isVisible())
+        mAddItemPalette->close();
+    if (mErasePalette && mErasePalette->isVisible())
+        mErasePalette->close();
+    if (mPagePalette && mPagePalette->isVisible())
+        mPagePalette->close();
+    if (mImageBackgroundPalette && mImageBackgroundPalette->isVisible())
+        mImageBackgroundPalette->close();
+    if (mBackgroundsPalette && mBackgroundsPalette->isVisible())
+        mBackgroundsPalette->close();
+}
