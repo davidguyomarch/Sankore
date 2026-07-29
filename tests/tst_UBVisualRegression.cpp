@@ -128,8 +128,8 @@ void TestUBVisualRegression::testToolButtonRendering()
     button.setText("Test");
     button.setIcon(QIcon(":/images/toolbar/svg/stylus.svg"));
     button.setIconSize(QSize(32, 32));
-    button.setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    button.setFixedSize(64, 56);
+    button.setToolButtonStyle(Qt::ToolButtonIconOnly);
+    button.setFixedSize(40, 40);
     button.show();
     (void)QTest::qWaitForWindowExposed(&button);
 
@@ -143,7 +143,7 @@ void TestUBVisualRegression::testDarkToolBarStyle()
     // Create a toolbar with a few actions
     QToolBar toolbar;
     toolbar.setIconSize(QSize(32, 32));
-    toolbar.setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    toolbar.setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     QAction *action1 = toolbar.addAction(QIcon(":/images/toolbar/svg/stylus.svg"), "Stylus");
     QAction *action2 = toolbar.addAction(QIcon(":/images/toolbar/svg/undo.svg"), "Undo");
@@ -154,7 +154,7 @@ void TestUBVisualRegression::testDarkToolBarStyle()
     Q_UNUSED(action2);
     Q_UNUSED(action3);
 
-    toolbar.setFixedSize(300, 64);
+    toolbar.setFixedSize(200, 48);
     toolbar.show();
     (void)QTest::qWaitForWindowExposed(&toolbar);
 

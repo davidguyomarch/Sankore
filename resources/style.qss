@@ -22,15 +22,15 @@ QToolBar
 {
     background-color: #2A2A2A;
     border: none;
-    spacing: 4px;
-    padding: 4px;
+    spacing: 2px;
+    padding: 2px 4px;
 }
 
 QToolBar::separator
 {
     background: rgba(255, 255, 255, 40);
     width: 1px;
-    margin: 6px 4px;
+    margin: 4px 2px;
 }
 
 QToolButton
@@ -38,9 +38,10 @@ QToolButton
     color: white;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 4px;
-    font-size: 11px;
+    min-width: 32px;
+    min-height: 32px;
 }
 
 QToolButton:hover
