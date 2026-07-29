@@ -662,7 +662,8 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         }
 
         painter.drawPath(path);
-        painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);
+        if (!iconPixmap.isNull())
+            painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);
         yFrom += (TABSIZE + dock->tabSpacing());
         painter.restore();
     }
