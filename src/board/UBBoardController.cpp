@@ -99,6 +99,7 @@
 #include "UBBoardPaletteManager.h"
 #include "UBBoardNavigationController.h"
 #include "UBBoardToolbarController.h"
+#include "UBBoardZoomController.h"
 
 #include "core/UBSettings.h"
 
@@ -133,6 +134,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     mSettings = UBSettings::settings();
     mNavigationController = new UBBoardNavigationController(this, this);
     mToolbarController = new UBBoardToolbarController(this, mainWindow, mSettings, this);
+    mZoomController = new UBBoardZoomController(this, this);
     mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
 
     int penColorIndex = mSettings->penColorIndex();
@@ -762,111 +764,49 @@ void UBBoardController::showKeyboard(bool show)
 
 void UBBoardController::zoomIn(QPointF scenePoint)
 {
-    if (mControlView->transform().m11() > UB_MAX_ZOOM)
-    {
-        qApp->beep();
-        return;
-    }
-    zoom(mZoomFactor, scenePoint);
+    mZoomController->zoomIn(scenePoint);
 }
 
 
 void UBBoardController::zoomOut(QPointF scenePoint)
 {
-    if ((mControlView->horizontalScrollBar()->maximum() == 0) && (mControlView->verticalScrollBar()->maximum() == 0))
-    {
-        // Do not zoom out if we reached the maximum
-        qApp->beep();
-        return;
-    }
-
-    qreal newZoomFactor = 1 / mZoomFactor;
-
-    zoom(newZoomFactor, scenePoint);
+    mZoomController->zoomOut(scenePoint);
 }
 
 
 void UBBoardController::zoomRestore()
 {
-    QTransform tr;
-
-    tr.scale(mSystemScaleFactor, mSystemScaleFactor);
-    mControlView->setTransform(tr);    
-
-    centerRestore();
-
-    for (QGraphicsItem *gi : mActiveScene->selectedItems ())
-    {
-        //force item to redraw the frame (for the anti scale calculation)
-        gi->setSelected(false);
-        gi->setSelected(true);
-    }
-
-    emit zoomChanged(1.0);
+    mZoomController->zoomRestore();
 }
 
 
 void UBBoardController::centerRestore()
 {
-    centerOn(QPointF(0,0));
+    mZoomController->centerRestore();
 }
 
 
 void UBBoardController::centerOn(QPointF scenePoint)
 {
-    mControlView->centerOn(scenePoint);
-    UBApplication::applicationController->adjustDisplayView();
+    mZoomController->centerOn(scenePoint);
 }
 
 
 void UBBoardController::zoom(const qreal ratio, QPointF scenePoint)
 {
-
-    QPointF viewCenter = mControlView->mapToScene(QRect(0, 0, mControlView->width(), mControlView->height()).center());
-    QPointF offset = scenePoint - viewCenter;
-    QPointF scalledOffset = offset / ratio;
-
-    qreal currentZoom = ratio * mControlView->viewportTransform().m11() / mSystemScaleFactor;
-
-    qreal usedRatio = ratio;
-    if (currentZoom > UB_MAX_ZOOM)
-    {
-        currentZoom = UB_MAX_ZOOM;
-        usedRatio = currentZoom * mSystemScaleFactor / mControlView->viewportTransform().m11();
-    }
-
-    mControlView->scale(usedRatio, usedRatio);
-
-    QPointF newCenter = scenePoint - scalledOffset;
-
-    mControlView->centerOn(newCenter);
-
-    emit zoomChanged(currentZoom);
-    UBApplication::applicationController->adjustDisplayView();
-
-    emit controlViewportChanged();
-    mActiveScene->setBackgroundZoomFactor(mControlView->transform().m11());
+    mZoomController->zoom(ratio, scenePoint);
 }
 
 
 void UBBoardController::handScroll(qreal dx, qreal dy)
 {
-    mControlView->translate(dx, dy);
-
-    UBApplication::applicationController->adjustDisplayView();
-
-    emit controlViewportChanged();
+    mZoomController->handScroll(dx, dy);
 }
 
-// Issue 1598/1605 - CFA - 20131028
 void UBBoardController::persistViewPositionOnCurrentScene()
 {
-    QRect rect = mControlView->rect();
-    QPoint center(rect.x() + rect.width() / 2, rect.y() + rect.height() / 2);
-    QPointF viewRelativeCenter = mControlView->mapToScene(center);
-    mActiveScene->setLastCenter(viewRelativeCenter);
+    mZoomController->persistViewPositionOnCurrentScene();
 }
-// Fin issue 1598/1605 - CFA - 20131028
 
 void UBBoardController::previousScene()
 {
@@ -2050,38 +1990,8 @@ void UBBoardController::persistCurrentScene(UBDocumentProxy *pProxy)
 
 void UBBoardController::updateSystemScaleFactor()
 {
-    qreal newScaleFactor = 1.0;
-
-    if (mActiveScene)
-    {
-        QSize pageNominalSize = mActiveScene->nominalSize();
-
-        //Issue NC - CFA - 20140320 : correction pdf importes -> vue mal dimensionnee
-        QSize controlSize = controlViewport();
-
-        qreal hFactor = ((qreal)controlSize.width()) / ((qreal)pageNominalSize.width());
-        qreal vFactor = ((qreal)controlSize.height()) / ((qreal)pageNominalSize.height());
-
-        newScaleFactor = qMin(hFactor, vFactor);
-    }
-
-    if (mSystemScaleFactor != newScaleFactor)
-    {
-        mSystemScaleFactor = newScaleFactor;
-        emit systemScaleFactorChanged(newScaleFactor);
-    }
-
-    UBGraphicsScene::SceneViewState viewState = mActiveScene->viewState();
-
-    QTransform scalingTransform;
-
-    qreal scaleFactor = viewState.zoomFactor * mSystemScaleFactor;
-    scalingTransform.scale(scaleFactor, scaleFactor);
-
-    mControlView->setTransform(scalingTransform);
-    mControlView->horizontalScrollBar()->setValue(viewState.horizontalPosition);
-    mControlView->verticalScrollBar()->setValue(viewState.verticalPostition);
-    mActiveScene->setBackgroundZoomFactor(mControlView->transform().m11());}
+    mZoomController->updateSystemScaleFactor();
+}
 
 
 void UBBoardController::setWidePageSize(bool checked)

@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ *
+ * This file is part of Open-Sankoré.
+ *
+ * Open-Sankoré is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ */
+
+#ifndef UBBOARDZOOMCONTROLLER_H
+#define UBBOARDZOOMCONTROLLER_H
+
+#include <QObject>
+#include <QPointF>
+
+class UBBoardController;
+
+/**
+ * @brief Manages zoom, scroll, and view transformations.
+ *
+ * Extracted from UBBoardController to reduce its size and improve testability.
+ * Handles: zoomIn, zoomOut, zoomRestore, centerRestore, centerOn, zoom, handScroll,
+ * persistViewPositionOnCurrentScene, updateSystemScaleFactor.
+ */
+class UBBoardZoomController : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit UBBoardZoomController(UBBoardController* boardController, QObject* parent = nullptr);
+
+public slots:
+    void zoomIn(QPointF scenePoint = QPointF(0, 0));
+    void zoomOut(QPointF scenePoint = QPointF(0, 0));
+    void zoomRestore();
+    void centerRestore();
+    void centerOn(QPointF scenePoint = QPointF(0, 0));
+    void zoom(const qreal ratio, QPointF scenePoint);
+    void handScroll(qreal dx, qreal dy);
+    void persistViewPositionOnCurrentScene();
+    void updateSystemScaleFactor();
+
+private:
+    UBBoardController* mBoardController;
+};
+
+#endif // UBBOARDZOOMCONTROLLER_H

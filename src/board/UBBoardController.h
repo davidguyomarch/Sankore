@@ -53,6 +53,7 @@ class UBGraphicsWidgetItem;
 class UBBoardPaletteManager;
 class UBBoardNavigationController;
 class UBBoardToolbarController;
+class UBBoardZoomController;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
@@ -160,6 +161,16 @@ class UBBoardController : public UBDocumentContainer
         qreal systemScaleFactor()
         {
             return mSystemScaleFactor;
+        }
+
+        void setSystemScaleFactor(qreal factor)
+        {
+            mSystemScaleFactor = factor;
+        }
+
+        qreal zoomFactor()
+        {
+            return mZoomFactor;
         }
 
         //EV-7 - NNE - 20140106
@@ -325,6 +336,7 @@ class UBBoardController : public UBDocumentContainer
         UBBoardPaletteManager *mPaletteManager;
         UBBoardNavigationController *mNavigationController;
         UBBoardToolbarController *mToolbarController;
+        UBBoardZoomController *mZoomController;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
         UBMessageWindow *mMessageWindow;
         UBBoardView *mControlView;
