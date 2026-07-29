@@ -190,6 +190,7 @@ class UBBoardController : public UBDocumentContainer
 
         void notifyCache(bool visible);
         void notifyPageChanged();
+        void updateActionStates();
         void displayMetaData(QMap<QString, QString> metadatas);
 
         void setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, int pSceneIndex = 0, bool forceReload = false, const bool onImport = false);
@@ -303,7 +304,6 @@ class UBBoardController : public UBDocumentContainer
         void setupToolbar();
         void connectToolbar();
         void initToolbarTexts();
-        void updateActionStates();
         void updateSystemScaleFactor();
         QString truncate(QString text, int maxWidth);
 
