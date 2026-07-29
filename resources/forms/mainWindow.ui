@@ -1700,7 +1700,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/centerBackground.png</normaloff>../images/imageBackgroundPalette/centerBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/center.svg</normaloff>:/images/imageBackgroundPalette/svg/center.svg</iconset>
    </property>
    <property name="text">
     <string>Center</string>
@@ -1718,7 +1718,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/adjustBackground.png</normaloff>../images/imageBackgroundPalette/adjustBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/adjust.svg</normaloff>:/images/imageBackgroundPalette/svg/adjust.svg</iconset>
    </property>
    <property name="text">
     <string>Adjust</string>
@@ -1733,7 +1733,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/extendBackground.png</normaloff>../images/imageBackgroundPalette/extendBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/extend.svg</normaloff>:/images/imageBackgroundPalette/svg/extend.svg</iconset>
    </property>
    <property name="text">
     <string>Expand</string>
@@ -1748,7 +1748,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/fillBackground.png</normaloff>../images/imageBackgroundPalette/fillBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/fill.svg</normaloff>:/images/imageBackgroundPalette/svg/fill.svg</iconset>
    </property>
    <property name="text">
     <string>Fill</string>
@@ -1763,7 +1763,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/mosaicBackground.png</normaloff>../images/imageBackgroundPalette/mosaicBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/mosaic.svg</normaloff>:/images/imageBackgroundPalette/svg/mosaic.svg</iconset>
    </property>
    <property name="text">
     <string>Mosaic</string>

@@ -213,11 +213,6 @@
         <file>images/trapFlashPalette/trappedSoundIcon.svg</file>
         <file>images/trapFlashPalette/trappedVideoIcon.svg</file>
         <file>images/trapFlashPalette/trappedIcon.svg</file>
-        <file>images/imageBackgroundPalette/adjustBackground.png</file>
-        <file>images/imageBackgroundPalette/centerBackground.png</file>
-        <file>images/imageBackgroundPalette/extendBackground.png</file>
-        <file>images/imageBackgroundPalette/fillBackground.png</file>
-        <file>images/imageBackgroundPalette/mosaicBackground.png</file>
         <file>images/teacherGuide/document_large.gif</file>
         <file>images/teacherGuide/document_large_warning.gif</file>
         <file>images/teacherGuideResources_close.png</file>
@@ -342,6 +337,11 @@
         <file>images/extraPalette/svg/blackout.svg</file>
         <file>images/extraPalette/svg/keyboard.svg</file>
         <file>images/extraPalette/svg/webTrap.svg</file>
+        <file>images/imageBackgroundPalette/svg/center.svg</file>
+        <file>images/imageBackgroundPalette/svg/adjust.svg</file>
+        <file>images/imageBackgroundPalette/svg/extend.svg</file>
+        <file>images/imageBackgroundPalette/svg/fill.svg</file>
+        <file>images/imageBackgroundPalette/svg/mosaic.svg</file>
         <file>images/toolbar/svg/web.svg</file>
         <file>images/toolbar/svg/library.svg</file>
         <file>images/toolbar/svg/reload.svg</file>
