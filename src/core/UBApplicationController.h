@@ -141,11 +141,7 @@ class UBApplicationController : public QObject
         void actionCopy();
         void actionPaste();
 
-        void checkUpdateRequest();
-        void checkUpdateAtLaunch();
-
     private slots:
-        void updateRequestFinished(int id, bool error);
 
     protected:
 
@@ -178,11 +174,8 @@ class UBApplicationController : public QObject
 
         bool mIsShowingDesktop;
 
-        bool isNoUpdateDisplayed;
-        void checkUpdate ();
         QNetworkAccessManager *networkAccessManager;
 
-        void downloadJsonFinished(QString updateString);
         // QHttp removed in Qt6 - TODO: use QNetworkAccessManager
 };
 
