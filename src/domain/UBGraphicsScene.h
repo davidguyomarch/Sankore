@@ -472,6 +472,13 @@ public slots:
 
         bool mDrawWithCompass;
 
+        // Stroke smoothing (Catmull-Rom interpolation)
+        QVector<QPointF> mSmoothBuffer;   // circular buffer of last 4 points
+        QVector<qreal> mSmoothWidths;     // corresponding widths
+        void drawSmoothedSegment(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3,
+                                 qreal w1, qreal w2, bool bLineStyle);
+        void flushSmoothBuffer(bool bLineStyle);
+
 };
 
 

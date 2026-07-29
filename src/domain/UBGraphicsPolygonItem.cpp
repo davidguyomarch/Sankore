@@ -193,6 +193,8 @@ void UBGraphicsPolygonItem::copyItemParameters(UBItem *copy) const
 
 void UBGraphicsPolygonItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
     if(mHasAlpha && scene() && scene()->isLightBackground())
     {
         painter->setCompositionMode(QPainter::CompositionMode_Darken);
