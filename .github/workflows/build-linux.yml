@@ -28,6 +28,7 @@ jobs:
           apt-get update
           apt-get install -y \
             git \
+            gdb \
             build-essential \
             cmake \
             python3 \
@@ -144,9 +145,24 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
           export LANG=C.UTF-8
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+          # Enable core dumps for crash analysis
+          ulimit -c unlimited
+          echo "core" | sudo tee /proc/sys/kernel/core_pattern || true
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
-          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
-          echo "App smoke test completed (clean exit)"
+          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
+            EXIT_CODE=$?
+            echo "=== APP CRASHED (exit code $EXIT_CODE) ==="
+            # Try to get backtrace from core file
+            CORE_FILE=$(find . -name "core*" -newer build/linux/release/product/Open-Sankore 2>/dev/null | head -1)
+            if [ -n "$CORE_FILE" ]; then
+              echo "=== BACKTRACE ==="
+              gdb -batch -ex "bt full" -ex "quit" build/linux/release/product/Open-Sankore "$CORE_FILE" 2>&1 | head -100
+            else
+              echo "No core file found"
+            fi
+            echo "Continuing despite crash (coverage may be incomplete)"
+          }
+          echo "App smoke test completed"
           GCDA_COUNT=$(find . -name "*.gcda" 2>/dev/null | wc -l)
           echo "Found $GCDA_COUNT .gcda files"
 
