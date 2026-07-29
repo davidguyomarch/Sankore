@@ -74,6 +74,13 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         // IUBBoardContext override to resolve ambiguity with UBDocumentContainer
         UBDocumentProxy* selectedDocument() override { return UBDocumentContainer::selectedDocument(); }
         QObject* asQObject() override { return this; }
+        void reloadThumbnails() override { UBDocumentContainer::reloadThumbnails(); }
+        int pageCount() override { return UBDocumentContainer::pageCount(); }
+        void addPage(int index) override { UBDocumentContainer::addPage(index); }
+        void duplicatePages(QList<int>& indexes) override { UBDocumentContainer::duplicatePages(indexes); }
+        void deletePages(QList<int>& indexes) override { UBDocumentContainer::deletePages(indexes); }
+        void movePageToIndex(int source, int target) override { UBDocumentContainer::movePageToIndex(source, target); }
+        void insertThumbPage(int index) override { UBDocumentContainer::insertThumbPage(index); }
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
 

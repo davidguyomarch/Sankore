@@ -76,8 +76,8 @@ public:
 
     // --- Page operations ---
     virtual void addPage(int index) = 0;
-    virtual void duplicatePages(QList<int> indexes) = 0;
-    virtual void deletePages(QList<int> indexes) = 0;
+    virtual void duplicatePages(QList<int>& indexes) = 0;
+    virtual void deletePages(QList<int>& indexes) = 0;
     virtual void movePageToIndex(int source, int target) = 0;
     virtual void insertThumbPage(int index) = 0;
 
