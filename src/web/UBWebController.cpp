@@ -100,6 +100,5 @@ void UBWebController::onActionBookmark() {}
 void UBWebController::initialiazemOEmbedProviders() {}
 void UBWebController::tutorialWebInstance() {}
 void UBWebController::webBrowserInstance() {}
-void UBWebController::paraschoolWebInstance() {}
 void UBWebController::lookForEmbedContent(QString*, QString, QString, QList<QUrl>*) {}
 void UBWebController::checkForOEmbed(QString*) {}

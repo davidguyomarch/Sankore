@@ -64,8 +64,6 @@
 #include "customWidgets/UBGraphicsItemAction.h"
 
 
-class UBGraphicsParaschoolEditorWidgetItem;
-
 DelegateButton *DelegateButton::Spacer = 0;
 
 DelegateButton::DelegateButton(const QString & fileName, QGraphicsItem* pDelegated, QGraphicsItem * parent, Qt::WindowFrameSection section)

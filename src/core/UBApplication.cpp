@@ -366,7 +366,6 @@ int UBApplication::exec(const QString& pFileToImport)
 
     connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
     connect(mainWindow->actionTutorial, SIGNAL(triggered()), applicationController, SLOT(showTutorial()));
-    connect(mainWindow->actionSankoreEditor, SIGNAL(triggered()), applicationController, SLOT(showSankoreEditor()));
     connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
 
     toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
@@ -571,7 +570,6 @@ void UBApplication::decorateActionMenu(QAction* action)
 
             menu->addSeparator();
             menu->addAction(mainWindow->actionTutorial);
-            //menu->addAction(mainWindow->actionSankoreEditor); // ALTI/AOU - 20140217 : don't show "Open-Sankoré Editor" anymore.
 
 #ifndef Q_OS_LINUX // No Podcast on Linux yet
             menu->addAction(mainWindow->actionPodcast);

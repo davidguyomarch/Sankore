@@ -1550,18 +1550,6 @@
     <string>Check Update</string>
    </property>
   </action>
-  <action name="actionSankoreEditor">
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/tutorial.svg</normaloff>:/images/toolbar/svg/tutorial.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Open-Sankoré Editor</string>
-   </property>
-   <property name="toolTip">
-    <string>Show Open-Sankoré Widgets Editor</string>
-   </property>
-  </action>
   <action name="actionHideApplication">
    <property name="icon">
     <iconset resource="../sankore.qrc">
