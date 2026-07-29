@@ -2199,382 +2199,47 @@ QUrl UBBoardController::expandWidgetToTempDir(const QByteArray& pZipedData, cons
 
 void UBBoardController::grabScene(const QRectF& pSceneRect)
 {
-    if (mActiveScene)
-    {
-        QImage image(pSceneRect.width(), pSceneRect.height(), QImage::Format_ARGB32);
-        image.fill(Qt::transparent);
-
-        QRectF targetRect(0, 0, pSceneRect.width(), pSceneRect.height());
-        QPainter painter(&image);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform);
-        painter.setRenderHint(QPainter::Antialiasing);
-
-        mActiveScene->setRenderingQuality(UBItem::RenderingQualityHigh);
-
-        mActiveScene->render(&painter, targetRect, pSceneRect);
-
-        mActiveScene->setRenderingQuality(UBItem::RenderingQualityNormal);
-
-        mPaletteManager->addItem(QPixmap::fromImage(image));
-        selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-    }
+    mItemFactory->grabScene(pSceneRect);
 }
 
 UBGraphicsMediaItem* UBBoardController::addVideo(const QUrl& pSourceUrl, bool startPlay, const QPointF& pos, bool bUseSource)
 {
-    QUuid uuid = QUuid::createUuid();
-    QUrl concreteUrl = pSourceUrl;
-
-    // media file is not in document folder yet
-    if (bUseSource)
-    {
-        QString destFile;
-        bool b = UBPersistenceManager::persistenceManager()->addFileToDocument(selectedDocument(),
-                    pSourceUrl.toLocalFile(),
-                    UBPersistenceManager::videoDirectory,
-                    uuid,
-                    destFile);
-        if (!b)
-        {
-            showMessage(tr("Add file operation failed: file copying error"));
-            return nullptr;
-        }
-        concreteUrl = QUrl::fromLocalFile(destFile);
-    }// else we just use source Url.
-
-
-    UBGraphicsMediaItem* vi = mActiveScene->addMedia(concreteUrl, startPlay, pos);
-    selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-
-    if (vi) {
-        vi->setUuid(uuid);
-        vi->setSourceUrl(pSourceUrl);
-    }
-
-    return vi;
-
+    return mItemFactory->addVideo(pSourceUrl, startPlay, pos, bUseSource);
 }
 
 UBGraphicsMediaItem* UBBoardController::addAudio(const QUrl& pSourceUrl, bool startPlay, const QPointF& pos, bool bUseSource)
 {
-    QUuid uuid = QUuid::createUuid();
-    QUrl concreteUrl = pSourceUrl;
-
-    // media file is not in document folder yet
-    if (bUseSource)
-    {
-        QString destFile;
-        bool b = UBPersistenceManager::persistenceManager()->addFileToDocument(selectedDocument(),
-            pSourceUrl.toLocalFile(),
-            UBPersistenceManager::audioDirectory,
-            uuid,
-            destFile);
-        if (!b)
-        {
-            showMessage(tr("Add file operation failed: file copying error"));
-            return nullptr;
-        }
-        concreteUrl = QUrl::fromLocalFile(destFile);
-    }// else we just use source Url.
-
-    UBGraphicsMediaItem* ai = mActiveScene->addMedia(concreteUrl, startPlay, pos);
-    selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-
-    if (ai){
-        ai->setUuid(uuid);
-        ai->setSourceUrl(pSourceUrl);
-    }
-
-    return ai;
-
+    return mItemFactory->addAudio(pSourceUrl, startPlay, pos, bUseSource);
 }
 
 UBGraphicsWidgetItem *UBBoardController::addW3cWidget(const QUrl &pUrl, const QPointF &pos)
 {
-    UBGraphicsWidgetItem* w3cWidgetItem = 0;
-
-    QUuid uuid = QUuid::createUuid();
-
-    QString destPath;
-    if (!UBPersistenceManager::persistenceManager()->addGraphicsWidgetToDocument(selectedDocument(), pUrl.toLocalFile(), uuid, destPath))
-        return nullptr;
-    QUrl newUrl = QUrl::fromLocalFile(destPath);
-
-    w3cWidgetItem = mActiveScene->addW3CWidget(newUrl, pos);
-
-    if (w3cWidgetItem) {
-        w3cWidgetItem->setUuid(uuid);
-        w3cWidgetItem->setOwnFolder(newUrl);
-        w3cWidgetItem->setSourceUrl(pUrl);
-
-        QString struuid = UBStringUtils::toCanonicalUuid(uuid);
-        QString snapshotPath = selectedDocument()->persistencePath() +  "/" + UBPersistenceManager::widgetDirectory + "/" + struuid + ".png";
-        w3cWidgetItem->setSnapshotPath(QUrl::fromLocalFile(snapshotPath));
-    }
-
-    return w3cWidgetItem;
+    return mItemFactory->addW3cWidget(pUrl, pos);
 }
 
 void UBBoardController::cut()
 {
-    // Issue 1595 - CFA - 20131024 : correction du fonctionnement de l'action couper
-    copy();
-
-    QList<UBItem*> selected;
-    for (QGraphicsItem* gi : mActiveScene->selectedItems())
-    {
-        gi->setSelected(false);
-
-        UBItem* ubItem = dynamic_cast<UBItem*>(gi);
-        UBGraphicsItem *ubGi =  dynamic_cast<UBGraphicsItem*>(gi);
-
-        if (ubItem && ubGi && !mActiveScene->tools().contains(gi))
-        {
-            selected << ubItem->deepCopy();
-            ubGi->remove();
-        }
-    }
-    // Fin Issue 1595 - CFA - 20131024
-    //---------------------------------------------------------//
+    mItemFactory->cut();
 }
 
 void UBBoardController::copy()
 {
-    QList<UBItem*> selected;
-
-    for (QGraphicsItem* gi : mActiveScene->selectedItems())
-    {
-        UBItem* ubItem = dynamic_cast<UBItem*>(gi);
-        if (ubItem && !mActiveScene->tools().contains(gi))
-            selected << ubItem;
-    }
-
-    if (selected.size() > 0)
-    {
-        QClipboard *clipboard = QApplication::clipboard();
-
-        UBMimeDataGraphicsItem*  mimeGi = new UBMimeDataGraphicsItem(selected);
-
-        mimeGi->setData(UBApplication::mimeTypeUniboardPageItem, QByteArray());
-        clipboard->setMimeData(mimeGi);
-
-    }
+    mItemFactory->copy();
 }
-
 
 void UBBoardController::paste()
 {
-    QClipboard *clipboard = QApplication::clipboard();
-    //avoiding the to paste two objects exaclty at the same position
-    qreal xPosition = ((qreal)QRandomGenerator::global()->generate()/(qreal)RAND_MAX) * 400;
-    qreal yPosition = ((qreal)QRandomGenerator::global()->generate()/(qreal)RAND_MAX) * 200;
-    QPointF pos(xPosition -200 , yPosition - 100);
-    processMimeData(clipboard->mimeData(), pos, eItemActionType_Paste);
-
-    selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
+    mItemFactory->paste();
 }
-
 
 void UBBoardController::processMimeData(const QMimeData* pMimeData, const QPointF& pPos, eItemActionType actionType)
 {
-    if (pMimeData->hasFormat(UBApplication::mimeTypeUniboardPage))
-    {
-        const UBMimeData* mimeData = qobject_cast <const UBMimeData*>(pMimeData);
-
-        if (mimeData)
-        {
-            int previousActiveSceneIndex = activeSceneIndex();
-            int previousPageCount = selectedDocument()->pageCount();
-
-            for (const UBMimeDataItem& sourceItem : mimeData->items())
-                addScene(sourceItem.documentProxy(), sourceItem.sceneIndex(), true);
-
-            if (selectedDocument()->pageCount() < previousPageCount + mimeData->items().count())
-                setActiveDocumentScene(previousActiveSceneIndex);
-            else
-                setActiveDocumentScene(previousActiveSceneIndex + 1);
-
-            return;
-        }
-    }
-
-    if (pMimeData->hasFormat(UBApplication::mimeTypeUniboardPageItem))
-    {
-        const UBMimeDataGraphicsItem* mimeData = qobject_cast <const UBMimeDataGraphicsItem*>(pMimeData);
-
-        if (mimeData)
-        {
-            for (UBItem* item : mimeData->items())
-            {
-                QGraphicsItem* pItem = dynamic_cast<QGraphicsItem*>(item);
-                if(nullptr != pItem){
-                    duplicateItem(item, true, actionType);
-                }
-            }
-
-            return;
-        }
-    }
-
-    if(pMimeData->hasHtml())
-    {
-        QString qsHtml = pMimeData->html();
-        QString url = UBApplication::urlFromHtml(qsHtml);
-
-        if("" != url)
-        {
-            downloadURL(url, QString(), pPos);
-            return;
-        }
-    }
-
-    if (pMimeData->hasUrls())
-    {
-        QList<QUrl> urls = pMimeData->urls();
-
-        int index = 0;
-
-        const UBFeaturesMimeData *internalMimeData = qobject_cast<const UBFeaturesMimeData*>(pMimeData);
-        bool internalData = false;
-        if (internalMimeData) {
-            internalData = true;
-        }
-
-        for (const QUrl& url : urls){
-            QPointF pos(pPos + QPointF(index * 15, index * 15));
-
-            downloadURL(url, QString(), pos, QSize(), false,  internalData);
-            index++;
-        }
-
-        return;
-    }
-
-    if (pMimeData->hasImage())
-    {
-        QImage img = qvariant_cast<QImage> (pMimeData->imageData());
-        QPixmap pix = QPixmap::fromImage(img);
-
-        // validate that the image is really an image, webkit does not fill properly the image mime data
-        if (pix.width() != 0 && pix.height() != 0)
-        {
-            mActiveScene->addPixmap(pix, nullptr, pPos, 1.);
-            return;
-        }
-    }
-
-    if (pMimeData->hasText())
-    {
-        if(pMimeData->text().length()){
-            // Sometimes, it is possible to have an URL as text. we check here if it is the case
-            QString qsTmp = pMimeData->text().remove(QRegularExpression("[\\0]"));
-            if(qsTmp.startsWith("http")){
-                downloadURL(QUrl(qsTmp), QString(), pPos);
-            }
-            else{
-                if(eItemActionType_Paste == actionType && (mActiveScene->selectedItems().size() > 0) && mActiveScene->selectedItems().at(0)->type() == UBGraphicsItemType::TextItemType){
-                    dynamic_cast<UBGraphicsTextItem*>(mActiveScene->selectedItems().at(0))->setHtml(pMimeData->text());
-                }
-                else{
-                    mActiveScene->addTextHtml(pMimeData->text(), pPos);
-                }
-            }
-        }
-        else{
-#ifdef Q_OS_MACOSX
-                //  With Safari, in 95% of the drops, the mime datas are hidden in Apple Web Archive pasteboard type.
-                //  This is due to the way Safari is working so we have to dig into the pasteboard in order to retrieve
-                //  the data.
-                QString qsUrl = UBPlatformUtils::urlFromClipboard();
-                if("" != qsUrl){
-                    // We finally got the url of the dropped ressource! Let's import it!
-                    downloadURL(qsUrl, qsUrl, pPos);
-                    return;
-                }
-#endif
-        }
-    }
+    mItemFactory->processMimeData(pMimeData, pPos, actionType);
 }
-
-
-void UBBoardController::togglePodcast(bool checked)
-{
-    if (UBPodcastController::instance())
-        UBPodcastController::instance()->toggleRecordingPalette(checked);
-}
-
-void UBBoardController::moveGraphicsWidgetToControlView(UBGraphicsWidgetItem* graphicsWidget)
-{
-    mActiveScene->setURStackEnable(false);
-    UBGraphicsItem *toolW3C = duplicateItem(dynamic_cast<UBItem *>(graphicsWidget));
-    UBGraphicsWidgetItem *copyedGraphicsWidget = nullptr;
-
-    if (UBGraphicsWidgetItem::Type == toolW3C->type())
-        copyedGraphicsWidget = static_cast<UBGraphicsWidgetItem *>(toolW3C);
-
-    UBToolWidget *toolWidget = new UBToolWidget(copyedGraphicsWidget, mControlView);
-
-    graphicsWidget->remove(false);
-    mActiveScene->addItemToDeletion(graphicsWidget);
-
-    mActiveScene->setURStackEnable(true);
-
-    QPoint controlViewPos = mControlView->mapFromScene(graphicsWidget->sceneBoundingRect().center());
-    toolWidget->centerOn(mControlView->mapTo(mControlContainer, controlViewPos));
-    toolWidget->show();
-}
-
-
-void UBBoardController::moveToolWidgetToScene(UBToolWidget* toolWidget)
-{
-    UBGraphicsWidgetItem *widgetToScene = toolWidget->toolWidget();
-
-    widgetToScene->resetTransform();
-
-    QPoint mainWindowCenter = toolWidget->mapTo(mMainWindow, QPoint(toolWidget->width(), toolWidget->height()) / 2);
-    QPoint controlViewCenter = mControlView->mapFrom(mMainWindow, mainWindowCenter);
-    QPointF scenePos = mControlView->mapToScene(controlViewCenter);
-
-    mActiveScene->addGraphicsWidget(widgetToScene, scenePos);
-
-    toolWidget->remove();
-}
-
-
-void UBBoardController::updateBackgroundActionsState(bool isDark, bool isCrossed)
-{
-    if (isDark && !isCrossed)
-        mMainWindow->actionPlainDarkBackground->setChecked(true);
-    else if (isDark && isCrossed)
-        mMainWindow->actionCrossedDarkBackground->setChecked(true);
-    else if (!isDark && isCrossed)
-        mMainWindow->actionCrossedLightBackground->setChecked(true);
-    else
-        mMainWindow->actionPlainLightBackground->setChecked(true);
-}
-
 
 void UBBoardController::addItem()
 {
-    QString defaultPath = mSettings->lastImportToLibraryPath->get().toString();
-
-    QString extensions;
-    for (const QString& ext : UBSettings::imageFileExtensions)
-    {
-        extensions += " *.";
-        extensions += ext;
-    }
-
-    QString filename = QFileDialog::getOpenFileName(mControlContainer, tr("Add Item"),
-                                                    defaultPath,
-                                                    tr("All Supported (%1)").arg(extensions), nullptr, QFileDialog::DontUseNativeDialog);
-
-    if (filename.length() > 0)
-    {
-        mPaletteManager->addItem(QUrl::fromLocalFile(filename));
-        QFileInfo source(filename);
-        mSettings->lastImportToLibraryPath->set(QVariant(source.absolutePath()));
-    }
+    mItemFactory->addItem();
 }
 
 void UBBoardController::importPage()
