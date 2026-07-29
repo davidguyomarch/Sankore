@@ -4,7 +4,7 @@ TEMPLATE = app
 CONFIG += testcase console c++17
 CONFIG -= app_bundle
 
-QT += core gui widgets testlib xml network
+QT += core gui widgets testlib xml network svg svgwidgets
 
 # Paths — tests/ shims take priority over ../src for stubbed headers
 INCLUDEPATH += .
@@ -78,6 +78,7 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
+           tst_UBVisualRegression.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -90,7 +91,10 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp \
+           premoc/moc_tst_UBVisualRegression.cpp
+
+RESOURCES += visual_tests.qrc
 
 # Build output
 DESTDIR = build
