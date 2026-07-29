@@ -36,6 +36,7 @@
 
 #include "core/UBSettings.h"
 #include "core/UBSettingsData.h"
+#include "core/UBTheme.h"
 #include "core/UBMimeData.h"
 #include "core/UBApplication.h"
 #include "core/UBSetting.h"
@@ -1810,9 +1811,9 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
           QColor docSizeColor;
 
           if (darkBackground)
-            docSizeColor = UBSettingsData::documentSizeMarkColorDarkBackground;
+            docSizeColor = UBTheme::documentSizeMarkDark();
           else
-            docSizeColor = UBSettingsData::documentSizeMarkColorLightBackground;
+            docSizeColor = UBTheme::documentSizeMarkLight();
 
           QPen pen (docSizeColor);
           pen.setWidth (penWidth);
