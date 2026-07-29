@@ -74,8 +74,8 @@ public:
         return mode == eUBDockPaletteWidget_BOARD;
     }
 
-    QPixmap iconToLeft() const {return QPixmap(":images/cache_open.png");}
-    QPixmap iconToRight() const {return QPixmap(":images/cache_open.png");}
+    QPixmap iconToLeft() const {return QPixmap(":images/svg/cache_open.svg");}
+    QPixmap iconToRight() const {return QPixmap(":images/svg/cache_open.svg");}
 
 public slots:
     void updateCurrentCache();
