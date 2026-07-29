@@ -54,7 +54,6 @@ UBWebToolsPalette::UBWebToolsPalette(QWidget *parent,bool tutorialMode=false)
         actions << UBApplication::mainWindow->actionWebCustomCapture;
         actions << UBApplication::mainWindow->actionWebWindowCapture;
 
-        //actions << UBApplication::mainWindow->actionEduMedia;
 
         actions << UBApplication::mainWindow->actionWebShowHideOnDisplay;
 

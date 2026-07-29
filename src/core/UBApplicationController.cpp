@@ -118,7 +118,6 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
             , this, SLOT(addCapturedPixmap(const QPixmap &, bool, const QUrl&)));
 
     networkAccessManager = new QNetworkAccessManager (this);
-    QTimer::singleShot (1000, this, SLOT (checkUpdateAtLaunch()));
 
 #ifdef Q_OS_LINUX
     mMainWindow->setStyleSheet("QToolButton { font-size: 11px}");
@@ -495,68 +494,6 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
     UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
 }
 
-
-void UBApplicationController::checkUpdate()
-{
-    if(false) // QHttp removed        // QHttp removed
-    QUrl url("http://ftp.open-sankore.org/update.json");
-    // TODO: Replace QHttp with QNetworkAccessManager
-    // TODO: Replace QHttp signal connection
-    // TODO: Replace QHttp get
-}
-
-void UBApplicationController::updateRequestFinished(int id, bool error)
-{
-   if (error){
-       qWarning() << "http command id" << id << "return the error: " << QString("HTTP error");
-       
-   }
-   else{
-       QString responseString =  QString();
-       if (!responseString.isEmpty() && responseString.contains("version") && responseString.contains("url")){
-           
-           downloadJsonFinished(responseString);
-       }
-   }
-}
-
-
-
-void UBApplicationController::downloadJsonFinished(QString currentJson)
-{
-    QJSValue scriptValue;
-    QJSEngine scriptEngine;
-    scriptValue = scriptEngine.evaluate ("(" + currentJson + ")");
-
-    UBVersion installedVersion (qApp->applicationVersion().left(4));
-    UBVersion jsonVersion (scriptValue.property("version").toString().left(4));
-
-    if (installedVersion.isValid() &&  jsonVersion.isValid() && jsonVersion > installedVersion) {
-            if (UBApplication::mainWindow->yesNoQuestion(tr("Update available"), tr ("New update available, would you go to the web page ?"))){
-                    QUrl url(scriptValue.property ("url").toString());
-                    QDesktopServices::openUrl (url);
-            }
-    }
-    else {
-        if (isNoUpdateDisplayed) {
-            mMainWindow->information(tr("Update"), tr("No update available"));
-        }
-    }
-}
-
-void UBApplicationController::checkUpdateAtLaunch()
-{
-    if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool()){
-        isNoUpdateDisplayed = false;
-        checkUpdate ();
-    }
-}
-
-void UBApplicationController::checkUpdateRequest()
-{
-    isNoUpdateDisplayed = true;
-    checkUpdate ();
-}
 
 void UBApplicationController::hideDesktop()
 {

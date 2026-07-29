@@ -374,7 +374,6 @@ int UBApplication::exec(const QString& pFileToImport)
     mPreferencesController = new UBPreferencesController(mainWindow);
 
     connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
-    connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
 
     toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
     toolBarPositionChanged(mSettings->appToolBarPositionedAtTop->get());
@@ -570,9 +569,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             // SANKORE-48: Hide the check update action if the setting
             // EnableAutomaticSoftwareUpdates is false in Uniboard.config
             if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool())
-                menu->addAction(mainWindow->actionCheckUpdate);
             else
-                mainWindow->actionCheckUpdate->setEnabled(false);
 
             menu->addSeparator();
 
