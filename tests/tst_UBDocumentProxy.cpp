@@ -1,4 +1,5 @@
 #include "tst_UBDocumentProxy.h"
+#include "core/UBSettingsData.h"
 #include "document/UBDocumentProxy.h"
 
 #include <QDir>
@@ -20,14 +21,14 @@ void TestUBDocumentProxy::testMetadataGetSet()
     UBDocumentProxy proxy;
 
     // Test setting and retrieving metadata (typical teacher use case)
-    proxy.setMetaData(UBSettings::documentName, QString::fromUtf8("Math\xc3\xa9matiques CE2"));
-    QCOMPARE(proxy.metaData(UBSettings::documentName).toString(), QString::fromUtf8("Math\xc3\xa9matiques CE2"));
+    proxy.setMetaData(UBSettingsData::documentName, QString::fromUtf8("Math\xc3\xa9matiques CE2"));
+    QCOMPARE(proxy.metaData(UBSettingsData::documentName).toString(), QString::fromUtf8("Math\xc3\xa9matiques CE2"));
 
-    proxy.setMetaData(UBSettings::sessionAuthors, "M. Dupont");
-    QCOMPARE(proxy.metaData(UBSettings::sessionAuthors).toString(), QString("M. Dupont"));
+    proxy.setMetaData(UBSettingsData::sessionAuthors, "M. Dupont");
+    QCOMPARE(proxy.metaData(UBSettingsData::sessionAuthors).toString(), QString("M. Dupont"));
 
-    proxy.setMetaData(UBSettings::documentVersion, "4.7.0");
-    QCOMPARE(proxy.metaData(UBSettings::documentVersion).toString(), QString("4.7.0"));
+    proxy.setMetaData(UBSettingsData::documentVersion, "4.7.0");
+    QCOMPARE(proxy.metaData(UBSettingsData::documentVersion).toString(), QString("4.7.0"));
 
     // Test UUID stored in metadata
     QUuid testUuid = QUuid::createUuid();
@@ -36,8 +37,8 @@ void TestUBDocumentProxy::testMetadataGetSet()
 
     // Test creation date
     QString dateStr = "2024-01-15T10:30:00Z";
-    proxy.setMetaData(UBSettings::documentDate, dateStr);
-    QCOMPARE(proxy.metaData(UBSettings::documentDate).toString(), dateStr);
+    proxy.setMetaData(UBSettingsData::documentDate, dateStr);
+    QCOMPARE(proxy.metaData(UBSettingsData::documentDate).toString(), dateStr);
 }
 
 void TestUBDocumentProxy::testPageCountOperations()
@@ -118,7 +119,7 @@ void TestUBDocumentProxy::testCopyConstructor()
 {
     UBDocumentProxyTestHelper original;
     original.setPersistencePath("/tmp/test_original");
-    original.setMetaData(UBSettings::documentName, "Test Document");
+    original.setMetaData(UBSettingsData::documentName, "Test Document");
     original.setPageCount(5);
 
     UBDocumentProxy copy(original);
@@ -127,7 +128,7 @@ void TestUBDocumentProxy::testCopyConstructor()
     QCOMPARE(copy.persistencePath(), original.persistencePath());
 
     // Copy should have same metadata
-    QCOMPARE(copy.metaData(UBSettings::documentName).toString(), QString("Test Document"));
+    QCOMPARE(copy.metaData(UBSettingsData::documentName).toString(), QString("Test Document"));
 
     // Copy should have same page count
     QCOMPARE(copy.pageCount(), 5);
@@ -161,7 +162,7 @@ void TestUBDocumentProxy::testDocumentName()
     QVERIFY(!proxy.name().isEmpty());
 
     // Set a custom name
-    proxy.setMetaData(UBSettings::documentName, QString::fromUtf8("Le\xc3\xa7on de g\xc3\xa9ographie"));
+    proxy.setMetaData(UBSettingsData::documentName, QString::fromUtf8("Le\xc3\xa7on de g\xc3\xa9ographie"));
     QCOMPARE(proxy.name(), QString::fromUtf8("Le\xc3\xa7on de g\xc3\xa9ographie"));
 
     // Group name should be initially empty
@@ -201,19 +202,19 @@ void TestUBDocumentProxy::testDocumentDateAndLastUpdate()
 
     // Set a date via metadata and verify retrieval
     QString isoDate = "2024-03-15T14:30:00Z";
-    proxy.setMetaData(UBSettings::documentDate, isoDate);
+    proxy.setMetaData(UBSettingsData::documentDate, isoDate);
     QDateTime docDate = proxy.documentDate();
     QVERIFY(docDate.isValid());
 
     // Set updatedAt and verify
-    proxy.setMetaData(UBSettings::documentUpdatedAt, isoDate);
+    proxy.setMetaData(UBSettingsData::documentUpdatedAt, isoDate);
     QDateTime lastUpd = proxy.lastUpdate();
     QVERIFY(lastUpd.isValid());
 
     // Test metaDatas() returns full hash
     QHash<QString, QVariant> allMeta = proxy.metaDatas();
-    QVERIFY(allMeta.contains(UBSettings::documentDate));
-    QVERIFY(allMeta.contains(UBSettings::documentUpdatedAt));
+    QVERIFY(allMeta.contains(UBSettingsData::documentDate));
+    QVERIFY(allMeta.contains(UBSettingsData::documentUpdatedAt));
 }
 
 void TestUBDocumentProxy::testDefaultImageBackground()

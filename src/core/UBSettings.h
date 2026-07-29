@@ -248,6 +248,8 @@ class UBSettings : public QObject
 
         UBSetting* appToolBarPositionedAtTop;
         UBSetting* appToolBarDisplayText;
+        UBSetting* appTheme;
+        UBSetting* appStrokeSmoothing;
         UBSetting* appEnableAutomaticSoftwareUpdates;
         UBSetting* appEnableSoftwareUpdates;
         UBSetting* appToolBarOrientationVertical;

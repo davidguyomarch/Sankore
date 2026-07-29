@@ -115,6 +115,8 @@ class UBApplication : public QtSingleApplication
 
         void toolBarPositionChanged(QVariant topOrBottom);
         void toolBarDisplayTextChanged(QVariant display);
+        void themeChanged(QAction* action);
+        void reloadThemeIcons(const QString& theme);
 
         void closeEvent(QCloseEvent *event);
 

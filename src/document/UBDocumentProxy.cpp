@@ -29,6 +29,7 @@
 #include "core/UBApplication.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBDocumentManager.h"
 
 
@@ -66,27 +67,27 @@ void UBDocumentProxy::init()
 {
     mSettings = UBSettings::settings();
 
-    setMetaData(UBSettings::documentGroupName, "");
+    setMetaData(UBSettingsData::documentGroupName, "");
 
     QDateTime now = QDateTime::currentDateTime();
-    setMetaData(UBSettings::documentName, QLocale().toString(now, QLocale::ShortFormat));
+    setMetaData(UBSettingsData::documentName, QLocale().toString(now, QLocale::ShortFormat));
 
     setUuid(QUuid::createUuid());
 
     setDefaultDocumentSize(mSettings->pageSize->get().toSize());
 
     //teacherGuide metadata
-    setMetaData(UBSettings::sessionTitle,"");
-    setMetaData(UBSettings::sessionAuthors,"");
-    setMetaData(UBSettings::sessionObjectives,"");
-    setMetaData(UBSettings::sessionKeywords,"");
-    setMetaData(UBSettings::sessionGradeLevel,"");
-    setMetaData(UBSettings::sessionSubjects,"");
-    setMetaData(UBSettings::sessionType,"");
-    setMetaData(UBSettings::sessionLicence,"");
+    setMetaData(UBSettingsData::sessionTitle,"");
+    setMetaData(UBSettingsData::sessionAuthors,"");
+    setMetaData(UBSettingsData::sessionObjectives,"");
+    setMetaData(UBSettingsData::sessionKeywords,"");
+    setMetaData(UBSettingsData::sessionGradeLevel,"");
+    setMetaData(UBSettingsData::sessionSubjects,"");
+    setMetaData(UBSettingsData::sessionType,"");
+    setMetaData(UBSettingsData::sessionLicence,"");
     // Issue 1684 - ALTI/AOU - 20131210
-    setMetaData(UBSettings::documentDefaultBackgroundImage,"");
-    setMetaData(UBSettings::documentDefaultBackgroundImageDisposition, "");
+    setMetaData(UBSettingsData::documentDefaultBackgroundImage,"");
+    setMetaData(UBSettingsData::documentDefaultBackgroundImageDisposition, "");
     // Fin Issue 1684 - ALTI/AOU - 20131210
 }
 
@@ -161,7 +162,7 @@ void UBDocumentProxy::setMetaData(const QString& pKey, const QVariant& pValue)
     {
         mIsModified = true;
         mMetaDatas.insert(pKey, pValue);
-        if (pKey == UBSettings::documentUpdatedAt)
+        if (pKey == UBSettingsData::documentUpdatedAt)
         {
             UBDocumentManager *documentManager = UBDocumentManager::documentManager();
             if (documentManager)
@@ -190,18 +191,18 @@ QHash<QString, QVariant> UBDocumentProxy::metaDatas() const
 
 QString UBDocumentProxy::name() const
 {
-    return metaData(UBSettings::documentName).toString();
+    return metaData(UBSettingsData::documentName).toString();
 }
 
 QString UBDocumentProxy::groupName() const
 {
-    return metaData(UBSettings::documentGroupName).toString();
+    return metaData(UBSettingsData::documentGroupName).toString();
 }
 
 QSize UBDocumentProxy::defaultDocumentSize() const
 {
-    if (mMetaDatas.contains(UBSettings::documentSize))
-        return metaData(UBSettings::documentSize).toSize();
+    if (mMetaDatas.contains(UBSettingsData::documentSize))
+        return metaData(UBSettingsData::documentSize).toSize();
     else
         return mSettings->pageSize->get().toSize();
 }
@@ -210,7 +211,7 @@ void UBDocumentProxy::setDefaultDocumentSize(QSize pSize)
 {
     if (defaultDocumentSize() != pSize)
     {
-        setMetaData(UBSettings::documentSize, QVariant(pSize));
+        setMetaData(UBSettingsData::documentSize, QVariant(pSize));
         emit defaultDocumentSizeChanged();
 
         mIsModified = true;
@@ -225,7 +226,7 @@ void UBDocumentProxy::setDefaultDocumentSize(int pWidth, int pHeight)
 
 QUuid UBDocumentProxy::uuid() const
 {
-    QString id = metaData(UBSettings::documentIdentifer).toString();
+    QString id = metaData(UBSettingsData::documentIdentifer).toString();
     QString sUuid = id.replace(UBSettings::uniboardDocumentNamespaceUri + "/", "");
 
     return QUuid(sUuid);
@@ -233,22 +234,22 @@ QUuid UBDocumentProxy::uuid() const
 
 void UBDocumentProxy::setUuid(const QUuid& uuid)
 {
-    setMetaData(UBSettings::documentIdentifer,
+    setMetaData(UBSettingsData::documentIdentifer,
             UBSettings::uniboardDocumentNamespaceUri + "/" + UBStringUtils::toCanonicalUuid(uuid));
 }
 
 
 QDateTime UBDocumentProxy::documentDate()
 {
-    if(mMetaDatas.contains(UBSettings::documentDate))
-        return UBStringUtils::fromUtcIsoDate(metaData(UBSettings::documentDate).toString());
+    if(mMetaDatas.contains(UBSettingsData::documentDate))
+        return UBStringUtils::fromUtcIsoDate(metaData(UBSettingsData::documentDate).toString());
     return QDateTime::currentDateTime();
 }
 
 QDateTime UBDocumentProxy::lastUpdate()
 {
-    if(mMetaDatas.contains(UBSettings::documentUpdatedAt))
-        return UBStringUtils::fromUtcIsoDate(metaData(UBSettings::documentUpdatedAt).toString());
+    if(mMetaDatas.contains(UBSettingsData::documentUpdatedAt))
+        return UBStringUtils::fromUtcIsoDate(metaData(UBSettingsData::documentUpdatedAt).toString());
     return QDateTime().currentDateTime();
 }
 
@@ -263,13 +264,13 @@ void UBDocumentProxy::setHasDefaultImageBackground(const bool hasDefault)
    mHasDefaultImageBackground = hasDefault;
    // Issue 1684 - ALTI/AOU - 20131210
    if (hasDefault == false){
-        setMetaData(UBSettings::documentDefaultBackgroundImage, "");
-        setMetaData(UBSettings::documentDefaultBackgroundImageDisposition, "");
+        setMetaData(UBSettingsData::documentDefaultBackgroundImage, "");
+        setMetaData(UBSettingsData::documentDefaultBackgroundImageDisposition, "");
    // Fin Issue 1684 - ALTI/AOU - 20131210
    }
 }
 
-const bool UBDocumentProxy::hasDefaultImageBackground() const
+bool UBDocumentProxy::hasDefaultImageBackground() const
 {
     return mHasDefaultImageBackground;
 }

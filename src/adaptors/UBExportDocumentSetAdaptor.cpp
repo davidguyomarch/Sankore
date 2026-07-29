@@ -27,6 +27,7 @@
 
 #include "core/UBDocumentManager.h"
 #include "core/UBApplication.h"
+#include "core/UBSettingsData.h"
 
 #include "document/UBDocumentProxy.h"
 #include "document/UBDocumentController.h"
@@ -80,7 +81,7 @@ void UBExportDocumentSetAdaptor::persist(UBDocumentProxy* pDocumentProxy)
 
         UBDocumentTreeNode* node = treeModel->nodeFromIndex(treeViewParentIndex);
         UBDocumentProxy proxy;
-        proxy.setMetaData(UBSettings::documentName,node->displayName());
+        proxy.setMetaData(UBSettingsData::documentName,node->displayName());
         filename = askForFileName(&proxy, tr("Export as UBX File"));
     }
 

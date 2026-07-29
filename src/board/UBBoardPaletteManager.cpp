@@ -193,7 +193,7 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
 void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMode mainMode)
 {
-//    Board = 0, Internet, Document, Tutorial, ParaschoolEditor, WebDocument
+//    Board = 0, Internet, Document, WebDocument
 
     switch( mainMode )
     {
@@ -202,13 +202,6 @@ void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMod
                 // call changeMode only when switch NOT from desktop mode
                 if(!UBApplication::applicationController->isShowingDesktop())
                     changeMode(eUBDockPaletteWidget_BOARD);
-            }
-            break;
-
-        case UBApplicationController::Tutorial:
-            {
-                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
-                    mKeyboardPalette->hide();
             }
             break;
 
@@ -455,6 +448,9 @@ void UBBoardPaletteManager::connectPalettes()
 {
     connect(UBApplication::mainWindow->actionDrawing, SIGNAL(toggled(bool)), this, SLOT(toggleDrawingPalette(bool)));
     connect(UBApplication::mainWindow->actionStylus, SIGNAL(toggled(bool)), this, SLOT(toggleStylusPalette(bool)));
+
+    // Close all popup palettes when any toolbar action is triggered
+    connect(UBApplication::mainWindow->boardToolBar, SIGNAL(actionTriggered(QAction*)), this, SLOT(closeAllPopupPalettes()));
 
     for (QWidget *widget : UBApplication::mainWindow->actionZoomIn->associatedWidgets())
     {
@@ -1128,3 +1124,17 @@ UBCreateLinkPalette* UBBoardPaletteManager::linkPalette()
     return mLinkPalette;
 }
 
+
+void UBBoardPaletteManager::closeAllPopupPalettes()
+{
+    if (mAddItemPalette && mAddItemPalette->isVisible())
+        mAddItemPalette->close();
+    if (mErasePalette && mErasePalette->isVisible())
+        mErasePalette->close();
+    if (mPagePalette && mPagePalette->isVisible())
+        mPagePalette->close();
+    if (mImageBackgroundPalette && mImageBackgroundPalette->isVisible())
+        mImageBackgroundPalette->close();
+    if (mBackgroundsPalette && mBackgroundsPalette->isVisible())
+        mBackgroundsPalette->close();
+}

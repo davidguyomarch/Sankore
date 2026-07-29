@@ -23,6 +23,7 @@
 #include "UBImportVirtualPrinter.h"
 
 #include "core/UBApplication.h"
+#include "core/UBSettingsData.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBDocumentManager.h"
 
@@ -165,7 +166,7 @@ UBDocumentProxy* UBImportVirtualPrinter::importFile(const QFile& pFile, const QS
         if (document)
         {
             if (documentName != "")
-                document->setMetaData(UBSettings::documentName, documentName);
+                document->setMetaData(UBSettingsData::documentName, documentName);
 
             UBPersistenceManager::persistenceManager()->persistDocumentMetadata(document);
         }

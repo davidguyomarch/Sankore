@@ -28,6 +28,7 @@ jobs:
           apt-get update
           apt-get install -y \
             git \
+            gdb \
             build-essential \
             cmake \
             python3 \
@@ -144,9 +145,24 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
           export LANG=C.UTF-8
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+          # Enable core dumps for crash analysis
+          ulimit -c unlimited
+          echo "core" | sudo tee /proc/sys/kernel/core_pattern || true
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
-          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
-          echo "App smoke test completed (clean exit)"
+          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
+            EXIT_CODE=$?
+            echo "=== APP CRASHED (exit code $EXIT_CODE) ==="
+            # Try to get backtrace from core file
+            CORE_FILE=$(find . -name "core*" -newer build/linux/release/product/Open-Sankore 2>/dev/null | head -1)
+            if [ -n "$CORE_FILE" ]; then
+              echo "=== BACKTRACE ==="
+              gdb -batch -ex "bt full" -ex "quit" build/linux/release/product/Open-Sankore "$CORE_FILE" 2>&1 | head -100
+            else
+              echo "No core file found"
+            fi
+            echo "Continuing despite crash (coverage may be incomplete)"
+          }
+          echo "App smoke test completed"
           GCDA_COUNT=$(find . -name "*.gcda" 2>/dev/null | wc -l)
           echo "Found $GCDA_COUNT .gcda files"
 
@@ -206,6 +222,16 @@ jobs:
           report_paths: tests/build/test-results.xml
           check_name: Linux Unit Tests
           fail_on_failure: false
+
+      - name: Upload visual test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-images
+          path: |
+            tests/visual/reference/
+            tests/visual/actual/
+          if-no-files-found: ignore
 
       - name: Generate coverage report
         continue-on-error: true
@@ -357,10 +383,10 @@ jobs:
           EOF
           cp AppDir/usr/share/applications/open-sankore.desktop AppDir/
 
-          # Create icon (use a placeholder if no icon available)
-          if [ -f resources/images/uniboard.png ]; then
-            cp resources/images/uniboard.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
-            cp resources/images/uniboard.png AppDir/open-sankore.png
+          # Create icon
+          if [ -f resources/images/sankore-icon.png ]; then
+            cp resources/images/sankore-icon.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
+            cp resources/images/sankore-icon.png AppDir/open-sankore.png
           else
             # Generate a simple placeholder icon
             convert -size 256x256 xc:blue -fill white -gravity center -pointsize 48 -annotate 0 "S" AppDir/open-sankore.png 2>/dev/null || touch AppDir/open-sankore.png

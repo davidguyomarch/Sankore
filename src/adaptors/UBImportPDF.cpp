@@ -67,7 +67,7 @@ QList<UBGraphicsItem*> UBImportPDF::import(const QUuid& uuid, const QString& fil
 
     PDFRenderer *pdfRenderer = PDFRenderer::rendererForUuid(uuid, filePath, true); // renderer is automatically deleted when not used anymore
 
-    if (!pdfRenderer->isValid())
+    if (!pdfRenderer || !pdfRenderer->isValid())
     {
         UBApplication::showMessage(tr("PDF import failed."));
         return result;

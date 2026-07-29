@@ -42,8 +42,8 @@ UBWebPluginPDFWidget::UBWebPluginPDFWidget(const QUrl &url, QWidget *parent)
 {
     QIcon previousPageIcon;
     QIcon nextPageIcon;
-    previousPageIcon.addFile(":/images/toolbar/previousPage.png", QSize(32, 32), QIcon::Normal);
-    nextPageIcon.addFile(":/images/toolbar/nextPage.png", QSize(32, 32), QIcon::Normal);
+    previousPageIcon.addFile(":/images/toolbar/svg/previousPage.svg", QSize(32, 32), QIcon::Normal);
+    nextPageIcon.addFile(":/images/toolbar/svg/nextPage.svg", QSize(32, 32), QIcon::Normal);
     mPreviousPageAction = new QAction(previousPageIcon, QString(), this);
     mNextPageAction = new QAction(nextPageIcon, QString(), this);
 

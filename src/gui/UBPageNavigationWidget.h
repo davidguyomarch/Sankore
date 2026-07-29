@@ -53,8 +53,8 @@ public:
         return mode == eUBDockPaletteWidget_BOARD;
     }
 
-    QPixmap iconToLeft() const {return QPixmap(":images/pages_close.png");}
-    QPixmap iconToRight() const {return QPixmap(":images/pages_open.png");}
+    QPixmap iconToLeft() const {return QPixmap(":images/svg/pages_open.svg");}
+    QPixmap iconToRight() const {return QPixmap(":images/svg/pages_open.svg");}
 
 signals:
     void resizeRequest(QResizeEvent* event);

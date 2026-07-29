@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Proposal 1: Stylized "S" in a rounded square -->
+  <rect x="24" y="24" width="208" height="208" rx="40" fill="#4A90D9"/>
+  <path d="M160,88c0-17.67-16.57-32-40-32-23.43,0-40,14.33-40,32,0,36,72,28,72,64,0,17.67-16.57,32-40,32-23.43,0-40-14.33-40-32" fill="none" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

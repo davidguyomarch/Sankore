@@ -26,6 +26,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QFile>
 
 #include "transition/UniboardSankoreTransition.h"
 
@@ -166,8 +167,18 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     updateProtoActionsState();
 
 #ifndef Q_OS_MACOS
-    setWindowIcon(QIcon(":/images/uniboard.png"));
+    setWindowIcon(QIcon(":/images/icon-proposal-2-board-stylus.svg"));
 #endif
+
+    // Load global stylesheet based on saved theme preference
+    QString theme = UBSettings::settings()->appTheme->get().toString();
+    QString qssResource = ":/themes/" + theme + "/style.qss";
+    QFile styleFile(qssResource);
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        setStyleSheet(styleFile.readAll());
+        styleFile.close();
+    }
 
     setStyle(new UBStyle()); // Style is owned and deleted by the application
 
@@ -365,12 +376,12 @@ int UBApplication::exec(const QString& pFileToImport)
     mPreferencesController = new UBPreferencesController(mainWindow);
 
     connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
-    connect(mainWindow->actionTutorial, SIGNAL(triggered()), applicationController, SLOT(showTutorial()));
-    connect(mainWindow->actionSankoreEditor, SIGNAL(triggered()), applicationController, SLOT(showSankoreEditor()));
-    connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
 
     toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
     toolBarPositionChanged(mSettings->appToolBarPositionedAtTop->get());
+
+    // Apply theme icons at startup
+    reloadThemeIcons(mSettings->appTheme->get().toString());
 
     bool bUseMultiScreen = mSettings->appUseMultiscreen->get().toBool();
     mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
@@ -473,7 +484,6 @@ void UBApplication::toolBarPositionChanged(QVariant topOrBottom)
     mainWindow->addToolBar(area, mainWindow->boardToolBar);
     mainWindow->addToolBar(area, mainWindow->webToolBar);
     mainWindow->addToolBar(area, mainWindow->documentToolBar);
-    mainWindow->addToolBar(area, mainWindow->tutorialToolBar);
 
     webController->showTabAtTop(topOrBottom.toBool());
 
@@ -486,7 +496,69 @@ void UBApplication::toolBarDisplayTextChanged(QVariant display)
     mainWindow->boardToolBar->setToolButtonStyle(toolButtonStyle);
     mainWindow->webToolBar->setToolButtonStyle(toolButtonStyle);
     mainWindow->documentToolBar->setToolButtonStyle(toolButtonStyle);
-    mainWindow->tutorialToolBar->setToolButtonStyle(toolButtonStyle);
+}
+
+void UBApplication::themeChanged(QAction* action)
+{
+    if (!action)
+        return;
+
+    QString theme = action->data().toString();
+    mSettings->appTheme->set(theme);
+
+    // Reload stylesheet from theme directory
+    QString qssPath = ":/themes/" + theme + "/style.qss";
+    QFile styleFile(qssPath);
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        setStyleSheet(styleFile.readAll());
+        styleFile.close();
+    }
+
+    // Reload toolbar icons from theme directory
+    reloadThemeIcons(theme);
+}
+
+void UBApplication::reloadThemeIcons(const QString& theme)
+{
+    QString iconPrefix = ":/themes/" + theme + "/icons/";
+
+    // Reload icons for all toolbar actions by matching icon filenames
+    QList<QToolBar*> toolbars = {mainWindow->boardToolBar, mainWindow->webToolBar, mainWindow->documentToolBar};
+
+    for (QToolBar* toolbar : toolbars)
+    {
+        for (QAction* action : toolbar->actions())
+        {
+            if (action->isSeparator() || action->icon().isNull())
+                continue;
+
+            // Try to find the icon in the theme directory using the icon name
+            // stored as dynamic property (set on first load)
+            QString iconName = action->property("themeIconName").toString();
+
+            if (iconName.isEmpty())
+            {
+                // First time: extract icon name from the current resource path
+                // Qt doesn't expose the resource path from QIcon, so we use
+                // a lookup based on the action's icon resource set in mainWindow.ui
+                // We'll try the action name mapping
+                QString actionName = action->objectName();
+                if (actionName.startsWith("action"))
+                    actionName = actionName.mid(6);
+                if (!actionName.isEmpty())
+                    actionName[0] = actionName[0].toLower();
+                iconName = actionName;
+                action->setProperty("themeIconName", iconName);
+            }
+
+            QString iconPath = iconPrefix + iconName + ".svg";
+            if (QFile::exists(iconPath))
+            {
+                action->setIcon(QIcon(iconPath));
+            }
+        }
+    }
 }
 
 
@@ -548,7 +620,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             pageSizeGroup->addAction(mainWindow->actionRegularPageSize);
             pageSizeGroup->addAction(mainWindow->actionCustomPageSize);
 
-            QMenu* documentSizeMenu = menu->addMenu(QIcon(":/images/toolbar/pageSize.png"),tr("Page Size"));
+            QMenu* documentSizeMenu = menu->addMenu(QIcon(":/images/toolbar/svg/display.svg"),tr("Page Size"));
             documentSizeMenu->addAction(mainWindow->actionWidePageSize);
             documentSizeMenu->addAction(mainWindow->actionWidePageSize_16_10);
             documentSizeMenu->addAction(mainWindow->actionRegularPageSize);
@@ -561,17 +633,33 @@ void UBApplication::decorateActionMenu(QAction* action)
 
             menu->addSeparator();
             menu->addAction(mainWindow->actionPreferences);
-            menu->addAction(mainWindow->actionMultiScreen);
-            // SANKORE-48: Hide the check update action if the setting
-            // EnableAutomaticSoftwareUpdates is false in Uniboard.config
-            if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool())
-                menu->addAction(mainWindow->actionCheckUpdate);
+
+            // Theme sub-menu
+            QMenu* themeMenu = menu->addMenu(tr("Theme"));
+            QActionGroup* themeGroup = new QActionGroup(themeMenu);
+            themeGroup->setExclusive(true);
+
+            QAction* actionThemeDark = themeMenu->addAction(tr("Dark (default)"));
+            actionThemeDark->setCheckable(true);
+            actionThemeDark->setData("dark");
+            themeGroup->addAction(actionThemeDark);
+
+            QAction* actionThemeClassic = themeMenu->addAction(tr("Classic (light)"));
+            actionThemeClassic->setCheckable(true);
+            actionThemeClassic->setData("classic");
+            themeGroup->addAction(actionThemeClassic);
+
+            QString currentTheme = mSettings->appTheme->get().toString();
+            if (currentTheme == "classic")
+                actionThemeClassic->setChecked(true);
             else
-                mainWindow->actionCheckUpdate->setEnabled(false);
+                actionThemeDark->setChecked(true);
+
+            connect(themeGroup, SIGNAL(triggered(QAction*)), this, SLOT(themeChanged(QAction*)));
+
+            menu->addAction(mainWindow->actionMultiScreen);
 
             menu->addSeparator();
-            menu->addAction(mainWindow->actionTutorial);
-            //menu->addAction(mainWindow->actionSankoreEditor); // ALTI/AOU - 20140217 : don't show "Open-Sankoré Editor" anymore.
 
 #ifndef Q_OS_LINUX // No Podcast on Linux yet
             menu->addAction(mainWindow->actionPodcast);

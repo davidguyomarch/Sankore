@@ -75,7 +75,7 @@ class UBWebController : public QObject
 
         enum WebInstance
         {
-            WebBrowser = 0, Tutorial, Paraschool, TotalNumberOfWebInstances
+            WebBrowser = 0, TotalNumberOfWebInstances
         };
 
         void show(WebInstance type = UBWebController::WebBrowser);
@@ -122,9 +122,7 @@ class UBWebController : public QObject
 
     private:
         void initialiazemOEmbedProviders();
-        void tutorialWebInstance();
         void webBrowserInstance();
-        void paraschoolWebInstance();
         void lookForEmbedContent(QString* pHtml, QString tag, QString attribute, QList<QUrl>* pList);
         void checkForOEmbed(QString* pHtml);
 

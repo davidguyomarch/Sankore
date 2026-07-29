@@ -113,9 +113,6 @@ WBBrowserWindow::WBBrowserWindow(QWidget *parent, Ui::MainWindow* uniboardMainWi
     setupMenu();
     if(!isViewerWebInstance)
         setupToolBar();
-    else{
-        setupToolBarForTutorial();
-    }
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(0);
@@ -261,34 +258,6 @@ void WBBrowserWindow::setupToolBar()
 
     mWebToolBar->show();
 }
-
-void WBBrowserWindow::setupToolBarForTutorial()
-{
-    mWebToolBar = mUniboardMainWindow->tutorialToolBar;
-
-    mTabWidget->addWebAction(mUniboardMainWindow->actionWebBack, QWebEnginePage::Back);
-    mTabWidget->addWebAction(mUniboardMainWindow->actionWebForward, QWebEnginePage::Forward);
-
-    for (QWidget* menuWidget : mUniboardMainWindow->actionWebBack->associatedWidgets())
-    {
-        QToolButton *tb = qobject_cast<QToolButton*>(menuWidget);
-
-        if (tb && tb->menu())
-            tb->setMenu(nullptr);
-    }
-
-    for (QWidget* menuWidget : mUniboardMainWindow->actionWebForward->associatedWidgets())
-    {
-        QToolButton *tb = qobject_cast<QToolButton*>(menuWidget);
-
-        if (tb && tb->menu())
-            tb->setMenu(nullptr);
-    }
-
-    mWebToolBar->show();
-}
-
-
 
 void WBBrowserWindow::adaptToolBar(bool wideRes)
 {

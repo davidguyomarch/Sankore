@@ -31,6 +31,7 @@
 #include "UBFeaturesController.h"
 #include "gui/UBActionPalette.h"
 #include "domain/UBShapeFactory.h"
+#include "IUBBoardContext.h"
 
 
 class UBMainWindow;
@@ -51,6 +52,10 @@ class UBGraphicsVideoItem;
 class UBGraphicsAudioItem;
 class UBGraphicsWidgetItem;
 class UBBoardPaletteManager;
+class UBBoardNavigationController;
+class UBBoardToolbarController;
+class UBBoardZoomController;
+class UBBoardItemFactory;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
@@ -58,19 +63,24 @@ class UBTextDelegateDialogHandler;
 class UBGraphicsTextItem;
 
 
-typedef enum{
-    eItemActionType_Default,
-    eItemActionType_Duplicate,
-    eItemActionType_Paste
-}eItemActionType;
-
-class UBBoardController : public UBDocumentContainer
+class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 {
     Q_OBJECT
 
     public:
         UBBoardController(UBMainWindow *mainWindow);
         virtual ~UBBoardController();
+
+        // IUBBoardContext override to resolve ambiguity with UBDocumentContainer
+        UBDocumentProxy* selectedDocument() override { return UBDocumentContainer::selectedDocument(); }
+        QObject* asQObject() override { return this; }
+        void reloadThumbnails() override { UBDocumentContainer::reloadThumbnails(); }
+        int pageCount() override { return UBDocumentContainer::pageCount(); }
+        void addPage(int index) override { UBDocumentContainer::addPage(index); }
+        void duplicatePages(QList<int>& indexes) override { UBDocumentContainer::duplicatePages(indexes); }
+        void deletePages(QList<int>& indexes) override { UBDocumentContainer::deletePages(indexes); }
+        void movePageToIndex(int source, int target) override { UBDocumentContainer::movePageToIndex(source, target); }
+        void insertThumbPage(int index) override { UBDocumentContainer::insertThumbPage(index); }
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
 
@@ -160,6 +170,16 @@ class UBBoardController : public UBDocumentContainer
             return mSystemScaleFactor;
         }
 
+        void setSystemScaleFactor(qreal factor)
+        {
+            mSystemScaleFactor = factor;
+        }
+
+        qreal zoomFactor()
+        {
+            return mZoomFactor;
+        }
+
         //EV-7 - NNE - 20140106
         UBShapeFactory& shapeFactory()
         {
@@ -181,9 +201,23 @@ class UBBoardController : public UBDocumentContainer
             return mPaletteManager;
         }
 
+        UBBoardNavigationController *navigationController()
+        {
+            return mNavigationController;
+        }
+
         void notifyCache(bool visible);
         void notifyPageChanged();
+        void updateActionStates();
         void displayMetaData(QMap<QString, QString> metadatas);
+
+        // IUBBoardContext signal emission
+        void emitPageChanged() override { emit pageChanged(); }
+        void emitActiveSceneChanged() override { emit activeSceneChanged(); }
+        void emitZoomChanged(qreal zoom) override { emit zoomChanged(zoom); }
+        void emitControlViewportChanged() override { emit controlViewportChanged(); }
+        void emitSystemScaleFactorChanged(qreal factor) override { emit systemScaleFactorChanged(factor); }
+        void emitDocumentThumbnailsUpdated(void* sender) override { emit documentThumbnailsUpdated(static_cast<UBDocumentContainer*>(sender)); }
 
         void setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, int pSceneIndex = 0, bool forceReload = false, const bool onImport = false);
         void setActiveDocumentScene(int pSceneIndex);
@@ -296,7 +330,6 @@ class UBBoardController : public UBDocumentContainer
         void setupToolbar();
         void connectToolbar();
         void initToolbarTexts();
-        void updateActionStates();
         void updateSystemScaleFactor();
         QString truncate(QString text, int maxWidth);
 
@@ -316,6 +349,10 @@ class UBBoardController : public UBDocumentContainer
         UBGraphicsScene* mActiveScene;
         int mActiveSceneIndex;
         UBBoardPaletteManager *mPaletteManager;
+        UBBoardNavigationController *mNavigationController;
+        UBBoardToolbarController *mToolbarController;
+        UBBoardZoomController *mZoomController;
+        UBBoardItemFactory *mItemFactory;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
         UBMessageWindow *mMessageWindow;
         UBBoardView *mControlView;
@@ -331,7 +368,6 @@ class UBBoardController : public UBDocumentContainer
         QColor mMarkerColorOnLightBackground;
         qreal mSystemScaleFactor;
         bool mCleanupDone;
-        QMap<QAction*, QPair<QString, QString> > mActionTexts;
         bool mCacheWidgetIsEnabled;
         QGraphicsItem* mLastCreatedItem;
         int mDeletingSceneIndex;

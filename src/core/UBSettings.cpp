@@ -22,6 +22,7 @@
 
 
 #include "UBSettings.h"
+#include "UBTheme.h"
 
 #include <QWidget>
 #include <QApplication>
@@ -83,22 +84,22 @@ const char *UBSettings::sDefaultFontFamily = "Arial";
 
 QString UBSettings::currentFileVersion = "4.7.0";
 
-QColor UBSettings::crossDarkBackground = QColor(44, 44, 44, 200);
-QColor UBSettings::crossLightBackground = QColor(165, 225, 255);
+QColor UBSettings::crossDarkBackground = UBTheme::crossDark();
+QColor UBSettings::crossLightBackground = UBTheme::crossLight();
 
-QBrush UBSettings::eraserBrushLightBackground = QBrush(QColor(255, 255, 255, 30));
-QBrush UBSettings::eraserBrushDarkBackground = QBrush(QColor(127, 127, 127, 30));
+QBrush UBSettings::eraserBrushLightBackground = UBTheme::eraserBrushLight();
+QBrush UBSettings::eraserBrushDarkBackground = UBTheme::eraserBrushDark();
 
-QPen UBSettings::eraserPenDarkBackground = QPen(QColor(255, 255, 255, 63));
-QPen UBSettings::eraserPenLightBackground = QPen(QColor(0, 0, 0, 63));
+QPen UBSettings::eraserPenDarkBackground = UBTheme::eraserPenDark();
+QPen UBSettings::eraserPenLightBackground = UBTheme::eraserPenLight();
 
-QColor UBSettings::documentSizeMarkColorDarkBackground = QColor(44, 44, 44, 200);
-QColor UBSettings::documentSizeMarkColorLightBackground = QColor(241, 241, 241);
+QColor UBSettings::documentSizeMarkColorDarkBackground = UBTheme::documentSizeMarkDark();
+QColor UBSettings::documentSizeMarkColorLightBackground = UBTheme::documentSizeMarkLight();
 
-QColor UBSettings::paletteColor = QColor(127, 127, 127, 127);
-QColor UBSettings::opaquePaletteColor = QColor(66, 66, 66, 200);
+QColor UBSettings::paletteColor = UBTheme::surface();
+QColor UBSettings::opaquePaletteColor = UBTheme::surfaceOpaque();
 
-QColor UBSettings::documentViewLightColor = QColor(241, 241, 241);
+QColor UBSettings::documentViewLightColor = UBTheme::documentViewLight();
 
 QPointer<QSettings> UBSettings::sAppSettings = 0;
 
@@ -124,7 +125,7 @@ QStringList UBSettings::imageFileExtensions;
 QStringList UBSettings::widgetFileExtensions;
 QStringList UBSettings::interactiveContentFileExtensions;
 
-QColor UBSettings::treeViewBackgroundColor = QColor(209, 215, 226); //in synch with css tree view background
+QColor UBSettings::treeViewBackgroundColor = UBTheme::treeViewBg();
 
 int UBSettings::objectInControlViewMargin = 100;
 
@@ -234,7 +235,9 @@ void UBSettings::init()
     documentSizes.insert(DocumentSizeRatio::Ratio16_9, QSize((960 / 9 * 16), 960)); // 1.77
 
     appToolBarPositionedAtTop = new UBSetting(this, "App", "ToolBarPositionedAtTop", true);
-    appToolBarDisplayText = new UBSetting(this, "App", "ToolBarDisplayText", true);
+    appToolBarDisplayText = new UBSetting(this, "App", "ToolBarDisplayText", false);
+    appTheme = new UBSetting(this, "App", "Theme", "dark");
+    appStrokeSmoothing = new UBSetting(this, "App", "StrokeSmoothing", true);
     appEnableAutomaticSoftwareUpdates = new UBSetting(this, "App", "EnableAutomaticSoftwareUpdates", true);
     appEnableSoftwareUpdates = new UBSetting(this, "App", "EnableSoftwareUpdates", true);
     appToolBarOrientationVertical = new UBSetting(this, "App", "ToolBarOrientationVertical", false);    

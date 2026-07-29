@@ -99,7 +99,8 @@ void UBScreenMirror::grabPixmap()
         mLastPixmap = QGuiApplication::screens().at(mScreenIndex)->grabWindow(0, mRect.x(), mRect.y(), mRect.width(), mRect.height());
     }
 
-    mLastPixmap = mLastPixmap.scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (!mLastPixmap.isNull())
+        mLastPixmap = mLastPixmap.scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 

@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../sankore.qrc">
-    <normaloff>:/images/uniboard.png</normaloff>:/images/uniboard.png</iconset>
+    <normaloff>:/images/icon-proposal-2-board-stylus.svg</normaloff>:/images/icon-proposal-2-board-stylus.svg</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -24,7 +24,7 @@
    </size>
   </property>
   <property name="toolButtonStyle">
-   <enum>Qt::ToolButtonTextUnderIcon</enum>
+   <enum>Qt::ToolButtonIconOnly</enum>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>false</bool>
@@ -45,7 +45,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -91,7 +91,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -137,7 +137,7 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>48</width>
+     <width>32</width>
      <height>32</height>
     </size>
    </property>
@@ -171,44 +171,6 @@
    <addaction name="actionDesktop"/>
    <addaction name="actionMenu"/>
   </widget>
-  <widget class="QToolBar" name="tutorialToolBar">
-   <property name="contextMenuPolicy">
-    <enum>Qt::PreventContextMenu</enum>
-   </property>
-   <property name="windowTitle">
-    <string>Tutorial</string>
-   </property>
-   <property name="layoutDirection">
-    <enum>Qt::LeftToRight</enum>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>48</width>
-     <height>32</height>
-    </size>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>true</bool>
-   </attribute>
-   <addaction name="actionWebBack"/>
-   <addaction name="actionWebForward"/>
-   <addaction name="actionBoard"/>
-   <addaction name="actionWeb"/>
-   <addaction name="actionDocument"/>
-   <addaction name="actionMenu"/>
-  </widget>
   <action name="actionStylus">
    <property name="checkable">
     <bool>true</bool>
@@ -218,7 +180,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/stylus.png</normaloff>:/images/toolbar/stylus.png</iconset>
+     <normaloff>:/images/toolbar/svg/stylus.svg</normaloff>:/images/toolbar/svg/stylus.svg</iconset>
    </property>
    <property name="text">
     <string>Stylus</string>
@@ -236,7 +198,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/background.png</normaloff>:/images/toolbar/background.png</iconset>
+     <normaloff>:/images/toolbar/svg/background.svg</normaloff>:/images/toolbar/svg/background.svg</iconset>
    </property>
    <property name="text">
     <string>Backgrounds</string>
@@ -248,7 +210,7 @@
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/undoOn.png</normaloff>:/images/toolbar/undoOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/undo.svg</normaloff>:/images/toolbar/svg/undo.svg</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -260,7 +222,7 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/redoOn.png</normaloff>:/images/toolbar/redoOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/redo.svg</normaloff>:/images/toolbar/svg/redo.svg</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -272,7 +234,7 @@
   <action name="actionBack">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/previousPageOn.png</normaloff>:/images/toolbar/previousPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/previousPage.svg</normaloff>:/images/toolbar/svg/previousPage.svg</iconset>
    </property>
    <property name="text">
     <string>Previous</string>
@@ -287,7 +249,7 @@
   <action name="actionForward">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/nextPageOn.png</normaloff>:/images/toolbar/nextPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/nextPage.svg</normaloff>:/images/toolbar/svg/nextPage.svg</iconset>
    </property>
    <property name="text">
     <string>Next</string>
@@ -305,7 +267,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/documents.png</normaloff>:/images/toolbar/documents.png</iconset>
+     <normaloff>:/images/toolbar/svg/documents.svg</normaloff>:/images/toolbar/svg/documents.svg</iconset>
    </property>
    <property name="text">
     <string>Documents</string>
@@ -320,7 +282,7 @@
   <action name="actionWeb">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/web.png</normaloff>:/images/toolbar/web.png</iconset>
+     <normaloff>:/images/toolbar/svg/web.svg</normaloff>:/images/toolbar/svg/web.svg</iconset>
    </property>
    <property name="text">
     <string>Web</string>
@@ -341,7 +303,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/smallPen.png</normaloff>:/images/toolbar/smallPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/smallPen.svg</normaloff>:/images/toolbar/svg/smallPen.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -356,7 +318,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/mediumPen.png</normaloff>:/images/toolbar/mediumPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/mediumPen.svg</normaloff>:/images/toolbar/svg/mediumPen.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -371,7 +333,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/largePen.png</normaloff>:/images/toolbar/largePen.png</iconset>
+     <normaloff>:/images/toolbar/svg/largePen.svg</normaloff>:/images/toolbar/svg/largePen.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -383,7 +345,7 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/quitOn.png</normaloff>:/images/toolbar/quitOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/quit.svg</normaloff>:/images/toolbar/svg/quit.svg</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -404,7 +366,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/smallEraser.png</normaloff>:/images/toolbar/smallEraser.png</iconset>
+     <normaloff>:/images/toolbar/svg/smallEraser.svg</normaloff>:/images/toolbar/svg/smallEraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -422,7 +384,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/mediumEraser.png</normaloff>:/images/toolbar/mediumEraser.png</iconset>
+     <normaloff>:/images/toolbar/svg/mediumEraser.svg</normaloff>:/images/toolbar/svg/mediumEraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -437,7 +399,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/largeEraser.png</normaloff>:/images/toolbar/largeEraser.png</iconset>
+     <normaloff>:/images/toolbar/svg/largeEraser.svg</normaloff>:/images/toolbar/svg/largeEraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -449,7 +411,7 @@
   <action name="actionColor0">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -461,7 +423,7 @@
   <action name="actionColor1">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -470,7 +432,7 @@
   <action name="actionColor2">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -479,7 +441,7 @@
   <action name="actionColor3">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/color.png</normaloff>:/images/toolbar/color.png</iconset>
+     <normaloff>:/images/toolbar/svg/color.svg</normaloff>:/images/toolbar/svg/color.svg</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -488,7 +450,7 @@
   <action name="actionWebBack">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/previousPageOn.png</normaloff>:/images/toolbar/previousPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/previousPage.svg</normaloff>:/images/toolbar/svg/previousPage.svg</iconset>
    </property>
    <property name="text">
     <string>Back</string>
@@ -503,7 +465,7 @@
   <action name="actionWebForward">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/nextPageOn.png</normaloff>:/images/toolbar/nextPageOn.png</iconset>
+     <normaloff>:/images/toolbar/svg/nextPage.svg</normaloff>:/images/toolbar/svg/nextPage.svg</iconset>
    </property>
    <property name="text">
     <string>Forward</string>
@@ -518,7 +480,7 @@
   <action name="actionWebReload">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/reload.png</normaloff>:/images/toolbar/reload.png</iconset>
+     <normaloff>:/images/toolbar/svg/reload.svg</normaloff>:/images/toolbar/svg/reload.svg</iconset>
    </property>
    <property name="text">
     <string>Reload</string>
@@ -530,7 +492,7 @@
   <action name="actionHome">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/home.png</normaloff>:/images/toolbar/home.png</iconset>
+     <normaloff>:/images/toolbar/svg/home.svg</normaloff>:/images/toolbar/svg/home.svg</iconset>
    </property>
    <property name="text">
     <string>Home</string>
@@ -542,7 +504,7 @@
   <action name="actionBookmarks">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/bookmarks.png</normaloff>:/images/toolbar/bookmarks.png</iconset>
+     <normaloff>:/images/toolbar/svg/bookmarks.svg</normaloff>:/images/toolbar/svg/bookmarks.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmarks</string>
@@ -554,7 +516,7 @@
   <action name="actionAddBookmark">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addBookmark.png</normaloff>:/images/toolbar/addBookmark.png</iconset>
+     <normaloff>:/images/toolbar/svg/addBookmark.svg</normaloff>:/images/toolbar/svg/addBookmark.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmark</string>
@@ -566,7 +528,7 @@
   <action name="actionBoard">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/board.png</normaloff>:/images/toolbar/board.png</iconset>
+     <normaloff>:/images/toolbar/svg/board.svg</normaloff>:/images/toolbar/svg/board.svg</iconset>
    </property>
    <property name="text">
     <string>Board</string>
@@ -584,7 +546,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/clearPage.png</normaloff>:/images/toolbar/clearPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/clearPage.svg</normaloff>:/images/toolbar/svg/clearPage.svg</iconset>
    </property>
    <property name="text">
     <string>Erase</string>
@@ -596,7 +558,7 @@
   <action name="actionPreferences">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/settings.png</normaloff>:/images/toolbar/settings.png</iconset>
+     <normaloff>:/images/toolbar/svg/settings.svg</normaloff>:/images/toolbar/svg/settings.svg</iconset>
    </property>
    <property name="text">
     <string>Preferences</string>
@@ -611,7 +573,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/library.png</normaloff>:/images/toolbar/library.png</iconset>
+     <normaloff>:/images/toolbar/svg/library.svg</normaloff>:/images/toolbar/svg/library.svg</iconset>
    </property>
    <property name="text">
     <string>Library</string>
@@ -626,7 +588,7 @@
   <action name="actionMenu">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/menu.png</normaloff>:/images/toolbar/menu.png</iconset>
+     <normaloff>:/images/toolbar/svg/menu.svg</normaloff>:/images/toolbar/svg/menu.svg</iconset>
    </property>
    <property name="text">
     <string>Open-Sankoré</string>
@@ -638,7 +600,7 @@
   <action name="actionDesktop">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/display.png</normaloff>:/images/toolbar/display.png</iconset>
+     <normaloff>:/images/toolbar/svg/display.svg</normaloff>:/images/toolbar/svg/display.svg</iconset>
    </property>
    <property name="text">
     <string>Show Desktop</string>
@@ -653,7 +615,7 @@
   <action name="actionWebBigger">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomIn.png</normaloff>:/images/stylusPalette/zoomIn.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomIn.svg</normaloff>:/images/stylusPalette/svg/zoomIn.svg</iconset>
    </property>
    <property name="text">
     <string>Bigger</string>
@@ -668,7 +630,7 @@
   <action name="actionWebSmaller">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomOut.png</normaloff>:/images/stylusPalette/zoomOut.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomOut.svg</normaloff>:/images/stylusPalette/svg/zoomOut.svg</iconset>
    </property>
    <property name="text">
     <string>Smaller</string>
@@ -683,7 +645,7 @@
   <action name="actionNewFolder">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/newFolder.png</normaloff>:/images/toolbar/newFolder.png</iconset>
+     <normaloff>:/images/toolbar/svg/newFolder.svg</normaloff>:/images/toolbar/svg/newFolder.svg</iconset>
    </property>
    <property name="text">
     <string>New Folder</string>
@@ -695,7 +657,7 @@
   <action name="actionNewDocument">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/newDocument.png</normaloff>:/images/toolbar/newDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/newDocument.svg</normaloff>:/images/toolbar/svg/newDocument.svg</iconset>
    </property>
    <property name="text">
     <string>New Document</string>
@@ -707,7 +669,7 @@
   <action name="actionImport">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/import.png</normaloff>:/images/toolbar/import.png</iconset>
+     <normaloff>:/images/toolbar/svg/import.svg</normaloff>:/images/toolbar/svg/import.svg</iconset>
    </property>
    <property name="text">
     <string>Import</string>
@@ -719,7 +681,7 @@
   <action name="actionExport">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/export.png</normaloff>:/images/toolbar/export.png</iconset>
+     <normaloff>:/images/toolbar/svg/export.svg</normaloff>:/images/toolbar/svg/export.svg</iconset>
    </property>
    <property name="text">
     <string>Export</string>
@@ -731,7 +693,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/open.png</normaloff>:/images/toolbar/open.png</iconset>
+     <normaloff>:/images/toolbar/svg/open.svg</normaloff>:/images/toolbar/svg/open.svg</iconset>
    </property>
    <property name="text">
     <string>Open in Board</string>
@@ -746,7 +708,7 @@
   <action name="actionDuplicate">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/duplicate.png</normaloff>:/images/toolbar/duplicate.png</iconset>
+     <normaloff>:/images/toolbar/svg/duplicate.svg</normaloff>:/images/toolbar/svg/duplicate.svg</iconset>
    </property>
    <property name="text">
     <string>Duplicate</string>
@@ -758,7 +720,7 @@
   <action name="actionDelete">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/deleteDocument.png</normaloff>:/images/toolbar/deleteDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/remove.svg</normaloff>:/images/toolbar/svg/remove.svg</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -773,7 +735,7 @@
   <action name="actionAddToWorkingDocument">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToWorkingDoc.png</normaloff>:/images/toolbar/addToWorkingDoc.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToWorkingDoc.svg</normaloff>:/images/toolbar/svg/addToWorkingDoc.svg</iconset>
    </property>
    <property name="text">
     <string>Add to Working Document</string>
@@ -785,7 +747,7 @@
   <action name="actionDocumentAdd">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Add</string>
@@ -797,7 +759,7 @@
   <action name="actionRename">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/rename.png</normaloff>:/images/toolbar/rename.png</iconset>
+     <normaloff>:/images/toolbar/svg/rename.svg</normaloff>:/images/toolbar/svg/rename.svg</iconset>
    </property>
    <property name="text">
     <string>Rename</string>
@@ -812,7 +774,7 @@
   <action name="actionDocumentTools">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/tools.png</normaloff>:/images/toolbar/tools.png</iconset>
+     <normaloff>:/images/toolbar/svg/tools.svg</normaloff>:/images/toolbar/svg/tools.svg</iconset>
    </property>
    <property name="text">
     <string>Tools</string>
@@ -827,7 +789,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/tools.png</normaloff>:/images/toolbar/tools.png</iconset>
+     <normaloff>:/images/toolbar/svg/tools.svg</normaloff>:/images/toolbar/svg/tools.svg</iconset>
    </property>
    <property name="text">
     <string>Tools</string>
@@ -845,7 +807,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/display.png</normaloff>:/images/toolbar/display.png</iconset>
+     <normaloff>:/images/toolbar/svg/display.svg</normaloff>:/images/toolbar/svg/display.svg</iconset>
    </property>
    <property name="text">
     <string>Multi Screen</string>
@@ -857,7 +819,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Wide Size (16/9)</string>
@@ -878,7 +840,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Size (4/3)</string>
@@ -902,7 +864,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Custom Size</string>
@@ -920,7 +882,7 @@
   <action name="actionStopLoading">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/deleteDocument.png</normaloff>:/images/toolbar/deleteDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/remove.svg</normaloff>:/images/toolbar/svg/remove.svg</iconset>
    </property>
    <property name="text">
     <string>Stop Loading</string>
@@ -932,7 +894,7 @@
   <action name="actionCut">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/cut.png</normaloff>:/images/toolbar/cut.png</iconset>
+     <normaloff>:/images/toolbar/svg/cut.svg</normaloff>:/images/toolbar/svg/cut.svg</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -944,7 +906,7 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/copy.png</normaloff>:/images/toolbar/copy.png</iconset>
+     <normaloff>:/images/toolbar/svg/copy.svg</normaloff>:/images/toolbar/svg/copy.svg</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -956,7 +918,7 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/paste.png</normaloff>:/images/toolbar/paste.png</iconset>
+     <normaloff>:/images/toolbar/svg/paste.svg</normaloff>:/images/toolbar/svg/paste.svg</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -971,8 +933,7 @@
   <action name="actionSleep">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/blackout.png</normaloff>
-     <normalon>:/images/extraPalette/blackoutOn.png</normalon>:/images/extraPalette/blackout.png</iconset>
+     <normaloff>:/images/extraPalette/svg/blackout.svg</normaloff>:/images/extraPalette/svg/blackout.svg</iconset>
    </property>
    <property name="text">
     <string>Sleep</string>
@@ -987,8 +948,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/keyboard.png</normaloff>
-     <normalon>:/images/extraPalette/keyboardOn.png</normalon>:/images/extraPalette/keyboard.png</iconset>
+     <normaloff>:/images/extraPalette/svg/keyboard.svg</normaloff>:/images/extraPalette/svg/keyboard.svg</iconset>
    </property>
    <property name="text">
     <string>Virtual Keyboard</string>
@@ -1003,8 +963,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background1.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background1On.svg</normalon>:/images/backgroundPalette/background1.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background1.svg</normaloff>:/images/backgroundPalette/background1.svg</iconset>
    </property>
    <property name="text">
     <string>Plain Light Background</string>
@@ -1022,8 +981,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background2.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background2On.svg</normalon>:/images/backgroundPalette/background2.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background2.svg</normaloff>:/images/backgroundPalette/background2.svg</iconset>
    </property>
    <property name="text">
     <string>Grid Light Background</string>
@@ -1041,8 +999,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background3.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background3On.svg</normalon>:/images/backgroundPalette/background3.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background3.svg</normaloff>:/images/backgroundPalette/background3.svg</iconset>
    </property>
    <property name="text">
     <string>Plain Dark Background</string>
@@ -1060,8 +1017,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/backgroundPalette/background4.svg</normaloff>
-     <normalon>:/images/backgroundPalette/background4On.svg</normalon>:/images/backgroundPalette/background4.svg</iconset>
+     <normaloff>:/images/backgroundPalette/background4.svg</normaloff>:/images/backgroundPalette/background4.svg</iconset>
    </property>
    <property name="text">
     <string>Grid Dark Background</string>
@@ -1079,7 +1035,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/record.png</normaloff>:/images/toolbar/record.png</iconset>
+     <normaloff>:/images/toolbar/svg/record.svg</normaloff>:/images/toolbar/svg/record.svg</iconset>
    </property>
    <property name="text">
     <string>Podcast</string>
@@ -1094,8 +1050,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/record.png</normaloff>
-     <normalon>:/images/toolbar/stop.png</normalon>:/images/toolbar/record.png</iconset>
+     <normaloff>:/images/toolbar/svg/record.svg</normaloff>:/images/toolbar/svg/record.svg</iconset>
    </property>
    <property name="text">
     <string>Record</string>
@@ -1143,7 +1098,7 @@
   <action name="actionAdd">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Add</string>
@@ -1158,8 +1113,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/pen.png</normaloff>
-     <normalon>:/images/stylusPalette/penOn.png</normalon>:/images/stylusPalette/pen.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/pen.svg</normaloff>:/images/stylusPalette/svg/pen.svg</iconset>
    </property>
    <property name="text">
     <string>Pen</string>
@@ -1177,8 +1131,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/eraser.png</normaloff>
-     <normalon>:/images/stylusPalette/eraserOn.png</normalon>:/images/stylusPalette/eraser.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/eraser.svg</normaloff>:/images/stylusPalette/svg/eraser.svg</iconset>
    </property>
    <property name="text">
     <string>Eraser</string>
@@ -1196,8 +1149,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/marker.png</normaloff>
-     <normalon>:/images/stylusPalette/markerOn.png</normalon>:/images/stylusPalette/marker.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/marker.svg</normaloff>:/images/stylusPalette/svg/marker.svg</iconset>
    </property>
    <property name="text">
     <string>Marker</string>
@@ -1215,8 +1167,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/arrow.png</normaloff>
-     <normalon>:/images/stylusPalette/arrowOn.png</normalon>:/images/stylusPalette/arrow.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/selector.svg</normaloff>:/images/stylusPalette/svg/selector.svg</iconset>
    </property>
    <property name="text">
     <string>Selector</string>
@@ -1234,8 +1185,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/hand.png</normaloff>
-     <normalon>:/images/stylusPalette/handOn.png</normalon>:/images/stylusPalette/hand.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/hand.svg</normaloff>:/images/stylusPalette/svg/hand.svg</iconset>
    </property>
    <property name="text">
     <string>Hand</string>
@@ -1250,8 +1200,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomIn.png</normaloff>
-     <normalon>:/images/stylusPalette/zoomInOn.png</normalon>:/images/stylusPalette/zoomIn.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomIn.svg</normaloff>:/images/stylusPalette/svg/zoomIn.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -1263,8 +1212,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/zoomOut.png</normaloff>
-     <normalon>:/images/stylusPalette/zoomOutOn.png</normalon>:/images/stylusPalette/zoomOut.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/zoomOut.svg</normaloff>:/images/stylusPalette/svg/zoomOut.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -1276,8 +1224,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/laser.png</normaloff>
-     <normalon>:/images/stylusPalette/laserOn.png</normalon>:/images/stylusPalette/laser.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/pointer.svg</normaloff>:/images/stylusPalette/svg/pointer.svg</iconset>
    </property>
    <property name="text">
     <string>Laser Pointer</string>
@@ -1295,8 +1242,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/line.png</normaloff>
-     <normalon>:/images/stylusPalette/lineOn.png</normalon>:/images/stylusPalette/line.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/line.svg</normaloff>:/images/stylusPalette/svg/line.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -1314,8 +1260,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/text.png</normaloff>
-     <normalon>:/images/stylusPalette/textOn.png</normalon>:/images/stylusPalette/text.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/text.svg</normaloff>:/images/stylusPalette/svg/text.svg</iconset>
    </property>
    <property name="text">
     <string>Text</string>
@@ -1333,8 +1278,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/captureArea.png</normaloff>
-     <normalon>:/images/stylusPalette/captureAreaOn.png</normalon>:/images/stylusPalette/captureArea.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/capture.svg</normaloff>:/images/stylusPalette/svg/capture.svg</iconset>
    </property>
    <property name="text">
     <string>Capture</string>
@@ -1388,7 +1332,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/newDocument.png</normaloff>:/images/toolbar/newDocument.png</iconset>
+     <normaloff>:/images/toolbar/svg/newDocument.svg</normaloff>:/images/toolbar/svg/newDocument.svg</iconset>
    </property>
    <property name="text">
     <string>Pages</string>
@@ -1442,7 +1386,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/pause.png</normaloff>:/images/toolbar/pause.png</iconset>
+     <normaloff>:/images/toolbar/svg/pause.svg</normaloff>:/images/toolbar/svg/pause.svg</iconset>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -1454,7 +1398,7 @@
   <action name="actionPodcastConfig">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/settings.png</normaloff>:/images/toolbar/settings.png</iconset>
+     <normaloff>:/images/toolbar/svg/settings.svg</normaloff>:/images/toolbar/svg/settings.svg</iconset>
    </property>
    <property name="text">
     <string>Podcast Config</string>
@@ -1469,8 +1413,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/extraPalette/webTrap.png</normaloff>
-     <normalon>:/images/extraPalette/webTrapEnabled.png</normalon>:/images/extraPalette/webTrap.png</iconset>
+     <normaloff>:/images/extraPalette/svg/webTrap.svg</normaloff>:/images/extraPalette/svg/webTrap.svg</iconset>
    </property>
    <property name="text">
     <string>Web Trap</string>
@@ -1482,7 +1425,7 @@
   <action name="actionWebCustomCapture">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/captureArea.png</normaloff>:/images/toolbar/captureArea.png</iconset>
+     <normaloff>:/images/toolbar/svg/captureArea.svg</normaloff>:/images/toolbar/svg/captureArea.svg</iconset>
    </property>
    <property name="text">
     <string>Custom Capture</string>
@@ -1494,7 +1437,7 @@
   <action name="actionWebWindowCapture">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/captureWindow.png</normaloff>:/images/toolbar/captureWindow.png</iconset>
+     <normaloff>:/images/toolbar/svg/captureWindow.svg</normaloff>:/images/toolbar/svg/captureWindow.svg</iconset>
    </property>
    <property name="text">
     <string>Window Capture</string>
@@ -1509,8 +1452,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/eyeClosed.png</normaloff>
-     <normalon>:/images/toolbar/eyeOpened.png</normalon>:/images/toolbar/eyeClosed.png</iconset>
+     <normaloff>:/images/toolbar/svg/eyeClosed.svg</normaloff>:/images/toolbar/svg/eyeClosed.svg</iconset>
    </property>
    <property name="text">
     <string>Show on Display</string>
@@ -1537,55 +1479,10 @@
     <string>Erase all Annotations</string>
    </property>
   </action>
-  <action name="actionEduMedia">
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToolToLibrary.png</normaloff>:/images/toolbar/addToolToLibrary.png</iconset>
-   </property>
-   <property name="text">
-    <string>eduMedia</string>
-   </property>
-   <property name="toolTip">
-    <string>Import eduMedia simulation</string>
-   </property>
-  </action>
-  <action name="actionTutorial">
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/tutorial.png</normaloff>:/images/toolbar/tutorial.png</iconset>
-   </property>
-   <property name="text">
-    <string>Tutorial</string>
-   </property>
-   <property name="toolTip">
-    <string>Open the tutorial</string>
-   </property>
-  </action>
-  <action name="actionCheckUpdate">
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/updates.png</normaloff>:/images/toolbar/updates.png</iconset>
-   </property>
-   <property name="text">
-    <string>Check Update</string>
-   </property>
-  </action>
-  <action name="actionSankoreEditor">
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/paraschool.png</normaloff>:/images/toolbar/paraschool.png</iconset>
-   </property>
-   <property name="text">
-    <string>Open-Sankoré Editor</string>
-   </property>
-   <property name="toolTip">
-    <string>Show Open-Sankoré Widgets Editor</string>
-   </property>
-  </action>
   <action name="actionHideApplication">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/hide.png</normaloff>:/images/toolbar/hide.png</iconset>
+     <normaloff>:/images/toolbar/svg/hide.svg</normaloff>:/images/toolbar/svg/hide.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Open-Sankoré</string>
@@ -1606,8 +1503,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/group.png</normaloff>
-     <normalon>:/images/toolbar/ungroup.png</normalon>:/images/toolbar/group.png</iconset>
+     <normaloff>:/images/toolbar/svg/group.svg</normaloff>:/images/toolbar/svg/group.svg</iconset>
    </property>
    <property name="text">
     <string>Group</string>
@@ -1622,8 +1518,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/handPlay.png</normaloff>
-     <normalon>:/images/stylusPalette/handPlayOn.png</normalon>:/images/stylusPalette/handPlay.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/play.svg</normaloff>:/images/stylusPalette/svg/play.svg</iconset>
    </property>
    <property name="text">
     <string>Play</string>
@@ -1647,7 +1542,7 @@
   <action name="actionBookmark">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/bookmark.png</normaloff>:/images/toolbar/bookmark.png</iconset>
+     <normaloff>:/images/toolbar/svg/bookmark.svg</normaloff>:/images/toolbar/svg/bookmark.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmark</string>
@@ -1665,7 +1560,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToolToLibrary.png</normaloff>:/images/toolbar/addToolToLibrary.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToolToLibrary.svg</normaloff>:/images/toolbar/svg/addToolToLibrary.svg</iconset>
    </property>
    <property name="text">
     <string>Web Trap</string>
@@ -1734,7 +1629,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/centerBackground.png</normaloff>../images/imageBackgroundPalette/centerBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/center.svg</normaloff>:/images/imageBackgroundPalette/svg/center.svg</iconset>
    </property>
    <property name="text">
     <string>Center</string>
@@ -1752,8 +1647,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/adjustBackground.png</normaloff>
-     <normalon>../images/imageBackgroundPalette/adjustBackground.png</normalon>../images/imageBackgroundPalette/adjustBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/adjust.svg</normaloff>:/images/imageBackgroundPalette/svg/adjust.svg</iconset>
    </property>
    <property name="text">
     <string>Adjust</string>
@@ -1768,7 +1662,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/extendBackground.png</normaloff>../images/imageBackgroundPalette/extendBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/extend.svg</normaloff>:/images/imageBackgroundPalette/svg/extend.svg</iconset>
    </property>
    <property name="text">
     <string>Expand</string>
@@ -1783,8 +1677,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/fillBackground.png</normaloff>
-     <normalon>../images/imageBackgroundPalette/fillBackground.png</normalon>../images/imageBackgroundPalette/fillBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/fill.svg</normaloff>:/images/imageBackgroundPalette/svg/fill.svg</iconset>
    </property>
    <property name="text">
     <string>Fill</string>
@@ -1799,8 +1692,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../images/imageBackgroundPalette/mosaicBackground.png</normaloff>
-     <normalon>../images/imageBackgroundPalette/mosaicBackground.png</normalon>../images/imageBackgroundPalette/mosaicBackground.png</iconset>
+     <normaloff>:/images/imageBackgroundPalette/svg/mosaic.svg</normaloff>:/images/imageBackgroundPalette/svg/mosaic.svg</iconset>
    </property>
    <property name="text">
     <string>Mosaic</string>
@@ -1815,7 +1707,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/addToPage.png</normaloff>:/images/toolbar/addToPage.png</iconset>
+     <normaloff>:/images/toolbar/svg/addToPage.svg</normaloff>:/images/toolbar/svg/addToPage.svg</iconset>
    </property>
    <property name="text">
     <string>Wide Size (16/10)</string>
@@ -1836,8 +1728,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/richTextEditor.png</normaloff>
-     <normalon>:/images/stylusPalette/richTextEditorOn.png</normalon>:/images/stylusPalette/richTextEditor.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/richText.svg</normaloff>:/images/stylusPalette/svg/richText.svg</iconset>
    </property>
    <property name="text">
     <string>Rich Text Editor</string>
@@ -1852,8 +1743,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/ellipse.png</normaloff>
-     <normalon>:/images/drawingPalette/ellipseON.png</normalon>:/images/drawingPalette/ellipse.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/ellipse.svg</normaloff>:/images/drawingPalette/svg/ellipse.svg</iconset>
    </property>
    <property name="text">
     <string>Ellipse</string>
@@ -1868,8 +1758,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/paint-bucket.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/paint-bucket.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/paint-bucket.svg</normaloff>:/images/drawingPalette/svg/paint-bucket.svg</iconset>
    </property>
    <property name="text">
     <string>Change Filling Color</string>
@@ -1881,8 +1770,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/free-shape.png</normaloff>
-     <normalon>:/images/drawingPalette/free-shapeOn.png</normalon>:/images/drawingPalette/free-shape.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/free-shape.svg</normaloff>:/images/drawingPalette/svg/free-shape.svg</iconset>
    </property>
    <property name="text">
     <string>Polygon</string>
@@ -1900,8 +1788,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/paint-palette.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-paletteOn.png</normalon>:/images/drawingPalette/paint-palette.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/drawing.svg</normaloff>:/images/stylusPalette/svg/drawing.svg</iconset>
    </property>
    <property name="text">
     <string>Drawing</string>
@@ -1919,8 +1806,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/cercle.png</normaloff>
-     <normalon>:/images/drawingPalette/cercleON.png</normalon>:/images/drawingPalette/cercle.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/circle.svg</normaloff>:/images/drawingPalette/svg/circle.svg</iconset>
    </property>
    <property name="text">
     <string>Circle</string>
@@ -1935,8 +1821,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/rectangle.png</normaloff>
-     <normalon>:/images/drawingPalette/rectangleON.png</normalon>:/images/drawingPalette/rectangle.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/rectangle.svg</normaloff>:/images/drawingPalette/svg/rectangle.svg</iconset>
    </property>
    <property name="text">
     <string>Rectangle</string>
@@ -1951,8 +1836,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/square.png</normaloff>
-     <normalon>:/images/drawingPalette/squareON.png</normalon>:/images/drawingPalette/square.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/square.svg</normaloff>:/images/drawingPalette/svg/square.svg</iconset>
    </property>
    <property name="text">
     <string>Square</string>
@@ -1970,13 +1854,11 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/pen.png</normaloff>
-     <normalon>:/images/stylusPalette/penOn.png</normalon>:/images/stylusPalette/pen.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/pen.svg</normaloff>:/images/stylusPalette/svg/pen.svg</iconset>
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/freeHand.png</normaloff>
-     <normalon>:/images/drawingPalette/freeHandOn.png</normalon>:/images/drawingPalette/freeHand.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/freeHand.svg</normaloff>:/images/drawingPalette/svg/freeHand.svg</iconset>
    </property>
    <property name="text">
     <string>Freehand Drawing</string>
@@ -1991,8 +1873,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/stylusPalette/line.png</normaloff>
-     <normalon>:/images/stylusPalette/lineOn.png</normalon>:/images/stylusPalette/line.png</iconset>
+     <normaloff>:/images/stylusPalette/svg/line.svg</normaloff>:/images/stylusPalette/svg/line.svg</iconset>
    </property>
    <property name="text">
     <string>Line</string>
@@ -2007,8 +1888,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/triangle.png</normaloff>
-     <normalon>:/images/drawingPalette/triangleON.png</normalon>:/images/drawingPalette/triangle.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/triangle.svg</normaloff>:/images/drawingPalette/svg/triangle.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Shapes</string>
@@ -2023,8 +1903,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/triangle.png</normaloff>
-     <normalon>:/images/drawingPalette/triangleON.png</normalon>:/images/drawingPalette/triangle.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/triangle.svg</normaloff>:/images/drawingPalette/svg/triangle.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Triangle</string>
@@ -2039,8 +1918,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/square.png</normaloff>
-     <normalon>:/images/drawingPalette/squareON.png</normalon>:/images/drawingPalette/square.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/square.svg</normaloff>:/images/drawingPalette/svg/square.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Square</string>
@@ -2055,8 +1933,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/Penta.png</normaloff>
-     <normalon>:/images/drawingPalette/PentaON.png</normalon>:/images/drawingPalette/Penta.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/pentagon.svg</normaloff>:/images/drawingPalette/svg/pentagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Pentagon</string>
@@ -2071,8 +1948,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/hexa.png</normaloff>
-     <normalon>:/images/drawingPalette/hexaON.png</normalon>:/images/drawingPalette/hexa.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/hexagon.svg</normaloff>:/images/drawingPalette/svg/hexagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Hexagon</string>
@@ -2087,8 +1963,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/hepta.png</normaloff>
-     <normalon>:/images/drawingPalette/heptaON.png</normalon>:/images/drawingPalette/hepta.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/heptagon.svg</normaloff>:/images/drawingPalette/svg/heptagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Heptagon</string>
@@ -2103,8 +1978,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/octo.png</normaloff>
-     <normalon>:/images/drawingPalette/octoON.png</normalon>:/images/drawingPalette/octo.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/octagon.svg</normaloff>:/images/drawingPalette/svg/octagon.svg</iconset>
    </property>
    <property name="text">
     <string>Regular Octogon</string>
@@ -2116,7 +1990,7 @@
   <action name="actionStrokeProperties">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/line-thickness.png</normaloff>:/images/drawingPalette/line-thickness.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/line-thickness.svg</normaloff>:/images/drawingPalette/svg/line-thickness.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Properties</string>
@@ -2128,7 +2002,7 @@
   <action name="actionFillProperties">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/fill-modes.png</normaloff>:/images/drawingPalette/fill-modes.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-modes.svg</normaloff>:/images/drawingPalette/svg/fill-modes.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Properties</string>
@@ -2143,7 +2017,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/smallPen.png</normaloff>:/images/toolbar/smallPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/smallPen.svg</normaloff>:/images/toolbar/svg/smallPen.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Thickness</string>
@@ -2158,7 +2032,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/mediumPen.png</normaloff>:/images/toolbar/mediumPen.png</iconset>
+     <normaloff>:/images/toolbar/svg/mediumPen.svg</normaloff>:/images/toolbar/svg/mediumPen.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Thickness</string>
@@ -2173,7 +2047,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/largePen.png</normaloff>:/images/toolbar/largePen.png</iconset>
+     <normaloff>:/images/toolbar/svg/largePen.svg</normaloff>:/images/toolbar/svg/largePen.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Thickness</string>
@@ -2188,7 +2062,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/strokeStyleSolidLine.png</normaloff>:/images/drawingPalette/strokeStyleSolidLine.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/strokeStyleSolidLine.svg</normaloff>:/images/drawingPalette/svg/strokeStyleSolidLine.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Style Solid Line</string>
@@ -2203,7 +2077,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/strokeStyleDotLine .png</normaloff>:/images/drawingPalette/strokeStyleDotLine .png</iconset>
+     <normaloff>:/images/drawingPalette/svg/strokeStyleDotLine.svg</normaloff>:/images/drawingPalette/svg/strokeStyleDotLine.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Style Dot Line</string>
@@ -2218,8 +2092,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/fill-transparent.png</normaloff>
-     <normalon>:/images/drawingPalette/fill-transparent.png</normalon>:/images/drawingPalette/fill-transparent.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-transparent.svg</normaloff>:/images/drawingPalette/svg/fill-transparent.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Transparent</string>
@@ -2234,8 +2107,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/fill-gradient.png</normaloff>
-     <normalon>:/images/drawingPalette/fill-gradient.png</normalon>:/images/drawingPalette/fill-gradient.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-gradient.svg</normaloff>:/images/drawingPalette/svg/fill-gradient.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Gradient</string>
@@ -2250,8 +2122,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/fill-plain.png</normaloff>
-     <normalon>:/images/drawingPalette/fill-plain.png</normalon>:/images/drawingPalette/fill-plain.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-plain.svg</normaloff>:/images/drawingPalette/svg/fill-plain.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Full</string>
@@ -2266,8 +2137,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/fill-dotted.png</normaloff>
-     <normalon>:/images/drawingPalette/fill-dotted.png</normalon>:/images/drawingPalette/fill-dotted.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-dotted.svg</normaloff>:/images/drawingPalette/svg/fill-dotted.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Dense</string>
@@ -2282,8 +2152,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/fill-stripes.png</normaloff>
-     <normalon>:/images/drawingPalette/fill-stripes.png</normalon>:/images/drawingPalette/fill-stripes.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/fill-stripes.svg</normaloff>:/images/drawingPalette/svg/fill-stripes.svg</iconset>
    </property>
    <property name="text">
     <string>Filling Style : Diagonal</string>
@@ -2298,7 +2167,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/strokeStyleCustomDash.png</normaloff>:/images/drawingPalette/strokeStyleCustomDash.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/strokeStyleCustomDash.svg</normaloff>:/images/drawingPalette/svg/strokeStyleCustomDash.svg</iconset>
    </property>
    <property name="text">
     <string>Stroke Style Dot Dash</string>
@@ -2313,8 +2182,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-left.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-left.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-left.svg</normaloff>:/images/drawingPalette/svg/align-left.svg</iconset>
    </property>
    <property name="text">
     <string>Align objects</string>
@@ -2329,8 +2197,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-left.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-left.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-left.svg</normaloff>:/images/drawingPalette/svg/align-left.svg</iconset>
    </property>
    <property name="text">
     <string>Align Left</string>
@@ -2345,8 +2212,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-center.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-center.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-center.svg</normaloff>:/images/drawingPalette/svg/align-center.svg</iconset>
    </property>
    <property name="text">
     <string>Align Center Vertically</string>
@@ -2361,8 +2227,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-right.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-right.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-right.svg</normaloff>:/images/drawingPalette/svg/align-right.svg</iconset>
    </property>
    <property name="text">
     <string>Align Right</string>
@@ -2377,8 +2242,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-top.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-top.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-top.svg</normaloff>:/images/drawingPalette/svg/align-top.svg</iconset>
    </property>
    <property name="text">
     <string>Align Top</string>
@@ -2393,8 +2257,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-middle.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-middle.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-middle.svg</normaloff>:/images/drawingPalette/svg/align-middle.svg</iconset>
    </property>
    <property name="text">
     <string>Align Center Horizontally</string>
@@ -2406,8 +2269,7 @@
   <action name="actionAlignToBottom">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/align-bottom.png</normaloff>
-     <normalon>:/images/drawingPalette/paint-bucketOn.png</normalon>:/images/drawingPalette/align-bottom.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/align-bottom.svg</normaloff>:/images/drawingPalette/svg/align-bottom.svg</iconset>
    </property>
    <property name="text">
     <string>Align Bottom</string>
@@ -2422,7 +2284,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/endArrowStyleArrow.png</normaloff>:/images/drawingPalette/endArrowStyleArrow.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/endArrowStyleArrow.svg</normaloff>:/images/drawingPalette/svg/endArrowStyleArrow.svg</iconset>
    </property>
    <property name="text">
     <string>End arrow style : Arrow</string>
@@ -2437,7 +2299,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/startArrowStyleArrow.png</normaloff>:/images/drawingPalette/startArrowStyleArrow.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/startArrowStyleArrow.svg</normaloff>:/images/drawingPalette/svg/startArrowStyleArrow.svg</iconset>
    </property>
    <property name="text">
     <string>Start arrow style : Arrow</string>
@@ -2452,7 +2314,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/endArrowStyleRound.png</normaloff>:/images/drawingPalette/endArrowStyleRound.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/endArrowStyleRound.svg</normaloff>:/images/drawingPalette/svg/endArrowStyleRound.svg</iconset>
    </property>
    <property name="text">
     <string>End arrow style : Round</string>
@@ -2467,7 +2329,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/startArrowStyleRound.png</normaloff>:/images/drawingPalette/startArrowStyleRound.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/startArrowStyleRound.svg</normaloff>:/images/drawingPalette/svg/startArrowStyleRound.svg</iconset>
    </property>
    <property name="text">
     <string>Start arrow style : Round</string>
@@ -2482,7 +2344,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/endArrowStyleNone.png</normaloff>:/images/drawingPalette/endArrowStyleNone.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/endArrowStyleNone.svg</normaloff>:/images/drawingPalette/svg/endArrowStyleNone.svg</iconset>
    </property>
    <property name="text">
     <string>End arrow style : None</string>
@@ -2497,7 +2359,7 @@
    </property>
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/startArrowStyleNone.png</normaloff>:/images/drawingPalette/startArrowStyleNone.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/startArrowStyleNone.svg</normaloff>:/images/drawingPalette/svg/startArrowStyleNone.svg</iconset>
    </property>
    <property name="text">
     <string>Start arrow style : None</string>
@@ -2509,7 +2371,7 @@
   <action name="actionArrowProperties">
    <property name="icon">
     <iconset resource="../sankore.qrc">
-     <normaloff>:/images/drawingPalette/arrowsProperties.png</normaloff>:/images/drawingPalette/arrowsProperties.png</iconset>
+     <normaloff>:/images/drawingPalette/svg/arrowsProperties.svg</normaloff>:/images/drawingPalette/svg/arrowsProperties.svg</iconset>
    </property>
    <property name="text">
     <string>Arrows Properties</string>

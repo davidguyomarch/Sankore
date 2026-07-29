@@ -118,7 +118,6 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
             , this, SLOT(addCapturedPixmap(const QPixmap &, bool, const QUrl&)));
 
     networkAccessManager = new QNetworkAccessManager (this);
-    QTimer::singleShot (1000, this, SLOT (checkUpdateAtLaunch()));
 
 #ifdef Q_OS_LINUX
     mMainWindow->setStyleSheet("QToolButton { font-size: 11px}");
@@ -350,7 +349,6 @@ void UBApplicationController::showBoard()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
-    mMainWindow->tutorialToolBar->hide();
     mMainWindow->boardToolBar->show();
 
 //    if (mMainMode == Document)
@@ -414,7 +412,6 @@ void UBApplicationController::showInternet()
     {
         mMainWindow->boardToolBar->hide();
         mMainWindow->documentToolBar->hide();
-        mMainWindow->tutorialToolBar->hide();
         mMainWindow->webToolBar->show();
 
         mMainMode = Internet;
@@ -435,7 +432,6 @@ void UBApplicationController::showDocument()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->boardToolBar->hide();
-    mMainWindow->tutorialToolBar->hide();
     mMainWindow->documentToolBar->show();
 
     mMainMode = Document;
@@ -473,7 +469,14 @@ void UBApplicationController::showDocument()
 
 void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 {
-    int desktopWidgetIndex = 0; // In Qt6, use mMainWindow->screen() to find screen index
+    // Use the screen where the main window is currently displayed
+    QScreen *currentScreen = mMainWindow->screen();
+    if (!currentScreen)
+        currentScreen = QGuiApplication::primaryScreen();
+
+    int desktopWidgetIndex = QGuiApplication::screens().indexOf(currentScreen);
+    if (desktopWidgetIndex < 0)
+        desktopWidgetIndex = 0;
 
     if (UBApplication::boardController)
         UBApplication::boardController->hide();
@@ -499,133 +502,6 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 }
 
 
-void UBApplicationController::showTutorial()
-{
-
-    if (UBApplication::boardController)
-    {
-        UBApplication::boardController->persistCurrentScene();
-        UBApplication::boardController->hide();
-    }
-
-    if (mSettings->webUseExternalBrowser->get().toBool())
-    {
-        showDesktop(true);
-        UBApplication::webController->show(UBWebController::Tutorial);
-        UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::NonScreen);
-    }
-    else{
-        mMainWindow->webToolBar->hide();
-        mMainWindow->boardToolBar->hide();
-        mMainWindow->documentToolBar->hide();
-        mMainWindow->tutorialToolBar->show();
-
-
-        mMainMode = Tutorial;
-
-        adaptToolBar();
-
-        mUninoteController->hideWindow();
-
-        UBApplication::webController->show(UBWebController::Tutorial);
-
-        mirroringEnabled(false);
-        emit mainModeChanged(mMainMode);
-    }
-}
-
-
-void UBApplicationController::showSankoreEditor()
-{
-
-    if (UBApplication::boardController)
-    {
-        UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::NonScreen);
-        UBApplication::boardController->persistCurrentScene();
-        UBApplication::boardController->hide();
-    }
-
-// it's needed not to duplicate webbrowser search in web mode. If I've breaked smbd's code let Ivan know
-        UBApplication::webController->show(UBWebController::Paraschool);
-
-    mMainWindow->webToolBar->hide();
-    mMainWindow->boardToolBar->hide();
-    mMainWindow->documentToolBar->hide();
-    mMainWindow->tutorialToolBar->show();
-
-
-    mMainMode = ParaschoolEditor;
-
-    adaptToolBar();
-
-    mUninoteController->hideWindow();
-
-    mirroringEnabled(false);
-    emit mainModeChanged(mMainMode);
-}
-
-void UBApplicationController::checkUpdate()
-{
-    if(false) // QHttp removed        // QHttp removed
-    QUrl url("http://ftp.open-sankore.org/update.json");
-    // TODO: Replace QHttp with QNetworkAccessManager
-    // TODO: Replace QHttp signal connection
-    // TODO: Replace QHttp get
-}
-
-void UBApplicationController::updateRequestFinished(int id, bool error)
-{
-   if (error){
-       qWarning() << "http command id" << id << "return the error: " << QString("HTTP error");
-       
-   }
-   else{
-       QString responseString =  QString();
-       if (!responseString.isEmpty() && responseString.contains("version") && responseString.contains("url")){
-           
-           downloadJsonFinished(responseString);
-       }
-   }
-}
-
-
-
-void UBApplicationController::downloadJsonFinished(QString currentJson)
-{
-    QJSValue scriptValue;
-    QJSEngine scriptEngine;
-    scriptValue = scriptEngine.evaluate ("(" + currentJson + ")");
-
-    UBVersion installedVersion (qApp->applicationVersion().left(4));
-    UBVersion jsonVersion (scriptValue.property("version").toString().left(4));
-
-    if (installedVersion.isValid() &&  jsonVersion.isValid() && jsonVersion > installedVersion) {
-            if (UBApplication::mainWindow->yesNoQuestion(tr("Update available"), tr ("New update available, would you go to the web page ?"))){
-                    QUrl url(scriptValue.property ("url").toString());
-                    QDesktopServices::openUrl (url);
-            }
-    }
-    else {
-        if (isNoUpdateDisplayed) {
-            mMainWindow->information(tr("Update"), tr("No update available"));
-        }
-    }
-}
-
-void UBApplicationController::checkUpdateAtLaunch()
-{
-    if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool()){
-        isNoUpdateDisplayed = false;
-        checkUpdate ();
-    }
-}
-
-void UBApplicationController::checkUpdateRequest()
-{
-    isNoUpdateDisplayed = true;
-    checkUpdate ();
-}
-
 void UBApplicationController::hideDesktop()
 {
     if (mMainMode == Board)
@@ -639,14 +515,6 @@ void UBApplicationController::hideDesktop()
     else if (mMainMode == Document)
     {
         showDocument();
-    }
-    else if (mMainMode == Tutorial)
-    {
-        showTutorial();
-    }
-    else if (mMainMode == ParaschoolEditor)
-    {
-        showSankoreEditor();
     }
 
     mIsShowingDesktop = false;

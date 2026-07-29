@@ -45,7 +45,7 @@ public:
     }
 
     QPixmap iconToLeft() const {return QPixmap(":images/teacher_close.png");}
-    QPixmap iconToRight() const {return QPixmap(":images/teacher_open");}
+    QPixmap iconToRight() const {return QPixmap(":images/teacher_close.png");}
 
     UBTeacherGuideWidget* teacherGuideWidget();
 

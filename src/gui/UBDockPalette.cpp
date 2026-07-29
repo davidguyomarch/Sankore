@@ -30,6 +30,7 @@
 #include "frameworks/UBPlatformUtils.h"
 
 #include "core/UBSettings.h"
+#include "core/UBTheme.h"
 #include "core/UBApplication.h"
 #include "core/UBPreferencesController.h"
 #include "core/UBDownloadManager.h"
@@ -254,7 +255,7 @@ void UBDockPalette::setBackgroundBrush(const QBrush &brush)
  */
 int UBDockPalette::border()
 {
-    return 15;
+    return 12;
 }
 
 /**
@@ -263,7 +264,7 @@ int UBDockPalette::border()
  */
 int UBDockPalette::radius()
 {
-    return 5;
+    return 6;
 }
 
 /**
@@ -656,12 +657,13 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         QPixmap transparencyPix(":/images/tab_mask.png");
         if (dock->mCurrentTab != i) {
             iconPixmap; // setAlphaChannel removed in Qt6;
-            QColor color(0x7F, 0x7F, 0x7F, 0x3F);
+            QColor color = UBTheme::tabInactive();
             painter.setBrush(QBrush(color));
         }
 
         painter.drawPath(path);
-        painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);
+        if (!iconPixmap.isNull())
+            painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);
         yFrom += (TABSIZE + dock->tabSpacing());
         painter.restore();
     }
@@ -708,6 +710,8 @@ void UBTabDockPalette::mouseMoveEvent(QMouseEvent *event)
             move(this->pos().x(),  p.y());
         }
 
+        int previousWidth = dock->width();
+
         switch(dock->mOrientation) {
 
         case eUBDockOrientation_Left:
@@ -715,8 +719,8 @@ void UBTabDockPalette::mouseMoveEvent(QMouseEvent *event)
             if(p.x() < dock->collapseWidth() && p.x() >= dock->minimumWidth()) {
                 dock->update();
                 dock->resize(0, dock->height());
-                //dock->mLastWidth = dock->collapseWidth() + 1;
-                dock->mResized = true;
+                if (previousWidth != 0)
+                    dock->mResized = true;
             } else if (p.x() <= dock->maximumWidth() && p.x() >= dock->minimumWidth()) {
                 dock->resize(p.x(), dock->height());
                 dock->mResized = true;
@@ -728,8 +732,8 @@ void UBTabDockPalette::mouseMoveEvent(QMouseEvent *event)
             if((dock->x() + p.x() > dock->parentWidget()->width() - dock->collapseWidth()) && (dock->x() + p.x() < dock->parentWidget()->width())) {
                 dock->update();
                 dock->resize(0, dock->height());
-                //dock->mLastWidth = dock->collapseWidth() + 1;
-                dock->mResized = true;
+                if (previousWidth != 0)
+                    dock->mResized = true;
             } else if((dock->x() + p.x() >= dock->parentWidget()->width() - dock->maximumWidth()) && (dock->x() + p.x() <= dock->parentWidget()->width() - dock->minimumWidth())) {
                 dock->resize(dock->parentWidget()->width() - (dock->x() + p.x()), dock->height());
                 dock->mResized = true;

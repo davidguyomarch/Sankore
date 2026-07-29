@@ -31,6 +31,7 @@
 #include "board/UBBoardView.h"
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBApplication.h"
 
 #include "document/UBDocumentProxy.h"
@@ -945,7 +946,7 @@ void UBSceneThumbnailNavigPixmap::updateButtonsState()
 
 void UBSceneThumbnailNavigPixmap::deletePage()
 {
-	if(UBApplication::mainWindow->yesNoQuestion(QObject::tr("Remove Page"), QObject::tr("Are you sure you want to remove 1 page from the selected document '%0'?").arg(UBApplication::documentController->selectedDocument()->metaData(UBSettings::documentName).toString()))){
+	if(UBApplication::mainWindow->yesNoQuestion(QObject::tr("Remove Page"), QObject::tr("Are you sure you want to remove 1 page from the selected document '%0'?").arg(UBApplication::documentController->selectedDocument()->metaData(UBSettingsData::documentName).toString()))){
 		UBApplication::boardController->deleteScene(sceneIndex());
 	}
 }
@@ -1106,7 +1107,7 @@ void UBSceneThumbnailProxyWidget::mousePressEvent(QGraphicsSceneMouseEvent *even
     // Here we check the position of the click and verify if it has to trig an action or not.
     if(bCanDelete && p.x() >= 0 && p.x() <= BUTTONSIZE && p.y() >= 0 && p.y() <= BUTTONSIZE)
     {
-        if(UBApplication::mainWindow->yesNoQuestion(QObject::tr("Remove Page"), QObject::tr("Are you sure you want to remove 1 page from the selected document '%0'?").arg(UBApplication::documentController->selectedDocument()->metaData(UBSettings::documentName).toString()))){
+        if(UBApplication::mainWindow->yesNoQuestion(QObject::tr("Remove Page"), QObject::tr("Are you sure you want to remove 1 page from the selected document '%0'?").arg(UBApplication::documentController->selectedDocument()->metaData(UBSettingsData::documentName).toString()))){
             UBApplication::boardController->deleteScene(sceneIndex);
         }
     }

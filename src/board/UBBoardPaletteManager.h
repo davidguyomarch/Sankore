@@ -111,6 +111,7 @@ class UBBoardPaletteManager : public QObject
 
         void toggleErasePalette(bool ckecked);
         void toggleImageBackgroundPalette(bool ckecked, bool isDefault);// Issue 1684 - CFA - 20131120
+        void closeAllPopupPalettes();
 
     private:
         UBSettings* mSettings;

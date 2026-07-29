@@ -78,31 +78,13 @@ public:
     virtual ~UBSettings();
 
     // Static string constants used by UBDocumentProxy
-    static QString documentGroupName;
-    static QString documentName;
-    static QString documentSize;
-    static QString documentIdentifer;
-    static QString documentVersion;
-    static QString documentUpdatedAt;
-    static QString documentDate;
 
-    static QString sessionTitle;
-    static QString sessionAuthors;
-    static QString sessionObjectives;
-    static QString sessionKeywords;
-    static QString sessionGradeLevel;
-    static QString sessionSubjects;
-    static QString sessionType;
-    static QString sessionLicence;
 
-    static QString documentDefaultBackgroundImage;
-    static QString documentDefaultBackgroundImageDisposition;
 
     static QString uniboardDocumentNamespaceUri;
 
     static QString trashedDocumentGroupNamePrefix;
     static QString currentFileVersion;
-    static QString documentTagVersion;
 
     static int pointerDiameter;
     static int boardMargin;

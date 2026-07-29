@@ -1,4 +1,5 @@
 #include "tst_UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "stubs/UBSettings_stub.h"
 #include "stubs/UBPlatformUtils_stub.h"
 
@@ -151,28 +152,28 @@ void TestUBSettings::testToolWidthSettings()
 void TestUBSettings::testStaticConstantsDefined()
 {
     // Verify static constants are properly defined and non-empty
-    QVERIFY(!UBSettings::documentGroupName.isEmpty());
-    QVERIFY(!UBSettings::documentName.isEmpty());
-    QVERIFY(!UBSettings::documentSize.isEmpty());
-    QVERIFY(!UBSettings::documentIdentifer.isEmpty());
-    QVERIFY(!UBSettings::documentVersion.isEmpty());
-    QVERIFY(!UBSettings::documentUpdatedAt.isEmpty());
-    QVERIFY(!UBSettings::documentDate.isEmpty());
+    QVERIFY(!UBSettingsData::documentGroupName.isEmpty());
+    QVERIFY(!UBSettingsData::documentName.isEmpty());
+    QVERIFY(!UBSettingsData::documentSize.isEmpty());
+    QVERIFY(!UBSettingsData::documentIdentifer.isEmpty());
+    QVERIFY(!UBSettingsData::documentVersion.isEmpty());
+    QVERIFY(!UBSettingsData::documentUpdatedAt.isEmpty());
+    QVERIFY(!UBSettingsData::documentDate.isEmpty());
 
-    QVERIFY(!UBSettings::sessionTitle.isEmpty());
-    QVERIFY(!UBSettings::sessionAuthors.isEmpty());
-    QVERIFY(!UBSettings::sessionObjectives.isEmpty());
-    QVERIFY(!UBSettings::sessionKeywords.isEmpty());
-    QVERIFY(!UBSettings::sessionGradeLevel.isEmpty());
-    QVERIFY(!UBSettings::sessionSubjects.isEmpty());
-    QVERIFY(!UBSettings::sessionType.isEmpty());
-    QVERIFY(!UBSettings::sessionLicence.isEmpty());
+    QVERIFY(!UBSettingsData::sessionTitle.isEmpty());
+    QVERIFY(!UBSettingsData::sessionAuthors.isEmpty());
+    QVERIFY(!UBSettingsData::sessionObjectives.isEmpty());
+    QVERIFY(!UBSettingsData::sessionKeywords.isEmpty());
+    QVERIFY(!UBSettingsData::sessionGradeLevel.isEmpty());
+    QVERIFY(!UBSettingsData::sessionSubjects.isEmpty());
+    QVERIFY(!UBSettingsData::sessionType.isEmpty());
+    QVERIFY(!UBSettingsData::sessionLicence.isEmpty());
 
     QVERIFY(!UBSettings::uniboardDocumentNamespaceUri.isEmpty());
     QVERIFY(UBSettings::uniboardDocumentNamespaceUri.startsWith("http"));
 
-    QVERIFY(!UBSettings::documentDefaultBackgroundImage.isEmpty());
-    QVERIFY(!UBSettings::documentDefaultBackgroundImageDisposition.isEmpty());
+    QVERIFY(!UBSettingsData::documentDefaultBackgroundImage.isEmpty());
+    QVERIFY(!UBSettingsData::documentDefaultBackgroundImageDisposition.isEmpty());
 }
 
 void TestUBSettings::testPageSizeSetting()

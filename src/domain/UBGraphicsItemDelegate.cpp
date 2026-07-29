@@ -44,6 +44,8 @@
 #include "core/UBApplicationController.h"
 #include "core/UBDisplayManager.h"
 #include "core/UBSettings.h"
+#include "core/UBTheme.h"
+#include "core/UBSettingsData.h"
 #include "core/UBPersistenceManager.h"
 
 #include "document/UBDocumentProxy.h"
@@ -63,8 +65,6 @@
 
 #include "customWidgets/UBGraphicsItemAction.h"
 
-
-class UBGraphicsParaschoolEditorWidgetItem;
 
 DelegateButton *DelegateButton::Spacer = 0;
 
@@ -1418,7 +1418,7 @@ void DelegateMediaControl::paint(QPainter *painter,
     int radius = frameWidth-clearance;
     QRectF r(position - radius, clearance+mSeecAreaBorderHeight, radius * 2, radius * 2);
 
-    painter->setBrush(UBSettings::documentViewLightColor);
+    painter->setBrush(UBTheme::documentViewLight());
     painter->drawEllipse(r);
 }
 

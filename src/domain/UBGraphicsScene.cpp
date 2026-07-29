@@ -37,6 +37,7 @@
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBApplicationController.h"
 #include "core/UBDisplayManager.h"
 #include "core/UBPersistenceManager.h"
@@ -552,7 +553,39 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
             if(dc->mActiveRuler){
                 dc->mActiveRuler->DrawLine(position, width);
             }else{
-                drawLineTo(position, width, UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line);
+                bool bLineStyle = UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line;
+                if (!bLineStyle && currentTool != UBStylusTool::Line)
+                {
+                    // Freehand stroke: route through smoothing buffer if enabled
+                    if (mSettings->appStrokeSmoothing->get().toBool())
+                    {
+                        mSmoothBuffer.append(position);
+                        mSmoothWidths.append(width);
+
+                        if (mSmoothBuffer.size() >= 4)
+                        {
+                            int n = mSmoothBuffer.size();
+                            drawSmoothedSegment(
+                                mSmoothBuffer[n-4], mSmoothBuffer[n-3],
+                                mSmoothBuffer[n-2], mSmoothBuffer[n-1],
+                                mSmoothWidths[n-3], mSmoothWidths[n-2],
+                                false);
+                        }
+                        else if (mSmoothBuffer.size() == 2)
+                        {
+                            // Draw first segment directly (not enough points yet for spline)
+                            drawLineTo(position, width, false);
+                        }
+                    }
+                    else
+                    {
+                        drawLineTo(position, width, false);
+                    }
+                }
+                else
+                {
+                    drawLineTo(position, width, bLineStyle);
+                }
             }
         }
         else if (currentTool == UBStylusTool::Eraser)
@@ -600,6 +633,9 @@ bool UBGraphicsScene::inputDeviceRelease()
 
     if (dc->isDrawingTool() || mDrawWithCompass)
     {
+        // Flush any remaining smoothing buffer points
+        flushSmoothBuffer(dc->stylusTool() == UBStylusTool::Line);
+
         if(mArcPolygonItem){
 
                 UBGraphicsStrokesGroup* pStrokes = new UBGraphicsStrokesGroup();
@@ -756,6 +792,8 @@ void UBGraphicsScene::moveTo(const QPointF &pPoint)
     mPreviousPolygonItems.clear();
     mArcPolygonItem = 0;
     mDrawWithCompass = false;
+    mSmoothBuffer.clear();
+    mSmoothWidths.clear();
 }
 
 void UBGraphicsScene::drawLineTo(const QPointF &pEndPoint, const qreal &pWidth, bool bLineStyle)
@@ -807,6 +845,71 @@ void UBGraphicsScene::drawLineTo(const QPointF &pEndPoint, const qreal &pWidth, 
         mPreviousPoint = pEndPoint;
         mPreviousWidth = pWidth;
     }
+}
+
+void UBGraphicsScene::drawSmoothedSegment(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3,
+                                           qreal w1, qreal w2, bool bLineStyle)
+{
+    // Catmull-Rom spline interpolation between p1 and p2
+    // p0 and p3 are control points (previous and next)
+    const int subdivisions = 4;
+
+    for (int i = 1; i <= subdivisions; i++)
+    {
+        qreal t = (qreal)i / (qreal)subdivisions;
+        qreal t2 = t * t;
+        qreal t3 = t2 * t;
+
+        // Catmull-Rom coefficients
+        qreal q0 = -t3 + 2.0*t2 - t;
+        qreal q1 =  3.0*t3 - 5.0*t2 + 2.0;
+        qreal q2 = -3.0*t3 + 4.0*t2 + t;
+        qreal q3 =  t3 - t2;
+
+        qreal x = 0.5 * (p0.x()*q0 + p1.x()*q1 + p2.x()*q2 + p3.x()*q3);
+        qreal y = 0.5 * (p0.y()*q0 + p1.y()*q1 + p2.y()*q2 + p3.y()*q3);
+
+        // Interpolate width linearly between w1 and w2
+        qreal w = w1 + (w2 - w1) * t;
+
+        QPointF interpolatedPoint(x, y);
+        drawLineTo(interpolatedPoint, w, bLineStyle);
+    }
+}
+
+void UBGraphicsScene::flushSmoothBuffer(bool bLineStyle)
+{
+    int n = mSmoothBuffer.size();
+    if (n < 2)
+    {
+        mSmoothBuffer.clear();
+        mSmoothWidths.clear();
+        return;
+    }
+
+    // Draw remaining points that haven't been smoothed yet
+    // For n >= 4, segments up to [n-4..n-1] have been drawn.
+    // Remaining: draw from the last smoothed point to the end
+    if (n >= 4)
+    {
+        // The segment [n-4..n-1] was the last drawn. Draw final point directly.
+        drawLineTo(mSmoothBuffer.last(), mSmoothWidths.last(), bLineStyle);
+    }
+    else if (n == 3)
+    {
+        // Only had 3 points, use first point as duplicate control point
+        drawSmoothedSegment(mSmoothBuffer[0], mSmoothBuffer[0], mSmoothBuffer[1], mSmoothBuffer[2],
+                           mSmoothWidths[0], mSmoothWidths[1], bLineStyle);
+        drawLineTo(mSmoothBuffer[2], mSmoothWidths[2], bLineStyle);
+    }
+    else
+    {
+        // 2 points: draw direct line
+        drawLineTo(mSmoothBuffer.last(), mSmoothWidths.last(), bLineStyle);
+    }
+
+    mSmoothBuffer.clear();
+    mSmoothWidths.clear();
 }
 
 void UBGraphicsScene::eraseLineTo(const QPointF &pEndPoint, const qreal &pWidth)
@@ -2542,7 +2645,7 @@ void UBGraphicsScene::keyReleaseEvent(QKeyEvent * keyEvent)
 void UBGraphicsScene::setDocumentUpdated()
 {
     if (document())
-        document()->setMetaData(UBSettings::documentUpdatedAt
+        document()->setMetaData(UBSettingsData::documentUpdatedAt
                 , UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 }
 

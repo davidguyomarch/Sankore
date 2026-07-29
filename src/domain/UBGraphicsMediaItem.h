@@ -29,6 +29,7 @@
 #include <QAudioOutput>
 #include <QVideoWidget>
 #include <QUrl>
+#include <QMimeDatabase>
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 #include "frameworks/UBFileSystemUtils.h"
@@ -107,6 +108,9 @@ public:
     virtual void copyItemParameters(UBItem *copy) const;
 
     virtual void setSourceUrl(const QUrl &pSourceUrl);
+
+    static mediaType detectMediaType(const QUrl &url);
+    static bool isAudioUrl(const QUrl &url);
 
 public slots:
 

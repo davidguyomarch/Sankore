@@ -30,6 +30,8 @@
 #include "gui/UBResources.h"
 
 #include "core/UBSettings.h"
+#include "core/UBTheme.h"
+#include "core/UBSettingsData.h"
 
 #include "gui/UBMainWindow.h"
 
@@ -189,6 +191,6 @@ void UBVuMeter::paintEvent(QPaintEvent* e)
     int h = (height() - 8) * mVolume / 255;
     QRectF rect(0, height() - 4 - h, width(), h);
 
-    painter.fillRect(rect, UBSettings::documentViewLightColor);
+    painter.fillRect(rect, UBTheme::documentViewLight());
 }
 

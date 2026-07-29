@@ -171,19 +171,19 @@ void UBGraphicsTextItemDelegate::buildButtons()
     // Create actions and subMenus of the "Table" menu :
     mTableMenu = new QMenu();
 
-    mTableMenu->addAction(QIcon(":/images/textEditor/add-table.png"), tr("Insert table"), this, SLOT(setTableSize()))->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/images/textEditor/svg/add-table.svg"), tr("Insert table"), this, SLOT(setTableSize()))->setIconVisibleInMenu(true);
 
     QMenu *columnMenu = mTableMenu->addMenu(tr("Column"));
-    columnMenu->addAction(QIcon(":/images/textEditor/insert-column-left.png"), tr("Insert column after"), this, SLOT(insertColumnOnRight()))->setIconVisibleInMenu(true);
-    columnMenu->addAction(QIcon(":/images/textEditor/insert-column-right.png"), tr("Insert column before"), this, SLOT(insertColumnOnLeft()))->setIconVisibleInMenu(true);
-    columnMenu->addAction(QIcon(":/images/textEditor/delete-column.png"), tr("Delete column"), this, SLOT(deleteColumn()))->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/images/textEditor/svg/insert-column-left.svg"), tr("Insert column after"), this, SLOT(insertColumnOnRight()))->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/images/textEditor/svg/insert-column-right.svg"), tr("Insert column before"), this, SLOT(insertColumnOnLeft()))->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/images/textEditor/svg/delete-column.svg"), tr("Delete column"), this, SLOT(deleteColumn()))->setIconVisibleInMenu(true);
 
     QMenu *rowMenu = mTableMenu->addMenu(tr("Row"));
-    rowMenu->addAction(QIcon(":/images/textEditor/insert-row-top.png"), tr("Insert row after"), this, SLOT(insertRowOnBottom()))->setIconVisibleInMenu(true);
-    rowMenu->addAction(QIcon(":/images/textEditor/insert-row-bottom.png"), tr("Insert row before"), this, SLOT(insertRowOnTop()))->setIconVisibleInMenu(true);
-    rowMenu->addAction(QIcon(":/images/textEditor/delete-row.png"), tr("Delete row"), this, SLOT(deleteRow()))->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/images/textEditor/svg/insert-row-top.svg"), tr("Insert row after"), this, SLOT(insertRowOnBottom()))->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/images/textEditor/svg/insert-row-bottom.svg"), tr("Insert row before"), this, SLOT(insertRowOnTop()))->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/images/textEditor/svg/delete-row.svg"), tr("Delete row"), this, SLOT(deleteRow()))->setIconVisibleInMenu(true);
 
-    mTableMenu->addAction(QIcon(":/images/textEditor/cell-properties.png"), tr("Cell properties"), this, SLOT(setCellProperties()))->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/images/textEditor/svg/cell-properties.svg"), tr("Cell properties"), this, SLOT(setCellProperties()))->setIconVisibleInMenu(true);
     mTableMenu->addAction(QIcon(), tr("Evenly distribute the columns"), this, SLOT(distributeColumn()))->setIconVisibleInMenu(true);
 
     //update the position of the menu and the sub menu

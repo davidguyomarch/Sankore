@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="style.qss">../resources/style.qss</file>
+        <file alias="images/toolbar/svg/stylus.svg">../resources/images/toolbar/svg/stylus.svg</file>
+        <file alias="images/toolbar/svg/undo.svg">../resources/images/toolbar/svg/undo.svg</file>
+        <file alias="images/toolbar/svg/redo.svg">../resources/images/toolbar/svg/redo.svg</file>
+    </qresource>
+</RCC>
