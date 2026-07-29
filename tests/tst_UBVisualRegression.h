@@ -11,7 +11,7 @@
  * Uses RMSE (Root Mean Square Error) with a configurable threshold.
  *
  * To generate/update reference images:
- *   OpenSankoreTests --generate-visual-references
+ *   UB_GENERATE_VISUAL_REFERENCES=1 OpenSankoreTests TestUBVisualRegression
  *
  * Reference images are stored in tests/visual/reference/
  * Actual images (on failure) are saved in tests/visual/actual/

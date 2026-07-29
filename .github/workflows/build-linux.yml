@@ -215,7 +215,8 @@ jobs:
           cd tests
           if [ -f build/OpenSankoreTests ]; then
             export QT_QPA_PLATFORM=offscreen
-            ./build/OpenSankoreTests --generate-visual-references TestUBVisualRegression 2>&1 || true
+            export UB_GENERATE_VISUAL_REFERENCES=1
+            ./build/OpenSankoreTests TestUBVisualRegression 2>&1 || true
             if ls visual/reference/*.png 1>/dev/null 2>&1; then
               echo "Visual references generated:"
               ls -la visual/reference/*.png

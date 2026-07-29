@@ -23,9 +23,8 @@ void TestUBVisualRegression::initTestCase()
     QDir().mkpath(m_referencePath);
     QDir().mkpath(m_actualPath);
 
-    // Check if we're in generate mode
-    QStringList args = QCoreApplication::arguments();
-    m_generateMode = args.contains("--generate-visual-references");
+    // Check if we're in generate mode (via environment variable)
+    m_generateMode = qEnvironmentVariableIsSet("UB_GENERATE_VISUAL_REFERENCES");
 
     if (m_generateMode)
         qDebug() << "VISUAL TESTS: Running in GENERATE mode — updating reference images";
