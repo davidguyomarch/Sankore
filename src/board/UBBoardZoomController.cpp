@@ -21,6 +21,7 @@
 #include "core/UBApplicationController.h"
 #include "core/UBSettings.h"
 #include "domain/UBGraphicsScene.h"
+#include "frameworks/UBPureFunctions.h"
 
 #define UB_MAX_ZOOM 9.0
 
@@ -93,16 +94,7 @@ void UBBoardZoomController::centerOn(QPointF scenePoint)
  */
 QPair<qreal, qreal> UBBoardZoomController::computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom)
 {
-    qreal currentZoom = requestedRatio * currentViewScale / systemScaleFactor;
-    qreal usedRatio = requestedRatio;
-
-    if (currentZoom > maxZoom)
-    {
-        currentZoom = maxZoom;
-        usedRatio = currentZoom * systemScaleFactor / currentViewScale;
-    }
-
-    return QPair<qreal, qreal>(currentZoom, usedRatio);
+    return UBPure::computeZoomRatio(requestedRatio, currentViewScale, systemScaleFactor, maxZoom);
 }
 
 void UBBoardZoomController::zoom(const qreal ratio, QPointF scenePoint)

@@ -1,30 +1,17 @@
 /**
  * @file UBBoardSubControllers_stub.cpp
- * @brief Standalone implementations of static methods for testing.
+ * @brief Thin wrappers around UBPure:: for test linking.
  *
- * These are copies of the pure static methods from UBBoardZoomController
- * and UBBoardToolbarController, compiled without the full app dependency chain.
+ * No duplication — calls UBPureFunctions.h directly.
  */
 
-#include <QPair>
-#include <QString>
-#include <QFont>
-#include <QFontMetricsF>
+#include "frameworks/UBPureFunctions.h"
 
 namespace UBBoardZoomController
 {
     QPair<qreal, qreal> computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom)
     {
-        qreal currentZoom = requestedRatio * currentViewScale / systemScaleFactor;
-        qreal usedRatio = requestedRatio;
-
-        if (currentZoom > maxZoom)
-        {
-            currentZoom = maxZoom;
-            usedRatio = currentZoom * systemScaleFactor / currentViewScale;
-        }
-
-        return QPair<qreal, qreal>(currentZoom, usedRatio);
+        return UBPure::computeZoomRatio(requestedRatio, currentViewScale, systemScaleFactor, maxZoom);
     }
 }
 
@@ -32,7 +19,6 @@ namespace UBBoardToolbarController
 {
     QString truncate(const QString& text, int maxWidth, const QFont& font)
     {
-        QFontMetricsF fontMetrics(font);
-        return fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
+        return UBPure::truncateText(text, maxWidth, font);
     }
 }

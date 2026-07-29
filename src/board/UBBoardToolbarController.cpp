@@ -22,6 +22,7 @@
 #include "gui/UBMainWindow.h"
 #include "gui/UBToolbarButtonGroup.h"
 #include "domain/UBGraphicsScene.h"
+#include "frameworks/UBPureFunctions.h"
 
 UBBoardToolbarController::UBBoardToolbarController(UBBoardController* boardController,
                                                    UBMainWindow* mainWindow,
@@ -212,6 +213,5 @@ void UBBoardToolbarController::updatePageSizeState()
 
 QString UBBoardToolbarController::truncate(const QString& text, int maxWidth, const QFont& font)
 {
-    QFontMetricsF fontMetrics(font);
-    return fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
+    return UBPure::truncateText(text, maxWidth, font);
 }
