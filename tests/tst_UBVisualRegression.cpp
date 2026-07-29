@@ -131,7 +131,7 @@ void TestUBVisualRegression::testToolButtonRendering()
     button.setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     button.setFixedSize(64, 56);
     button.show();
-    QTest::qWaitForWindowExposed(&button);
+    (void)QTest::qWaitForWindowExposed(&button);
 
     QImage capture = button.grab().toImage();
     QVERIFY2(checkOrGenerateReference(capture, "toolbutton_normal"),
@@ -156,7 +156,7 @@ void TestUBVisualRegression::testDarkToolBarStyle()
 
     toolbar.setFixedSize(300, 64);
     toolbar.show();
-    QTest::qWaitForWindowExposed(&toolbar);
+    (void)QTest::qWaitForWindowExposed(&toolbar);
 
     QImage capture = toolbar.grab().toImage();
     QVERIFY2(checkOrGenerateReference(capture, "toolbar_dark"),
@@ -171,7 +171,7 @@ void TestUBVisualRegression::testScrollBarMinimal()
     scrollbar.setValue(30);
     scrollbar.setFixedSize(20, 200);
     scrollbar.show();
-    QTest::qWaitForWindowExposed(&scrollbar);
+    (void)QTest::qWaitForWindowExposed(&scrollbar);
 
     QImage capture = scrollbar.grab().toImage();
     QVERIFY2(checkOrGenerateReference(capture, "scrollbar_vertical"),
@@ -185,7 +185,7 @@ void TestUBVisualRegression::testButtonStyles()
     button.setObjectName("DockPaletteWidgetButton");
     button.setFixedSize(120, 36);
     button.show();
-    QTest::qWaitForWindowExposed(&button);
+    (void)QTest::qWaitForWindowExposed(&button);
 
     QImage normalCapture = button.grab().toImage();
     QVERIFY2(checkOrGenerateReference(normalCapture, "button_dock_normal"),
