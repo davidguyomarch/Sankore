@@ -137,14 +137,14 @@ void TestUBMetadataDcSubsetAdaptor::testLoadSessionFields()
     xml += "  <dc:title>Session Test</dc:title>\n";
     xml += "  <dc:date>2024-01-01</dc:date>\n";
     xml += "  <ub:size>1920x1080</ub:size>\n";
-    xml += "  <ub:SessionTitle>Introduction aux fractions</ub:SessionTitle>\n";
-    xml += "  <ub:SessionAuthors>M. Dupont</ub:SessionAuthors>\n";
-    xml += "  <ub:SessionObjectives>Comprendre les fractions</ub:SessionObjectives>\n";
-    xml += "  <ub:SessionKeywords>maths,fractions</ub:SessionKeywords>\n";
-    xml += "  <ub:SessionGradeLevel>CM2</ub:SessionGradeLevel>\n";
-    xml += "  <ub:SessionSubjects>Mathematiques</ub:SessionSubjects>\n";
-    xml += "  <ub:SessionType>Cours</ub:SessionType>\n";
-    xml += "  <ub:SessionLicence>CC-BY-SA</ub:SessionLicence>\n";
+    xml += "  <ub:sessionTitle>Introduction aux fractions</ub:sessionTitle>\n";
+    xml += "  <ub:sessionAuthors>M. Dupont</ub:sessionAuthors>\n";
+    xml += "  <ub:sessionObjectives>Comprendre les fractions</ub:sessionObjectives>\n";
+    xml += "  <ub:sessionKeywords>maths,fractions</ub:sessionKeywords>\n";
+    xml += "  <ub:sessionGradeLevel>CM2</ub:sessionGradeLevel>\n";
+    xml += "  <ub:sessionSubjects>Mathematiques</ub:sessionSubjects>\n";
+    xml += "  <ub:sessionType>Cours</ub:sessionType>\n";
+    xml += "  <ub:sessionLicence>CC-BY-SA</ub:sessionLicence>\n";
     xml += "</rdf:Description>\n";
     xml += "</rdf:RDF>\n";
 
@@ -218,8 +218,8 @@ void TestUBMetadataDcSubsetAdaptor::testLoadBackgroundImage()
     xml += "  <dc:title>BG Test</dc:title>\n";
     xml += "  <dc:date>2024-01-01</dc:date>\n";
     xml += "  <ub:size>1920x1080</ub:size>\n";
-    xml += "  <ub:DocumentDefaultBackgroundImage>images/bg.png</ub:DocumentDefaultBackgroundImage>\n";
-    xml += "  <ub:DocumentDefaultBackgroundImageDisposition>adjust</ub:DocumentDefaultBackgroundImageDisposition>\n";
+    xml += "  <ub:defaultBackgroundImage>images/bg.png</ub:defaultBackgroundImage>\n";
+    xml += "  <ub:defaultBackgroundImageDisposition>adjust</ub:defaultBackgroundImageDisposition>\n";
     xml += "</rdf:Description>\n";
     xml += "</rdf:RDF>\n";
 
