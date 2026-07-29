@@ -254,7 +254,7 @@ void UBDockPalette::setBackgroundBrush(const QBrush &brush)
  */
 int UBDockPalette::border()
 {
-    return 15;
+    return 12;
 }
 
 /**
@@ -263,7 +263,7 @@ int UBDockPalette::border()
  */
 int UBDockPalette::radius()
 {
-    return 5;
+    return 6;
 }
 
 /**
@@ -656,7 +656,7 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         QPixmap transparencyPix(":/images/tab_mask.png");
         if (dock->mCurrentTab != i) {
             iconPixmap; // setAlphaChannel removed in Qt6;
-            QColor color(0x7F, 0x7F, 0x7F, 0x3F);
+            QColor color(60, 60, 60, 160);
             painter.setBrush(QBrush(color));
         }
 

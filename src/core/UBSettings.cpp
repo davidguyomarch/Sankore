@@ -95,8 +95,8 @@ QPen UBSettings::eraserPenLightBackground = QPen(QColor(0, 0, 0, 63));
 QColor UBSettings::documentSizeMarkColorDarkBackground = QColor(44, 44, 44, 200);
 QColor UBSettings::documentSizeMarkColorLightBackground = QColor(241, 241, 241);
 
-QColor UBSettings::paletteColor = QColor(127, 127, 127, 127);
-QColor UBSettings::opaquePaletteColor = QColor(66, 66, 66, 200);
+QColor UBSettings::paletteColor = QColor(42, 42, 42, 220);
+QColor UBSettings::opaquePaletteColor = QColor(32, 32, 32, 240);
 
 QColor UBSettings::documentViewLightColor = QColor(241, 241, 241);
 
