@@ -13,6 +13,7 @@
 
 #include <QObject>
 #include <QPointF>
+#include <QPair>
 
 class UBBoardController;
 
@@ -40,6 +41,12 @@ public slots:
     void handScroll(qreal dx, qreal dy);
     void persistViewPositionOnCurrentScene();
     void updateSystemScaleFactor();
+
+    /**
+     * @brief Pure computation: clamp zoom ratio to max.
+     * Static so it can be unit-tested without instantiating the controller.
+     */
+    static QPair<qreal, qreal> computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom = 9.0);
 
 private:
     UBBoardController* mBoardController;

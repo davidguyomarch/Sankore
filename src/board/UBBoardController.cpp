@@ -364,8 +364,7 @@ void UBBoardController::setToolbarTexts()
 
 QString UBBoardController::truncate(QString text, int maxWidth)
 {
-    QFontMetricsF fontMetrics(mMainWindow->font());
-    return fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
+    return UBBoardToolbarController::truncate(text, maxWidth, mMainWindow->font());
 }
 
 

@@ -149,7 +149,7 @@ void UBBoardToolbarController::initToolbarTexts()
     for (QAction* action : allToolbarActions)
     {
         QString nominalText = action->text();
-        QString shortText = truncate(nominalText, 48);
+        QString shortText = truncate(nominalText, 48, mMainWindow->font());
         QPair<QString, QString> texts(nominalText, shortText);
 
         mActionTexts.insert(action, texts);
@@ -210,8 +210,8 @@ void UBBoardToolbarController::updatePageSizeState()
     }
 }
 
-QString UBBoardToolbarController::truncate(QString text, int maxWidth)
+QString UBBoardToolbarController::truncate(const QString& text, int maxWidth, const QFont& font)
 {
-    QFontMetricsF fontMetrics(mMainWindow->font());
+    QFontMetricsF fontMetrics(font);
     return fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
 }

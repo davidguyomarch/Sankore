@@ -45,8 +45,13 @@ public:
     void updateActionStates();
     void updatePageSizeState();
 
+    /**
+     * @brief Elide text to fit a given pixel width.
+     * Static so it can be unit-tested without instantiating the controller.
+     */
+    static QString truncate(const QString& text, int maxWidth, const QFont& font);
+
 private:
-    QString truncate(QString text, int maxWidth);
 
     UBBoardController* mBoardController;
     UBMainWindow* mMainWindow;

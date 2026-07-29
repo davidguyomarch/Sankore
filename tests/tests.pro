@@ -63,6 +63,9 @@ SOURCES += stubs/UBPlatformUtils_stub.cpp
 
 # Test headers — not in HEADERS (premoc used instead to avoid moc issues on Linux)
 
+# UBBoardSubControllers — stub with static methods only (no app deps)
+SOURCES += stubs/UBBoardSubControllers_stub.cpp
+
 # Test sources
 SOURCES += main.cpp \
            tst_UBStringUtils.cpp \
@@ -78,6 +81,7 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
+           tst_UBBoardSubControllers.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -91,6 +95,7 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
            premoc/moc_tst_UBForeignObjectsHelper.cpp \
+           premoc/moc_tst_UBBoardSubControllers.cpp \
 
 
 # Build output

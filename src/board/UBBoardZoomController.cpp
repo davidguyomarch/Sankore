@@ -81,6 +81,30 @@ void UBBoardZoomController::centerOn(QPointF scenePoint)
     UBApplication::applicationController->adjustDisplayView();
 }
 
+/**
+ * @brief Compute the effective zoom ratio, clamped to UB_MAX_ZOOM.
+ *
+ * Pure function — no side effects, testable in isolation.
+ * @param requestedRatio The zoom ratio requested
+ * @param currentViewScale The current m11() of the view transform
+ * @param systemScaleFactor The system scale factor
+ * @param maxZoom Maximum allowed zoom level
+ * @return QPair<qreal, qreal> (clampedZoom, usedRatio)
+ */
+QPair<qreal, qreal> UBBoardZoomController::computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom)
+{
+    qreal currentZoom = requestedRatio * currentViewScale / systemScaleFactor;
+    qreal usedRatio = requestedRatio;
+
+    if (currentZoom > maxZoom)
+    {
+        currentZoom = maxZoom;
+        usedRatio = currentZoom * systemScaleFactor / currentViewScale;
+    }
+
+    return QPair<qreal, qreal>(currentZoom, usedRatio);
+}
+
 void UBBoardZoomController::zoom(const qreal ratio, QPointF scenePoint)
 {
     UBBoardView* controlView = mBoardController->controlView();

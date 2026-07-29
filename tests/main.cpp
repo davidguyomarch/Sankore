@@ -21,6 +21,7 @@
 #include "tst_UBOEmbedParser.h"
 #include "tst_UBSvgTransform.h"
 #include "tst_UBForeignObjectsHelper.h"
+#include "tst_UBBoardSubControllers.h"
 
 int main(int argc, char *argv[])
 {
@@ -91,6 +92,11 @@ int main(int argc, char *argv[])
 
     {
         TestUBForeignObjectsHelper test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+
+    {
+        TestUBBoardSubControllers test;
         status |= QTest::qExec(&test, argc, argv);
     }
 
