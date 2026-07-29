@@ -100,6 +100,7 @@
 #include "UBBoardNavigationController.h"
 #include "UBBoardToolbarController.h"
 #include "UBBoardZoomController.h"
+#include "UBBoardItemFactory.h"
 
 #include "core/UBSettings.h"
 
@@ -135,6 +136,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     mNavigationController = new UBBoardNavigationController(this, this);
     mToolbarController = new UBBoardToolbarController(this, mainWindow, mSettings, this);
     mZoomController = new UBBoardZoomController(this, this);
+    mItemFactory = new UBBoardItemFactory(this, this);
     mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
 
     int penColorIndex = mSettings->penColorIndex();

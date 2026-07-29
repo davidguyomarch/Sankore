@@ -54,6 +54,7 @@ class UBBoardPaletteManager;
 class UBBoardNavigationController;
 class UBBoardToolbarController;
 class UBBoardZoomController;
+class UBBoardItemFactory;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
@@ -337,6 +338,7 @@ class UBBoardController : public UBDocumentContainer
         UBBoardNavigationController *mNavigationController;
         UBBoardToolbarController *mToolbarController;
         UBBoardZoomController *mZoomController;
+        UBBoardItemFactory *mItemFactory;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
         UBMessageWindow *mMessageWindow;
         UBBoardView *mControlView;
