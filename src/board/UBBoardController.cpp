@@ -2237,6 +2237,60 @@ void UBBoardController::processMimeData(const QMimeData* pMimeData, const QPoint
     mItemFactory->processMimeData(pMimeData, pPos, actionType);
 }
 
+void UBBoardController::togglePodcast(bool checked)
+{
+    if (UBPodcastController::instance())
+        UBPodcastController::instance()->toggleRecordingPalette(checked);
+}
+
+void UBBoardController::moveGraphicsWidgetToControlView(UBGraphicsWidgetItem* graphicsWidget)
+{
+    mActiveScene->setURStackEnable(false);
+    UBGraphicsItem *toolW3C = duplicateItem(dynamic_cast<UBItem *>(graphicsWidget));
+    UBGraphicsWidgetItem *copyedGraphicsWidget = nullptr;
+
+    if (UBGraphicsWidgetItem::Type == toolW3C->type())
+        copyedGraphicsWidget = static_cast<UBGraphicsWidgetItem *>(toolW3C);
+
+    UBToolWidget *toolWidget = new UBToolWidget(copyedGraphicsWidget, mControlView);
+
+    graphicsWidget->remove(false);
+    mActiveScene->addItemToDeletion(graphicsWidget);
+
+    mActiveScene->setURStackEnable(true);
+
+    QPoint controlViewPos = mControlView->mapFromScene(graphicsWidget->sceneBoundingRect().center());
+    toolWidget->centerOn(mControlView->mapTo(mControlContainer, controlViewPos));
+    toolWidget->show();
+}
+
+void UBBoardController::moveToolWidgetToScene(UBToolWidget* toolWidget)
+{
+    UBGraphicsWidgetItem *widgetToScene = toolWidget->toolWidget();
+
+    widgetToScene->resetTransform();
+
+    QPoint mainWindowCenter = toolWidget->mapTo(mMainWindow, QPoint(toolWidget->width(), toolWidget->height()) / 2);
+    QPoint controlViewCenter = mControlView->mapFrom(mMainWindow, mainWindowCenter);
+    QPointF scenePos = mControlView->mapToScene(controlViewCenter);
+
+    mActiveScene->addGraphicsWidget(widgetToScene, scenePos);
+
+    toolWidget->remove();
+}
+
+void UBBoardController::updateBackgroundActionsState(bool isDark, bool isCrossed)
+{
+    if (isDark && !isCrossed)
+        mMainWindow->actionPlainDarkBackground->setChecked(true);
+    else if (isDark && isCrossed)
+        mMainWindow->actionCrossedDarkBackground->setChecked(true);
+    else if (!isDark && isCrossed)
+        mMainWindow->actionCrossedLightBackground->setChecked(true);
+    else
+        mMainWindow->actionPlainLightBackground->setChecked(true);
+}
+
 void UBBoardController::addItem()
 {
     mItemFactory->addItem();
