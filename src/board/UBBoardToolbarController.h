@@ -12,11 +12,13 @@
 #define UBBOARDTOOLBARCONTROLLER_H
 
 #include <QObject>
+#include "IUBBoardContext.h"
 #include <QMap>
 #include <QPair>
 #include <QString>
 
 class QAction;
+class IUBBoardContext;
 class UBBoardController;
 class UBMainWindow;
 class UBSettings;
@@ -33,7 +35,7 @@ class UBBoardToolbarController : public QObject
     Q_OBJECT
 
 public:
-    explicit UBBoardToolbarController(UBBoardController* boardController,
+    explicit UBBoardToolbarController(IUBBoardContext* boardController,
                                       UBMainWindow* mainWindow,
                                       UBSettings* settings,
                                       QObject* parent = nullptr);
@@ -53,7 +55,7 @@ public:
 
 private:
 
-    UBBoardController* mBoardController;
+    IUBBoardContext* mBoardController;
     UBMainWindow* mMainWindow;
     UBSettings* mSettings;
     QMap<QAction*, QPair<QString, QString>> mActionTexts;

@@ -12,10 +12,11 @@
 #define UBBOARDZOOMCONTROLLER_H
 
 #include <QObject>
+#include "IUBBoardContext.h"
 #include <QPointF>
 #include <QPair>
 
-class UBBoardController;
+class IUBBoardContext;
 
 /**
  * @brief Manages zoom, scroll, and view transformations.
@@ -29,7 +30,7 @@ class UBBoardZoomController : public QObject
     Q_OBJECT
 
 public:
-    explicit UBBoardZoomController(UBBoardController* boardController, QObject* parent = nullptr);
+    explicit UBBoardZoomController(IUBBoardContext* boardController, QObject* parent = nullptr);
 
 public slots:
     void zoomIn(QPointF scenePoint = QPointF(0, 0));
@@ -49,7 +50,7 @@ public slots:
     static QPair<qreal, qreal> computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom = 9.0);
 
 private:
-    UBBoardController* mBoardController;
+    IUBBoardContext* mBoardController;
 };
 
 #endif // UBBOARDZOOMCONTROLLER_H

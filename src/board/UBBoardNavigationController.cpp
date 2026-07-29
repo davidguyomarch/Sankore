@@ -31,7 +31,7 @@
 #include "adaptors/UBMetadataDcSubsetAdaptor.h"
 #include "board/UBFeaturesController.h"
 
-UBBoardNavigationController::UBBoardNavigationController(UBBoardController* boardController, QObject* parent)
+UBBoardNavigationController::UBBoardNavigationController(IUBBoardContext* boardController, QObject* parent)
     : QObject(parent)
     , mBoardController(boardController)
 {
@@ -50,7 +50,7 @@ void UBBoardNavigationController::previousScene()
     }
 
     mBoardController->updateActionStates();
-    emit mBoardController->pageChanged();
+    mBoardController->emitPageChanged();
 }
 
 void UBBoardNavigationController::nextScene()
@@ -66,7 +66,7 @@ void UBBoardNavigationController::nextScene()
     }
 
     mBoardController->updateActionStates();
-    emit mBoardController->pageChanged();
+    mBoardController->emitPageChanged();
 }
 
 void UBBoardNavigationController::firstScene()
@@ -82,7 +82,7 @@ void UBBoardNavigationController::firstScene()
     }
 
     mBoardController->updateActionStates();
-    emit mBoardController->pageChanged();
+    mBoardController->emitPageChanged();
 }
 
 void UBBoardNavigationController::lastScene()
@@ -98,7 +98,7 @@ void UBBoardNavigationController::lastScene()
     }
 
     mBoardController->updateActionStates();
-    emit mBoardController->pageChanged();
+    mBoardController->emitPageChanged();
 }
 
 void UBBoardNavigationController::addScene()
@@ -178,13 +178,13 @@ void UBBoardNavigationController::duplicateScene(int nIndex)
     scIndexes << nIndex;
     mBoardController->duplicatePages(scIndexes);
     mBoardController->insertThumbPage(nIndex);
-    emit mBoardController->documentThumbnailsUpdated(mBoardController);
+    mBoardController->emitDocumentThumbnailsUpdated(mBoardController);
     mBoardController->selectedDocument()->setMetaData(UBSettingsData::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
     mBoardController->setActiveDocumentScene(nIndex + 1);
     QApplication::restoreOverrideCursor();
 
-    emit mBoardController->pageChanged();
+    mBoardController->emitPageChanged();
     mBoardController->reloadThumbnails();
 }
 
@@ -229,7 +229,7 @@ void UBBoardNavigationController::moveSceneToIndex(int source, int target)
         UBMetadataDcSubsetAdaptor::persist(mBoardController->selectedDocument());
         mBoardController->setActiveDocumentScene(target);
 
-        emit mBoardController->activeSceneChanged();
+        mBoardController->emitActiveSceneChanged();
     }
 }
 

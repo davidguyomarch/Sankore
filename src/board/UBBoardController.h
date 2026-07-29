@@ -31,6 +31,7 @@
 #include "UBFeaturesController.h"
 #include "gui/UBActionPalette.h"
 #include "domain/UBShapeFactory.h"
+#include "IUBBoardContext.h"
 
 
 class UBMainWindow;
@@ -68,7 +69,7 @@ typedef enum{
     eItemActionType_Paste
 }eItemActionType;
 
-class UBBoardController : public UBDocumentContainer
+class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 {
     Q_OBJECT
 
@@ -204,6 +205,14 @@ class UBBoardController : public UBDocumentContainer
         void notifyPageChanged();
         void updateActionStates();
         void displayMetaData(QMap<QString, QString> metadatas);
+
+        // IUBBoardContext signal emission
+        void emitPageChanged() override { emit pageChanged(); }
+        void emitActiveSceneChanged() override { emit activeSceneChanged(); }
+        void emitZoomChanged(qreal zoom) override { emit zoomChanged(zoom); }
+        void emitControlViewportChanged() override { emit controlViewportChanged(); }
+        void emitSystemScaleFactorChanged(qreal factor) override { emit systemScaleFactorChanged(factor); }
+        void emitDocumentThumbnailsUpdated(void* sender) override { emit documentThumbnailsUpdated(static_cast<UBDocumentContainer*>(sender)); }
 
         void setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, int pSceneIndex = 0, bool forceReload = false, const bool onImport = false);
         void setActiveDocumentScene(int pSceneIndex);

@@ -25,7 +25,7 @@
 
 #define UB_MAX_ZOOM 9.0
 
-UBBoardZoomController::UBBoardZoomController(UBBoardController* boardController, QObject* parent)
+UBBoardZoomController::UBBoardZoomController(IUBBoardContext* boardController, QObject* parent)
     : QObject(parent)
     , mBoardController(boardController)
 {
@@ -68,7 +68,7 @@ void UBBoardZoomController::zoomRestore()
         gi->setSelected(true);
     }
 
-    emit mBoardController->zoomChanged(1.0);
+    mBoardController->emitZoomChanged(1.0);
 }
 
 void UBBoardZoomController::centerRestore()
@@ -119,10 +119,10 @@ void UBBoardZoomController::zoom(const qreal ratio, QPointF scenePoint)
     QPointF newCenter = scenePoint - scalledOffset;
     controlView->centerOn(newCenter);
 
-    emit mBoardController->zoomChanged(currentZoom);
+    mBoardController->emitZoomChanged(currentZoom);
     UBApplication::applicationController->adjustDisplayView();
 
-    emit mBoardController->controlViewportChanged();
+    mBoardController->emitControlViewportChanged();
     mBoardController->activeScene()->setBackgroundZoomFactor(controlView->transform().m11());
 }
 
@@ -130,7 +130,7 @@ void UBBoardZoomController::handScroll(qreal dx, qreal dy)
 {
     mBoardController->controlView()->translate(dx, dy);
     UBApplication::applicationController->adjustDisplayView();
-    emit mBoardController->controlViewportChanged();
+    mBoardController->emitControlViewportChanged();
 }
 
 void UBBoardZoomController::persistViewPositionOnCurrentScene()
@@ -160,7 +160,7 @@ void UBBoardZoomController::updateSystemScaleFactor()
     if (mBoardController->systemScaleFactor() != newScaleFactor)
     {
         mBoardController->setSystemScaleFactor(newScaleFactor);
-        emit mBoardController->systemScaleFactorChanged(newScaleFactor);
+        mBoardController->emitSystemScaleFactorChanged(newScaleFactor);
     }
 
     UBGraphicsScene::SceneViewState viewState = mBoardController->activeScene()->viewState();

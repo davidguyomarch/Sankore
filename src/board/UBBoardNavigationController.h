@@ -12,8 +12,9 @@
 #define UBBOARDNAVIGATIONCONTROLLER_H
 
 #include <QObject>
+#include "IUBBoardContext.h"
 
-class UBBoardController;
+class IUBBoardContext;
 class UBDocumentProxy;
 class UBGraphicsScene;
 
@@ -28,7 +29,7 @@ class UBBoardNavigationController : public QObject
     Q_OBJECT
 
 public:
-    explicit UBBoardNavigationController(UBBoardController* boardController, QObject* parent = nullptr);
+    explicit UBBoardNavigationController(IUBBoardContext* boardController, QObject* parent = nullptr);
 
 public slots:
     void previousScene();
@@ -48,7 +49,7 @@ public slots:
     void importPage();
 
 private:
-    UBBoardController* mBoardController;
+    IUBBoardContext* mBoardController;
 };
 
 #endif // UBBOARDNAVIGATIONCONTROLLER_H

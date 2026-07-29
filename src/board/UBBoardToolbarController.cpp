@@ -24,7 +24,7 @@
 #include "domain/UBGraphicsScene.h"
 #include "frameworks/UBPureFunctions.h"
 
-UBBoardToolbarController::UBBoardToolbarController(UBBoardController* boardController,
+UBBoardToolbarController::UBBoardToolbarController(IUBBoardContext* boardController,
                                                    UBMainWindow* mainWindow,
                                                    UBSettings* settings,
                                                    QObject* parent)

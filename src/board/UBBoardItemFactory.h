@@ -12,6 +12,7 @@
 #define UBBOARDITEMFACTORY_H
 
 #include <QObject>
+#include "IUBBoardContext.h"
 #include <QPointF>
 #include <QUrl>
 #include <QSize>
@@ -36,7 +37,7 @@ class UBBoardItemFactory : public QObject
     Q_OBJECT
 
 public:
-    explicit UBBoardItemFactory(UBBoardController* boardController, QObject* parent = nullptr);
+    explicit UBBoardItemFactory(IUBBoardContext* boardController, QObject* parent = nullptr);
 
 public slots:
     UBGraphicsMediaItem* addVideo(const QUrl& pUrl, bool startPlay, const QPointF& pos, bool bUseSource = false);
@@ -50,7 +51,7 @@ public slots:
     void grabScene(const QRectF& pSceneRect);
 
 private:
-    UBBoardController* mBoardController;
+    IUBBoardContext* mBoardController;
 };
 
 #endif // UBBOARDITEMFACTORY_H

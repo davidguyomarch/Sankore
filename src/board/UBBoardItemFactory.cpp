@@ -40,7 +40,7 @@
 #include "gui/UBFeaturesWidget.h"
 #include "board/UBBoardPaletteManager.h"
 
-UBBoardItemFactory::UBBoardItemFactory(UBBoardController* boardController, QObject* parent)
+UBBoardItemFactory::UBBoardItemFactory(IUBBoardContext* boardController, QObject* parent)
     : QObject(parent)
     , mBoardController(boardController)
 {
