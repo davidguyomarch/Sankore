@@ -566,10 +566,6 @@ void UBApplication::decorateActionMenu(QAction* action)
             menu->addSeparator();
             menu->addAction(mainWindow->actionPreferences);
             menu->addAction(mainWindow->actionMultiScreen);
-            // SANKORE-48: Hide the check update action if the setting
-            // EnableAutomaticSoftwareUpdates is false in Uniboard.config
-            if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool())
-            else
 
             menu->addSeparator();
 
