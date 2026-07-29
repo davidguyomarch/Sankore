@@ -207,22 +207,6 @@ jobs:
           check_name: Linux Unit Tests
           fail_on_failure: false
 
-      - name: Generate visual regression references
-        if: success()
-        continue-on-error: true
-        shell: bash
-        run: |
-          cd tests
-          if [ -f build/OpenSankoreTests ]; then
-            export QT_QPA_PLATFORM=offscreen
-            export UB_GENERATE_VISUAL_REFERENCES=1
-            ./build/OpenSankoreTests TestUBVisualRegression 2>&1 || true
-            if ls visual/reference/*.png 1>/dev/null 2>&1; then
-              echo "Visual references generated:"
-              ls -la visual/reference/*.png
-            fi
-          fi
-
       - name: Upload visual test artifacts
         if: always()
         uses: actions/upload-artifact@v4
