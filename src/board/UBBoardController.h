@@ -52,6 +52,7 @@ class UBGraphicsAudioItem;
 class UBGraphicsWidgetItem;
 class UBBoardPaletteManager;
 class UBBoardNavigationController;
+class UBBoardToolbarController;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
@@ -323,6 +324,7 @@ class UBBoardController : public UBDocumentContainer
         int mActiveSceneIndex;
         UBBoardPaletteManager *mPaletteManager;
         UBBoardNavigationController *mNavigationController;
+        UBBoardToolbarController *mToolbarController;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
         UBMessageWindow *mMessageWindow;
         UBBoardView *mControlView;
@@ -338,7 +340,6 @@ class UBBoardController : public UBDocumentContainer
         QColor mMarkerColorOnLightBackground;
         qreal mSystemScaleFactor;
         bool mCleanupDone;
-        QMap<QAction*, QPair<QString, QString> > mActionTexts;
         bool mCacheWidgetIsEnabled;
         QGraphicsItem* mLastCreatedItem;
         int mDeletingSceneIndex;

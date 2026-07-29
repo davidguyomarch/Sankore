@@ -98,6 +98,7 @@
 
 #include "UBBoardPaletteManager.h"
 #include "UBBoardNavigationController.h"
+#include "UBBoardToolbarController.h"
 
 #include "core/UBSettings.h"
 
@@ -131,6 +132,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
 {
     mSettings = UBSettings::settings();
     mNavigationController = new UBBoardNavigationController(this, this);
+    mToolbarController = new UBBoardToolbarController(this, mainWindow, mSettings, this);
     mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
 
     int penColorIndex = mSettings->penColorIndex();
@@ -314,82 +316,7 @@ QRectF UBBoardController::controlGeometry()
 
 void UBBoardController::setupToolbar()
 {
-    // Setup color choice widget
-    QList<QAction *> colorActions;
-    colorActions.append(mMainWindow->actionColor0);
-    colorActions.append(mMainWindow->actionColor1);
-    colorActions.append(mMainWindow->actionColor2);
-    colorActions.append(mMainWindow->actionColor3);
-
-    UBToolbarButtonGroup *colorChoice =
-            new UBToolbarButtonGroup(mMainWindow->boardToolBar, colorActions);
-
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
-
-    connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), colorChoice, SLOT(displayText(QVariant)));
-    connect(colorChoice, SIGNAL(activated(int)), this, SLOT(setColorIndex(int)));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorIndexChanged(int)), colorChoice, SLOT(setCurrentIndex(int)));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), colorChoice, SLOT(colorPaletteChanged()));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), this, SLOT(colorPaletteChanged()));
-
-    colorChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
-    colorChoice->colorPaletteChanged();
-
-    // Setup line width choice widget
-    QList<QAction *> lineWidthActions;
-    lineWidthActions.append(mMainWindow->actionLineSmall);
-    lineWidthActions.append(mMainWindow->actionLineMedium);
-    lineWidthActions.append(mMainWindow->actionLineLarge);
-
-    UBToolbarButtonGroup *lineWidthChoice =
-            new UBToolbarButtonGroup(mMainWindow->boardToolBar, lineWidthActions);
-
-    connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), lineWidthChoice, SLOT(displayText(QVariant)));
-
-    connect(lineWidthChoice, SIGNAL(activated(int))
-            , UBDrawingController::drawingController(), SLOT(setLineWidthIndex(int)));
-
-    connect(UBDrawingController::drawingController(), SIGNAL(lineWidthIndexChanged(int))
-            , lineWidthChoice, SLOT(setCurrentIndex(int)));
-
-    lineWidthChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
-
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
-
-    //-----------------------------------------------------------//
-    // Setup eraser width choice widget
-
-    QList<QAction *> eraserWidthActions;
-    eraserWidthActions.append(mMainWindow->actionEraserSmall);
-    eraserWidthActions.append(mMainWindow->actionEraserMedium);
-    eraserWidthActions.append(mMainWindow->actionEraserLarge);
-
-    UBToolbarButtonGroup *eraserWidthChoice =
-            new UBToolbarButtonGroup(mMainWindow->boardToolBar, eraserWidthActions);
-
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, eraserWidthChoice);
-
-    connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), eraserWidthChoice, SLOT(displayText(QVariant)));
-    connect(eraserWidthChoice, SIGNAL(activated(int)), UBDrawingController::drawingController(), SLOT(setEraserWidthIndex(int)));
-
-    eraserWidthChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
-    eraserWidthChoice->setCurrentIndex(mSettings->eraserWidthIndex());
-
-    mMainWindow->boardToolBar->insertSeparator(mMainWindow->actionBackgrounds);
-
-    //-----------------------------------------------------------//
-
-    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->boardToolBar, mMainWindow->actionBoard);
-
-    UBApplication::app()->decorateActionMenu(mMainWindow->actionMenu);
-
-    mMainWindow->actionBoard->setVisible(false);
-
-    mMainWindow->webToolBar->hide();
-    mMainWindow->documentToolBar->hide();
-
-    connectToolbar();
-    initToolbarTexts();
+    mToolbarController->setupToolbar();
 }
 
 
@@ -406,33 +333,7 @@ void UBBoardController::setToolCursor(int tool)
 
 void UBBoardController::connectToolbar()
 {
-    connect(mMainWindow->actionAdd, SIGNAL(triggered()), this, SLOT(addItem()));
-    connect(mMainWindow->actionNewPage, SIGNAL(triggered()), this, SLOT(addScene()));
-    connect(mMainWindow->actionDuplicatePage, SIGNAL(triggered()), this, SLOT(duplicateScene()));
-
-    connect(mMainWindow->actionClearPage, SIGNAL(triggered()), this, SLOT(clearScene()));
-    connect(mMainWindow->actionEraseItems, SIGNAL(triggered()), this, SLOT(clearSceneItems()));
-    connect(mMainWindow->actionEraseAnnotations, SIGNAL(triggered()), this, SLOT(clearSceneAnnotation()));
-    connect(mMainWindow->actionEraseBackground,SIGNAL(triggered()),this,SLOT(clearSceneBackground()));
-
-    // Issue 1684 - CFA - 20131119
-    connect(mMainWindow->actionCenterImageBackground, SIGNAL(triggered()), this, SLOT( centerImageBackground()));
-    connect(mMainWindow->actionAdjustImageBackground, SIGNAL(triggered()), this, SLOT( adjustImageBackground()));
-    connect(mMainWindow->actionMosaicImageBackground, SIGNAL(triggered()), this, SLOT( mosaicImageBackground()));
-    connect(mMainWindow->actionFillImageBackground, SIGNAL(triggered()), this, SLOT( fillImageBackground()));
-    connect(mMainWindow->actionExtendImageBackground, SIGNAL(triggered()), this, SLOT( extendImageBackground()));
-
-    connect(mMainWindow->actionUndo, SIGNAL(triggered()), UBApplication::undoStack, SLOT(undo()));
-    connect(mMainWindow->actionRedo, SIGNAL(triggered()), UBApplication::undoStack, SLOT(redo()));
-    connect(mMainWindow->actionRedo, SIGNAL(triggered()), this, SLOT(startScript()));
-    connect(mMainWindow->actionBack, SIGNAL( triggered()), this, SLOT(previousScene()));
-    connect(mMainWindow->actionForward, SIGNAL(triggered()), this, SLOT(nextScene()));
-    connect(mMainWindow->actionSleep, SIGNAL(triggered()), this, SLOT(stopScript()));
-    connect(mMainWindow->actionSleep, SIGNAL(triggered()), this, SLOT(blackout()));
-    connect(mMainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(showKeyboard(bool)));
-    connect(mMainWindow->actionImportPage, SIGNAL(triggered()), this, SLOT(importPage()));
-
-    //EV-7 - NNE - 20131230
+    // Delegated to mToolbarController via setupToolbar()
 }
 
 void UBBoardController::startScript()
@@ -447,50 +348,13 @@ void UBBoardController::stopScript()
 
 void UBBoardController::initToolbarTexts()
 {
-    QList<QAction*> allToolbarActions;
-
-    allToolbarActions << mMainWindow->boardToolBar->actions();
-    allToolbarActions << mMainWindow->webToolBar->actions();
-    allToolbarActions << mMainWindow->documentToolBar->actions();
-
-    for (QAction* action : allToolbarActions)
-    {
-        QString nominalText = action->text();
-        QString shortText = truncate(nominalText, 48);
-        QPair<QString, QString> texts(nominalText, shortText);
-
-        mActionTexts.insert(action, texts);
-    }
+    // Delegated to mToolbarController via setupToolbar()
 }
 
 
 void UBBoardController::setToolbarTexts()
 {
-    bool highResolution = mMainWindow->width() > 1024;
-    QSize iconSize;
-
-    if (highResolution)
-        iconSize = QSize(48, 32);
-    else
-        iconSize = QSize(32, 32);
-
-    mMainWindow->boardToolBar->setIconSize(iconSize);
-    mMainWindow->webToolBar->setIconSize(iconSize);
-    mMainWindow->documentToolBar->setIconSize(iconSize);
-
-    for (QAction* action : mActionTexts.keys())
-    {
-        QPair<QString, QString> texts = mActionTexts.value(action);
-
-        if (highResolution)
-            action->setText(texts.first);
-        else
-        {
-            action->setText(texts.second);
-        }
-
-        action->setToolTip(texts.first);
-    }
+    mToolbarController->setToolbarTexts();
 }
 
 
@@ -1988,9 +1852,7 @@ void UBBoardController::undoRedoStateChange(bool canUndo)
 
 void UBBoardController::updateActionStates()
 {
-    mMainWindow->actionBack->setEnabled(selectedDocument() && (mActiveSceneIndex > 0));
-    mMainWindow->actionForward->setEnabled(selectedDocument() && (mActiveSceneIndex < selectedDocument()->pageCount() - 1));
-    mMainWindow->actionErase->setEnabled(mActiveScene && !mActiveScene->isEmpty());
+    mToolbarController->updateActionStates();
 }
 
 
@@ -2324,23 +2186,8 @@ void UBBoardController::notifyCache(bool visible)
 }
 
 void UBBoardController::updatePageSizeState()
-{    
-    if (mActiveScene->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_9))
-    {
-        mMainWindow->actionWidePageSize->setChecked(true);
-    }
-    else if(mActiveScene->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio4_3))
-    {
-        mMainWindow->actionRegularPageSize->setChecked(true);
-    }
-    else if(mActiveScene->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_10))
-    {
-        mMainWindow->actionWidePageSize_16_10->setChecked(true);
-    }
-    else
-    {
-        mMainWindow->actionCustomPageSize->setChecked(true);
-    }
+{
+    mToolbarController->updatePageSizeState();
 }
 
 
