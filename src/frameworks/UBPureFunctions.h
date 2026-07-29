@@ -13,8 +13,19 @@
 
 #include <QPair>
 #include <QString>
+#include <QStringList>
 #include <QFont>
 #include <QFontMetricsF>
+#include <QPointF>
+#include <QRectF>
+#include <QLineF>
+#include <QUuid>
+#include <QDateTime>
+#include <QRegularExpression>
+#include <QMultiMap>
+
+#include <cmath>
+#include <algorithm>
 
 /**
  * @brief Pure utility functions with no side effects and no app dependencies.
@@ -30,14 +41,10 @@
 namespace UBPure
 {
 
+// --- Zoom ---
+
 /**
  * @brief Compute the effective zoom ratio, clamped to a maximum.
- *
- * @param requestedRatio The zoom multiplier requested
- * @param currentViewScale Current m11() of the view transform
- * @param systemScaleFactor The system DPI scale factor
- * @param maxZoom Maximum allowed zoom level (default 9.0)
- * @return QPair(clampedZoomLevel, adjustedRatio)
  */
 inline QPair<qreal, qreal> computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom = 9.0)
 {
@@ -53,18 +60,111 @@ inline QPair<qreal, qreal> computeZoomRatio(qreal requestedRatio, qreal currentV
     return QPair<qreal, qreal>(currentZoom, usedRatio);
 }
 
+// --- Text ---
+
 /**
  * @brief Elide text to fit within a given pixel width.
- *
- * @param text The text to potentially truncate
- * @param maxWidth Maximum width in pixels
- * @param font The font used for measurement
- * @return The elided text (with ellipsis if truncated)
  */
 inline QString truncateText(const QString& text, int maxWidth, const QFont& font)
 {
     QFontMetricsF fontMetrics(font);
     return fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
+}
+
+/**
+ * @brief Convert a QUuid to its canonical string (without braces).
+ */
+inline QString toCanonicalUuid(const QUuid& uuid)
+{
+    QString s = uuid.toString();
+    if (s.startsWith("{"))
+        s = s.right(s.length() - 1);
+    if (s.endsWith("}"))
+        s = s.left(s.length() - 1);
+    return s;
+}
+
+/**
+ * @brief Convert a QDateTime to UTC ISO 8601 string with trailing Z.
+ */
+inline QString toUtcIsoDateTime(const QDateTime& dateTime)
+{
+    QString isoStr = dateTime.toUTC().toString(Qt::ISODate);
+    if (!isoStr.endsWith('Z'))
+        isoStr += "Z";
+    return isoStr;
+}
+
+/**
+ * @brief Parse a UTC ISO 8601 date string to local QDateTime.
+ */
+inline QDateTime fromUtcIsoDate(const QString& dateString)
+{
+    return QDateTime::fromString(dateString, Qt::ISODate).toLocalTime();
+}
+
+// --- Geometry ---
+
+/**
+ * @brief Constrain a point to stay within a rectangle.
+ */
+inline QPointF pointConstrainedInRect(QPointF point, QRectF rect)
+{
+    return QPointF(
+        qMax(rect.x(), qMin(rect.x() + rect.width(), point.x())),
+        qMax(rect.y(), qMin(rect.y() + rect.height(), point.y()))
+    );
+}
+
+/**
+ * @brief Compute an inner square from a line segment and width.
+ */
+inline QRectF lineToInnerRect(const QLineF& pLine, const qreal& pWidth)
+{
+    qreal centerX = (pLine.x1() + pLine.x2()) / 2;
+    qreal centerY = (pLine.y1() + pLine.y2()) / 2;
+    qreal side = std::sqrt((pWidth * pWidth) / 2);
+    qreal halfSide = side / 2;
+    return QRectF(centerX - halfSide, centerY - halfSide, side, side);
+}
+
+// --- String sorting ---
+
+/**
+ * @brief Sort a list of filenames by the last digit sequence before the extension.
+ */
+inline QStringList sortByLastDigit(const QStringList& sourceList)
+{
+    QRegularExpression rx("\\D(\\d+)\\.");
+    QMultiMap<int, QString> elements;
+
+    for (const QString& source : sourceList)
+    {
+        QRegularExpressionMatch match;
+        QRegularExpressionMatchIterator it = rx.globalMatch(source);
+        while (it.hasNext())
+            match = it.next();
+
+        int digit = match.hasMatch() ? match.captured(1).toInt() : -1;
+        elements.insert(digit, source);
+    }
+
+    QStringList result;
+    QList<int> keys = elements.keys();
+    std::sort(keys.begin(), keys.end());
+
+    for (int key : keys)
+    {
+        QList<QString> values = elements.values(key);
+        std::sort(values.begin(), values.end());
+        for (const QString& val : values)
+        {
+            if (!result.contains(val))
+                result << val;
+        }
+    }
+
+    return result;
 }
 
 } // namespace UBPure

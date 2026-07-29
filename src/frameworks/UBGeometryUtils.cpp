@@ -22,6 +22,7 @@
 
 
 #include "UBGeometryUtils.h"
+#include "UBPureFunctions.h"
 
 #include <cmath>
 
@@ -197,7 +198,7 @@ QPolygonF UBGeometryUtils::arcToPolygon(const QLineF& startRadius, qreal spanAng
 
 QPointF UBGeometryUtils::pointConstrainedInRect(QPointF point, QRectF rect)
 {
-    return QPointF(qMax(rect.x(), qMin(rect.x() + rect.width(), point.x())), qMax(rect.y(), qMin(rect.y() + rect.height(), point.y())));
+    return UBPure::pointConstrainedInRect(point, rect);
 }
 
 
@@ -209,14 +210,7 @@ QPoint UBGeometryUtils::pointConstrainedInRect(QPoint point, QRect rect)
 
 QRectF UBGeometryUtils::lineToInnerRect(const QLineF& pLine, const qreal& pWidth)
 {
-    qreal centerX = (pLine.x1() + pLine.x2()) / 2;
-    qreal centerY = (pLine.y1() + pLine.y2()) / 2;
-
-    // Please put a fucking comment here
-    qreal side = sqrt((pWidth * pWidth) / 2);
-    qreal halfSide = side / 2;
-
-    return QRectF(centerX - halfSide, centerY - halfSide, side, side);
+    return UBPure::lineToInnerRect(pLine, pWidth);
 }
 
 
