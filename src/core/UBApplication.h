@@ -150,6 +150,7 @@ class UBApplication : public QtSingleApplication
 #endif
 
         UBPreferencesController* mPreferencesController;
+        class UBRecognitionController* mRecognitionController;
         QTranslator* mApplicationTranslator;
         QTranslator* mQtGuiTranslator;
 

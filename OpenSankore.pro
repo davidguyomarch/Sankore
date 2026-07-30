@@ -72,6 +72,7 @@ include(src/pdf-merger/pdfMerger.pri)
 
 #plugins
 include(plugins/plugins.pri)
+include(src/recognition/recognition.pri)
 INCLUDEPATH += plugins/cffadaptor/src
 
 

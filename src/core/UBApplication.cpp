@@ -59,6 +59,7 @@
 
 #include "UBSettings.h"
 #include "UBTheme.h"
+#include "recognition/UBRecognitionController.h"
 #include "UBSetting.h"
 #include "UBPersistenceManager.h"
 #include "UBDocumentManager.h"
@@ -383,6 +384,7 @@ int UBApplication::exec(const QString& pFileToImport)
 #endif
 
     mPreferencesController = new UBPreferencesController(mainWindow);
+    mRecognitionController = new UBRecognitionController(this);
 
     connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
 
@@ -759,6 +761,15 @@ void UBApplication::decorateActionMenu(QAction* action)
             menu->addAction(mainWindow->actionPodcast);
             mainWindow->actionPodcast->setText(tr("Podcast"));
 #endif
+
+            // Handwriting recognition
+            if (mRecognitionController && mRecognitionController->isAvailable())
+            {
+                menu->addSeparator();
+                QAction* actionRecognize = menu->addAction(tr("Recognize Handwriting"));
+                actionRecognize->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
+                connect(actionRecognize, SIGNAL(triggered()), mRecognitionController, SLOT(recognizeSelection()));
+            }
 
             menu->addSeparator();
             menu->addAction(mainWindow->actionQuit);
