@@ -554,9 +554,10 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
                 dc->mActiveRuler->DrawLine(position, width);
             }else{
                 bool bLineStyle = UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line;
-                if (!bLineStyle && currentTool != UBStylusTool::Line)
+                if (!bLineStyle && currentTool != UBStylusTool::Line
+                    && currentTool != UBStylusTool::Marker)
                 {
-                    // Freehand stroke: route through smoothing buffer if enabled
+                    // Freehand Pen stroke: route through smoothing buffer if enabled
                     if (mSettings->appStrokeSmoothing->get().toBool())
                     {
                         mSmoothBuffer.append(position);
@@ -807,8 +808,10 @@ void UBGraphicsScene::drawLineTo(const QPointF &pEndPoint, const qreal &pWidth, 
     {
         // -------------------------------------------------------------------------------------
         // Here we substract the polygons that are overlapping in order to keep the transparency
+        // Only check the last few items (nearby segments) to avoid O(n²) performance
         // -------------------------------------------------------------------------------------
-        for (int i = 0; i < mPreviousPolygonItems.size(); i++)
+        int startIdx = qMax(0, mPreviousPolygonItems.size() - 10);
+        for (int i = startIdx; i < mPreviousPolygonItems.size(); i++)
         {
             UBGraphicsPolygonItem* previous = mPreviousPolygonItems.value(i);
             polygonItem->subtract(previous);
