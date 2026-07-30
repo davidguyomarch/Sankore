@@ -299,6 +299,7 @@ void UBBoardPaletteManager::setupPalettes()
     mAddItemPalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     mAddItemPalette->groupActions();
     mAddItemPalette->setClosable(true);
+    mAddItemPalette->setAutoClose(true);
     mAddItemPalette->adjustSizeAndPosition();
     mAddItemPalette->hide();
 
@@ -314,6 +315,7 @@ void UBBoardPaletteManager::setupPalettes()
     mErasePalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     mErasePalette->groupActions();
     mErasePalette->setClosable(true);
+    mErasePalette->setAutoClose(true);
     mErasePalette->adjustSizeAndPosition();
     mErasePalette->hide();
 
@@ -328,6 +330,7 @@ void UBBoardPaletteManager::setupPalettes()
     mPagePalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     mPagePalette->groupActions();
     mPagePalette->setClosable(true);
+    mPagePalette->setAutoClose(true);
     mPagePalette->adjustSizeAndPosition();
     mPagePalette->hide();
 
@@ -350,6 +353,7 @@ void UBBoardPaletteManager::setupPalettes()
     mImageBackgroundPalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     mImageBackgroundPalette->groupActions();
     mImageBackgroundPalette->setClosable(true);
+    mImageBackgroundPalette->setAutoClose(true);
     mImageBackgroundPalette->adjustSizeAndPosition();
     mImageBackgroundPalette->hide();
     // Fin Issue 1684 - CFA - 20131120
@@ -387,6 +391,7 @@ void UBBoardPaletteManager::pagePaletteButtonReleased()
             mPagePalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
             mPagePalette->groupActions();
             mPagePalette->setClosable(true);
+            mPagePalette->setAutoClose(true);
 
             // As we recreate the pagePalette every time, we must reconnect the slots
             connect(UBApplication::mainWindow->actionNewPage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
