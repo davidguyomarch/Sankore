@@ -283,6 +283,10 @@ UBActionPaletteButton::UBActionPaletteButton(QAction* action, QWidget * parent)
     setFocusPolicy(Qt::NoFocus);
 
     setObjectName("ubActionPaletteButton");
+
+    // Ensure tooltip is always set (use action text as fallback)
+    if (toolTip().isEmpty() && action)
+        setToolTip(action->text());
 }
 
 UBActionPaletteButton::~UBActionPaletteButton()
