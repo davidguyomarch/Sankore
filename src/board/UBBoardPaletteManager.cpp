@@ -457,6 +457,12 @@ void UBBoardPaletteManager::connectPalettes()
     // Close all popup palettes when any toolbar action is triggered
     connect(UBApplication::mainWindow->boardToolBar, SIGNAL(actionTriggered(QAction*)), this, SLOT(closeAllPopupPalettes()));
 
+    // Also close popup palettes when stylus palette buttons are clicked
+    if (mStylusPalette)
+        connect(mStylusPalette, SIGNAL(buttonGroupClicked(int)), this, SLOT(closeAllPopupPalettes()));
+    if (mDrawingPalette)
+        connect(mDrawingPalette, SIGNAL(buttonGroupClicked(int)), this, SLOT(closeAllPopupPalettes()));
+
     for (QWidget *widget : UBApplication::mainWindow->actionZoomIn->associatedWidgets())
     {
         QAbstractButton *button = qobject_cast<QAbstractButton*>(widget);
