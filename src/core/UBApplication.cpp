@@ -631,7 +631,12 @@ void UBApplication::reloadThemeIcons(const QString& theme)
             QString actionName = action->objectName();
             if (actionIconMap.contains(actionName))
             {
-                QString iconPath = iconPrefix + actionIconMap.value(actionName);
+                QString baseName = actionIconMap.value(actionName);
+                // Remove extension and try both .svg and .png
+                QString stem = baseName.left(baseName.lastIndexOf('.'));
+                QString iconPath = iconPrefix + stem + ".svg";
+                if (!QFile::exists(iconPath))
+                    iconPath = iconPrefix + stem + ".png";
                 if (QFile::exists(iconPath))
                     action->setIcon(QIcon(iconPath));
             }
