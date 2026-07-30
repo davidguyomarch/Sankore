@@ -324,7 +324,11 @@ void UBDockPalette::showTabWidget(int tabIndex)
 void UBDockPalette::toggleCollapseExpand()
 {
     if(width() < mCollapseWidth)
+    {
         resize(mLastWidth,height());
+        raise();
+        mTabPalette->raise();
+    }
     else{
         mLastWidth = width();
         update();
@@ -543,6 +547,11 @@ void UBDockPalette::setVisible(bool visible)
 {
     QWidget::setVisible(visible);
     mTabPalette->setVisible(visible);
+    if (visible)
+    {
+        raise();
+        mTabPalette->raise();
+    }
 }
 
 bool UBDockPalette::switchMode(eUBDockPaletteWidgetMode mode)
