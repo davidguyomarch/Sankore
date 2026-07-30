@@ -392,6 +392,17 @@ int UBApplication::exec(const QString& pFileToImport)
     // Apply theme icons at startup
     reloadThemeIcons(mSettings->appTheme->get().toString());
 
+    // Ensure all toolbar actions have tooltips (use text as fallback)
+    QList<QToolBar*> toolbars = {mainWindow->boardToolBar, mainWindow->webToolBar, mainWindow->documentToolBar};
+    for (QToolBar* toolbar : toolbars)
+    {
+        for (QAction* action : toolbar->actions())
+        {
+            if (!action->isSeparator() && action->toolTip().isEmpty())
+                action->setToolTip(action->text());
+        }
+    }
+
     bool bUseMultiScreen = mSettings->appUseMultiscreen->get().toBool();
     mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
     connect(mainWindow->actionMultiScreen, SIGNAL(triggered(bool)), applicationController, SLOT(useMultiScreen(bool)));
