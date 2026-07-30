@@ -62,6 +62,8 @@ class UBGraphicsPolygonItem : public QGraphicsPolygonItem, public UBItem
 
         inline void subtract(UBGraphicsPolygonItem *pi)
         {
+            if (polygon().isEmpty() || pi->polygon().isEmpty())
+                return;
             if (boundingRect().intersects(pi->boundingRect()))
             {
                 QPolygonF subtractedPolygon = polygon().subtracted(pi->polygon());

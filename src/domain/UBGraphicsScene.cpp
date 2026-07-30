@@ -802,6 +802,10 @@ void UBGraphicsScene::drawLineTo(const QPointF &pEndPoint, const qreal &pWidth, 
     if (mPreviousWidth == -1.0)
         mPreviousWidth = pWidth;
 
+    // Skip zero-length segments (can produce degenerate polygons that crash subtraction)
+    if (mPreviousPoint == pEndPoint)
+        return;
+
     UBGraphicsPolygonItem *polygonItem = lineToPolygonItem(QLineF(mPreviousPoint, pEndPoint), pWidth);
 
     if (!polygonItem->brush().isOpaque())
