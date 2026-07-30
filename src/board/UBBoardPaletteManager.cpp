@@ -1166,6 +1166,15 @@ void UBBoardPaletteManager::closeAllPopupPalettes()
         mImageBackgroundPalette->close();
     if (mBackgroundsPalette && mBackgroundsPalette->isVisible())
         mBackgroundsPalette->close();
-    if (mDrawingPalette)
-        mDrawingPalette->hideSubPalettes();
+    if (mDrawingPalette && mDrawingPalette->isVisible())
+    {
+        // Only hide drawing palette if the current tool is NOT the Drawing tool
+        int currentTool = UBDrawingController::drawingController()->stylusTool();
+        if (currentTool != UBStylusTool::Drawing)
+        {
+            mDrawingPalette->hideSubPalettes();
+            mDrawingPalette->hide();
+            UBApplication::mainWindow->actionDrawing->setChecked(false);
+        }
+    }
 }
