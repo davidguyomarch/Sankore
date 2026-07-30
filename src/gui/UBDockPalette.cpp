@@ -42,7 +42,7 @@
  * \brief The constructor
  */
 UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, const char *name)
-:QWidget(parent, Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint)
+:QWidget(parent)
 , mCurrentMode(eUBDockPaletteWidget_BOARD)
 , mOrientation(eUBDockOrientation_Left)
 , mPreferredWidth(100)

@@ -1163,4 +1163,6 @@ void UBBoardPaletteManager::closeAllPopupPalettes()
         mImageBackgroundPalette->close();
     if (mBackgroundsPalette && mBackgroundsPalette->isVisible())
         mBackgroundsPalette->close();
+    if (mDrawingPalette)
+        mDrawingPalette->hideSubPalettes();
 }
