@@ -23,6 +23,7 @@
 
 #include "UBPreferencesController.h"
 
+#include <QClipboard>
 #include "UBSettings.h"
 #include "UBApplication.h"
 
@@ -117,6 +118,10 @@ void UBPreferencesController::wire()
     // main tab
     mPreferencesUI->mainTabWidget->setCurrentWidget(mPreferencesUI->displayTab);
     mPreferencesUI->versionLabel->setText(tr("version: ") + UBApplication::applicationVersion());
+
+    connect(mPreferencesUI->copyVersionButton, &QPushButton::clicked, this, [this]() {
+        QApplication::clipboard()->setText(UBApplication::applicationVersion());
+    });
 
     connect(mPreferencesUI->closeButton, SIGNAL(released()), this, SLOT(close()));
     connect(mPreferencesUI->defaultSettingsButton, SIGNAL(released()), this, SLOT(defaultSettings()));
