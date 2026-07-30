@@ -657,7 +657,9 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         QPixmap transparencyPix(":/images/tab_mask.png");
         if (dock->mCurrentTab != i) {
             iconPixmap; // setAlphaChannel removed in Qt6;
-            QColor color = UBTheme::tabInactive();
+            // Use a slightly dimmed version of the palette color for inactive tabs
+            QColor color = UBSettings::paletteColor;
+            color.setAlpha(160);
             painter.setBrush(QBrush(color));
         }
 

@@ -50,6 +50,7 @@
 #include "frameworks/UBStringUtils.h"
 
 #include "UBSettings.h"
+#include "UBTheme.h"
 #include "UBSetting.h"
 #include "UBPersistenceManager.h"
 #include "UBDocumentManager.h"
@@ -515,6 +516,28 @@ void UBApplication::themeChanged(QAction* action)
         styleFile.close();
     }
 
+    // Update palette colors based on theme
+    if (theme == "classic")
+    {
+        UBSettings::paletteColor = QColor(232, 232, 232, 220);
+        UBSettings::opaquePaletteColor = QColor(240, 240, 240, 240);
+    }
+    else
+    {
+        UBSettings::paletteColor = UBTheme::surface();
+        UBSettings::opaquePaletteColor = UBTheme::surfaceOpaque();
+    }
+
+    // Refresh dock palette backgrounds
+    if (boardController && boardController->paletteManager())
+    {
+        UBBoardPaletteManager* pm = boardController->paletteManager();
+        if (pm->leftPalette())
+            pm->leftPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+        if (pm->rightPalette())
+            pm->rightPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+    }
+
     // Reload toolbar icons from theme directory
     reloadThemeIcons(theme);
 }
@@ -523,7 +546,71 @@ void UBApplication::reloadThemeIcons(const QString& theme)
 {
     QString iconPrefix = ":/themes/" + theme + "/icons/";
 
-    // Reload icons for all toolbar actions by matching icon filenames
+    // Static mapping from action objectName to icon filename (from mainWindow.ui)
+    static const QMap<QString, QString> actionIconMap = {
+        {"actionStylus", "stylus.svg"},
+        {"actionBackgrounds", "background.svg"},
+        {"actionUndo", "undo.svg"},
+        {"actionRedo", "redo.svg"},
+        {"actionPages", "newDocument.svg"},
+        {"actionBack", "previousPage.svg"},
+        {"actionForward", "nextPage.svg"},
+        {"actionErase", "clearPage.svg"},
+        {"actionGroupItems", "group.svg"},
+        {"actionBoard", "board.svg"},
+        {"actionWeb", "web.svg"},
+        {"actionDocument", "documents.svg"},
+        {"actionDesktop", "display.svg"},
+        {"actionMenu", "menu.svg"},
+        {"actionWebTools", "tools.svg"},
+        {"actionWebBack", "previousPage.svg"},
+        {"actionWebForward", "nextPage.svg"},
+        {"actionWebReload", "reload.svg"},
+        {"actionHome", "home.svg"},
+        {"actionBookmarks", "bookmarks.svg"},
+        {"actionAddBookmark", "addBookmark.svg"},
+        {"actionStopLoading", "remove.svg"},
+        {"actionDocumentTools", "tools.svg"},
+        {"actionNewDocument", "newDocument.svg"},
+        {"actionNewFolder", "newFolder.svg"},
+        {"actionImport", "import.svg"},
+        {"actionExport", "export.svg"},
+        {"actionRename", "rename.svg"},
+        {"actionOpen", "open.svg"},
+        {"actionDuplicate", "duplicate.svg"},
+        {"actionDelete", "remove.svg"},
+        {"actionCut", "cut.svg"},
+        {"actionCopy", "copy.svg"},
+        {"actionPaste", "paste.svg"},
+        {"actionPreferences", "settings.svg"},
+        {"actionMultiScreen", "display.svg"},
+        {"actionQuit", "quit.svg"},
+        {"actionLibrary", "library.svg"},
+        {"actionHideApplication", "hide.svg"},
+        {"actionAdd", "addToPage.svg"},
+        {"actionDocumentAdd", "addToPage.svg"},
+        {"actionAddToWorkingDocument", "addToWorkingDoc.svg"},
+        {"actionBookmark", "bookmark.svg"},
+        {"actionWebCustomCapture", "captureArea.svg"},
+        {"actionWebWindowCapture", "captureWindow.svg"},
+        {"actionWebShowHideOnDisplay", "eyeClosed.svg"},
+        {"actionWebTrapContent", "addToolToLibrary.svg"},
+        {"actionPodcast", "record.svg"},
+        {"actionPodcastPause", "pause.svg"},
+        {"actionPodcastConfig", "settings.svg"},
+        {"actionLineSmall", "smallPen.svg"},
+        {"actionLineMedium", "mediumPen.svg"},
+        {"actionLineLarge", "largePen.svg"},
+        {"actionEraserSmall", "smallEraser.svg"},
+        {"actionEraserMedium", "mediumEraser.svg"},
+        {"actionEraserLarge", "largeEraser.svg"},
+        {"actionColor0", "color.svg"},
+        {"actionColor1", "color.svg"},
+        {"actionColor2", "color.svg"},
+        {"actionColor3", "color.svg"},
+    };
+
+    // Reload icons for all toolbar actions
     QList<QToolBar*> toolbars = {mainWindow->boardToolBar, mainWindow->webToolBar, mainWindow->documentToolBar};
 
     for (QToolBar* toolbar : toolbars)
@@ -533,29 +620,12 @@ void UBApplication::reloadThemeIcons(const QString& theme)
             if (action->isSeparator() || action->icon().isNull())
                 continue;
 
-            // Try to find the icon in the theme directory using the icon name
-            // stored as dynamic property (set on first load)
-            QString iconName = action->property("themeIconName").toString();
-
-            if (iconName.isEmpty())
+            QString actionName = action->objectName();
+            if (actionIconMap.contains(actionName))
             {
-                // First time: extract icon name from the current resource path
-                // Qt doesn't expose the resource path from QIcon, so we use
-                // a lookup based on the action's icon resource set in mainWindow.ui
-                // We'll try the action name mapping
-                QString actionName = action->objectName();
-                if (actionName.startsWith("action"))
-                    actionName = actionName.mid(6);
-                if (!actionName.isEmpty())
-                    actionName[0] = actionName[0].toLower();
-                iconName = actionName;
-                action->setProperty("themeIconName", iconName);
-            }
-
-            QString iconPath = iconPrefix + iconName + ".svg";
-            if (QFile::exists(iconPath))
-            {
-                action->setIcon(QIcon(iconPath));
+                QString iconPath = iconPrefix + actionIconMap.value(actionName);
+                if (QFile::exists(iconPath))
+                    action->setIcon(QIcon(iconPath));
             }
         }
     }
