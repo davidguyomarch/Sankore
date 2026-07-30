@@ -787,8 +787,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 if (mDrawingPalette)
                     mDrawingPalette->stackUnder(mStylusPalette);
 
-                mRightPalette->stackUnder(mDrawingPalette);
-                mLeftPalette->stackUnder(mDrawingPalette);
+                // Dock palettes must be above the board view but below floating palettes
+                // Don't stackUnder — let raise() in setVisible handle z-order
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
@@ -812,6 +812,14 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
                 if( !isInit )
                     containerResized();
+                else
+                {
+                    // At startup, ensure palettes are sized to container
+                    if(mLeftPalette)
+                        mLeftPalette->resize(mLeftPalette->width(), mContainer->height());
+                    if(mRightPalette)
+                        mRightPalette->resize(mRightPalette->width(), mContainer->height());
+                }
                 if (mWebToolsCurrentPalette)
                     mWebToolsCurrentPalette->hide();
             }
