@@ -26,14 +26,18 @@
      <item>
       <widget class="QPushButton" name="copyVersionButton">
        <property name="text">
-        <string>Copy</string>
+        <string></string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources/sankore.qrc">
+         <normaloff>:/images/svg/copy-clipboard.svg</normaloff>:/images/svg/copy-clipboard.svg</iconset>
        </property>
        <property name="toolTip">
         <string>Copy version to clipboard</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>28</width>
          <height>24</height>
         </size>
        </property>
