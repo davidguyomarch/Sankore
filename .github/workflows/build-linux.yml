@@ -124,6 +124,7 @@ jobs:
       - name: Generate git version header
         run: |
           echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
+          echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
 
       - name: Run qmake
         run: |

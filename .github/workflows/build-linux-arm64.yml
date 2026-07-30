@@ -33,6 +33,12 @@ jobs:
       - name: Build in ARM64 container
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate git version header
+        run: |
+          echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
+          echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
+          cat src/core/git_version.h
+
       - name: Build and test in ARM64
         run: |
           docker run --rm --platform linux/arm64 \
@@ -66,7 +72,7 @@ jobs:
               ldconfig || true
 
               echo "=== Generating git version ==="
-              echo "#define GIT_COMMIT \"arm64-ci\"" > src/core/git_version.h
+              cat src/core/git_version.h
 
               echo "=== Running qmake ==="
               export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH

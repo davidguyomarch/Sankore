@@ -114,6 +114,7 @@ jobs:
         run: |
           set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
           for /f %%i in ('git rev-parse --short HEAD') do echo #define GIT_COMMIT "%%i" > src\core\git_version.h
+          for /f %%i in ('git describe --tags --always') do echo #define GIT_VERSION "%%i" >> src\core\git_version.h
           qmake OpenSankore.pro CONFIG+=no_webengine
 
       - name: Build
