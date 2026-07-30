@@ -51,7 +51,10 @@ UBRightPalette::UBRightPalette(QWidget *parent, const char *name):
         isCollapsed = mSettings->rightLibPaletteWebModeIsCollapsed->get().toBool();
     }
     if(isCollapsed)
-        resize(0,parentWidget()->height());
+    {
+        resize(mLastWidth, parentWidget()->height());
+        hide();
+    }
     else
         resize(mLastWidth, parentWidget()->height());
 }
@@ -82,20 +85,21 @@ void UBRightPalette::mouseMoveEvent(QMouseEvent *event)
 void UBRightPalette::resizeEvent(QResizeEvent *event)
 {
     int newWidth = width();
+    bool collapsed = !isVisible();
     if(mCurrentMode == eUBDockPaletteWidget_BOARD){
         if(newWidth > mCollapseWidth)
             mSettings->rightLibPaletteBoardModeWidth->set(newWidth);
-        mSettings->rightLibPaletteBoardModeIsCollapsed->set(newWidth == 0);
+        mSettings->rightLibPaletteBoardModeIsCollapsed->set(collapsed);
     }
     else if (mCurrentMode == eUBDockPaletteWidget_DESKTOP){
         if(newWidth > mCollapseWidth)
             mSettings->rightLibPaletteDesktopModeWidth->set(newWidth);
-        mSettings->rightLibPaletteDesktopModeIsCollapsed->set(newWidth == 0);
+        mSettings->rightLibPaletteDesktopModeIsCollapsed->set(collapsed);
     }
     else if (mCurrentMode == eUBDockPaletteWidget_WEB){
         if(newWidth > mCollapseWidth)
             mSettings->rightLibPaletteWebModeWidth->set(newWidth);
-        mSettings->rightLibPaletteWebModeIsCollapsed->set(newWidth == 0);
+        mSettings->rightLibPaletteWebModeIsCollapsed->set(collapsed);
     }
     UBDockPalette::resizeEvent(event);
     emit resized();

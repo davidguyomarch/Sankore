@@ -323,17 +323,24 @@ void UBDockPalette::showTabWidget(int tabIndex)
  */
 void UBDockPalette::toggleCollapseExpand()
 {
-    if(width() < mCollapseWidth)
+    if(width() < mCollapseWidth || !isVisible())
     {
-        resize(mLastWidth,height());
+        // Expand
+        show();
+        resize(mLastWidth, height());
         raise();
         mTabPalette->raise();
+        moveTabs();
     }
     else{
+        // Collapse
         mLastWidth = width();
-        update();
-        resize(0,height());
+        hide();
+        moveTabs();
     }
+    // Notify subclasses to save collapsed state
+    QResizeEvent ev(size(), size());
+    resizeEvent(&ev);
 }
 
 /**
@@ -507,15 +514,18 @@ void UBDockPalette::moveTabs()
     }
     //    }
 
-    QPoint origin(width(), mHTab + mTabPalette->mVerticalOffset);
+    // Use 0 for dock width when hidden (collapsed)
+    int effectiveWidth = isVisible() ? width() : 0;
+
+    QPoint origin(effectiveWidth, mHTab + mTabPalette->mVerticalOffset);
 
     switch (mOrientation) {
     case eUBDockOrientation_Left:
-        origin.setX(width());
+        origin.setX(effectiveWidth);
         break;
     case eUBDockOrientation_Right:
         if (parentWidget()) {
-            origin.setX(parentWidget()->width() - width() - border() * 2);
+            origin.setX(parentWidget()->width() - effectiveWidth - border() * 2);
         }
         break;
     case eUBDockOrientation_Top: ;

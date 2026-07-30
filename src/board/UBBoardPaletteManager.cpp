@@ -463,6 +463,9 @@ void UBBoardPaletteManager::connectPalettes()
     if (mDrawingPalette)
         connect(mDrawingPalette, SIGNAL(buttonGroupClicked(int)), this, SLOT(closeAllPopupPalettes()));
 
+    // Close popup palettes on any stylus tool change
+    connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int)), this, SLOT(closeAllPopupPalettes()));
+
     for (QWidget *widget : UBApplication::mainWindow->actionZoomIn->associatedWidgets())
     {
         QAbstractButton *button = qobject_cast<QAbstractButton*>(widget);

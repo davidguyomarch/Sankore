@@ -46,7 +46,10 @@ UBLeftPalette::UBLeftPalette(QWidget *parent, const char *name):
     }
 
     if(isCollapsed)
-        resize(0,parentWidget()->height());
+    {
+        resize(mLastWidth, parentWidget()->height());
+        hide();
+    }
     else
         resize(mLastWidth, parentWidget()->height());
 }
@@ -82,15 +85,16 @@ void UBLeftPalette::updateMaxWidth()
 void UBLeftPalette::resizeEvent(QResizeEvent *event)
 {
     int newWidth = width();
+    bool collapsed = !isVisible();
     if(mCurrentMode == eUBDockPaletteWidget_BOARD){
         if(newWidth > mCollapseWidth)
             mSettings->leftLibPaletteBoardModeWidth->set(newWidth+1);
-        mSettings->leftLibPaletteBoardModeIsCollapsed->set(newWidth == 0);
+        mSettings->leftLibPaletteBoardModeIsCollapsed->set(collapsed);
     }
     else if (mCurrentMode == eUBDockPaletteWidget_DESKTOP){
         if(newWidth > mCollapseWidth)
             mSettings->leftLibPaletteDesktopModeWidth->set(newWidth);
-        mSettings->leftLibPaletteDesktopModeIsCollapsed->set(newWidth == 0);
+        mSettings->leftLibPaletteDesktopModeIsCollapsed->set(collapsed);
     }
     UBDockPalette::resizeEvent(event);
 }
