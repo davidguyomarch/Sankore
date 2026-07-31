@@ -5,7 +5,8 @@ echo [1/5] Killing any running instance...
 taskkill /F /IM Open-Sankore.exe >nul 2>&1
 timeout /t 3 /nobreak >nul
 echo [2/5] Copying fresh files to C:\Sankore...
-robocopy "%~dp0" C:\Sankore /MIR /NFL /NDL /NJH /NJS /R:3 /W:2 >nul 2>&1
+if not exist C:\Sankore mkdir C:\Sankore
+robocopy "%~dp0" C:\Sankore /E /IS /IT /NFL /NDL /NJH /NJS /R:5 /W:3 >nul 2>&1
 del C:\Sankore\startup.log >nul 2>&1
 echo [3/5] Launching Open-Sankore.exe...
 cd /d C:\Sankore
