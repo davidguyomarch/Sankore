@@ -69,7 +69,8 @@ struct UBStylusTool
         Capture,
         RichText,
         ChangeFill,//EV-7 - CFA - 20140122 : pot de peinture
-        Drawing //EV-7 - NNE - 20140103
+        Drawing, //EV-7 - NNE - 20140103
+        Ocr // Handwriting recognition zone selection
     };
 };
 

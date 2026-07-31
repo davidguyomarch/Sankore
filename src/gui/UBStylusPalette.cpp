@@ -67,6 +67,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     */
 
     actions << UBApplication::mainWindow->actionCapture;
+    actions << UBApplication::mainWindow->actionOcr;
 
     if(UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;

@@ -1193,6 +1193,19 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
 
             event->accept ();
         }
+        else if (currentTool == UBStylusTool::Ocr)
+        {
+            scene ()->deselectAllItems();
+
+            if (!mRubberBand)
+                mRubberBand = new UBRubberBand (QRubberBand::Rectangle, this);
+
+            mRubberBand->setGeometry (QRect (mMouseDownPos, QSize ()));
+            mRubberBand->show ();
+            mIsCreatingSceneGrabZone = true;
+
+            event->accept ();
+        }
         else if (currentTool == UBStylusTool::ChangeFill)
         {
             qDebug() << "on est dans le cas du pot de peinture, on va remplir l'objet si possible";
@@ -1316,7 +1329,7 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
   {
       QGraphicsView::mouseMoveEvent (event);
   }
-  else if (currentTool == UBStylusTool::Text || currentTool == UBStylusTool::Capture)
+  else if (currentTool == UBStylusTool::Text || currentTool == UBStylusTool::Capture || currentTool == UBStylusTool::Ocr)
     {
       if (mRubberBand && (mIsCreatingTextZone || mIsCreatingSceneGrabZone))
         {
@@ -1509,6 +1522,30 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
           QRectF sceneRect (sceneTopLeft, sceneBottomRight);
 
           mController->grabScene (sceneRect);
+
+          event->accept ();
+        }
+      else
+        {
+          QGraphicsView::mouseReleaseEvent (event);
+        }
+
+      mIsCreatingSceneGrabZone = false;
+    }
+  else if (currentTool == UBStylusTool::Ocr)
+    {
+      if (mRubberBand)
+        mRubberBand->hide ();
+
+      if (scene () && mRubberBand && mIsCreatingSceneGrabZone && mRubberBand->geometry ().width () > 16)
+        {
+          QRect rect = mRubberBand->geometry ();
+          QPointF sceneTopLeft = mapToScene (rect.topLeft ());
+          QPointF sceneBottomRight = mapToScene (rect.bottomRight ());
+          QRectF sceneRect (sceneTopLeft, sceneBottomRight);
+
+          // Find all stroke items in this zone and run OCR
+          emit ocrZoneSelected(sceneRect);
 
           event->accept ();
         }

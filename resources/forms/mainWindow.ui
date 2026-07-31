@@ -1287,6 +1287,21 @@
     <string>Capture Part of the Screen</string>
    </property>
   </action>
+  <action name="actionOcr">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../sankore.qrc">
+     <normaloff>:/images/stylusPalette/svg/ocr.svg</normaloff>:/images/stylusPalette/svg/ocr.svg</iconset>
+   </property>
+   <property name="text">
+    <string>OCR</string>
+   </property>
+   <property name="toolTip">
+    <string>Recognize Handwriting</string>
+   </property>
+  </action>
   <action name="actionAddItemToCurrentPage">
    <property name="icon">
     <iconset resource="../sankore.qrc">

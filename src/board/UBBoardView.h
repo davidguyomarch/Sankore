@@ -80,6 +80,7 @@ class UBBoardView : public QGraphicsView
         void hidden();
         void shown();
         void clickOnBoard();
+        void ocrZoneSelected(const QRectF& sceneRect);
 
         //EV-7 - NNE - 20131231
         void mouseMove(QMouseEvent* event);

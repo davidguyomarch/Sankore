@@ -11,6 +11,8 @@
 #include "board/UBBoardController.h"
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsTextItem.h"
+#include "domain/UBGraphicsPolygonItem.h"
+#include "domain/UBGraphicsStrokesGroup.h"
 
 #include <QMessageBox>
 #include <QGraphicsItem>
@@ -100,6 +102,72 @@ void UBRecognitionController::recognizeSelection()
     {
         textItem->setSelected(true);
     }
+
+    UBApplication::showMessage(tr("Text recognized: \"%1\"").arg(result.text));
+}
+
+void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
+{
+    if (!mRecognizer || !mRecognizer->isAvailable())
+    {
+        UBApplication::showMessage(tr("Handwriting recognition is not available on this platform."));
+        return;
+    }
+
+    UBGraphicsScene* scene = UBApplication::boardController->activeScene();
+    if (!scene)
+        return;
+
+    // Find all items in the zone
+    QList<QGraphicsItem*> itemsInZone = scene->items(sceneRect, Qt::IntersectsItemBoundingRect);
+    if (itemsInZone.isEmpty())
+    {
+        UBApplication::showMessage(tr("No strokes found in the selected zone."));
+        return;
+    }
+
+    // Extract strokes from items in zone
+    QVector<UBRecognitionStroke> strokes = UBStrokeExtractor::extractFromSelection(itemsInZone);
+    if (strokes.isEmpty())
+    {
+        UBApplication::showMessage(tr("No handwriting strokes found in the selected zone."));
+        return;
+    }
+
+    // Run recognition
+    UBRecognitionResult result = mRecognizer->recognize(strokes);
+
+    if (!result.success)
+    {
+        UBApplication::showMessage(tr("Recognition failed: %1").arg(result.errorMessage));
+        return;
+    }
+
+    // Confirm with user
+    QString message = tr("Recognized text: \"%1\"\n\nReplace strokes with this text?").arg(result.text);
+    QMessageBox::StandardButton reply = QMessageBox::question(nullptr,
+        tr("Handwriting Recognition"), message,
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    if (reply != QMessageBox::Yes)
+        return;
+
+    // Remove stroke items in zone
+    for (QGraphicsItem* item : itemsInZone)
+    {
+        if (dynamic_cast<UBGraphicsStrokesGroup*>(item) ||
+            dynamic_cast<UBGraphicsPolygonItem*>(item))
+        {
+            scene->removeItem(item);
+            delete item;
+        }
+    }
+
+    // Add text at zone position
+    QPointF textPos(sceneRect.left(), sceneRect.top());
+    UBGraphicsTextItem* textItem = scene->addTextWithFont(result.text, textPos, 24);
+    if (textItem)
+        textItem->setSelected(true);
 
     UBApplication::showMessage(tr("Text recognized: \"%1\"").arg(result.text));
 }

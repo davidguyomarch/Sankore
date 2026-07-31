@@ -7,6 +7,7 @@
 #define UBRECOGNITIONCONTROLLER_H
 
 #include <QObject>
+#include <QRectF>
 
 class IHandwritingRecognizer;
 class UBGraphicsScene;
@@ -30,6 +31,9 @@ public:
 public slots:
     /// Recognize currently selected strokes on the active scene.
     void recognizeSelection();
+
+    /// Recognize strokes within a rectangular zone on the active scene.
+    void recognizeZone(const QRectF& sceneRect);
 
 private:
     IHandwritingRecognizer* mRecognizer;

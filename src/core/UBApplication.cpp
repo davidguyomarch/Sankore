@@ -419,6 +419,9 @@ int UBApplication::exec(const QString& pFileToImport)
     applicationController->initScreenLayout(bUseMultiScreen);
     boardController->setupLayout();
 
+    // Connect OCR zone selection from board view to recognition controller
+    connect(boardController->controlView(), SIGNAL(ocrZoneSelected(QRectF)),
+            mRecognitionController, SLOT(recognizeZone(QRectF)));
 
     if (pFileToImport.length() > 0)
         UBApplication::applicationController->importFile(pFileToImport);
