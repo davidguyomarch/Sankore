@@ -6,7 +6,13 @@ taskkill /F /IM Open-Sankore.exe >nul 2>&1
 timeout /t 3 /nobreak >nul
 echo [2/5] Copying fresh files to C:\Sankore...
 if not exist C:\Sankore mkdir C:\Sankore
-robocopy "%~dp0" C:\Sankore /E /IS /IT /NFL /NDL /NJH /NJS /R:5 /W:3 >nul 2>&1
+set "SRC=%~dp0"
+set "SRC=%SRC:~0,-1%"
+robocopy "%SRC%" C:\Sankore /E /IS /IT /NFL /NDL /NJH /NJS /R:5 /W:3 >nul 2>&1
+if not exist C:\Sankore\Open-Sankore.exe (
+    echo ERROR: Copy failed, retrying without quiet mode...
+    robocopy "%SRC%" C:\Sankore /E /IS /IT /R:5 /W:3
+)
 del C:\Sankore\startup.log >nul 2>&1
 echo [3/5] Launching Open-Sankore.exe...
 cd /d C:\Sankore
