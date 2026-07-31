@@ -107,30 +107,26 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         const qreal scaleToHimetric = 10.0;
 
         int numPoints = stroke.points.size();
+
+        // CreateStroke expects a 1D SAFEARRAY of LONG: x1,y1,x2,y2,...
         VARIANT varPoints;
         VariantInit(&varPoints);
         varPoints.vt = VT_ARRAY | VT_I4;
 
-        SAFEARRAYBOUND bounds[2];
-        bounds[0].lLbound = 0;
-        bounds[0].cElements = numPoints;
-        bounds[1].lLbound = 0;
-        bounds[1].cElements = 2; // x, y
+        SAFEARRAYBOUND bound;
+        bound.lLbound = 0;
+        bound.cElements = numPoints * 2;
 
-        varPoints.parray = SafeArrayCreate(VT_I4, 2, bounds);
+        varPoints.parray = SafeArrayCreate(VT_I4, 1, &bound);
 
+        LONG* pData = nullptr;
+        SafeArrayAccessData(varPoints.parray, (void**)&pData);
         for (int i = 0; i < numPoints; i++)
         {
-            long indices[2];
-            long x = (long)(stroke.points[i].x() * scaleToHimetric);
-            long y = (long)(stroke.points[i].y() * scaleToHimetric);
-
-            indices[0] = i;
-            indices[1] = 0;
-            SafeArrayPutElement(varPoints.parray, indices, &x);
-            indices[1] = 1;
-            SafeArrayPutElement(varPoints.parray, indices, &y);
+            pData[i * 2]     = (LONG)(stroke.points[i].x() * scaleToHimetric);
+            pData[i * 2 + 1] = (LONG)(stroke.points[i].y() * scaleToHimetric);
         }
+        SafeArrayUnaccessData(varPoints.parray);
 
         // Add stroke to ink
         IInkStrokeDisp* newStroke = nullptr;
