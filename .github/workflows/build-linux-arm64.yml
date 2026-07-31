@@ -94,7 +94,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Open-Sankore-Linux-arm64
+          name: open-sankore-linux-arm64
           path: build/linux/release/product/
           if-no-files-found: warn
 
@@ -114,7 +114,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: open-sankore-deb-arm64
+          name: open-sankore-linux-arm64-deb
           path: build/packages/*.deb
           if-no-files-found: warn
 
@@ -122,6 +122,6 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: open-sankore-rpm-arm64
+          name: open-sankore-linux-arm64-rpm
           path: build/packages/*.rpm
           if-no-files-found: warn

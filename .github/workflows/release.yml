@@ -43,8 +43,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p artifacts/windows
-          gh run download ${{ steps.find-runs.outputs.win_run }} -n Open-Sankore-Windows-x64 -D artifacts/windows/app || true
-          gh run download ${{ steps.find-runs.outputs.win_run }} -n Open-Sankore-Windows-x64-Setup -D artifacts/windows/installer || true
+          gh run download ${{ steps.find-runs.outputs.win_run }} -n open-sankore-windows-x64 -D artifacts/windows/app || true
+          gh run download ${{ steps.find-runs.outputs.win_run }} -n open-sankore-windows-x64-installer -D artifacts/windows/installer || true
 
       - name: Download Linux x64 artifacts
         if: steps.find-runs.outputs.linux_run != ''
@@ -52,8 +52,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p artifacts/linux
-          gh run download ${{ steps.find-runs.outputs.linux_run }} -n open-sankore-deb-x64 -D artifacts/linux || true
-          gh run download ${{ steps.find-runs.outputs.linux_run }} -n open-sankore-rpm-x64 -D artifacts/linux || true
+          gh run download ${{ steps.find-runs.outputs.linux_run }} -n open-sankore-linux-x64-deb -D artifacts/linux || true
+          gh run download ${{ steps.find-runs.outputs.linux_run }} -n open-sankore-linux-x64-rpm -D artifacts/linux || true
 
       - name: Download Linux ARM64 artifacts
         if: steps.find-runs.outputs.arm64_run != ''
@@ -61,9 +61,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p artifacts/arm64
-          gh run download ${{ steps.find-runs.outputs.arm64_run }} -n Open-Sankore-Linux-arm64 -D artifacts/arm64 || true
-          gh run download ${{ steps.find-runs.outputs.arm64_run }} -n open-sankore-deb-arm64 -D artifacts/arm64-pkg || true
-          gh run download ${{ steps.find-runs.outputs.arm64_run }} -n open-sankore-rpm-arm64 -D artifacts/arm64-pkg || true
+          gh run download ${{ steps.find-runs.outputs.arm64_run }} -n open-sankore-linux-arm64 -D artifacts/arm64 || true
+          gh run download ${{ steps.find-runs.outputs.arm64_run }} -n open-sankore-linux-arm64-deb -D artifacts/arm64-pkg || true
+          gh run download ${{ steps.find-runs.outputs.arm64_run }} -n open-sankore-linux-arm64-rpm -D artifacts/arm64-pkg || true
 
       - name: Package Windows zip
         if: steps.find-runs.outputs.win_run != ''

@@ -311,7 +311,7 @@ jobs:
         if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: Open-Sankore-Linux-x64
+          name: open-sankore-linux-x64
           path: build/linux/release/product/
           if-no-files-found: warn
 
@@ -327,7 +327,7 @@ jobs:
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: open-sankore-deb-x64
+          name: open-sankore-linux-x64-deb
           path: build/packages/*.deb
           if-no-files-found: warn
 
@@ -335,7 +335,7 @@ jobs:
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: open-sankore-rpm-x64
+          name: open-sankore-linux-x64-rpm
           path: build/packages/*.rpm
           if-no-files-found: warn
 
@@ -427,6 +427,6 @@ jobs:
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: Open-Sankore-Linux-x64-AppImage
+          name: open-sankore-linux-x64-appimage
           path: Open-Sankore-x86_64.AppImage
           if-no-files-found: warn
