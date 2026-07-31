@@ -111,6 +111,7 @@ class UBDrawingController : public QObject
         void textToolSelected(bool checked);
         void richTextToolSelected(bool checked);
         void captureToolSelected(bool checked);
+        void ocrToolSelected(bool checked);
 };
 
 #endif /* UBDRAWINGCONTROLLER_H_ */
