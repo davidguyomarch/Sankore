@@ -762,8 +762,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             mainWindow->actionPodcast->setText(tr("Podcast"));
 #endif
 
-            // Handwriting recognition
-            if (mRecognitionController && mRecognitionController->isAvailable())
+            // Handwriting recognition (always visible, shows error if unavailable)
             {
                 menu->addSeparator();
                 QAction* actionRecognize = menu->addAction(tr("Recognize Handwriting"));

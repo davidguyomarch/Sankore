@@ -32,8 +32,17 @@ UBWindowsInkRecognizer::UBWindowsInkRecognizer()
             long count = 0;
             recognizers->get_Count(&count);
             mAvailable = (count > 0);
+            qDebug() << "Windows Ink: found" << count << "recognizers";
             recognizers->Release();
         }
+        else
+        {
+            qDebug() << "Windows Ink: CoCreateInstance failed, hr=" << QString::number((unsigned long)hr, 16);
+        }
+    }
+    else
+    {
+        qDebug() << "Windows Ink: CoInitializeEx failed, hr=" << QString::number((unsigned long)hr, 16);
     }
 
     if (mAvailable)
