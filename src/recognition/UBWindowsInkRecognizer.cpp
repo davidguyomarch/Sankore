@@ -100,15 +100,15 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
             continue;
 
         // Log stroke info for debugging scale
-        QRectF bounds;
+        QRectF strokeBounds;
         for (const QPointF& p : stroke.points)
         {
-            if (bounds.isNull())
-                bounds = QRectF(p, QSizeF(1,1));
+            if (strokeBounds.isNull())
+                strokeBounds = QRectF(p, QSizeF(1,1));
             else
-                bounds = bounds.united(QRectF(p, QSizeF(1,1)));
+                strokeBounds = strokeBounds.united(QRectF(p, QSizeF(1,1)));
         }
-        qDebug() << "OCR stroke:" << stroke.points.size() << "points, bounds:" << bounds;
+        qDebug() << "OCR stroke:" << stroke.points.size() << "points, bounds:" << strokeBounds;
             continue;
 
         // Create POINT array (ink coordinates are in HIMETRIC: 1 unit = 0.01mm)
