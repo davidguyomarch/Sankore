@@ -99,10 +99,23 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         if (stroke.points.size() < 2)
             continue;
 
+        // Log stroke info for debugging scale
+        QRectF bounds;
+        for (const QPointF& p : stroke.points)
+        {
+            if (bounds.isNull())
+                bounds = QRectF(p, QSizeF(1,1));
+            else
+                bounds = bounds.united(QRectF(p, QSizeF(1,1)));
+        }
+        qDebug() << "OCR stroke:" << stroke.points.size() << "points, bounds:" << bounds;
+            continue;
+
         // Create POINT array (ink coordinates are in HIMETRIC: 1 unit = 0.01mm)
-        // We scale scene coordinates (pixels at ~96dpi) to HIMETRIC
-        // 1 pixel at 96dpi = 0.2646mm = 26.46 HIMETRIC units
-        const qreal scaleToHimetric = 26.46;
+        // Sankoré scene coordinates are roughly in screen pixels.
+        // At 96 DPI: 1 pixel = 0.2646mm = 26.46 HIMETRIC
+        // But scene may use different scale — use a smaller factor for better results
+        const qreal scaleToHimetric = 10.0;
 
         int numPoints = stroke.points.size();
         VARIANT varPoints;
