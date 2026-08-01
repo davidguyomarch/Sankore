@@ -82,6 +82,7 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
+HEADERS += tst_UBGraphicsScene.h
            tst_UBGraphicsScene.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
@@ -96,7 +97,7 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
            premoc/moc_tst_UBForeignObjectsHelper.cpp \
-           premoc/moc_tst_UBGraphicsScene.cpp \
+HEADERS += tst_UBGraphicsScene.h
            tst_UBGraphicsScene.cpp \
 
 
