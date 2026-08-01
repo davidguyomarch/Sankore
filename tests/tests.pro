@@ -23,6 +23,7 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/adaptors/UBSvgTransformUtils.h \
            ../src/adaptors/UBMetadataLoader.h \
            ../src/domain/UBSceneContext.h \
+           ../src/frameworks/UBFileSystemUtils.h \
            tst_UBGraphicsScene.h
 
 # Sources under test (only self-contained utilities)
