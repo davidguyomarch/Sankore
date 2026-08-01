@@ -16,6 +16,9 @@
 
 #include <QMessageBox>
 #include <QGraphicsItem>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 UBRecognitionController::UBRecognitionController(QObject* parent)
     : QObject(parent)
@@ -138,6 +141,24 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
     qDebug() << "OCR extracted" << strokes.size() << "strokes";
     for (int i = 0; i < strokes.size(); i++)
         qDebug() << "  stroke" << i << ":" << strokes[i].points.size() << "points";
+
+    // Dump strokes to file for debugging
+    {
+        QString dumpPath = QCoreApplication::applicationDirPath() + "/ocr_strokes_dump.txt";
+        QFile dumpFile(dumpPath);
+        if (dumpFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&dumpFile);
+            out << "STROKES " << strokes.size() << "\n";
+            for (int i = 0; i < strokes.size(); i++)
+            {
+                out << "STROKE " << i << " POINTS " << strokes[i].points.size() << "\n";
+                for (const QPointF& p : strokes[i].points)
+                    out << p.x() << " " << p.y() << "\n";
+            }
+            dumpFile.close();
+        }
+    }
 
     if (strokes.isEmpty())
     {
