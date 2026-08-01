@@ -1,5 +1,5 @@
 #include "tst_UBFileSystemUtils.h"
-#include "stubs/UBFileSystemUtils_stub.h"
+#include "frameworks/UBFileSystemUtils.h"
 
 #include <QDir>
 #include <QFile>
