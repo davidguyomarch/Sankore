@@ -23,7 +23,12 @@
 UBRecognitionController::UBRecognitionController(QObject* parent)
     : QObject(parent)
     , mRecognizer(IHandwritingRecognizer::createDefault())
+    , mAutoMode(false)
+    , mAutoTimer(new QTimer(this))
 {
+    mAutoTimer->setSingleShot(true);
+    mAutoTimer->setInterval(2000); // 2 seconds pause before auto-recognition
+    connect(mAutoTimer, &QTimer::timeout, this, &UBRecognitionController::onAutoTimerExpired);
 }
 
 UBRecognitionController::~UBRecognitionController()
@@ -208,4 +213,64 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
         textItem->setSelected(true);
 
     UBApplication::showMessage(tr("Text recognized: \"%1\"").arg(result.text));
+}
+
+void UBRecognitionController::setAutoMode(bool enabled)
+{
+    mAutoMode = enabled;
+    if (!mAutoMode)
+        mAutoTimer->stop();
+
+    if (enabled)
+        UBApplication::showMessage(tr("Auto-recognition ON — write and pause to recognize"));
+    else
+        UBApplication::showMessage(tr("Auto-recognition OFF"));
+}
+
+void UBRecognitionController::onStrokeFinished()
+{
+    if (!mAutoMode)
+        return;
+
+    // Reset timer — recognition happens after 2s of no new strokes
+    mAutoTimer->start();
+}
+
+void UBRecognitionController::onAutoTimerExpired()
+{
+    if (!mAutoMode || !mRecognizer || !mRecognizer->isAvailable())
+        return;
+
+    UBGraphicsScene* scene = UBApplication::boardController->activeScene();
+    if (!scene)
+        return;
+
+    // Collect recently added stroke items (those added in the last few seconds)
+    // Strategy: find all UBGraphicsStrokesGroup items and recognize the most recent ones
+    QList<QGraphicsItem*> allItems = scene->items();
+
+    // Get strokes that were drawn recently — use the last N strokes groups
+    QList<QGraphicsItem*> recentStrokes;
+    int count = 0;
+    for (QGraphicsItem* item : allItems)
+    {
+        if (dynamic_cast<UBGraphicsStrokesGroup*>(item))
+        {
+            recentStrokes.append(item);
+            count++;
+            if (count >= 20) // max 20 strokes back
+                break;
+        }
+    }
+
+    if (recentStrokes.isEmpty())
+        return;
+
+    // Calculate bounding rect of recent strokes
+    QRectF recentRect;
+    for (QGraphicsItem* item : recentStrokes)
+        recentRect = recentRect.united(item->sceneBoundingRect());
+
+    // Run recognition on this zone
+    recognizeZone(recentRect);
 }

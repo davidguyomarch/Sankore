@@ -76,7 +76,7 @@ UBDrawingController::UBDrawingController(QObject * parent)
     connect(UBApplication::mainWindow->actionText, SIGNAL(triggered(bool)), this, SLOT(textToolSelected(bool)));
     //connect(UBApplication::mainWindow->actionRichTextEditor, SIGNAL(triggered(bool)), this, SLOT(richTextToolSelected(bool))); ALTI/AOU - 20140606 : RichTextEditor tool isn't available anymore.
     connect(UBApplication::mainWindow->actionCapture, SIGNAL(triggered(bool)), this, SLOT(captureToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionOcr, SIGNAL(triggered(bool)), this, SLOT(ocrToolSelected(bool)));
+    // OCR is NOT a tool — it's a toggle modifier handled by UBRecognitionController
 
     //EV-7 - NNE - 20140210 : Maybe is no the right place to do this...
     connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(onActiveSceneChanged()));
@@ -169,8 +169,6 @@ void UBDrawingController::setStylusTool(int tool)
         */
         else if (mStylusTool == UBStylusTool::Capture)
             UBApplication::mainWindow->actionCapture->setChecked(true);
-        else if (mStylusTool == UBStylusTool::Ocr)
-            UBApplication::mainWindow->actionOcr->setChecked(true);
 
         if(mStylusTool != UBStylusTool::Drawing){
             UBApplication::boardController->shapeFactory().desactivate();
@@ -484,11 +482,5 @@ void UBDrawingController::captureToolSelected(bool checked)
 {
     if (checked)
         setStylusTool(UBStylusTool::Capture);
-}
-
-void UBDrawingController::ocrToolSelected(bool checked)
-{
-    if (checked)
-        setStylusTool(UBStylusTool::Ocr);
 }
 

@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QRectF>
+#include <QTimer>
 
 class IHandwritingRecognizer;
 class UBGraphicsScene;
@@ -35,8 +36,19 @@ public slots:
     /// Recognize strokes within a rectangular zone on the active scene.
     void recognizeZone(const QRectF& sceneRect);
 
+    /// Toggle auto-recognition mode (recognize after pause in writing)
+    void setAutoMode(bool enabled);
+
+    /// Called when a stroke is finished on the active scene
+    void onStrokeFinished();
+
+private slots:
+    void onAutoTimerExpired();
+
 private:
     IHandwritingRecognizer* mRecognizer;
+    bool mAutoMode;
+    QTimer* mAutoTimer;
 };
 
 #endif // UBRECOGNITIONCONTROLLER_H

@@ -423,6 +423,13 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(boardController->controlView(), SIGNAL(ocrZoneSelected(QRectF)),
             mRecognitionController, SLOT(recognizeZone(QRectF)));
 
+    // Connect OCR auto mode toggle
+    connect(mainWindow->actionOcr, &QAction::toggled, mRecognitionController, &UBRecognitionController::setAutoMode);
+
+    // Notify OCR controller when a stroke finishes (mouse release on board)
+    connect(boardController->controlView(), SIGNAL(mouseRelease(QMouseEvent*)),
+            mRecognitionController, SLOT(onStrokeFinished()));
+
     if (pFileToImport.length() > 0)
         UBApplication::applicationController->importFile(pFileToImport);
 

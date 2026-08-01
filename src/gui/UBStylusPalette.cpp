@@ -67,17 +67,25 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     */
 
     actions << UBApplication::mainWindow->actionCapture;
-    actions << UBApplication::mainWindow->actionOcr;
 
     if(UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;
+
+    // OCR is last — excluded from button group (it's a toggle modifier, not a tool)
+    actions << UBApplication::mainWindow->actionOcr;
 
     setActions(actions);
     setButtonIconSize(QSize(39, 39));
 
     if(!UBPlatformUtils::hasVirtualKeyboard())
     {
-            groupActions();
+            // Group all buttons except first (Drawing) and last (OCR toggle)
+            mButtonGroup = new QButtonGroup(this);
+            for(int i=1; i < mButtons.size()-1; i++)
+            {
+                    mButtonGroup->addButton(mButtons[i], i);
+            }
+        connect(mButtonGroup, SIGNAL(idClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
     }
     else
     {
