@@ -97,8 +97,7 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp \
-           tst_UBGraphicsScene.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp
 
 
 # Build output
