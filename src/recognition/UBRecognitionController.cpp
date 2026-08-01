@@ -126,19 +126,36 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
         return;
     }
 
+    // Debug: log what we found
+    qDebug() << "OCR zone:" << sceneRect << "- found" << itemsInZone.size() << "items";
+    for (QGraphicsItem* item : itemsInZone)
+        qDebug() << "  item type:" << item->type() << "bounds:" << item->sceneBoundingRect();
+
     // Extract strokes from items in zone
     QVector<UBRecognitionStroke> strokes = UBStrokeExtractor::extractFromSelection(itemsInZone);
+
+    // Debug: log extraction results
+    qDebug() << "OCR extracted" << strokes.size() << "strokes";
+    for (int i = 0; i < strokes.size(); i++)
+        qDebug() << "  stroke" << i << ":" << strokes[i].points.size() << "points";
+
     if (strokes.isEmpty())
     {
         UBApplication::showMessage(tr("No handwriting strokes found in the selected zone."));
         return;
     }
 
+    // Show diagnostic in message
+    QString diagMsg = QString("Found %1 items, extracted %2 strokes").arg(itemsInZone.size()).arg(strokes.size());
+    for (int i = 0; i < strokes.size() && i < 3; i++)
+        diagMsg += QString(", s%1=%2pts").arg(i).arg(strokes[i].points.size());
+
     // Run recognition
     UBRecognitionResult result = mRecognizer->recognize(strokes);
 
     if (!result.success)
     {
+        UBApplication::showMessage(tr("Recognition failed: %1\n\nDiag: %2").arg(result.errorMessage).arg(diagMsg));
         UBApplication::showMessage(tr("Recognition failed: %1").arg(result.errorMessage));
         return;
     }
