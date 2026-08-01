@@ -34,7 +34,8 @@ SOURCES += ../src/frameworks/UBStringUtils.cpp \
 
 # For UBFileSystemUtils we need a minimal version without OpenSSL/QuaZip deps
 # We provide a test stub instead (not in HEADERS to avoid moc issues on Linux)
-SOURCES += stubs/UBFileSystemUtils_stub.cpp
+# Real source instead of stub (no QuaZip dependency)
+SOURCES += ../src/frameworks/UBFileSystemUtilsCore.cpp
 
 # UBCryptoUtils stub (bypasses UBApplication singleton)
 # Not in HEADERS to avoid moc parsing system headers on Linux
