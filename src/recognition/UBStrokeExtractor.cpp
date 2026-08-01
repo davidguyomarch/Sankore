@@ -14,28 +14,38 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList
 {
     QVector<UBRecognitionStroke> result;
     QSet<UBGraphicsStroke*> processedStrokes;
+    QSet<QGraphicsItem*> processedGroups;
 
+    // First pass: process StrokesGroups
     for (QGraphicsItem* item : items)
     {
-        // Case 1: A StrokesGroup (contains multiple polygon items forming one stroke)
         UBGraphicsStrokesGroup* group = dynamic_cast<UBGraphicsStrokesGroup*>(item);
         if (group)
         {
+            processedGroups.insert(group);
             UBRecognitionStroke recoStroke = extractFromStrokesGroup(group);
             if (!recoStroke.points.isEmpty())
                 result.append(recoStroke);
-            continue;
         }
+    }
 
-        // Case 2: Individual polygon item
+    // Second pass: individual polygons NOT inside an already-processed group
+    for (QGraphicsItem* item : items)
+    {
+        if (dynamic_cast<UBGraphicsStrokesGroup*>(item))
+            continue; // already processed above
+
         UBGraphicsPolygonItem* polygon = dynamic_cast<UBGraphicsPolygonItem*>(item);
-        if (polygon && polygon->stroke())
+        if (polygon)
         {
-            UBGraphicsStroke* stroke = polygon->stroke();
-            if (!processedStrokes.contains(stroke))
+            // Skip if this polygon's parent group was already processed
+            if (polygon->parentItem() && processedGroups.contains(polygon->parentItem()))
+                continue;
+
+            if (polygon->stroke() && !processedStrokes.contains(polygon->stroke()))
             {
-                processedStrokes.insert(stroke);
-                UBRecognitionStroke recoStroke = extractFromPolygons(stroke->polygons());
+                processedStrokes.insert(polygon->stroke());
+                UBRecognitionStroke recoStroke = extractFromPolygons(polygon->stroke()->polygons());
                 if (!recoStroke.points.isEmpty())
                     result.append(recoStroke);
             }
