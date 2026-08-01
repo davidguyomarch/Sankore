@@ -43,6 +43,7 @@
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
 #include "core/UBSettingsData.h"
+#include "domain/UBSceneContext.h"
 #include "core/UBSetting.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBApplicationController.h"
@@ -1581,6 +1582,7 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
         setDocument(pDocumentProxy, forceReload);
 
         updateSystemScaleFactor();
+        updateSceneContext();
 
         mControlView->setScene(mActiveScene);
         mDisplayView->setScene(mActiveScene);
@@ -2375,4 +2377,25 @@ void UBBoardController::onTextItemAdded(UBGraphicsTextItem* textItem)
             mTextDelegateDialogHandler->connectToDelegate(delegate);
         }
     }
+}
+
+void UBBoardController::updateSceneContext()
+{
+    if (!mActiveScene)
+        return;
+
+    UBSceneContext ctx;
+    ctx.systemScaleFactor = mSystemScaleFactor;
+    ctx.currentZoom = currentZoom();
+    ctx.pointerDiameter = UBSettings::pointerDiameter;
+    ctx.eraserFineWidth = mSettings->eraserFineWidth();
+    ctx.eraserMediumWidth = mSettings->eraserMediumWidth();
+    ctx.eraserStrongWidth = mSettings->eraserStrongWidth();
+    ctx.penColorOnDarkBackground = penColorOnDarkBackground();
+    ctx.penColorOnLightBackground = penColorOnLightBackground();
+    ctx.markerColorOnDarkBackground = markerColorOnDarkBackground();
+    ctx.markerColorOnLightBackground = markerColorOnLightBackground();
+    ctx.drawingController = UBDrawingController::drawingController();
+
+    mActiveScene->setSceneContext(ctx);
 }

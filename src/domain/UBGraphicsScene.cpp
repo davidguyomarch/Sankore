@@ -279,7 +279,7 @@ void UBZLayerController::setLayerType(QGraphicsItem *pItem, itemLayerType::Enum 
    pItem->setData(UBGraphicsItemData::itemLayerType, QVariant(pNewType));
 }
 
-UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoStack)
+UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoStack, const UBSceneContext& context)
     : UBCoreGraphicsScene(parent)
     , mEraser(0)
     , mPointer(0)
@@ -303,6 +303,7 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     , mZLayerController(new UBZLayerController(this))
     , mpLastPolygon(nullptr)
 {
+    mContext = context;
     mSettings = UBSettings::settings();
     UBCoreGraphicsScene::setObjectName("BoardScene");
 #ifdef __ppc__
@@ -365,7 +366,7 @@ QPointF UBGraphicsScene::lastCenter()
 void UBGraphicsScene::updateGroupButtonState()
 {
 
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)mContext.drawingController->stylusTool();
     if (UBStylusTool::Selector != currentTool && UBStylusTool::Play != currentTool)
         return;
 
@@ -412,9 +413,9 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
     {
         mInputDeviceIsPressed = true;
 
-        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)mContext.drawingController->stylusTool();
 
-        if (UBDrawingController::drawingController()->isDrawingTool())
+        if (mContext.drawingController->isDrawingTool())
         {
             // -----------------------------------------------------------------
             // We fall here if we are using the Pen, the Marker or the Line tool
@@ -434,26 +435,26 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
 
             if (currentTool != UBStylusTool::Line){
                 // Handle the pressure
-                width = UBDrawingController::drawingController()->currentToolWidth() * pressure;
+                width = mContext.drawingController->currentToolWidth() * pressure;
             }else{
                 // Ignore pressure for the line tool
-                width = UBDrawingController::drawingController()->currentToolWidth();
+                width = mContext.drawingController->currentToolWidth();
             }
 
-            width /= UBApplication::boardController->systemScaleFactor();
-            width /= UBApplication::boardController->currentZoom();
+            width /= mContext.systemScaleFactor;
+            width /= mContext.currentZoom;
 
             mAddedItems.clear();
             mRemovedItems.clear();
 
-            if (UBDrawingController::drawingController()->mActiveRuler)
+            if (mContext.drawingController->mActiveRuler)
             {
-                UBDrawingController::drawingController()->mActiveRuler->StartLine(scenePos, width);
+                mContext.drawingController->mActiveRuler->StartLine(scenePos, width);
             }
             else
             {
                 moveTo(scenePos);
-                drawLineTo(scenePos, width, UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line);
+                drawLineTo(scenePos, width, mContext.drawingController->stylusTool() == UBStylusTool::Line);
             }
             accepted = true;
         }
@@ -463,9 +464,9 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             mRemovedItems.clear();
             moveTo(scenePos);
 
-            qreal eraserWidth = mSettings->currentEraserWidth();
-            eraserWidth /= UBApplication::boardController->systemScaleFactor();
-            eraserWidth /= UBApplication::boardController->currentZoom();
+            qreal eraserWidth = mContext.currentEraserWidth();
+            eraserWidth /= mContext.systemScaleFactor;
+            eraserWidth /= mContext.currentZoom;
 
             eraseLineTo(scenePos, eraserWidth);
             drawEraser(scenePos, true);
@@ -491,7 +492,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
 {
     bool accepted = false;
 
-    UBDrawingController *dc = UBDrawingController::drawingController();
+    UBDrawingController *dc = mContext.drawingController;
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)dc->stylusTool();
 
     QPointF position = QPointF(scenePos);
@@ -516,12 +517,12 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
                 width = dc->currentToolWidth();
             }
 
-            width /= UBApplication::boardController->systemScaleFactor();
-            width /= UBApplication::boardController->currentZoom();
+            width /= mContext.systemScaleFactor;
+            width /= mContext.currentZoom;
 
             if (currentTool == UBStylusTool::Line || dc->mActiveRuler)
             {
-                if (UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Marker)
+                if (mContext.drawingController->stylusTool() != UBStylusTool::Marker)
                 if(nullptr != mpLastPolygon && nullptr != mCurrentStroke && mAddedItems.size() > 0){
                     UBCoreGraphicsScene::removeItemFromDeletion(mpLastPolygon);
                     mAddedItems.remove(mpLastPolygon);
@@ -553,7 +554,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
             if(dc->mActiveRuler){
                 dc->mActiveRuler->DrawLine(position, width);
             }else{
-                bool bLineStyle = UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line;
+                bool bLineStyle = mContext.drawingController->stylusTool() == UBStylusTool::Line;
                 if (!bLineStyle && currentTool != UBStylusTool::Line
                     && currentTool != UBStylusTool::Marker)
                 {
@@ -591,9 +592,9 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
         }
         else if (currentTool == UBStylusTool::Eraser)
         {
-            qreal eraserWidth = mSettings->currentEraserWidth();
-            eraserWidth /= UBApplication::boardController->systemScaleFactor();
-            eraserWidth /= UBApplication::boardController->currentZoom();
+            qreal eraserWidth = mContext.currentEraserWidth();
+            eraserWidth /= mContext.systemScaleFactor;
+            eraserWidth /= mContext.currentZoom;
 
             eraseLineTo(position, eraserWidth);
         }
@@ -630,7 +631,7 @@ bool UBGraphicsScene::inputDeviceRelease()
         accepted = true;
     }
 
-    UBDrawingController *dc = UBDrawingController::drawingController();
+    UBDrawingController *dc = mContext.drawingController;
 
     if (dc->isDrawingTool() || mDrawWithCompass)
     {
@@ -722,9 +723,9 @@ bool UBGraphicsScene::inputDeviceRelease()
 
 void UBGraphicsScene::drawEraser(const QPointF &pPoint, bool isFirstDraw)
 {
-    qreal eraserWidth = mSettings->currentEraserWidth();
-    eraserWidth /= UBApplication::boardController->systemScaleFactor();
-    eraserWidth /= UBApplication::boardController->currentZoom();
+    qreal eraserWidth = mContext.currentEraserWidth();
+    eraserWidth /= mContext.systemScaleFactor;
+    eraserWidth /= mContext.currentZoom;
 
     qreal eraserRadius = eraserWidth / 2;
 
@@ -740,7 +741,7 @@ void UBGraphicsScene::drawEraser(const QPointF &pPoint, bool isFirstDraw)
 
 void UBGraphicsScene::drawPointer(const QPointF &pPoint, bool isFirstDraw)
 {
-    qreal pointerDiameter = UBSettings::pointerDiameter / UBApplication::boardController->currentZoom();
+    qreal pointerDiameter = mContext.pointerDiameter / mContext.currentZoom;
     qreal pointerRadius = pointerDiameter / 2;
 
     // TODO UB 4.x optimize - no need to do that every time we move it
@@ -1031,8 +1032,8 @@ void UBGraphicsScene::drawArcTo(const QPointF& pCenterPoint, qreal pSpanAngle)
         mArcPolygonItem = 0;
     }
     qreal penWidth = mSettings->currentPenWidth();
-    penWidth /= UBApplication::boardController->systemScaleFactor();
-    penWidth /= UBApplication::boardController->currentZoom();
+    penWidth /= mContext.systemScaleFactor;
+    penWidth /= mContext.currentZoom;
 
     mArcPolygonItem = arcToPolygonItem(QLineF(pCenterPoint, mPreviousPoint), pSpanAngle, penWidth);
     mArcPolygonItem->setStroke(mCurrentStroke);
@@ -1144,15 +1145,15 @@ void UBGraphicsScene::initPolygonItem(UBGraphicsPolygonItem* polygonItem)
     QColor colorOnDarkBG;
     QColor colorOnLightBG;
 
-    if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
+    if (mContext.drawingController->stylusTool() == UBStylusTool::Marker)
     {
-        colorOnDarkBG = UBApplication::boardController->markerColorOnDarkBackground();
-        colorOnLightBG = UBApplication::boardController->markerColorOnLightBackground();
+        colorOnDarkBG = mContext.markerColorOnDarkBackground;
+        colorOnLightBG = mContext.markerColorOnLightBackground;
     }
     else // settings->stylusTool() == UBStylusTool::Pen + failsafe
     {
-        colorOnDarkBG = UBApplication::boardController->penColorOnDarkBackground();
-        colorOnLightBG = UBApplication::boardController->penColorOnLightBackground();
+        colorOnDarkBG = mContext.penColorOnDarkBackground;
+        colorOnLightBG = mContext.penColorOnLightBackground;
     }
 
     if (mDarkBackground)
@@ -1504,7 +1505,7 @@ void UBGraphicsScene::addGraphicsWidget(UBGraphicsWidgetItem* graphicsWidget, co
 
     addItem(graphicsWidget);
 
-    qreal ssf = 1 / UBApplication::boardController->systemScaleFactor();
+    qreal ssf = 1 / mContext.systemScaleFactor;
 
     graphicsWidget->setTransform(QTransform::fromScale(ssf, ssf), true);
 
@@ -1633,7 +1634,7 @@ UBGraphicsSvgItem* UBGraphicsScene::addSvg(const QUrl& pSvgFileUrl, const QPoint
     svgItem->setFlag(QGraphicsItem::ItemIsMovable, true);
     svgItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
 
-    qreal sscale = 1 / UBApplication::boardController->systemScaleFactor();
+    qreal sscale = 1 / mContext.systemScaleFactor;
     svgItem->setTransform(QTransform::fromScale(sscale, sscale), true);
 
     QPointF half(svgItem->boundingRect().width() / 2, svgItem->boundingRect().height() / 2);

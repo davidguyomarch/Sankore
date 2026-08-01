@@ -331,6 +331,7 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         void connectToolbar();
         void initToolbarTexts();
         void updateSystemScaleFactor();
+        void updateSceneContext();
         QString truncate(QString text, int maxWidth);
 
     protected slots:

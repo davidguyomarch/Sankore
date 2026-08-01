@@ -36,6 +36,7 @@ SOURCES += ../src/frameworks/UBStringUtils.cpp \
 # We provide a test stub instead (not in HEADERS to avoid moc issues on Linux)
 # Real source instead of stub (no QuaZip dependency)
 SOURCES += ../src/frameworks/UBFileSystemUtilsCore.cpp
+SOURCES += ../src/domain/UBSceneContext.cpp
 
 # UBCryptoUtils stub (bypasses UBApplication singleton)
 # Not in HEADERS to avoid moc parsing system headers on Linux
@@ -81,6 +82,7 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
+           tst_UBGraphicsScene.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -94,6 +96,8 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
            premoc/moc_tst_UBForeignObjectsHelper.cpp \
+           premoc/moc_tst_UBGraphicsScene.cpp \
+           tst_UBGraphicsScene.cpp \
 
 
 # Build output

@@ -33,6 +33,7 @@
 #include "core/UB.h"
 
 #include "UBItem.h"
+#include "UBSceneContext.h"
 #include "tools/UBGraphicsCurtainItem.h"
 #include "core/UBTypes.h"
 
@@ -114,6 +115,8 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
     public:
 
     void setSettings(UBSettings* settings) { mSettings = settings; }
+    void setSceneContext(const UBSceneContext& ctx) { mContext = ctx; }
+    const UBSceneContext& sceneContext() const { return mContext; }
 
     enum clearCase {
         clearItemsAndAnnotations = 0
@@ -127,7 +130,7 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         void setURStackEnable(bool enable){mUndoRedoStackEnabled = enable;}
         bool isURStackIsEnabled(){return mUndoRedoStackEnabled;}
 
-        UBGraphicsScene(UBDocumentProxy *parent, bool enableUndoRedoStack = true);
+        UBGraphicsScene(UBDocumentProxy *parent, bool enableUndoRedoStack = true, const UBSceneContext& context = UBSceneContext());
         virtual ~UBGraphicsScene();
 
         virtual UBItem* deepCopy() const;
@@ -416,6 +419,7 @@ public slots:
         QString cleanHtml(const QString& _html);
 
         UBSettings* mSettings;
+        UBSceneContext mContext;
 
         QGraphicsEllipseItem* mEraser;
         QGraphicsEllipseItem* mPointer;
