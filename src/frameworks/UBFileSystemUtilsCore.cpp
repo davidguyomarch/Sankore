@@ -673,26 +673,17 @@ QString UBFileSystemUtils::getFirstExistingFileFromList(const QString& path, con
 
 QString UBFileSystemUtils::md5InHex(const QByteArray &pByteArray)
 {
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, pByteArray.data(), pByteArray.size());
-
-    unsigned char result[16];
-    MD5_Final(result, &ctx);
-
-    return QString(QByteArray((char *)result, 16).toHex());
+    return QString(QCryptographicHash::hash(pByteArray, QCryptographicHash::Md5).toHex());
 }
 
 QString UBFileSystemUtils::md5(const QByteArray &pByteArray)
 {
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, pByteArray.data(), pByteArray.size());
-
-    unsigned char result[16];
-    MD5_Final(result, &ctx);
+    QByteArray result = QCryptographicHash::hash(pByteArray, QCryptographicHash::Md5);
     QString s;
-
+    for (int i = 0; i < result.size(); i++)
+    {
+        s += QChar((unsigned char)result[i]);
+    }
     for(int i = 0; i < 16; i++)
     {
         s += QChar(result[i]);
