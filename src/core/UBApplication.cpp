@@ -765,13 +765,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             mainWindow->actionPodcast->setText(tr("Podcast"));
 #endif
 
-            // Handwriting recognition (always visible, shows error if unavailable)
-            {
-                menu->addSeparator();
-                QAction* actionRecognize = menu->addAction(tr("Recognize Handwriting"));
-                actionRecognize->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R));
-                connect(actionRecognize, SIGNAL(triggered()), mRecognitionController, SLOT(recognizeSelection()));
-            }
+            // Handwriting recognition available via OCR tool in stylus palette
 
             menu->addSeparator();
             menu->addAction(mainWindow->actionQuit);
