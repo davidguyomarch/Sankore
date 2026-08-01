@@ -89,23 +89,20 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         return result;
     }
 
-    // Get the ink strokes collection
     IInkStrokes* inkStrokes = nullptr;
-    inkDisp->get_Strokes(&inkStrokes);
 
     // Add each stroke as an array of points
     for (const UBRecognitionStroke& stroke : strokes)
     {
         if (stroke.points.size() < 2)
             continue;
-            continue;
 
         // Create POINT array (ink coordinates are in HIMETRIC: 1 unit = 0.01mm)
         // Sankoré scene coordinates are roughly in screen pixels.
         // A handwritten character is ~100-300 scene units.
         // Windows Ink expects HIMETRIC where typical handwriting is 5000-15000 units.
-        // Scale factor: 50 maps 200 scene units → 10000 HIMETRIC (~10cm)
-        const qreal scaleToHimetric = 50.0;
+        // Scale factor: 10 maps ~100 scene units → ~1000 HIMETRIC (good for recognition)
+        const qreal scaleToHimetric = 10.0;
 
         int numPoints = stroke.points.size();
 
@@ -147,7 +144,7 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
                          IID_IInkRecognizers, (void**)&recognizers);
     if (FAILED(hr) || !recognizers)
     {
-        inkStrokes->Release();
+        if (inkStrokes) inkStrokes->Release();
         inkDisp->Release();
         result.success = false;
         result.errorMessage = "Failed to get recognizers";
@@ -159,7 +156,7 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     if (FAILED(hr) || !defaultRecognizer)
     {
         recognizers->Release();
-        inkStrokes->Release();
+        if (inkStrokes) inkStrokes->Release();
         inkDisp->Release();
         result.success = false;
         result.errorMessage = "No default recognizer found";
@@ -173,7 +170,7 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     {
         defaultRecognizer->Release();
         recognizers->Release();
-        inkStrokes->Release();
+        if (inkStrokes) inkStrokes->Release();
         inkDisp->Release();
         result.success = false;
         result.errorMessage = "Failed to create recognizer context";
