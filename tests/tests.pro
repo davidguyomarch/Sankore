@@ -84,7 +84,7 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
-           tst_UBGraphicsScene.cpp
+           tst_UBGraphicsScene.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
