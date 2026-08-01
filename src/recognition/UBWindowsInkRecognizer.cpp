@@ -102,9 +102,10 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
 
         // Create POINT array (ink coordinates are in HIMETRIC: 1 unit = 0.01mm)
         // Sankoré scene coordinates are roughly in screen pixels.
-        // At 96 DPI: 1 pixel = 0.2646mm = 26.46 HIMETRIC
-        // But scene may use different scale — use a smaller factor for better results
-        const qreal scaleToHimetric = 10.0;
+        // A handwritten character is ~100-300 scene units.
+        // Windows Ink expects HIMETRIC where typical handwriting is 5000-15000 units.
+        // Scale factor: 50 maps 200 scene units → 10000 HIMETRIC (~10cm)
+        const qreal scaleToHimetric = 50.0;
 
         int numPoints = stroke.points.size();
 

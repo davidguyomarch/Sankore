@@ -72,26 +72,36 @@ UBRecognitionStroke UBStrokeExtractor::extractFromPolygons(const QList<UBGraphic
         return result;
 
     // Each polygon item represents a line segment of the stroke.
-    // Extract the center line (midpoint of originalLine) for each segment.
-    // The first point is the start of the first segment.
+    // Extract the center line for each segment.
     bool first = true;
     for (UBGraphicsPolygonItem* polygon : polygons)
     {
-        if (!polygon->isNominalLine())
-            continue;
-
-        QLineF line = polygon->originalLine();
-
-        if (first)
+        if (polygon->isNominalLine())
         {
-            // Map to scene coordinates
-            QPointF startScene = polygon->mapToScene(line.p1());
-            result.points.append(startScene);
-            first = false;
+            QLineF line = polygon->originalLine();
+            if (first)
+            {
+                QPointF startScene = polygon->mapToScene(line.p1());
+                result.points.append(startScene);
+                first = false;
+            }
+            QPointF endScene = polygon->mapToScene(line.p2());
+            result.points.append(endScene);
         }
-
-        QPointF endScene = polygon->mapToScene(line.p2());
-        result.points.append(endScene);
+        else
+        {
+            // Non-nominal polygon (modified by subtraction) — use center of bounding rect
+            QPointF center = polygon->mapToScene(polygon->boundingRect().center());
+            if (first)
+            {
+                result.points.append(center);
+                first = false;
+            }
+            else
+            {
+                result.points.append(center);
+            }
+        }
     }
 
     return result;
