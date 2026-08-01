@@ -21,7 +21,9 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/core/UB.h \
            ../src/web/UBOEmbedUtils.h \
            ../src/adaptors/UBSvgTransformUtils.h \
-           ../src/adaptors/UBMetadataLoader.h
+           ../src/adaptors/UBMetadataLoader.h \
+           ../src/domain/UBSceneContext.h \
+           tst_UBGraphicsScene.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -82,8 +84,7 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
-HEADERS += tst_UBGraphicsScene.h
-           tst_UBGraphicsScene.cpp \
+           tst_UBGraphicsScene.cpp
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -97,8 +98,7 @@ HEADERS += tst_UBGraphicsScene.h
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
            premoc/moc_tst_UBForeignObjectsHelper.cpp \
-HEADERS += tst_UBGraphicsScene.h
-           tst_UBGraphicsScene.cpp \
+           tst_UBGraphicsScene.cpp
 
 
 # Build output
