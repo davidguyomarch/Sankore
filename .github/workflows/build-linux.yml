@@ -61,6 +61,7 @@ jobs:
             libxkbcommon-dev \
             libxkbcommon-x11-dev \
             libpulse-dev \
+            libzinnia-dev \
             libssl-dev \
             zlib1g-dev \
             libomp-dev \

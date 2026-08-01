@@ -15,3 +15,10 @@ win32 {
     SOURCES += src/recognition/UBWindowsInkRecognizer.cpp
     LIBS += -lole32 -loleaut32
 }
+
+!win32 {
+    HEADERS += src/recognition/UBZinniaRecognizer.h
+    SOURCES += src/recognition/UBZinniaRecognizer.cpp
+    # Zinnia library (install: apt install libzinnia-dev)
+    LIBS += -lzinnia
+}
