@@ -2385,8 +2385,8 @@ void UBBoardController::updateSceneContext()
         return;
 
     UBSceneContext ctx;
-    ctx.systemScaleFactor = mSystemScaleFactor;
-    ctx.currentZoom = currentZoom();
+    ctx.boardController = this;
+    ctx.drawingController = UBDrawingController::drawingController();
     ctx.pointerDiameter = UBSettings::pointerDiameter;
     ctx.eraserFineWidth = mSettings->eraserFineWidth();
     ctx.eraserMediumWidth = mSettings->eraserMediumWidth();
@@ -2395,7 +2395,6 @@ void UBBoardController::updateSceneContext()
     ctx.penColorOnLightBackground = penColorOnLightBackground();
     ctx.markerColorOnDarkBackground = markerColorOnDarkBackground();
     ctx.markerColorOnLightBackground = markerColorOnLightBackground();
-    ctx.drawingController = UBDrawingController::drawingController();
 
     mActiveScene->setSceneContext(ctx);
 }

@@ -441,8 +441,8 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
                 width = mContext.drawingController->currentToolWidth();
             }
 
-            width /= mContext.systemScaleFactor;
-            width /= mContext.currentZoom;
+            width /= mContext.systemScaleFactor();
+            width /= mContext.currentZoom();
 
             mAddedItems.clear();
             mRemovedItems.clear();
@@ -465,8 +465,8 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             moveTo(scenePos);
 
             qreal eraserWidth = mContext.currentEraserWidth();
-            eraserWidth /= mContext.systemScaleFactor;
-            eraserWidth /= mContext.currentZoom;
+            eraserWidth /= mContext.systemScaleFactor();
+            eraserWidth /= mContext.currentZoom();
 
             eraseLineTo(scenePos, eraserWidth);
             drawEraser(scenePos, true);
@@ -517,8 +517,8 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
                 width = dc->currentToolWidth();
             }
 
-            width /= mContext.systemScaleFactor;
-            width /= mContext.currentZoom;
+            width /= mContext.systemScaleFactor();
+            width /= mContext.currentZoom();
 
             if (currentTool == UBStylusTool::Line || dc->mActiveRuler)
             {
@@ -593,8 +593,8 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
         else if (currentTool == UBStylusTool::Eraser)
         {
             qreal eraserWidth = mContext.currentEraserWidth();
-            eraserWidth /= mContext.systemScaleFactor;
-            eraserWidth /= mContext.currentZoom;
+            eraserWidth /= mContext.systemScaleFactor();
+            eraserWidth /= mContext.currentZoom();
 
             eraseLineTo(position, eraserWidth);
         }
@@ -724,8 +724,8 @@ bool UBGraphicsScene::inputDeviceRelease()
 void UBGraphicsScene::drawEraser(const QPointF &pPoint, bool isFirstDraw)
 {
     qreal eraserWidth = mContext.currentEraserWidth();
-    eraserWidth /= mContext.systemScaleFactor;
-    eraserWidth /= mContext.currentZoom;
+    eraserWidth /= mContext.systemScaleFactor();
+    eraserWidth /= mContext.currentZoom();
 
     qreal eraserRadius = eraserWidth / 2;
 
@@ -741,7 +741,7 @@ void UBGraphicsScene::drawEraser(const QPointF &pPoint, bool isFirstDraw)
 
 void UBGraphicsScene::drawPointer(const QPointF &pPoint, bool isFirstDraw)
 {
-    qreal pointerDiameter = mContext.pointerDiameter / mContext.currentZoom;
+    qreal pointerDiameter = mContext.pointerDiameter / mContext.currentZoom();
     qreal pointerRadius = pointerDiameter / 2;
 
     // TODO UB 4.x optimize - no need to do that every time we move it
@@ -1032,8 +1032,8 @@ void UBGraphicsScene::drawArcTo(const QPointF& pCenterPoint, qreal pSpanAngle)
         mArcPolygonItem = 0;
     }
     qreal penWidth = mSettings->currentPenWidth();
-    penWidth /= mContext.systemScaleFactor;
-    penWidth /= mContext.currentZoom;
+    penWidth /= mContext.systemScaleFactor();
+    penWidth /= mContext.currentZoom();
 
     mArcPolygonItem = arcToPolygonItem(QLineF(pCenterPoint, mPreviousPoint), pSpanAngle, penWidth);
     mArcPolygonItem->setStroke(mCurrentStroke);
@@ -1505,7 +1505,7 @@ void UBGraphicsScene::addGraphicsWidget(UBGraphicsWidgetItem* graphicsWidget, co
 
     addItem(graphicsWidget);
 
-    qreal ssf = 1 / mContext.systemScaleFactor;
+    qreal ssf = 1 / mContext.systemScaleFactor();
 
     graphicsWidget->setTransform(QTransform::fromScale(ssf, ssf), true);
 
@@ -1634,7 +1634,7 @@ UBGraphicsSvgItem* UBGraphicsScene::addSvg(const QUrl& pSvgFileUrl, const QPoint
     svgItem->setFlag(QGraphicsItem::ItemIsMovable, true);
     svgItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
 
-    qreal sscale = 1 / mContext.systemScaleFactor;
+    qreal sscale = 1 / mContext.systemScaleFactor();
     svgItem->setTransform(QTransform::fromScale(sscale, sscale), true);
 
     QPointF half(svgItem->boundingRect().width() / 2, svgItem->boundingRect().height() / 2);

@@ -4,15 +4,27 @@
  */
 
 #include "UBSceneContext.h"
+#include "board/UBBoardController.h"
 #include "board/UBDrawingController.h"
 #include "core/UBSettings.h"
+
+qreal UBSceneContext::systemScaleFactor() const
+{
+    if (boardController)
+        return boardController->systemScaleFactor();
+    return testSystemScaleFactor;
+}
+
+qreal UBSceneContext::currentZoom() const
+{
+    if (boardController)
+        return boardController->currentZoom();
+    return testCurrentZoom;
+}
 
 qreal UBSceneContext::currentEraserWidth() const
 {
     if (!drawingController)
         return eraserMediumWidth;
-
-    // Delegate to the real settings if available
-    // For tests, just return medium
     return eraserMediumWidth;
 }
