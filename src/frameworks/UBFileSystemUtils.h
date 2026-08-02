@@ -24,25 +24,10 @@
 #ifndef UBFILESYSTEMUTILS_H_
 #define UBFILESYSTEMUTILS_H_
 
-#ifndef Q_MOC_RUN
 #include <QtCore>
 #include <QThread>
-#include "core/UB.h"
-#else
-// Minimal includes for moc parsing (avoids system header parse failures on GCC 11)
-#include <QObject>
-#include <QString>
-#include <QStringList>
-#include <QDir>
-#include <QUrl>
-#include <QFileInfo>
-#include <QByteArray>
-#endif
 
-#ifdef Q_MOC_RUN
-// Forward declarations for moc (types used in method signatures)
-namespace UBMimeType { enum Enum {}; }
-#endif
+#include "core/UB.h"
 
 class QuaZipFile;
 class UBProcessingProgressListener;

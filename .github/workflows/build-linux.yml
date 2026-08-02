@@ -197,6 +197,13 @@ jobs:
           # Patch: remove any aarch64 include paths from Makefile
           sed -i 's|-I/usr/include/aarch64-linux-gnu[^ ]*||g' Makefile 2>/dev/null || true
           sed -i 's|-I/usr/lib/gcc/aarch64-linux-gnu[^ ]*||g' Makefile 2>/dev/null || true
+          # Pre-generate moc for UBFileSystemUtils.h (moc crashes on GCC system headers
+          # when --include moc_predefs.h pulls in <type_traits>). Run without moc_predefs.
+          /opt/qt/6.8.2/gcc_64/libexec/moc -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_TESTLIB_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB \
+            -I/opt/qt/6.8.2/gcc_64/mkspecs/linux-g++ -I. -I../src \
+            -I/opt/qt/6.8.2/gcc_64/include -I/opt/qt/6.8.2/gcc_64/include/QtCore \
+            -I/opt/qt/6.8.2/gcc_64/include/QtGui -I/opt/qt/6.8.2/gcc_64/include/QtWidgets \
+            ../src/frameworks/UBFileSystemUtils.h -o premoc/moc_UBFileSystemUtils.cpp
           make -j$(nproc)
 
       - name: Run unit tests with coverage
