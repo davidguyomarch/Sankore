@@ -9,6 +9,7 @@
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
+#include "board/UBBoardView.h"
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsTextItem.h"
 #include "domain/UBGraphicsPolygonItem.h"
@@ -87,6 +88,9 @@ void UBRecognitionController::recognizeSelection()
     QMessageBox::StandardButton reply = QMessageBox::question(nullptr,
         tr("Handwriting Recognition"), message,
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    // Force release mouse/tablet state — the modal dialog eats the release event
+    UBApplication::boardController->controlView()->forcedTabletRelease();
 
     if (reply != QMessageBox::Yes)
         return;
@@ -191,6 +195,9 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
     QMessageBox::StandardButton reply = QMessageBox::question(nullptr,
         tr("Handwriting Recognition"), message,
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    // Force release mouse/tablet state — the modal dialog eats the release event
+    UBApplication::boardController->controlView()->forcedTabletRelease();
 
     if (reply != QMessageBox::Yes)
         return;
