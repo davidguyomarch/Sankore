@@ -94,10 +94,10 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
 
     // Add each stroke as an array of points
     // First, compute bounding box of ALL strokes to normalize coordinates
-    qreal minX = std::numeric_limits<qreal>::max();
-    qreal minY = std::numeric_limits<qreal>::max();
-    qreal maxX = std::numeric_limits<qreal>::lowest();
-    qreal maxY = std::numeric_limits<qreal>::lowest();
+    qreal minX = (std::numeric_limits<qreal>::max)();
+    qreal minY = (std::numeric_limits<qreal>::max)();
+    qreal maxX = (std::numeric_limits<qreal>::lowest)();
+    qreal maxY = (std::numeric_limits<qreal>::lowest)();
 
     for (const UBRecognitionStroke& stroke : strokes)
     {
