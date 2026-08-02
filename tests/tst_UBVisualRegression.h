@@ -38,6 +38,7 @@ private:
     QString m_referencePath;
     QString m_actualPath;
     bool m_generateMode = false;
+    bool m_offscreen = false;
 };
 
 #endif // TST_UBVISUALREGRESSION_H

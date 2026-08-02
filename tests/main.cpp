@@ -6,7 +6,7 @@
  */
 
 #include <QtTest>
-#include <QGuiApplication>
+#include <QApplication>
 
 #include "tst_UBStringUtils.h"
 #include "tst_UBFileSystemUtils.h"
@@ -28,7 +28,7 @@
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setApplicationName("OpenSankoreTests");
 
     int status = 0;

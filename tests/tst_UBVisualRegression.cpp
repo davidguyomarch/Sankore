@@ -1,6 +1,7 @@
 #include "tst_UBVisualRegression.h"
 
 #include <QApplication>
+#include <QGuiApplication>
 #include <QToolBar>
 #include <QToolButton>
 #include <QAction>
@@ -28,6 +29,9 @@ void TestUBVisualRegression::initTestCase()
 
     if (m_generateMode)
         qDebug() << "VISUAL TESTS: Running in GENERATE mode — updating reference images";
+
+    // Detect offscreen mode (CI environment)
+    m_offscreen = (QGuiApplication::platformName() == "offscreen");
 
     // Load the global stylesheet
     QFile styleFile(":/style.qss");
@@ -123,24 +127,26 @@ bool TestUBVisualRegression::checkOrGenerateReference(const QImage &actual, cons
 
 void TestUBVisualRegression::testToolButtonRendering()
 {
-    // Create a QToolButton styled like our toolbar buttons
     QToolButton button;
     button.setText("Test");
     button.setIcon(QIcon(":/images/toolbar/svg/stylus.svg"));
     button.setIconSize(QSize(32, 32));
     button.setToolButtonStyle(Qt::ToolButtonIconOnly);
     button.setFixedSize(40, 40);
-    button.show();
-    (void)QTest::qWaitForWindowExposed(&button);
+
+    if (!m_offscreen) {
+        button.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&button, 3000));
+    }
 
     QImage capture = button.grab().toImage();
+    QVERIFY(!capture.isNull());
     QVERIFY2(checkOrGenerateReference(capture, "toolbutton_normal"),
              "Tool button rendering differs from reference");
 }
 
 void TestUBVisualRegression::testDarkToolBarStyle()
 {
-    // Create a toolbar with a few actions
     QToolBar toolbar;
     toolbar.setIconSize(QSize(32, 32));
     toolbar.setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -155,39 +161,49 @@ void TestUBVisualRegression::testDarkToolBarStyle()
     Q_UNUSED(action3);
 
     toolbar.setFixedSize(200, 48);
-    toolbar.show();
-    (void)QTest::qWaitForWindowExposed(&toolbar);
+
+    if (!m_offscreen) {
+        toolbar.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&toolbar, 3000));
+    }
 
     QImage capture = toolbar.grab().toImage();
+    QVERIFY(!capture.isNull());
     QVERIFY2(checkOrGenerateReference(capture, "toolbar_dark"),
              "Dark toolbar rendering differs from reference");
 }
 
 void TestUBVisualRegression::testScrollBarMinimal()
 {
-    // Create a vertical scrollbar
     QScrollBar scrollbar(Qt::Vertical);
     scrollbar.setRange(0, 100);
     scrollbar.setValue(30);
     scrollbar.setFixedSize(20, 200);
-    scrollbar.show();
-    (void)QTest::qWaitForWindowExposed(&scrollbar);
+
+    if (!m_offscreen) {
+        scrollbar.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&scrollbar, 3000));
+    }
 
     QImage capture = scrollbar.grab().toImage();
+    QVERIFY(!capture.isNull());
     QVERIFY2(checkOrGenerateReference(capture, "scrollbar_vertical"),
              "Scrollbar rendering differs from reference");
 }
 
 void TestUBVisualRegression::testButtonStyles()
 {
-    // Create a styled button matching DockPaletteWidgetButton
     QPushButton button("Test Button");
     button.setObjectName("DockPaletteWidgetButton");
     button.setFixedSize(120, 36);
-    button.show();
-    (void)QTest::qWaitForWindowExposed(&button);
+
+    if (!m_offscreen) {
+        button.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&button, 3000));
+    }
 
     QImage normalCapture = button.grab().toImage();
+    QVERIFY(!normalCapture.isNull());
     QVERIFY2(checkOrGenerateReference(normalCapture, "button_dock_normal"),
              "Dock button rendering differs from reference");
 
@@ -198,6 +214,7 @@ void TestUBVisualRegression::testButtonStyles()
     QTest::qWait(50);
 
     QImage checkedCapture = button.grab().toImage();
+    QVERIFY(!checkedCapture.isNull());
     QVERIFY2(checkOrGenerateReference(checkedCapture, "button_dock_checked"),
              "Dock button checked rendering differs from reference");
 }
