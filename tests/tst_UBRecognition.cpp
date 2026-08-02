@@ -176,5 +176,6 @@ void TestUBRecognition::testTruncateText()
     QString longText = "This is a very long text that should definitely be truncated when the max width is small";
     result = UBPure::truncateText(longText, 50, font);
     QVERIFY(result.length() < longText.length());
-    QVERIFY(result.endsWith("..."));
+    // Qt's elidedText uses Unicode ellipsis (U+2026: …), not ASCII "..."
+    QVERIFY(result.endsWith(QChar(0x2026)));
 }
