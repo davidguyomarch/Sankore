@@ -25,7 +25,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/domain/UBSceneContext.h \
            ../src/frameworks/UBFileSystemUtils.h \
            tst_UBGraphicsScene.h \
-           tst_UBVisualRegression.h
+           tst_UBVisualRegression.h \
+           tst_UBRecognition.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -88,6 +89,7 @@ SOURCES += main.cpp \
            tst_UBForeignObjectsHelper.cpp \
            tst_UBGraphicsScene.cpp \
            tst_UBVisualRegression.cpp \
+           tst_UBRecognition.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
