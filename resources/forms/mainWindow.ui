@@ -1302,6 +1302,21 @@
     <string>Recognize Handwriting</string>
    </property>
   </action>
+  <action name="actionAutoOcr">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../sankore.qrc">
+     <normaloff>:/images/stylusPalette/svg/ocr-auto-off.svg</normaloff>:/images/stylusPalette/svg/ocr-auto-off.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Auto-OCR</string>
+   </property>
+   <property name="toolTip">
+    <string>Auto-recognize handwriting after pause</string>
+   </property>
+  </action>
   <action name="actionAddItemToCurrentPage">
    <property name="icon">
     <iconset resource="../sankore.qrc">

@@ -153,7 +153,6 @@ class UBApplication : public QtSingleApplication
 
         UBPreferencesController* mPreferencesController;
         class UBRecognitionController* mRecognitionController;
-        QAction* mActionAutoOcr = nullptr;
         QTranslator* mApplicationTranslator;
         QTranslator* mQtGuiTranslator;
 

@@ -74,14 +74,17 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     // OCR tool — included in button group (rubber-band zone selection)
     actions << UBApplication::mainWindow->actionOcr;
 
+    // Auto-OCR toggle — small button next to OCR, excluded from button group
+    actions << UBApplication::mainWindow->actionAutoOcr;
+
     setActions(actions);
     setButtonIconSize(QSize(39, 39));
 
     if(!UBPlatformUtils::hasVirtualKeyboard())
     {
-            // Group all buttons except first (Drawing)
+            // Group all buttons except first (Drawing) and last (Auto-OCR toggle)
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size(); i++)
+            for(int i=1; i < mButtons.size()-1; i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
@@ -92,7 +95,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
             // VirtualKeyboard and Drawing actions are not in group
             // So, groupping all buttons, except first and last
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size(); i++)
+            for(int i=1; i < mButtons.size()-1; i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }

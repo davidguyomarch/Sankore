@@ -423,6 +423,9 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(boardController->controlView(), SIGNAL(ocrZoneSelected(QRectF)),
             mRecognitionController, SLOT(recognizeZone(QRectF)));
 
+    // Connect Auto-OCR toggle (palette button + menu entry)
+    connect(mainWindow->actionAutoOcr, &QAction::toggled, this, &UBApplication::onAutoOcrToggled);
+
     // Notify OCR controller when a stroke finishes (mouse release on board)
     connect(boardController->controlView(), SIGNAL(mouseRelease(QMouseEvent*)),
             mRecognitionController, SLOT(onStrokeFinished()));
@@ -673,13 +676,13 @@ void UBApplication::onAutoOcrToggled(bool enabled)
 
 void UBApplication::updateAutoOcrIcon(bool enabled)
 {
-    if (!mActionAutoOcr)
+    if (!mainWindow || !mainWindow->actionAutoOcr)
         return;
 
     if (enabled)
-        mActionAutoOcr->setIcon(QIcon(":/images/stylusPalette/svg/ocr-auto-on.svg"));
+        mainWindow->actionAutoOcr->setIcon(QIcon(":/images/stylusPalette/svg/ocr-auto-on.svg"));
     else
-        mActionAutoOcr->setIcon(QIcon(":/images/stylusPalette/svg/ocr-auto-off.svg"));
+        mainWindow->actionAutoOcr->setIcon(QIcon(":/images/stylusPalette/svg/ocr-auto-off.svg"));
 }
 
 
@@ -787,17 +790,9 @@ void UBApplication::decorateActionMenu(QAction* action)
             mainWindow->actionPodcast->setText(tr("Podcast"));
 #endif
 
-            // Auto-OCR toggle (independent of tool selection)
+            // Auto-OCR also available in menu (mirrors the palette toggle button)
             if (mRecognitionController && mRecognitionController->isAvailable())
-            {
-                mActionAutoOcr = new QAction(tr("Auto-OCR"), mainWindow);
-                mActionAutoOcr->setCheckable(true);
-                mActionAutoOcr->setChecked(false);
-                mActionAutoOcr->setToolTip(tr("Automatically recognize handwriting after a pause"));
-                updateAutoOcrIcon(false);
-                connect(mActionAutoOcr, &QAction::toggled, this, &UBApplication::onAutoOcrToggled);
-                menu->addAction(mActionAutoOcr);
-            }
+                menu->addAction(mainWindow->actionAutoOcr);
 
             menu->addSeparator();
             menu->addAction(mainWindow->actionQuit);
