@@ -424,7 +424,8 @@ int UBApplication::exec(const QString& pFileToImport)
             mRecognitionController, SLOT(recognizeZone(QRectF)));
 
     // Connect Auto-OCR toggle (palette button + menu entry)
-    connect(mainWindow->actionAutoOcr, &QAction::toggled, this, &UBApplication::onAutoOcrToggled);
+    if (mainWindow->actionAutoOcr)
+        connect(mainWindow->actionAutoOcr, &QAction::toggled, this, &UBApplication::onAutoOcrToggled);
 
     // Notify OCR controller when a stroke finishes (mouse release on board)
     connect(boardController->controlView(), SIGNAL(mouseRelease(QMouseEvent*)),
@@ -791,7 +792,7 @@ void UBApplication::decorateActionMenu(QAction* action)
 #endif
 
             // Auto-OCR also available in menu (mirrors the palette toggle button)
-            if (mRecognitionController && mRecognitionController->isAvailable())
+            if (mRecognitionController && mRecognitionController->isAvailable() && mainWindow->actionAutoOcr)
                 menu->addAction(mainWindow->actionAutoOcr);
 
             menu->addSeparator();

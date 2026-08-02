@@ -75,16 +75,22 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     actions << UBApplication::mainWindow->actionOcr;
 
     // Auto-OCR toggle — small button next to OCR, excluded from button group
-    actions << UBApplication::mainWindow->actionAutoOcr;
+    if (UBApplication::mainWindow->actionAutoOcr)
+        actions << UBApplication::mainWindow->actionAutoOcr;
 
     setActions(actions);
     setButtonIconSize(QSize(39, 39));
 
+    // Determine how many buttons to exclude from the group at the end
+    // (Auto-OCR toggle is excluded if present)
+    bool hasAutoOcr = (UBApplication::mainWindow->actionAutoOcr != nullptr);
+    int groupEnd = hasAutoOcr ? mButtons.size() - 1 : mButtons.size();
+
     if(!UBPlatformUtils::hasVirtualKeyboard())
     {
-            // Group all buttons except first (Drawing) and last (Auto-OCR toggle)
+            // Group all buttons except first (Drawing) and optionally last (Auto-OCR)
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size()-1; i++)
+            for(int i=1; i < groupEnd; i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
@@ -92,10 +98,8 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     }
     else
     {
-            // VirtualKeyboard and Drawing actions are not in group
-            // So, groupping all buttons, except first and last
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size()-1; i++)
+            for(int i=1; i < groupEnd; i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
