@@ -35,6 +35,13 @@ namespace UBStrokeExtractor
     UBRecognitionStroke extractFromStrokesGroup(UBGraphicsStrokesGroup* group);
 
     /**
+     * @brief Extract multiple recognition strokes from a strokes group.
+     * Each logical pen stroke within the group becomes a separate UBRecognitionStroke.
+     * This is the preferred method for recognition (Windows Ink needs separate strokes).
+     */
+    QVector<UBRecognitionStroke> extractMultipleFromStrokesGroup(UBGraphicsStrokesGroup* group);
+
+    /**
      * @brief Extract center points from a list of polygon items that form a stroke.
      */
     UBRecognitionStroke extractFromPolygons(const QList<UBGraphicsPolygonItem*>& polygons);

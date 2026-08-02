@@ -9,6 +9,7 @@
 #include "domain/UBGraphicsStroke.h"
 
 #include <QSet>
+#include <QMap>
 
 QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList<QGraphicsItem*>& items)
 {
@@ -23,9 +24,9 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList
         if (group)
         {
             processedGroups.insert(group);
-            UBRecognitionStroke recoStroke = extractFromStrokesGroup(group);
-            if (!recoStroke.points.isEmpty())
-                result.append(recoStroke);
+            // Extract multiple logical strokes from the group (one per pen stroke)
+            QVector<UBRecognitionStroke> groupStrokes = extractMultipleFromStrokesGroup(group);
+            result.append(groupStrokes);
         }
     }
 
@@ -57,6 +58,8 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList
 
 UBRecognitionStroke UBStrokeExtractor::extractFromStrokesGroup(UBGraphicsStrokesGroup* group)
 {
+    // NOTE: This function returns a single stroke for backward compatibility,
+    // but for groups with multiple logical strokes, use extractMultipleFromStrokesGroup().
     UBRecognitionStroke result;
 
     if (!group)
@@ -72,6 +75,49 @@ UBRecognitionStroke UBStrokeExtractor::extractFromStrokesGroup(UBGraphicsStrokes
     }
 
     return extractFromPolygons(polygons);
+}
+
+QVector<UBRecognitionStroke> UBStrokeExtractor::extractMultipleFromStrokesGroup(UBGraphicsStrokesGroup* group)
+{
+    QVector<UBRecognitionStroke> results;
+
+    if (!group)
+        return results;
+
+    // Group polygons by their parent UBGraphicsStroke
+    QMap<UBGraphicsStroke*, QList<UBGraphicsPolygonItem*>> strokeMap;
+    QList<UBGraphicsPolygonItem*> orphanPolygons;
+
+    for (QGraphicsItem* child : group->childItems())
+    {
+        UBGraphicsPolygonItem* polygon = dynamic_cast<UBGraphicsPolygonItem*>(child);
+        if (polygon)
+        {
+            UBGraphicsStroke* stroke = polygon->stroke();
+            if (stroke)
+                strokeMap[stroke].append(polygon);
+            else
+                orphanPolygons.append(polygon);
+        }
+    }
+
+    // Create one UBRecognitionStroke per logical stroke
+    for (auto it = strokeMap.begin(); it != strokeMap.end(); ++it)
+    {
+        UBRecognitionStroke recoStroke = extractFromPolygons(it.value());
+        if (!recoStroke.points.isEmpty())
+            results.append(recoStroke);
+    }
+
+    // Orphan polygons as a single stroke
+    if (!orphanPolygons.isEmpty())
+    {
+        UBRecognitionStroke recoStroke = extractFromPolygons(orphanPolygons);
+        if (!recoStroke.points.isEmpty())
+            results.append(recoStroke);
+    }
+
+    return results;
 }
 
 UBRecognitionStroke UBStrokeExtractor::extractFromPolygons(const QList<UBGraphicsPolygonItem*>& polygons)
