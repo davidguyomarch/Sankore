@@ -11,6 +11,7 @@
 #include <comdef.h>
 #include <msinkaut.h>
 #include <msinkaut_i.c>
+#include <limits>
 
 #pragma comment(lib, "ole32.lib")
 
@@ -92,17 +93,37 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     IInkStrokes* inkStrokes = nullptr;
 
     // Add each stroke as an array of points
+    // First, compute bounding box of ALL strokes to normalize coordinates
+    qreal minX = std::numeric_limits<qreal>::max();
+    qreal minY = std::numeric_limits<qreal>::max();
+    qreal maxX = std::numeric_limits<qreal>::lowest();
+    qreal maxY = std::numeric_limits<qreal>::lowest();
+
+    for (const UBRecognitionStroke& stroke : strokes)
+    {
+        for (const QPointF& p : stroke.points)
+        {
+            minX = qMin(minX, p.x());
+            minY = qMin(minY, p.y());
+            maxX = qMax(maxX, p.x());
+            maxY = qMax(maxY, p.y());
+        }
+    }
+
+    qreal sceneWidth = maxX - minX;
+    qreal sceneHeight = maxY - minY;
+    if (sceneWidth < 1.0) sceneWidth = 1.0;
+    if (sceneHeight < 1.0) sceneHeight = 1.0;
+
+    // Windows Ink HIMETRIC: typical handwriting fills ~5000-20000 units.
+    // Scale to fit a 20000 x 20000 box while preserving aspect ratio.
+    const qreal targetSize = 20000.0;
+    qreal scale = targetSize / qMax(sceneWidth, sceneHeight);
+
     for (const UBRecognitionStroke& stroke : strokes)
     {
         if (stroke.points.size() < 2)
             continue;
-
-        // Create POINT array (ink coordinates are in HIMETRIC: 1 unit = 0.01mm)
-        // Sankoré scene coordinates are roughly in screen pixels.
-        // A handwritten character is ~100-300 scene units.
-        // Windows Ink expects HIMETRIC where typical handwriting is 5000-15000 units.
-        // Scale factor: 10 maps ~100 scene units → ~1000 HIMETRIC (good for recognition)
-        const qreal scaleToHimetric = 10.0;
 
         int numPoints = stroke.points.size();
 
@@ -121,8 +142,9 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         SafeArrayAccessData(varPoints.parray, (void**)&pData);
         for (int i = 0; i < numPoints; i++)
         {
-            pData[i * 2]     = (LONG)(stroke.points[i].x() * scaleToHimetric);
-            pData[i * 2 + 1] = (LONG)(stroke.points[i].y() * scaleToHimetric);
+            // Normalize: shift to origin (0,0) then scale to HIMETRIC
+            pData[i * 2]     = (LONG)((stroke.points[i].x() - minX) * scale);
+            pData[i * 2 + 1] = (LONG)((stroke.points[i].y() - minY) * scale);
         }
         SafeArrayUnaccessData(varPoints.parray);
 
