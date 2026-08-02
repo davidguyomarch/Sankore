@@ -10,31 +10,7 @@
 
 #include <QFont>
 
-// === UBStrokeExtractor tests ===
-
-void TestUBRecognition::testExtractFromEmptySelection()
-{
-    // Test that the segmentation handles empty input
-    QVector<UBRecognitionStroke> empty;
-    auto result = segmentStrokes(empty);
-    QCOMPARE(result.size(), 0);
-}
-
-void TestUBRecognition::testExtractSkipsDuplicateStrokes()
-{
-    // Single stroke with zero width (all points at same X) = one character
-    UBRecognitionStroke stroke;
-    stroke.points = {QPointF(50, 10), QPointF(50, 50), QPointF(50, 90)};
-    QVector<UBRecognitionStroke> strokes = {stroke, stroke}; // duplicate
-
-    auto result = segmentStrokes(strokes);
-    // Both have same bounds → grouped as one character
-    QCOMPARE(result.size(), 1);
-    QCOMPARE(result[0].size(), 2);
-}
-
-// === Segmentation tests (Zinnia logic) ===
-// We test the character segmentation algorithm directly
+// === Segmentation helper (must be defined before test methods that use it) ===
 
 static QVector<QVector<UBRecognitionStroke>> segmentStrokes(const QVector<UBRecognitionStroke>& strokes)
 {
@@ -88,6 +64,29 @@ static QVector<QVector<UBRecognitionStroke>> segmentStrokes(const QVector<UBReco
         characters.append(currentGroup);
 
     return characters;
+}
+
+// === UBStrokeExtractor tests ===
+
+void TestUBRecognition::testExtractFromEmptySelection()
+{
+    // Test that the segmentation handles empty input
+    QVector<UBRecognitionStroke> empty;
+    auto result = segmentStrokes(empty);
+    QCOMPARE(result.size(), 0);
+}
+
+void TestUBRecognition::testExtractSkipsDuplicateStrokes()
+{
+    // Single stroke with zero width (all points at same X) = one character
+    UBRecognitionStroke stroke;
+    stroke.points = {QPointF(50, 10), QPointF(50, 50), QPointF(50, 90)};
+    QVector<UBRecognitionStroke> strokes = {stroke, stroke}; // duplicate
+
+    auto result = segmentStrokes(strokes);
+    // Both have same bounds → grouped as one character
+    QCOMPARE(result.size(), 1);
+    QCOMPARE(result[0].size(), 2);
 }
 
 void TestUBRecognition::testSegmentSingleCharacter()
