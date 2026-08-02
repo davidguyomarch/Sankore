@@ -207,7 +207,6 @@ jobs:
           cd tests
           if [ -f build/OpenSankoreTests ]; then
             export QT_QPA_PLATFORM=offscreen
-            export UB_GENERATE_VISUAL_REFERENCES=1
             ./build/OpenSankoreTests -v2 -o -,txt -o build/test-results.xml,junitxml 2>&1 | tee build/test-results.txt
             TEST_EXIT=${PIPESTATUS[0]}
             echo ""
