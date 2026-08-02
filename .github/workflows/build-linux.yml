@@ -197,6 +197,12 @@ jobs:
           # Patch: remove any aarch64 include paths from Makefile
           sed -i 's|-I/usr/include/aarch64-linux-gnu[^ ]*||g' Makefile 2>/dev/null || true
           sed -i 's|-I/usr/lib/gcc/aarch64-linux-gnu[^ ]*||g' Makefile 2>/dev/null || true
+          # Patch: remove system C++ include paths from moc commands only
+          # moc cannot parse GCC 11's <type_traits> — these paths are only needed by g++
+          sed -i '/libexec\/moc/s| -I/usr/include/c++/[^ ]*||g' Makefile 2>/dev/null || true
+          sed -i '/libexec\/moc/s| -I/usr/local/include||g' Makefile 2>/dev/null || true
+          sed -i '/libexec\/moc/s| -I/usr/include ||g' Makefile 2>/dev/null || true
+          sed -i '/libexec\/moc/s| -I/usr/include$||g' Makefile 2>/dev/null || true
           # Pre-generate moc for UBFileSystemUtils.h (moc crashes on GCC system headers
           # when --include moc_predefs.h pulls in <type_traits>). Run without moc_predefs.
           /opt/qt/6.8.2/gcc_64/libexec/moc -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_TESTLIB_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB \
