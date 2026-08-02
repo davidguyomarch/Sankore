@@ -22,6 +22,7 @@
 #include "tst_UBSvgTransform.h"
 #include "tst_UBForeignObjectsHelper.h"
 #include "tst_UBGraphicsScene.h"
+#include "tst_UBVisualRegression.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
@@ -97,6 +98,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBGraphicsScene test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBVisualRegression test;
         status |= QTest::qExec(&test, argc, argv);
     }
 

@@ -24,7 +24,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/adaptors/UBMetadataLoader.h \
            ../src/domain/UBSceneContext.h \
            ../src/frameworks/UBFileSystemUtils.h \
-           tst_UBGraphicsScene.h
+           tst_UBGraphicsScene.h \
+           tst_UBVisualRegression.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -86,6 +87,7 @@ SOURCES += main.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
            tst_UBGraphicsScene.cpp \
+           tst_UBVisualRegression.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -105,6 +107,9 @@ SOURCES += main.cpp \
 DESTDIR = build
 OBJECTS_DIR = build/objects
 MOC_DIR = build/moc
+
+# Resources for visual regression tests
+RESOURCES += visual_tests.qrc
 
 # OpenSSL for UBCryptoUtils
 win32-msvc* {
