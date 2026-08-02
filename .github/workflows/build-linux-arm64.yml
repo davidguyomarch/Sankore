@@ -57,7 +57,7 @@ jobs:
                 libqt6opengl6-dev libqt6core5compat6-dev \
                 libgl1-mesa-dev libssl-dev zlib1g-dev \
                 libx11-dev libomp-dev pkg-config \
-                libpulse-dev
+                libpulse-dev libzinnia-dev
 
               echo "=== Building QuaZip ==="
               git clone --depth 1 --branch v1.4 https://github.com/stachenov/quazip.git /tmp/quazip-src
