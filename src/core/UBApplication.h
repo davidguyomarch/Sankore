@@ -117,6 +117,8 @@ class UBApplication : public QtSingleApplication
         void toolBarDisplayTextChanged(QVariant display);
         void themeChanged(QAction* action);
         void reloadThemeIcons(const QString& theme);
+        void onAutoOcrToggled(bool enabled);
+        void updateAutoOcrIcon(bool enabled);
 
         void closeEvent(QCloseEvent *event);
 
@@ -151,6 +153,7 @@ class UBApplication : public QtSingleApplication
 
         UBPreferencesController* mPreferencesController;
         class UBRecognitionController* mRecognitionController;
+        QAction* mActionAutoOcr = nullptr;
         QTranslator* mApplicationTranslator;
         QTranslator* mQtGuiTranslator;
 

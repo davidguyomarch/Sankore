@@ -63,6 +63,8 @@
         <file>images/stylusPalette/svg/text.svg</file>
         <file>images/stylusPalette/svg/capture.svg</file>
         <file>images/stylusPalette/svg/ocr.svg</file>
+        <file>images/stylusPalette/svg/ocr-auto-on.svg</file>
+        <file>images/stylusPalette/svg/ocr-auto-off.svg</file>
         <file>images/stylusPalette/svg/play.svg</file>
         <file>images/stylusPalette/svg/drawing.svg</file>
         <file>images/stylusPalette/svg/richText.svg</file>

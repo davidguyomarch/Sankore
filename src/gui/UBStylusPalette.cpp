@@ -71,7 +71,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     if(UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;
 
-    // OCR is last — excluded from button group (it's a toggle modifier, not a tool)
+    // OCR tool — included in button group (rubber-band zone selection)
     actions << UBApplication::mainWindow->actionOcr;
 
     setActions(actions);
@@ -79,9 +79,9 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 
     if(!UBPlatformUtils::hasVirtualKeyboard())
     {
-            // Group all buttons except first (Drawing) and last (OCR toggle)
+            // Group all buttons except first (Drawing)
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size()-1; i++)
+            for(int i=1; i < mButtons.size(); i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
@@ -92,7 +92,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
             // VirtualKeyboard and Drawing actions are not in group
             // So, groupping all buttons, except first and last
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size()-1; i++)
+            for(int i=1; i < mButtons.size(); i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
