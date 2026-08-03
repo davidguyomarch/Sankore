@@ -115,10 +115,11 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     if (sceneWidth < 1.0) sceneWidth = 1.0;
     if (sceneHeight < 1.0) sceneHeight = 1.0;
 
-    // Windows Ink HIMETRIC: typical handwriting fills ~5000-20000 units.
-    // Scale to fit a 20000 x 20000 box while preserving aspect ratio.
-    const qreal targetSize = 20000.0;
-    qreal scale = targetSize / qMax(sceneWidth, sceneHeight);
+    // Windows Ink HIMETRIC: typical handwriting character height is ~2000-4000 units.
+    // Scale based on the HEIGHT of the writing (not width) to normalize character size.
+    // A single line of handwriting should be ~3000 HIMETRIC tall.
+    const qreal targetHeight = 3000.0;
+    qreal scale = targetHeight / sceneHeight;
 
     for (const UBRecognitionStroke& stroke : strokes)
     {
