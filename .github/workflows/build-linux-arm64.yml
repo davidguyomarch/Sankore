@@ -57,7 +57,8 @@ jobs:
                 libqt6opengl6-dev libqt6core5compat6-dev \
                 libgl1-mesa-dev libssl-dev zlib1g-dev \
                 libx11-dev libomp-dev pkg-config \
-                libpulse-dev libzinnia-dev
+                libpulse-dev libzinnia-dev \
+                gdb
 
               echo "=== Building QuaZip ==="
               git clone --depth 1 --branch v1.4 https://github.com/stachenov/quazip.git /tmp/quazip-src
@@ -86,7 +87,21 @@ jobs:
               export QT_QPA_PLATFORM=offscreen
               export LANG=C.UTF-8
               export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-              build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
+              # Enable core dumps for crash analysis
+              ulimit -c unlimited
+              echo "core.%p" > /proc/sys/kernel/core_pattern 2>/dev/null || true
+              build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
+                EXIT_CODE=$?
+                echo "=== SMOKE TEST CRASHED (exit $EXIT_CODE) ==="
+                CORE_FILE=$(find / -name "core*" -newer build/linux/release/product/Open-Sankore 2>/dev/null | head -1)
+                if [ -n "$CORE_FILE" ]; then
+                  echo "=== BACKTRACE ==="
+                  gdb -batch -ex "bt full" -ex "quit" build/linux/release/product/Open-Sankore "$CORE_FILE" 2>&1 | head -80
+                else
+                  echo "No core file found"
+                fi
+                exit $EXIT_CODE
+              }
               echo "ARM64 smoke test passed!"
             '
 
