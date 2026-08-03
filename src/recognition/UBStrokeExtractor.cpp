@@ -161,35 +161,15 @@ UBRecognitionStroke UBStrokeExtractor::extractFromPolygons(const QList<UBGraphic
 
     // Each polygon item represents a line segment of the stroke.
     // Extract the center line for each segment.
-    bool first = true;
+    //
+    // We use the polygon's bounding rect center mapped to scene as the point.
+    // This is more robust than originalLine() because it works correctly
+    // regardless of how the polygon was created or transformed.
     for (UBGraphicsPolygonItem* polygon : polygons)
     {
-        if (polygon->isNominalLine())
-        {
-            QLineF line = polygon->originalLine();
-            if (first)
-            {
-                QPointF startScene = polygon->mapToScene(line.p1());
-                result.points.append(startScene);
-                first = false;
-            }
-            QPointF endScene = polygon->mapToScene(line.p2());
-            result.points.append(endScene);
-        }
-        else
-        {
-            // Non-nominal polygon (modified by subtraction) — use center of bounding rect
-            QPointF center = polygon->mapToScene(polygon->boundingRect().center());
-            if (first)
-            {
-                result.points.append(center);
-                first = false;
-            }
-            else
-            {
-                result.points.append(center);
-            }
-        }
+        QRectF br = polygon->boundingRect();
+        QPointF center = polygon->mapToScene(br.center());
+        result.points.append(center);
     }
 
     return result;
