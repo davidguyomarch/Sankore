@@ -152,7 +152,7 @@ UBCachePropertiesWidget::UBCachePropertiesWidget(QWidget *parent, const char *na
     mpProperties->setLayout(mpPropertiesLayout);
 
     // Color and Alpha
-    mpColorLayout = new QHBoxLayout(mpProperties);
+    mpColorLayout = new QHBoxLayout();
     mpColorLabel = new QLabel(tr("Color:"), mpProperties);
     mpSelectColorButton = new QPushButton(mpProperties);
     mpSelectColorButton->setObjectName("DockPaletteWidgetButton");
