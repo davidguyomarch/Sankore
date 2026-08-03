@@ -9,7 +9,8 @@
 #include "domain/UBGraphicsStroke.h"
 
 #include <QSet>
-#include <QMap>
+#include <QPair>
+#include <QVector>
 
 QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList<QGraphicsItem*>& items)
 {
@@ -84,8 +85,10 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractMultipleFromStrokesGroup(
     if (!group)
         return results;
 
-    // Group polygons by their parent UBGraphicsStroke
-    QMap<UBGraphicsStroke*, QList<UBGraphicsPolygonItem*>> strokeMap;
+    // Group polygons by their parent UBGraphicsStroke, preserving temporal order.
+    // Use a QVector of pairs to maintain the order in which strokes first appear.
+    QVector<QPair<UBGraphicsStroke*, QList<UBGraphicsPolygonItem*>>> orderedStrokes;
+    QSet<UBGraphicsStroke*> seenStrokes;
     QList<UBGraphicsPolygonItem*> orphanPolygons;
 
     for (QGraphicsItem* child : group->childItems())
@@ -95,16 +98,33 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractMultipleFromStrokesGroup(
         {
             UBGraphicsStroke* stroke = polygon->stroke();
             if (stroke)
-                strokeMap[stroke].append(polygon);
+            {
+                if (!seenStrokes.contains(stroke))
+                {
+                    seenStrokes.insert(stroke);
+                    orderedStrokes.append({stroke, QList<UBGraphicsPolygonItem*>()});
+                }
+                // Find the entry and append polygon
+                for (auto& pair : orderedStrokes)
+                {
+                    if (pair.first == stroke)
+                    {
+                        pair.second.append(polygon);
+                        break;
+                    }
+                }
+            }
             else
+            {
                 orphanPolygons.append(polygon);
+            }
         }
     }
 
-    // Create one UBRecognitionStroke per logical stroke
-    for (auto it = strokeMap.begin(); it != strokeMap.end(); ++it)
+    // Create one UBRecognitionStroke per logical stroke, in temporal order
+    for (const auto& pair : orderedStrokes)
     {
-        UBRecognitionStroke recoStroke = extractFromPolygons(it.value());
+        UBRecognitionStroke recoStroke = extractFromPolygons(pair.second);
         if (!recoStroke.points.isEmpty())
             results.append(recoStroke);
     }
