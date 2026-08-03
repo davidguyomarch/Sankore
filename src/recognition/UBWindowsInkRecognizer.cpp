@@ -12,6 +12,9 @@
 #include <msinkaut.h>
 #include <msinkaut_i.c>
 #include <limits>
+#include <winnls.h>
+
+#include "core/UBSettings.h"
 
 #pragma comment(lib, "ole32.lib")
 
@@ -175,7 +178,34 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     }
 
     IInkRecognizer* defaultRecognizer = nullptr;
-    hr = recognizers->GetDefaultRecognizer(0, &defaultRecognizer); // 0 = system default language
+
+    // Use the language set in Sankoré preferences for recognition
+    LCID recognizerLcid = 0; // 0 = system default
+    QString appLang = UBSettings::settings()->appPreferredLanguage->get().toString();
+    if (!appLang.isEmpty())
+    {
+        // Convert ISO language code (e.g. "fr", "en", "de") to Windows LCID
+        // LocaleNameToLCID expects BCP 47 tags like "fr", "en-US", etc.
+        wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
+        appLang.toWCharArray(localeName);
+        localeName[appLang.length()] = 0;
+        LCID lcid = LocaleNameToLCID(localeName, 0);
+        if (lcid != 0)
+            recognizerLcid = lcid;
+
+        qDebug() << "OCR: app language =" << appLang << "-> LCID =" << recognizerLcid;
+    }
+
+    hr = recognizers->GetDefaultRecognizer(recognizerLcid, &defaultRecognizer);
+    if (FAILED(hr) || !defaultRecognizer)
+    {
+        // Fallback: try system default if app language recognizer not found
+        if (recognizerLcid != 0)
+        {
+            qDebug() << "OCR: no recognizer for LCID" << recognizerLcid << ", trying system default";
+            hr = recognizers->GetDefaultRecognizer(0, &defaultRecognizer);
+        }
+    }
     if (FAILED(hr) || !defaultRecognizer)
     {
         recognizers->Release();
@@ -189,6 +219,17 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     // Create recognizer context
     IInkRecognizerContext* context = nullptr;
     hr = defaultRecognizer->CreateRecognizerContext(&context);
+
+    // Log which recognizer was selected
+    {
+        BSTR bstrName = nullptr;
+        defaultRecognizer->get_Name(&bstrName);
+        if (bstrName) {
+            qDebug() << "OCR: using recognizer:" << QString::fromWCharArray(bstrName);
+            SysFreeString(bstrName);
+        }
+    }
+
     if (FAILED(hr) || !context)
     {
         defaultRecognizer->Release();
