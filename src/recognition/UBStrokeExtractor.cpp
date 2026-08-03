@@ -11,6 +11,7 @@
 #include <QSet>
 #include <QPair>
 #include <QVector>
+#include <algorithm>
 
 QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList<QGraphicsItem*>& items)
 {
@@ -136,6 +137,17 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractMultipleFromStrokesGroup(
         if (!recoStroke.points.isEmpty())
             results.append(recoStroke);
     }
+
+    // Sort strokes by their leftmost X coordinate (left-to-right reading order)
+    // This is more reliable than temporal order for recognition since users
+    // may not always write strictly left-to-right in time.
+    std::sort(results.begin(), results.end(), [](const UBRecognitionStroke& a, const UBRecognitionStroke& b) {
+        qreal minXa = a.points.isEmpty() ? 0 : a.points[0].x();
+        qreal minXb = b.points.isEmpty() ? 0 : b.points[0].x();
+        for (const QPointF& p : a.points) minXa = qMin(minXa, p.x());
+        for (const QPointF& p : b.points) minXb = qMin(minXb, p.x());
+        return minXa < minXb;
+    });
 
     return results;
 }
