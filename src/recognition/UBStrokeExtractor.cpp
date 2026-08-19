@@ -138,16 +138,9 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractMultipleFromStrokesGroup(
             results.append(recoStroke);
     }
 
-    // Sort strokes by their leftmost X coordinate (left-to-right reading order)
-    // This is more reliable than temporal order for recognition since users
-    // may not always write strictly left-to-right in time.
-    std::sort(results.begin(), results.end(), [](const UBRecognitionStroke& a, const UBRecognitionStroke& b) {
-        qreal minXa = a.points.isEmpty() ? 0 : a.points[0].x();
-        qreal minXb = b.points.isEmpty() ? 0 : b.points[0].x();
-        for (const QPointF& p : a.points) minXa = qMin(minXa, p.x());
-        for (const QPointF& p : b.points) minXb = qMin(minXb, p.x());
-        return minXa < minXb;
-    });
+    // Reverse results because childItems() returns in reverse Z-order
+    // (last drawn first). We want chronological order (first drawn first).
+    std::reverse(results.begin(), results.end());
 
     return results;
 }
@@ -160,16 +153,30 @@ UBRecognitionStroke UBStrokeExtractor::extractFromPolygons(const QList<UBGraphic
         return result;
 
     // Each polygon item represents a line segment of the stroke.
-    // Extract the center line for each segment.
-    //
-    // We use the polygon's bounding rect center mapped to scene as the point.
-    // This is more robust than originalLine() because it works correctly
-    // regardless of how the polygon was created or transformed.
+    // originalLine() contains the raw scene coordinates that were used to create the polygon.
+    // We do NOT use mapToScene because originalLine values are already in scene space
+    // (they were passed directly from mPreviousPoint/pEndPoint in drawLineTo).
+    // Using mapToScene would double-transform them when the polygon is inside a group.
+    bool first = true;
     for (UBGraphicsPolygonItem* polygon : polygons)
     {
-        QRectF br = polygon->boundingRect();
-        QPointF center = polygon->mapToScene(br.center());
-        result.points.append(center);
+        if (polygon->isNominalLine())
+        {
+            QLineF line = polygon->originalLine();
+            if (first)
+            {
+                result.points.append(line.p1());
+                first = false;
+            }
+            result.points.append(line.p2());
+        }
+        else
+        {
+            // Non-nominal polygon (eraser artifact) — use boundingRect center mapped to scene
+            QPointF center = polygon->mapToScene(polygon->boundingRect().center());
+            result.points.append(center);
+            first = false;
+        }
     }
 
     return result;
