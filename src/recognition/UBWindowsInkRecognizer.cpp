@@ -267,6 +267,36 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
 
     // Assign strokes to context
     inkDisp->get_Strokes(&inkStrokes);
+
+    // Log stroke count for diagnostic
+    {
+        long strokeCount = 0;
+        if (inkStrokes) inkStrokes->get_Count(&strokeCount);
+        qDebug() << "OCR: Ink contains" << strokeCount << "strokes before recognition";
+
+        // Write diagnostic file
+        QString diagPath = QCoreApplication::applicationDirPath() + "/ocr_diagnostic.txt";
+        QFile diagFile(diagPath);
+        if (diagFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&diagFile);
+            out << "OCR Diagnostic\n";
+            out << "Strokes in ink: " << strokeCount << "\n";
+            out << "Scale used: " << scale << "\n";
+            out << "Scene bounds: X[" << minX << "," << maxX << "] Y[" << minY << "," << maxY << "]\n";
+            out << "Scene size: " << sceneWidth << " x " << sceneHeight << "\n";
+
+            // Get recognizer name
+            BSTR bstrName = nullptr;
+            defaultRecognizer->get_Name(&bstrName);
+            if (bstrName) {
+                out << "Recognizer: " << QString::fromWCharArray(bstrName) << "\n";
+                SysFreeString(bstrName);
+            }
+            diagFile.close();
+        }
+    }
+
     context->putref_Strokes(inkStrokes);
 
     // Recognize
@@ -283,6 +313,19 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
             result.success = true;
             result.text = QString::fromWCharArray(bstrResult);
             SysFreeString(bstrResult);
+        }
+
+        // Append result to diagnostic file
+        {
+            QString diagPath = QCoreApplication::applicationDirPath() + "/ocr_diagnostic.txt";
+            QFile diagFile(diagPath);
+            if (diagFile.open(QIODevice::Append | QIODevice::Text))
+            {
+                QTextStream out(&diagFile);
+                out << "Recognition result: \"" << result.text << "\"\n";
+                out << "Status: " << (int)status << " hr: 0x" << QString::number((unsigned long)hr, 16) << "\n";
+                diagFile.close();
+            }
         }
 
         // Get alternates
