@@ -50,6 +50,9 @@ public:
     /// Recognize handwriting from a list of strokes.
     virtual UBRecognitionResult recognize(const QVector<UBRecognitionStroke>& strokes) = 0;
 
+    /// Returns diagnostic info about available recognizers (for troubleshooting).
+    virtual QString diagnosticInfo() const { return QString(); }
+
     /// Factory: create the best available recognizer for this platform.
     static IHandwritingRecognizer* createDefault();
 };

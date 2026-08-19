@@ -30,6 +30,20 @@ UBRecognitionController::UBRecognitionController(QObject* parent)
     mAutoTimer->setSingleShot(true);
     mAutoTimer->setInterval(2000); // 2 seconds pause before auto-recognition
     connect(mAutoTimer, &QTimer::timeout, this, &UBRecognitionController::onAutoTimerExpired);
+
+    // Log diagnostic info about available recognizers at startup
+    if (mRecognizer)
+    {
+        QString diag = mRecognizer->diagnosticInfo();
+        if (!diag.isEmpty())
+            qDebug().noquote() << "OCR diagnostic:\n" << diag;
+
+        if (!mRecognizer->isAvailable())
+        {
+            qWarning() << "OCR: Handwriting recognition is NOT available."
+                       << "Install a handwriting recognition pack in Windows Settings.";
+        }
+    }
 }
 
 UBRecognitionController::~UBRecognitionController()
@@ -122,7 +136,11 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
 {
     if (!mRecognizer || !mRecognizer->isAvailable())
     {
-        UBApplication::showMessage(tr("Handwriting recognition is not available on this platform."));
+        QString msg = tr("Handwriting recognition is not available on this platform.");
+        QString diag = mRecognizer ? mRecognizer->diagnosticInfo() : "";
+        if (!diag.isEmpty())
+            msg += "\n\n" + diag;
+        UBApplication::showMessage(msg);
         return;
     }
 

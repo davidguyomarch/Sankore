@@ -36,7 +36,31 @@ UBWindowsInkRecognizer::UBWindowsInkRecognizer()
             long count = 0;
             recognizers->get_Count(&count);
             mAvailable = (count > 0);
-            qDebug() << "Windows Ink: found" << count << "recognizers";
+            qDebug() << "Windows Ink: found" << count << "recognizer(s)";
+
+            // List all available recognizers for diagnostic
+            for (long i = 0; i < count; i++)
+            {
+                IInkRecognizer* reco = nullptr;
+                hr = recognizers->Item(i, &reco);
+                if (SUCCEEDED(hr) && reco)
+                {
+                    BSTR bstrName = nullptr;
+                    reco->get_Name(&bstrName);
+                    short langCount = 0;
+                    VARIANT varLangs;
+                    VariantInit(&varLangs);
+                    reco->get_Languages(&varLangs);
+
+                    QString name = bstrName ? QString::fromWCharArray(bstrName) : "unnamed";
+                    mAvailableRecognizers.append(name);
+                    qDebug() << "  Recognizer" << i << ":" << name;
+
+                    if (bstrName) SysFreeString(bstrName);
+                    VariantClear(&varLangs);
+                    reco->Release();
+                }
+            }
             recognizers->Release();
         }
         else
@@ -303,6 +327,24 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     inkDisp->Release();
 
     return result;
+}
+
+QString UBWindowsInkRecognizer::diagnosticInfo() const
+{
+    QString info;
+    if (!mAvailable)
+    {
+        info = "Windows Ink: NO recognizers installed.\n"
+               "To fix: Settings > Time & Language > Language & Region > "
+               "your language > Options > Handwriting > Download/Install.";
+    }
+    else
+    {
+        info = QString("Windows Ink: %1 recognizer(s) available:\n").arg(mAvailableRecognizers.size());
+        for (const QString& name : mAvailableRecognizers)
+            info += "  - " + name + "\n";
+    }
+    return info;
 }
 
 #endif // Q_OS_WIN

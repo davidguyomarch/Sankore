@@ -7,6 +7,7 @@
 #define UBWINDOWSINKRECOGNIZER_H
 
 #include "IHandwritingRecognizer.h"
+#include <QStringList>
 
 #ifdef Q_OS_WIN
 
@@ -29,9 +30,13 @@ public:
     QString engineName() const override;
     UBRecognitionResult recognize(const QVector<UBRecognitionStroke>& strokes) override;
 
+    /// Returns a diagnostic string listing available recognizers
+    QString diagnosticInfo() const;
+
 private:
     bool mAvailable;
     bool mComInitialized;
+    QStringList mAvailableRecognizers;
 };
 
 #endif // Q_OS_WIN
