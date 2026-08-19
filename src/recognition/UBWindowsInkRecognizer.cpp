@@ -143,12 +143,8 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
     if (sceneHeight < 1.0) sceneHeight = 1.0;
 
     // Windows Ink HIMETRIC: typical handwriting character height is ~2000-4000 units.
-    // Scale based on the HEIGHT of the writing (not width) to normalize character size.
-    // Empirically, a scale that produces characters ~1500 HIMETRIC wide works best.
-    // For a word, assume average character width = sceneWidth / (numStrokes * 0.6)
-    // Target: total width should be ~2000 * estimated_num_chars HIMETRIC
-    // Simple heuristic: scale to make height ~1500 HIMETRIC (smaller than before)
-    const qreal targetHeight = 1500.0;
+    // Scale to make height ~3000 HIMETRIC (empirically good for English recognizer).
+    const qreal targetHeight = 3000.0;
     qreal scale = targetHeight / sceneHeight;
 
     for (const UBRecognitionStroke& stroke : strokes)
@@ -156,7 +152,32 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         if (stroke.points.size() < 2)
             continue;
 
-        int numPoints = stroke.points.size();
+        // Simplify stroke: too many points confuses the recognizer.
+        // Windows Ink works best with ~20-40 points per character stroke.
+        // Use equidistant subsampling to reduce point count.
+        QVector<QPointF> simplified;
+        int numOriginal = stroke.points.size();
+        int maxPoints = 40; // max points per stroke
+
+        if (numOriginal <= maxPoints)
+        {
+            simplified = stroke.points;
+        }
+        else
+        {
+            // Always keep first and last point, sample evenly between
+            simplified.append(stroke.points.first());
+            double step = (double)(numOriginal - 1) / (double)(maxPoints - 1);
+            for (int i = 1; i < maxPoints - 1; i++)
+            {
+                int idx = (int)(i * step + 0.5);
+                if (idx < numOriginal)
+                    simplified.append(stroke.points[idx]);
+            }
+            simplified.append(stroke.points.last());
+        }
+
+        int numPoints = simplified.size();
 
         // CreateStroke expects a 1D SAFEARRAY of LONG: x1,y1,x2,y2,...
         VARIANT varPoints;
@@ -174,8 +195,8 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         for (int i = 0; i < numPoints; i++)
         {
             // Normalize: shift to origin (0,0) then scale to HIMETRIC
-            pData[i * 2]     = (LONG)((stroke.points[i].x() - minX) * scale);
-            pData[i * 2 + 1] = (LONG)((stroke.points[i].y() - minY) * scale);
+            pData[i * 2]     = (LONG)((simplified[i].x() - minX) * scale);
+            pData[i * 2 + 1] = (LONG)((simplified[i].y() - minY) * scale);
         }
         SafeArrayUnaccessData(varPoints.parray);
 
