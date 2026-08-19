@@ -78,19 +78,57 @@ int main(int argc, char* argv[])
     if (strokes.empty()) { printf("No strokes to process\n"); return 1; }
 
     // Try different scale factors
-    double scales[] = {1.0, 10.0, 50.0, 100.0};
+    // First compute bounding box for normalization
+    double gMinX = strokes[0].points[0].x, gMaxX = gMinX;
+    double gMinY = strokes[0].points[0].y, gMaxY = gMinY;
+    for (auto& s : strokes) {
+        for (auto& p : s.points) {
+            if (p.x < gMinX) gMinX = p.x; if (p.x > gMaxX) gMaxX = p.x;
+            if (p.y < gMinY) gMinY = p.y; if (p.y > gMaxY) gMaxY = p.y;
+        }
+    }
+    double sceneW = gMaxX - gMinX; if (sceneW < 1) sceneW = 1;
+    double sceneH = gMaxY - gMinY; if (sceneH < 1) sceneH = 1;
+    printf("\nBounding box: X[%.1f, %.1f] Y[%.1f, %.1f] size=%.1f x %.1f\n", gMinX, gMinY, gMaxX, gMaxY, sceneW, sceneH);
+
+    // Scale by height to 3000 HIMETRIC (like app does)
+    double normalizedScale = 3000.0 / sceneH;
+    double scales[] = {1.0, 10.0, 50.0, 100.0, normalizedScale};
+    const char* scaleNames[] = {"1.0", "10.0", "50.0", "100.0", "normalized(height=3000)"};
 
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) { printf("COM init failed\n"); return 1; }
 
     IInkRecognizers* recognizers = nullptr;
     CoCreateInstance(CLSID_InkRecognizers, NULL, CLSCTX_INPROC_SERVER, IID_IInkRecognizers, (void**)&recognizers);
+
+    // List recognizers
+    long recoCount = 0;
+    recognizers->get_Count(&recoCount);
+    printf("\nAvailable recognizers: %ld\n", recoCount);
+    for (long i = 0; i < recoCount; i++) {
+        IInkRecognizer* r = nullptr;
+        recognizers->Item(i, &r);
+        if (r) {
+            BSTR name = nullptr;
+            r->get_Name(&name);
+            if (name) { wprintf(L"  [%ld] %s\n", i, name); SysFreeString(name); }
+            r->Release();
+        }
+    }
+
     IInkRecognizer* defaultReco = nullptr;
     recognizers->GetDefaultRecognizer(0, &defaultReco);
-
-    for (double scale : scales)
     {
-        printf("\n--- Scale factor: %.1f ---\n", scale);
+        BSTR name = nullptr;
+        defaultReco->get_Name(&name);
+        if (name) { wprintf(L"\nUsing recognizer: %s\n", name); SysFreeString(name); }
+    }
+
+    for (int si = 0; si < 5; si++)
+    {
+        double scale = scales[si];
+        printf("\n--- Scale: %s (%.2f) --- [shifted to 0,0]\n", scaleNames[si], scale);
 
         IInkDisp* inkDisp = nullptr;
         CoCreateInstance(CLSID_InkDisp, NULL, CLSCTX_INPROC_SERVER, IID_IInkDisp, (void**)&inkDisp);
@@ -111,8 +149,9 @@ int main(int argc, char* argv[])
             SafeArrayAccessData(varPoints.parray, (void**)&pData);
             for (int i = 0; i < n; i++)
             {
-                pData[i*2]   = (LONG)(stroke.points[i].x * scale);
-                pData[i*2+1] = (LONG)(stroke.points[i].y * scale);
+                // Shift to origin (0,0) then scale
+                pData[i*2]   = (LONG)((stroke.points[i].x - gMinX) * scale);
+                pData[i*2+1] = (LONG)((stroke.points[i].y - gMinY) * scale);
             }
             SafeArrayUnaccessData(varPoints.parray);
 
