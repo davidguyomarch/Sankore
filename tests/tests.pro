@@ -118,8 +118,7 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp \
-           premoc/moc_tst_UBSmoothStrokeItem.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp
 
 
 # Build output

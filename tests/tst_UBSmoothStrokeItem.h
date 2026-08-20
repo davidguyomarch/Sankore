@@ -27,6 +27,13 @@ private slots:
     void testSubtractPath_partialErase();
     void testSubtractPath_fullErase();
 
+    // setLastPoint (Line tool rubber-band)
+    void testSetLastPoint_replaceEndpoint();
+    void testSetLastPoint_onSinglePoint();
+
+    // boundingRect
+    void testBoundingRect_expandedForSoftEdge();
+
     // deepCopy
     void testDeepCopy();
 

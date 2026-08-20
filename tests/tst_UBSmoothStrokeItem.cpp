@@ -170,6 +170,64 @@ void TestUBSmoothStrokeItem::testSubtractPath_fullErase()
 
 // --- deepCopy ---
 
+void TestUBSmoothStrokeItem::testSetLastPoint_replaceEndpoint()
+{
+    UBSmoothStrokeItem item;
+    QGraphicsScene scene;
+    scene.addItem(&item);
+
+    item.addPoint(QPointF(0, 0), 1.0);
+    item.addPoint(QPointF(100, 0), 1.0);
+
+    QCOMPARE(item.rawPoints().size(), 2);
+
+    // Replace endpoint
+    item.setLastPoint(QPointF(50, 50), 0.8);
+
+    // Still 2 points
+    QCOMPARE(item.rawPoints().size(), 2);
+    // Last pressure updated
+    QCOMPARE(item.rawPressures().last(), 0.8);
+    // Path should be a line to (50, 50) in local coords
+    QPainterPath path = item.path();
+    QCOMPARE(path.elementCount(), 2);
+}
+
+void TestUBSmoothStrokeItem::testSetLastPoint_onSinglePoint()
+{
+    UBSmoothStrokeItem item;
+    QGraphicsScene scene;
+    scene.addItem(&item);
+
+    item.addPoint(QPointF(10, 20), 1.0);
+    QCOMPARE(item.rawPoints().size(), 1);
+
+    // setLastPoint on single-point item should add a second point
+    item.setLastPoint(QPointF(80, 90), 0.5);
+    QCOMPARE(item.rawPoints().size(), 2);
+}
+
+void TestUBSmoothStrokeItem::testBoundingRect_expandedForSoftEdge()
+{
+    UBSmoothStrokeItem item;
+    QGraphicsScene scene;
+    scene.addItem(&item);
+
+    item.setStrokeWidth(5.0);
+    item.addPoint(QPointF(0, 0), 1.0);
+    item.addPoint(QPointF(100, 0), 1.0);
+
+    QRectF bounds = item.boundingRect();
+
+    // Should be at least 1px larger than the path bounds on each side
+    // The path from (0,0) to (100,0) with pen width 5 should have a bounding
+    // rect roughly (-2.5, -2.5, 105, 5) — our override adds 1px margin
+    QVERIFY(bounds.left() < -2.0);
+    QVERIFY(bounds.right() > 102.0);
+    QVERIFY(bounds.top() < -2.0);
+    QVERIFY(bounds.bottom() > 2.0);
+}
+
 void TestUBSmoothStrokeItem::testDeepCopy()
 {
     UBSmoothStrokeItem item;
