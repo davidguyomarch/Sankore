@@ -8,6 +8,7 @@ QT += core gui widgets testlib xml network
 
 # Paths — tests/ shims take priority over ../src for stubbed headers
 INCLUDEPATH += .
+INCLUDEPATH += stubs
 INCLUDEPATH += ../src
 
 # We only compile the utility sources under test (no app dependencies)
@@ -23,9 +24,12 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/adaptors/UBSvgTransformUtils.h \
            ../src/adaptors/UBMetadataLoader.h \
            ../src/domain/UBSceneContext.h \
+           ../src/domain/UBItem.h \
+           ../src/domain/UBSmoothStrokeItem.h \
            tst_UBGraphicsScene.h \
            tst_UBVisualRegression.h \
-           tst_UBRecognition.h
+           tst_UBRecognition.h \
+           tst_UBSmoothStrokeItem.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -100,6 +104,8 @@ SOURCES += main.cpp \
            tst_UBGraphicsScene.cpp \
            tst_UBVisualRegression.cpp \
            tst_UBRecognition.cpp \
+           tst_UBSmoothStrokeItem.cpp \
+           stubs/UBSmoothStrokeItem_testable.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
            premoc/moc_tst_UBGeometryUtils.cpp \
@@ -112,7 +118,8 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp \
+           premoc/moc_tst_UBSmoothStrokeItem.cpp
 
 
 # Build output

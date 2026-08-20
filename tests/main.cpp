@@ -24,6 +24,7 @@
 #include "tst_UBGraphicsScene.h"
 #include "tst_UBVisualRegression.h"
 #include "tst_UBRecognition.h"
+#include "tst_UBSmoothStrokeItem.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
@@ -107,6 +108,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBRecognition test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBSmoothStrokeItem test;
         status |= QTest::qExec(&test, argc, argv);
     }
 
