@@ -9,6 +9,9 @@
 //   test-ocr-winrt.exe [path_to_dump]
 //   (defaults to ocr_strokes_dump.txt in current directory)
 
+// Silence deprecation of experimental coroutines (WinRT headers use them in C++17 mode)
+#define _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
+
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
