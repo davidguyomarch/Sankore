@@ -262,6 +262,69 @@
         <file>themes/classic/icons/tools.png</file>
         <file>themes/classic/icons/undo.png</file>
         <file>themes/classic/icons/web.png</file>
+        <file>themes/light/style.qss</file>
+        <file>themes/light/icons/addBookmark.svg</file>
+        <file>themes/light/icons/addToPage.svg</file>
+        <file>themes/light/icons/addToWorkingDoc.svg</file>
+        <file>themes/light/icons/addToolToLibrary.svg</file>
+        <file>themes/light/icons/background.svg</file>
+        <file>themes/light/icons/board.svg</file>
+        <file>themes/light/icons/bookmark.svg</file>
+        <file>themes/light/icons/bookmarks.svg</file>
+        <file>themes/light/icons/captureArea.svg</file>
+        <file>themes/light/icons/captureWindow.svg</file>
+        <file>themes/light/icons/clearPage.svg</file>
+        <file>themes/light/icons/color.svg</file>
+        <file>themes/light/icons/copy.svg</file>
+        <file>themes/light/icons/cut.svg</file>
+        <file>themes/light/icons/display.svg</file>
+        <file>themes/light/icons/documents.svg</file>
+        <file>themes/light/icons/duplicate.svg</file>
+        <file>themes/light/icons/eraserTool.svg</file>
+        <file>themes/light/icons/export.svg</file>
+        <file>themes/light/icons/eyeClosed.svg</file>
+        <file>themes/light/icons/eyeOpened.svg</file>
+        <file>themes/light/icons/group.svg</file>
+        <file>themes/light/icons/hide.svg</file>
+        <file>themes/light/icons/home.svg</file>
+        <file>themes/light/icons/import.svg</file>
+        <file>themes/light/icons/largeEraser.svg</file>
+        <file>themes/light/icons/largePen.svg</file>
+        <file>themes/light/icons/library.svg</file>
+        <file>themes/light/icons/lineTool.svg</file>
+        <file>themes/light/icons/mediumEraser.svg</file>
+        <file>themes/light/icons/mediumPen.svg</file>
+        <file>themes/light/icons/menu.svg</file>
+        <file>themes/light/icons/mic.svg</file>
+        <file>themes/light/icons/micOff.svg</file>
+        <file>themes/light/icons/newDocument.svg</file>
+        <file>themes/light/icons/newFolder.svg</file>
+        <file>themes/light/icons/newPage.svg</file>
+        <file>themes/light/icons/nextPage.svg</file>
+        <file>themes/light/icons/open.svg</file>
+        <file>themes/light/icons/paste.svg</file>
+        <file>themes/light/icons/pause.svg</file>
+        <file>themes/light/icons/pdf.svg</file>
+        <file>themes/light/icons/plusBlack.svg</file>
+        <file>themes/light/icons/previousPage.svg</file>
+        <file>themes/light/icons/print.svg</file>
+        <file>themes/light/icons/quit.svg</file>
+        <file>themes/light/icons/record.svg</file>
+        <file>themes/light/icons/redo.svg</file>
+        <file>themes/light/icons/reload.svg</file>
+        <file>themes/light/icons/remove.svg</file>
+        <file>themes/light/icons/rename.svg</file>
+        <file>themes/light/icons/settings.svg</file>
+        <file>themes/light/icons/smallEraser.svg</file>
+        <file>themes/light/icons/smallPen.svg</file>
+        <file>themes/light/icons/stop.svg</file>
+        <file>themes/light/icons/stylus.svg</file>
+        <file>themes/light/icons/tools.svg</file>
+        <file>themes/light/icons/tutorial.svg</file>
+        <file>themes/light/icons/undo.svg</file>
+        <file>themes/light/icons/updates.svg</file>
+        <file>themes/light/icons/web.svg</file>
+        <file>themes/light/icons/window.svg</file>
         <file>style.qss</file>
         <file>images/libpalette/WebSearchCategory.svg</file>
         <file>images/tab_mask.png</file>

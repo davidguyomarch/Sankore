@@ -549,10 +549,10 @@ void UBApplication::themeChanged(QAction* action)
     }
 
     // Update palette colors based on theme
-    if (theme == "classic")
+    if (theme == "classic" || theme == "light")
     {
-        UBSettings::paletteColor = QColor(232, 232, 232, 220);
-        UBSettings::opaquePaletteColor = QColor(240, 240, 240, 240);
+        UBSettings::paletteColor = QColor(245, 245, 245, 220);
+        UBSettings::opaquePaletteColor = QColor(255, 255, 255, 240);
     }
     else
     {
@@ -774,9 +774,16 @@ void UBApplication::decorateActionMenu(QAction* action)
             actionThemeClassic->setData("classic");
             themeGroup->addAction(actionThemeClassic);
 
+            QAction* actionThemeLight = themeMenu->addAction(tr("Light (modern)"));
+            actionThemeLight->setCheckable(true);
+            actionThemeLight->setData("light");
+            themeGroup->addAction(actionThemeLight);
+
             QString currentTheme = mSettings->appTheme->get().toString();
             if (currentTheme == "classic")
                 actionThemeClassic->setChecked(true);
+            else if (currentTheme == "light")
+                actionThemeLight->setChecked(true);
             else
                 actionThemeDark->setChecked(true);
 
