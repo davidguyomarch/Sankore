@@ -7,82 +7,70 @@
 
 #ifdef Q_OS_WIN
 
+// C++/WinRT headers
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.UI.Input.Inking.h>
+
 #include <QDebug>
-#include <comdef.h>
-#include <msinkaut.h>
-#include <msinkaut_i.c>
-#include <limits>
-#include <winnls.h>
+#include <QCoreApplication>
+#include <QFile>
+#include <QTextStream>
 
 #include "core/UBSettings.h"
 
-#pragma comment(lib, "ole32.lib")
+using namespace winrt;
+using namespace Windows::Foundation;
+using namespace Windows::UI::Input::Inking;
 
 UBWindowsInkRecognizer::UBWindowsInkRecognizer()
     : mAvailable(false)
-    , mComInitialized(false)
 {
-    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    if (SUCCEEDED(hr) || hr == S_FALSE || hr == RPC_E_CHANGED_MODE)
+    try
     {
-        mComInitialized = (hr != RPC_E_CHANGED_MODE);
-
-        // Test if ink recognizer is available
-        IInkRecognizers* recognizers = nullptr;
-        hr = CoCreateInstance(CLSID_InkRecognizers, NULL, CLSCTX_INPROC_SERVER,
-                             IID_IInkRecognizers, (void**)&recognizers);
-        if (SUCCEEDED(hr) && recognizers)
-        {
-            long count = 0;
-            recognizers->get_Count(&count);
-            mAvailable = (count > 0);
-            qDebug() << "Windows Ink: found" << count << "recognizer(s)";
-
-            // List all available recognizers for diagnostic
-            for (long i = 0; i < count; i++)
-            {
-                IInkRecognizer* reco = nullptr;
-                hr = recognizers->Item(i, &reco);
-                if (SUCCEEDED(hr) && reco)
-                {
-                    BSTR bstrName = nullptr;
-                    reco->get_Name(&bstrName);
-                    short langCount = 0;
-                    VARIANT varLangs;
-                    VariantInit(&varLangs);
-                    reco->get_Languages(&varLangs);
-
-                    QString name = bstrName ? QString::fromWCharArray(bstrName) : "unnamed";
-                    mAvailableRecognizers.append(name);
-                    qDebug() << "  Recognizer" << i << ":" << name;
-
-                    if (bstrName) SysFreeString(bstrName);
-                    VariantClear(&varLangs);
-                    reco->Release();
-                }
-            }
-            recognizers->Release();
+        // Try to initialize WinRT apartment. If already initialized (by Qt/COM),
+        // this may throw — that's OK, we can still use the APIs.
+        try {
+            winrt::init_apartment(winrt::apartment_type::single_threaded);
+        } catch (const winrt::hresult_error&) {
+            // Already initialized — fine
         }
-        else
+
+        // Check if recognizers are available
+        InkRecognizerContainer container;
+        auto recognizers = container.GetRecognizers();
+
+        mAvailable = (recognizers.Size() > 0);
+        qDebug() << "WinRT Ink: found" << recognizers.Size() << "recognizer(s)";
+
+        for (uint32_t i = 0; i < recognizers.Size(); i++)
         {
-            qDebug() << "Windows Ink: CoCreateInstance failed, hr=" << QString::number((unsigned long)hr, 16);
+            auto reco = recognizers.GetAt(i);
+            QString name = QString::fromStdString(winrt::to_string(reco.Name()));
+            mAvailableRecognizers.append(name);
+            qDebug() << "  Recognizer" << i << ":" << name;
         }
     }
-    else
+    catch (const winrt::hresult_error& ex)
     {
-        qDebug() << "Windows Ink: CoInitializeEx failed, hr=" << QString::number((unsigned long)hr, 16);
+        qDebug() << "WinRT Ink: initialization failed -" << QString::fromStdString(winrt::to_string(ex.message()));
+        mAvailable = false;
+    }
+    catch (...)
+    {
+        qDebug() << "WinRT Ink: initialization failed (unknown exception)";
+        mAvailable = false;
     }
 
     if (mAvailable)
-        qDebug() << "Windows Ink recognizer available";
+        qDebug() << "WinRT Ink recognizer available";
     else
-        qDebug() << "Windows Ink recognizer NOT available";
+        qDebug() << "WinRT Ink recognizer NOT available";
 }
 
 UBWindowsInkRecognizer::~UBWindowsInkRecognizer()
 {
-    if (mComInitialized)
-        CoUninitialize();
+    // winrt::uninit_apartment() handled automatically
 }
 
 bool UBWindowsInkRecognizer::isAvailable() const
@@ -92,7 +80,25 @@ bool UBWindowsInkRecognizer::isAvailable() const
 
 QString UBWindowsInkRecognizer::engineName() const
 {
-    return "Windows Ink";
+    return "Windows Ink (WinRT)";
+}
+
+QString UBWindowsInkRecognizer::diagnosticInfo() const
+{
+    QString info;
+    if (!mAvailable)
+    {
+        info = "WinRT Ink: NO recognizers installed.\n"
+               "To fix: Settings > Time & Language > Language & Region > "
+               "your language > Options > Handwriting > Download/Install.";
+    }
+    else
+    {
+        info = QString("WinRT Ink: %1 recognizer(s) available:\n").arg(mAvailableRecognizers.size());
+        for (const QString& name : mAvailableRecognizers)
+            info += "  - " + name + "\n";
+    }
+    return info;
 }
 
 UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitionStroke>& strokes)
@@ -106,312 +112,189 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         return result;
     }
 
-    // Create InkCollector and add strokes
-    IInkDisp* inkDisp = nullptr;
-    HRESULT hr = CoCreateInstance(CLSID_InkDisp, NULL, CLSCTX_INPROC_SERVER,
-                                  IID_IInkDisp, (void**)&inkDisp);
-    if (FAILED(hr) || !inkDisp)
+    try
     {
-        result.success = false;
-        result.errorMessage = "Failed to create InkDisp object";
-        return result;
-    }
-
-    IInkStrokes* inkStrokes = nullptr;
-
-    // Add each stroke as an array of points
-    // First, compute bounding box of ALL strokes to normalize coordinates
-    qreal minX = (std::numeric_limits<qreal>::max)();
-    qreal minY = (std::numeric_limits<qreal>::max)();
-    qreal maxX = (std::numeric_limits<qreal>::lowest)();
-    qreal maxY = (std::numeric_limits<qreal>::lowest)();
-
-    for (const UBRecognitionStroke& stroke : strokes)
-    {
-        for (const QPointF& p : stroke.points)
+        // Compute bounding box for normalization
+        qreal minX = strokes[0].points[0].x(), minY = strokes[0].points[0].y();
+        qreal maxX = minX, maxY = minY;
+        for (const auto& stroke : strokes)
         {
-            minX = qMin(minX, p.x());
-            minY = qMin(minY, p.y());
-            maxX = qMax(maxX, p.x());
-            maxY = qMax(maxY, p.y());
-        }
-    }
-
-    qreal sceneWidth = maxX - minX;
-    qreal sceneHeight = maxY - minY;
-    if (sceneWidth < 1.0) sceneWidth = 1.0;
-    if (sceneHeight < 1.0) sceneHeight = 1.0;
-
-    // Windows Ink HIMETRIC: typical handwriting character height is ~2000-4000 units.
-    // Scale to make height ~3000 HIMETRIC (empirically good for English recognizer).
-    const qreal targetHeight = 3000.0;
-    qreal scale = targetHeight / sceneHeight;
-
-    for (const UBRecognitionStroke& stroke : strokes)
-    {
-        if (stroke.points.size() < 2)
-            continue;
-
-        // Simplify stroke: too many points confuses the recognizer.
-        // Windows Ink works best with ~20-40 points per character stroke.
-        // Use equidistant subsampling to reduce point count.
-        QVector<QPointF> simplified;
-        int numOriginal = stroke.points.size();
-        int maxPoints = 40; // max points per stroke
-
-        if (numOriginal <= maxPoints)
-        {
-            simplified = stroke.points;
-        }
-        else
-        {
-            // Always keep first and last point, sample evenly between
-            simplified.append(stroke.points.first());
-            double step = (double)(numOriginal - 1) / (double)(maxPoints - 1);
-            for (int i = 1; i < maxPoints - 1; i++)
+            for (const QPointF& p : stroke.points)
             {
-                int idx = (int)(i * step + 0.5);
-                if (idx < numOriginal)
-                    simplified.append(stroke.points[idx]);
+                if (p.x() < minX) minX = p.x();
+                if (p.y() < minY) minY = p.y();
+                if (p.x() > maxX) maxX = p.x();
+                if (p.y() > maxY) maxY = p.y();
             }
-            simplified.append(stroke.points.last());
         }
 
-        int numPoints = simplified.size();
+        qreal sceneWidth = maxX - minX;
+        qreal sceneHeight = maxY - minY;
+        if (sceneWidth < 1.0) sceneWidth = 1.0;
+        if (sceneHeight < 1.0) sceneHeight = 1.0;
 
-        // CreateStroke expects a 1D SAFEARRAY of LONG: x1,y1,x2,y2,...
-        VARIANT varPoints;
-        VariantInit(&varPoints);
-        varPoints.vt = VT_ARRAY | VT_I4;
+        // WinRT Ink uses DIP (device-independent pixels, 96 DPI).
+        // Typical handwriting on screen: letters ~30-50 DIP tall.
+        // Scale so that writing height maps to ~40 DIP.
+        const qreal targetHeight = 40.0;
+        qreal scale = targetHeight / sceneHeight;
 
-        SAFEARRAYBOUND bound;
-        bound.lLbound = 0;
-        bound.cElements = numPoints * 2;
+        // Build ink strokes using InkStrokeBuilder
+        InkStrokeBuilder builder;
+        InkStrokeContainer container;
 
-        varPoints.parray = SafeArrayCreate(VT_I4, 1, &bound);
+        int totalStrokesAdded = 0;
 
-        LONG* pData = nullptr;
-        SafeArrayAccessData(varPoints.parray, (void**)&pData);
-        for (int i = 0; i < numPoints; i++)
+        for (const auto& stroke : strokes)
         {
-            // Normalize: shift to origin (0,0) then scale to HIMETRIC
-            pData[i * 2]     = (LONG)((simplified[i].x() - minX) * scale);
-            pData[i * 2 + 1] = (LONG)((simplified[i].y() - minY) * scale);
+            if (stroke.points.size() < 2)
+                continue;
+
+            // Subsample to max 40 points per stroke
+            QVector<QPointF> simplified;
+            int numOriginal = stroke.points.size();
+            int maxPoints = 40;
+
+            if (numOriginal <= maxPoints)
+            {
+                simplified = stroke.points;
+            }
+            else
+            {
+                simplified.append(stroke.points.first());
+                double step = (double)(numOriginal - 1) / (double)(maxPoints - 1);
+                for (int i = 1; i < maxPoints - 1; i++)
+                {
+                    int idx = (int)(i * step + 0.5);
+                    if (idx < numOriginal)
+                        simplified.append(stroke.points[idx]);
+                }
+                simplified.append(stroke.points.last());
+            }
+
+            // Create InkPoints
+            std::vector<InkPoint> inkPoints;
+            for (const QPointF& p : simplified)
+            {
+                float x = (float)((p.x() - minX) * scale);
+                float y = (float)((p.y() - minY) * scale);
+                inkPoints.push_back(InkPoint(Windows::Foundation::Point(x, y), 0.5f));
+            }
+
+            // Create the stroke
+            auto inkStroke = builder.CreateStrokeFromInkPoints(
+                winrt::single_threaded_vector<InkPoint>(std::move(inkPoints)),
+                Windows::Foundation::Numerics::float3x2::identity());
+
+            container.AddStroke(inkStroke);
+            totalStrokesAdded++;
         }
-        SafeArrayUnaccessData(varPoints.parray);
 
-        // Add stroke to ink
-        IInkStrokeDisp* newStroke = nullptr;
-        VARIANT varPacketDesc;
-        VariantInit(&varPacketDesc); // empty = default (x, y only)
-
-        hr = inkDisp->CreateStroke(varPoints, varPacketDesc, &newStroke);
-        if (SUCCEEDED(hr) && newStroke)
-            newStroke->Release();
-
-        VariantClear(&varPoints);
-    }
-
-    // Get default recognizer
-    IInkRecognizers* recognizers = nullptr;
-    hr = CoCreateInstance(CLSID_InkRecognizers, NULL, CLSCTX_INPROC_SERVER,
-                         IID_IInkRecognizers, (void**)&recognizers);
-    if (FAILED(hr) || !recognizers)
-    {
-        if (inkStrokes) inkStrokes->Release();
-        inkDisp->Release();
-        result.success = false;
-        result.errorMessage = "Failed to get recognizers";
-        return result;
-    }
-
-    IInkRecognizer* defaultRecognizer = nullptr;
-
-    // Use the language set in Sankoré preferences for recognition
-    LCID recognizerLcid = 0; // 0 = system default
-    QString appLang = UBSettings::settings()->appPreferredLanguage->get().toString();
-    if (!appLang.isEmpty())
-    {
-        // Convert ISO language code (e.g. "fr", "en", "de") to Windows LCID
-        // LocaleNameToLCID expects BCP 47 tags like "fr", "en-US", etc.
-        wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
-        appLang.toWCharArray(localeName);
-        localeName[appLang.length()] = 0;
-        LCID lcid = LocaleNameToLCID(localeName, 0);
-        if (lcid != 0)
-            recognizerLcid = lcid;
-
-        qDebug() << "OCR: app language =" << appLang << "-> LCID =" << recognizerLcid;
-    }
-
-    hr = recognizers->GetDefaultRecognizer(recognizerLcid, &defaultRecognizer);
-    if (FAILED(hr) || !defaultRecognizer)
-    {
-        // Fallback: try system default if app language recognizer not found
-        if (recognizerLcid != 0)
+        if (totalStrokesAdded == 0)
         {
-            qDebug() << "OCR: no recognizer for LCID" << recognizerLcid << ", trying system default";
-            hr = recognizers->GetDefaultRecognizer(0, &defaultRecognizer);
+            result.success = false;
+            result.errorMessage = "No valid strokes to recognize";
+            return result;
         }
-    }
-    if (FAILED(hr) || !defaultRecognizer)
-    {
-        recognizers->Release();
-        if (inkStrokes) inkStrokes->Release();
-        inkDisp->Release();
-        result.success = false;
-        result.errorMessage = "No default recognizer found";
-        return result;
-    }
 
-    // Create recognizer context
-    IInkRecognizerContext* context = nullptr;
-    hr = defaultRecognizer->CreateRecognizerContext(&context);
+        // Select recognizer based on app language
+        InkRecognizerContainer recoContainer;
+        auto recognizers = recoContainer.GetRecognizers();
 
-    // Log which recognizer was selected
-    {
-        BSTR bstrName = nullptr;
-        defaultRecognizer->get_Name(&bstrName);
-        if (bstrName) {
-            qDebug() << "OCR: using recognizer:" << QString::fromWCharArray(bstrName);
-            SysFreeString(bstrName);
+        // Find recognizer matching app language
+        QString appLang = UBSettings::settings()->appPreferredLanguage->get().toString();
+        InkRecognizer selectedRecognizer{nullptr};
+
+        if (!appLang.isEmpty())
+        {
+            for (uint32_t i = 0; i < recognizers.Size(); i++)
+            {
+                auto reco = recognizers.GetAt(i);
+                QString name = QString::fromStdString(winrt::to_string(reco.Name()));
+                if (name.contains(appLang, Qt::CaseInsensitive) ||
+                    name.contains(appLang.left(2), Qt::CaseInsensitive))
+                {
+                    selectedRecognizer = reco;
+                    break;
+                }
+            }
         }
-    }
 
-    if (FAILED(hr) || !context)
-    {
-        defaultRecognizer->Release();
-        recognizers->Release();
-        if (inkStrokes) inkStrokes->Release();
-        inkDisp->Release();
-        result.success = false;
-        result.errorMessage = "Failed to create recognizer context";
-        return result;
-    }
+        // Fallback to first recognizer if no language match
+        if (!selectedRecognizer && recognizers.Size() > 0)
+            selectedRecognizer = recognizers.GetAt(0);
 
-    // Assign strokes to context
-    inkDisp->get_Strokes(&inkStrokes);
+        QString recoName = selectedRecognizer ?
+            QString::fromStdString(winrt::to_string(selectedRecognizer.Name())) : "none";
+        qDebug() << "OCR: using recognizer:" << recoName << "(app lang:" << appLang << ")";
 
-    // Log stroke count for diagnostic
-    {
-        long strokeCount = 0;
-        if (inkStrokes) inkStrokes->get_Count(&strokeCount);
-        qDebug() << "OCR: Ink contains" << strokeCount << "strokes before recognition";
+        // Recognize
+        auto recoResults = recoContainer.RecognizeAsync(container, InkRecognitionTarget::All).get();
+
+        // Collect results
+        QString fullText;
+        for (uint32_t i = 0; i < recoResults.Size(); i++)
+        {
+            auto recoResult = recoResults.GetAt(i);
+            auto candidates = recoResult.GetTextCandidates();
+            if (candidates.Size() > 0)
+            {
+                if (!fullText.isEmpty()) fullText += " ";
+                fullText += QString::fromStdString(winrt::to_string(candidates.GetAt(0)));
+
+                // Store alternatives from first result only
+                if (i == 0)
+                {
+                    for (uint32_t j = 0; j < candidates.Size() && j < 5; j++)
+                        result.candidates.append(QString::fromStdString(winrt::to_string(candidates.GetAt(j))));
+                }
+            }
+        }
 
         // Write diagnostic file
-        QString diagPath = QCoreApplication::applicationDirPath() + "/ocr_diagnostic.txt";
-        QFile diagFile(diagPath);
-        if (diagFile.open(QIODevice::WriteOnly | QIODevice::Text))
-        {
-            QTextStream out(&diagFile);
-            out << "OCR Diagnostic\n";
-            out << "Strokes in ink: " << strokeCount << "\n";
-            out << "Scale used: " << scale << "\n";
-            out << "Scene bounds: X[" << minX << "," << maxX << "] Y[" << minY << "," << maxY << "]\n";
-            out << "Scene size: " << sceneWidth << " x " << sceneHeight << "\n";
-
-            // Get recognizer name
-            BSTR bstrName = nullptr;
-            defaultRecognizer->get_Name(&bstrName);
-            if (bstrName) {
-                out << "Recognizer: " << QString::fromWCharArray(bstrName) << "\n";
-                SysFreeString(bstrName);
-            }
-            diagFile.close();
-        }
-    }
-
-    context->putref_Strokes(inkStrokes);
-
-    // Recognize
-    IInkRecognitionResult* recoResult = nullptr;
-    InkRecognitionStatus status;
-    hr = context->Recognize(&status, &recoResult);
-
-    if (SUCCEEDED(hr) && recoResult && status == IRS_NoError)
-    {
-        BSTR bstrResult = nullptr;
-        recoResult->get_TopString(&bstrResult);
-        if (bstrResult)
-        {
-            result.success = true;
-            result.text = QString::fromWCharArray(bstrResult);
-            SysFreeString(bstrResult);
-        }
-
-        // Append result to diagnostic file
         {
             QString diagPath = QCoreApplication::applicationDirPath() + "/ocr_diagnostic.txt";
             QFile diagFile(diagPath);
-            if (diagFile.open(QIODevice::Append | QIODevice::Text))
+            if (diagFile.open(QIODevice::WriteOnly | QIODevice::Text))
             {
                 QTextStream out(&diagFile);
-                out << "Recognition result: \"" << result.text << "\"\n";
-                out << "Status: " << (int)status << " hr: 0x" << QString::number((unsigned long)hr, 16) << "\n";
+                out << "OCR Diagnostic (WinRT)\n";
+                out << "Strokes added: " << totalStrokesAdded << "\n";
+                out << "Scale used: " << scale << "\n";
+                out << "Scene bounds: X[" << minX << "," << maxX << "] Y[" << minY << "," << maxY << "]\n";
+                out << "Scene size: " << sceneWidth << " x " << sceneHeight << "\n";
+                out << "Recognizer: " << recoName << "\n";
+                out << "Recognition results count: " << recoResults.Size() << "\n";
+                out << "Full text: \"" << fullText << "\"\n";
                 diagFile.close();
             }
         }
 
-        // Get alternates
-        IInkRecognitionAlternates* alternates = nullptr;
-        hr = recoResult->AlternatesFromSelection(0, -1, 5, &alternates);
-        if (SUCCEEDED(hr) && alternates)
+        if (fullText.isEmpty())
         {
-            long altCount = 0;
-            alternates->get_Count(&altCount);
-            for (long i = 0; i < altCount && i < 5; i++)
-            {
-                IInkRecognitionAlternate* alt = nullptr;
-                alternates->Item(i, &alt);
-                if (alt)
-                {
-                    BSTR bstrAlt = nullptr;
-                    alt->get_String(&bstrAlt);
-                    if (bstrAlt)
-                    {
-                        result.candidates.append(QString::fromWCharArray(bstrAlt));
-                        SysFreeString(bstrAlt);
-                    }
-                    alt->Release();
-                }
-            }
-            alternates->Release();
+            result.success = false;
+            result.errorMessage = "Recognition produced no text";
         }
-
-        recoResult->Release();
+        else
+        {
+            result.success = true;
+            result.text = fullText;
+        }
     }
-    else
+    catch (const winrt::hresult_error& ex)
     {
         result.success = false;
-        result.errorMessage = "Recognition failed (status: " + QString::number((int)status) + ")";
+        result.errorMessage = "WinRT error: " + QString::fromStdString(winrt::to_string(ex.message()));
+        qDebug() << "OCR WinRT error:" << result.errorMessage;
     }
-
-    // Cleanup
-    context->Release();
-    defaultRecognizer->Release();
-    recognizers->Release();
-    inkStrokes->Release();
-    inkDisp->Release();
+    catch (const std::exception& ex)
+    {
+        result.success = false;
+        result.errorMessage = QString("Exception: ") + ex.what();
+        qDebug() << "OCR exception:" << result.errorMessage;
+    }
 
     return result;
-}
-
-QString UBWindowsInkRecognizer::diagnosticInfo() const
-{
-    QString info;
-    if (!mAvailable)
-    {
-        info = "Windows Ink: NO recognizers installed.\n"
-               "To fix: Settings > Time & Language > Language & Region > "
-               "your language > Options > Handwriting > Download/Install.";
-    }
-    else
-    {
-        info = QString("Windows Ink: %1 recognizer(s) available:\n").arg(mAvailableRecognizers.size());
-        for (const QString& name : mAvailableRecognizers)
-            info += "  - " + name + "\n";
-    }
-    return info;
 }
 
 #endif // Q_OS_WIN

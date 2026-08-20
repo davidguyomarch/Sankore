@@ -13,7 +13,7 @@ SOURCES += \
 win32 {
     HEADERS += src/recognition/UBWindowsInkRecognizer.h
     SOURCES += src/recognition/UBWindowsInkRecognizer.cpp
-    LIBS += -lole32 -loleaut32
+    # WinRT C++/WinRT — WindowsApp.lib is linked in OpenSankore.pro
 }
 
 !win32 {

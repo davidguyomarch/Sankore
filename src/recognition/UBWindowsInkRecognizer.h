@@ -11,14 +11,14 @@
 
 #ifdef Q_OS_WIN
 
-#include <windows.h>
-
 /**
- * @brief Windows Ink handwriting recognizer using the COM Tablet PC API.
+ * @brief Windows Ink handwriting recognizer using WinRT API.
  *
- * Uses IInkRecognizerContext from msinkaut.h (InkObj.dll) to convert
- * stylus strokes into text. Supports multiple languages depending on
- * installed recognizer packs.
+ * Uses Windows.UI.Input.Inking (InkRecognizerContainer + InkStrokeBuilder)
+ * from the modern WinRT API. This replaces the legacy COM API (msinkaut)
+ * which is deprecated and broken under x64 emulation on ARM64.
+ *
+ * Requires Windows 10+ and C++/WinRT headers (included in Windows SDK).
  */
 class UBWindowsInkRecognizer : public IHandwritingRecognizer
 {
@@ -29,13 +29,10 @@ public:
     bool isAvailable() const override;
     QString engineName() const override;
     UBRecognitionResult recognize(const QVector<UBRecognitionStroke>& strokes) override;
-
-    /// Returns a diagnostic string listing available recognizers
-    QString diagnosticInfo() const;
+    QString diagnosticInfo() const override;
 
 private:
     bool mAvailable;
-    bool mComInitialized;
     QStringList mAvailableRecognizers;
 };
 
