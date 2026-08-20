@@ -51,7 +51,8 @@ HEADERS += src/domain/UBGraphicsScene.h \
     src/domain/UBAlignObjectManager.h \
     src/domain/UBDragableThumbnail.h \
     src/domain/UBAbstractGraphicsProxyWidget.h \
-    src/domain/UBGraphicsProxyWidget.h
+    src/domain/UBGraphicsProxyWidget.h \
+    src/domain/UBSmoothStrokeItem.h
     
 SOURCES += src/domain/UBGraphicsScene.cpp \
                 src/domain/UBSceneContext.cpp \
@@ -107,4 +108,5 @@ SOURCES += src/domain/UBGraphicsScene.cpp \
     src/domain/UBAlignObjectManager.cpp \
     src/domain/UBDragableThumbnail.cpp \
     src/domain/UBAbstractGraphicsProxyWidget.cpp \
-    src/domain/UBGraphicsProxyWidget.cpp
+    src/domain/UBGraphicsProxyWidget.cpp \
+    src/domain/UBSmoothStrokeItem.cpp
