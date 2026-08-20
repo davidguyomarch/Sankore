@@ -51,6 +51,8 @@
 #include "domain/UB1HEditableGraphicsSquareItem.h"
 #include "domain/UB1HEditableGraphicsCircleItem.h"
 
+#include "domain/UBSmoothStrokeItem.h"
+
 #include "domain/UBItem.h"
 
 #include "tools/UBGraphicsRuler.h"
@@ -640,6 +642,20 @@ UBGraphicsScene* UBSvgSubsetAdaptor::UBSvgSubsetReader::loadScene()
 
                         polygonItem->show();
                         group->addToGroup(polygonItem);
+                    }
+                }
+            }
+            else if (mXmlReader.name() == QLatin1String("path"))
+            {
+                // Check if this is a smooth stroke path (ub:type="smooth-stroke")
+                QStringView ubType = mXmlReader.attributes().value(mNamespaceUri, "type");
+                if (!ubType.isNull() && ubType.toString() == "smooth-stroke")
+                {
+                    UBSmoothStrokeItem* smoothItem = smoothStrokeItemFromPathSvg(
+                        mScene->isDarkBackground() ? Qt::white : Qt::black);
+                    if (smoothItem)
+                    {
+                        mScene->addItem(smoothItem);
                     }
                 }
             }
@@ -1427,6 +1443,14 @@ bool UBSvgSubsetAdaptor::UBSvgSubsetWriter::persistScene(int pageIndex)
                 openStroke = 0;
             }
 
+            // Is the item a smooth stroke?
+            UBSmoothStrokeItem *smoothStrokeItem = dynamic_cast<UBSmoothStrokeItem*>(item);
+            if (smoothStrokeItem && smoothStrokeItem->isVisible())
+            {
+                smoothStrokeItemToSvgPath(smoothStrokeItem);
+                continue;
+            }
+
             // Is the item a picture?
             UBGraphicsPixmapItem *pixmapItem = qgraphicsitem_cast<UBGraphicsPixmapItem*> (item);
             if (pixmapItem && pixmapItem->isVisible())
@@ -1871,6 +1895,94 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::strokeToSvgPolygon(UBGraphicsStroke*
     }
 }
 
+void UBSvgSubsetAdaptor::UBSvgSubsetWriter::smoothStrokeItemToSvgPath(UBSmoothStrokeItem* item)
+{
+    if (!item)
+        return;
+
+    mXmlWriter.writeStartElement("path");
+
+    // Write the SVG path data from the QPainterPath
+    QPainterPath pp = item->path();
+    QString pathData;
+    for (int i = 0; i < pp.elementCount(); i++)
+    {
+        QPainterPath::Element e = pp.elementAt(i);
+        switch (e.type)
+        {
+        case QPainterPath::MoveToElement:
+            pathData += QString("M %1,%2 ").arg(e.x, 0, 'f', 2).arg(e.y, 0, 'f', 2);
+            break;
+        case QPainterPath::LineToElement:
+            pathData += QString("L %1,%2 ").arg(e.x, 0, 'f', 2).arg(e.y, 0, 'f', 2);
+            break;
+        case QPainterPath::CurveToElement:
+        {
+            QPainterPath::Element c1 = e;
+            QPainterPath::Element c2 = pp.elementAt(i + 1);
+            QPainterPath::Element ep = pp.elementAt(i + 2);
+            pathData += QString("C %1,%2 %3,%4 %5,%6 ")
+                .arg(c1.x, 0, 'f', 2).arg(c1.y, 0, 'f', 2)
+                .arg(c2.x, 0, 'f', 2).arg(c2.y, 0, 'f', 2)
+                .arg(ep.x, 0, 'f', 2).arg(ep.y, 0, 'f', 2);
+            i += 2; // skip the two control point data elements
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    mXmlWriter.writeAttribute("d", pathData.trimmed());
+
+    // Standard SVG stroke attributes
+    mXmlWriter.writeAttribute("fill", "none");
+    mXmlWriter.writeAttribute("stroke", item->pen().color().name());
+    mXmlWriter.writeAttribute("stroke-width", QString::number(item->nominalWidth(), 'f', 2));
+    mXmlWriter.writeAttribute("stroke-linecap", "round");
+    mXmlWriter.writeAttribute("stroke-linejoin", "round");
+
+    qreal alpha = item->pen().color().alphaF();
+    if (alpha < 1.0)
+        mXmlWriter.writeAttribute("stroke-opacity", QString::number(alpha, 'f', 2));
+
+    // Transform
+    QTransform t = item->sceneTransform();
+    if (!t.isIdentity())
+        mXmlWriter.writeAttribute("transform", toSvgTransform(t));
+
+    // Custom ub: attributes
+    mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "fill-on-dark-background",
+                              item->colorOnDarkBackground().name());
+    mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "fill-on-light-background",
+                              item->colorOnLightBackground().name());
+    mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "z-value",
+                              QString::number(item->zValue()));
+    mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "uuid",
+                              UBStringUtils::toCanonicalUuid(item->uuid()));
+    mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "type", "smooth-stroke");
+
+    // Raw points for faithful reconstruction and OCR
+    QVector<QPointF> rawPoints = item->rawPoints();
+    QVector<qreal> rawPressures = item->rawPressures();
+
+    if (!rawPoints.isEmpty())
+    {
+        QString pointsStr;
+        for (const QPointF& p : rawPoints)
+            pointsStr += QString("%1,%2;").arg(p.x(), 0, 'f', 2).arg(p.y(), 0, 'f', 2);
+        pointsStr.chop(1); // remove trailing ';'
+        mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "raw-points", pointsStr);
+
+        QString pressuresStr;
+        for (qreal pr : rawPressures)
+            pressuresStr += QString("%1;").arg(pr, 0, 'f', 3);
+        pressuresStr.chop(1);
+        mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "raw-pressures", pressuresStr);
+    }
+
+    mXmlWriter.writeEndElement(); // path
+}
+
 void UBSvgSubsetAdaptor::UBSvgSubsetWriter::polygonItemToSvgPolygon(UBGraphicsPolygonItem* polygonItem, bool groupHoldsInfo, UBGraphicsItemAction* action)
 {
 
@@ -2286,6 +2398,148 @@ QList<UBGraphicsPolygonItem*> UBSvgSubsetAdaptor::UBSvgSubsetReader::polygonItem
     }
 
     return polygonItems;
+}
+
+UBSmoothStrokeItem* UBSvgSubsetAdaptor::UBSvgSubsetReader::smoothStrokeItemFromPathSvg(const QColor& pDefaultColor)
+{
+    UBSmoothStrokeItem* item = new UBSmoothStrokeItem();
+
+    // Read stroke width
+    QStringView strokeWidth = mXmlReader.attributes().value("stroke-width");
+    qreal width = 2.0;
+    if (!strokeWidth.isNull())
+        width = strokeWidth.toString().toFloat();
+    item->setStrokeWidth(width);
+
+    // Read stroke color
+    QColor strokeColor = pDefaultColor;
+    QStringView svgStroke = mXmlReader.attributes().value("stroke");
+    if (!svgStroke.isNull())
+        strokeColor.setNamedColor(svgStroke.toString());
+
+    QStringView svgStrokeOpacity = mXmlReader.attributes().value("stroke-opacity");
+    if (!svgStrokeOpacity.isNull())
+        strokeColor.setAlphaF(svgStrokeOpacity.toString().toFloat());
+
+    item->setStrokeColor(strokeColor);
+
+    // Read colors on dark/light backgrounds
+    QStringView ubFillOnDark = mXmlReader.attributes().value(mNamespaceUri, "fill-on-dark-background");
+    if (!ubFillOnDark.isNull())
+    {
+        QColor c;
+        c.setNamedColor(ubFillOnDark.toString());
+        if (c.isValid())
+            item->setColorOnDarkBackground(c);
+    }
+
+    QStringView ubFillOnLight = mXmlReader.attributes().value(mNamespaceUri, "fill-on-light-background");
+    if (!ubFillOnLight.isNull())
+    {
+        QColor c;
+        c.setNamedColor(ubFillOnLight.toString());
+        if (c.isValid())
+            item->setColorOnLightBackground(c);
+    }
+
+    // Read z-value
+    QStringView ubZValue = mXmlReader.attributes().value(mNamespaceUri, "z-value");
+    if (!ubZValue.isNull())
+        UBGraphicsItem::assignZValue(item, ubZValue.toString().toFloat());
+
+    // Read UUID
+    QStringView ubUuid = mXmlReader.attributes().value(mNamespaceUri, "uuid");
+    if (!ubUuid.isNull())
+        item->setUuid(QUuid(ubUuid.toString()));
+
+    // Read transform
+    QStringView svgTransform = mXmlReader.attributes().value("transform");
+    if (!svgTransform.isNull())
+        item->setTransform(fromSvgTransform(svgTransform.toString()));
+
+    // Read raw points and pressures (preferred for reconstruction)
+    QStringView ubRawPoints = mXmlReader.attributes().value(mNamespaceUri, "raw-points");
+    QStringView ubRawPressures = mXmlReader.attributes().value(mNamespaceUri, "raw-pressures");
+
+    if (!ubRawPoints.isNull())
+    {
+        // Reconstruct from raw points — gives faithful Catmull-Rom curves
+        QStringList pointStrs = ubRawPoints.toString().split(';', Qt::SkipEmptyParts);
+        QVector<qreal> pressures;
+
+        if (!ubRawPressures.isNull())
+        {
+            QStringList pressureStrs = ubRawPressures.toString().split(';', Qt::SkipEmptyParts);
+            for (const QString& ps : pressureStrs)
+                pressures.append(ps.toFloat());
+        }
+
+        // We need to add points in scene coordinates.
+        // Since the item has no parent and starts at (0,0), the item's local == scene at load time.
+        // The raw points were stored in local coordinates, so we use them directly via addPoint
+        // by temporarily treating local as scene (item is at origin with identity transform before points are added).
+        QTransform savedTransform = item->transform();
+        item->setTransform(QTransform()); // identity during reconstruction
+
+        for (int i = 0; i < pointStrs.size(); i++)
+        {
+            QStringList coords = pointStrs[i].split(',', Qt::SkipEmptyParts);
+            if (coords.size() == 2)
+            {
+                QPointF pt(coords[0].toFloat(), coords[1].toFloat());
+                qreal pressure = (i < pressures.size()) ? pressures[i] : 1.0;
+                // addPoint expects scene coords; since item is at origin with identity, local == scene
+                item->addPoint(pt, pressure);
+            }
+        }
+        item->finalize();
+        item->setTransform(savedTransform);
+    }
+    else
+    {
+        // Fallback: use the SVG path "d" attribute directly
+        QStringView pathD = mXmlReader.attributes().value("d");
+        if (!pathD.isNull())
+        {
+            // Parse SVG path data into QPainterPath
+            // Qt doesn't have a public SVG path parser, so we set the path from the d attribute
+            // using a simplified parser for M, L, C commands
+            QPainterPath pp;
+            QString d = pathD.toString();
+            QStringList tokens = d.split(QRegularExpression("[\\s,]+"), Qt::SkipEmptyParts);
+            int idx = 0;
+            while (idx < tokens.size())
+            {
+                QString cmd = tokens[idx];
+                if (cmd == "M" && idx + 2 < tokens.size())
+                {
+                    pp.moveTo(tokens[idx+1].toDouble(), tokens[idx+2].toDouble());
+                    idx += 3;
+                }
+                else if (cmd == "L" && idx + 2 < tokens.size())
+                {
+                    pp.lineTo(tokens[idx+1].toDouble(), tokens[idx+2].toDouble());
+                    idx += 3;
+                }
+                else if (cmd == "C" && idx + 6 < tokens.size())
+                {
+                    pp.cubicTo(tokens[idx+1].toDouble(), tokens[idx+2].toDouble(),
+                               tokens[idx+3].toDouble(), tokens[idx+4].toDouble(),
+                               tokens[idx+5].toDouble(), tokens[idx+6].toDouble());
+                    idx += 7;
+                }
+                else
+                {
+                    idx++; // skip unknown
+                }
+            }
+            item->setPath(pp);
+            item->finalize();
+        }
+    }
+
+    item->setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
+    return item;
 }
 
 void UBSvgSubsetAdaptor::UBSvgSubsetWriter::pixmapItemToLinkedImage(UBGraphicsPixmapItem* pixmapItem, bool isBackground)
