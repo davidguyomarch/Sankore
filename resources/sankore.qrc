@@ -234,9 +234,11 @@
         <file>themes/classic/icons/home.png</file>
         <file>themes/classic/icons/import.png</file>
         <file>themes/classic/icons/largeEraser.png</file>
+        <file>themes/classic/icons/largeEraser.svg</file>
         <file>themes/classic/icons/largePen.png</file>
         <file>themes/classic/icons/library.png</file>
         <file>themes/classic/icons/mediumEraser.png</file>
+        <file>themes/classic/icons/mediumEraser.svg</file>
         <file>themes/classic/icons/mediumPen.png</file>
         <file>themes/classic/icons/menu.png</file>
         <file>themes/classic/icons/newDocument.png</file>
@@ -254,6 +256,7 @@
         <file>themes/classic/icons/rename.png</file>
         <file>themes/classic/icons/settings.png</file>
         <file>themes/classic/icons/smallEraser.png</file>
+        <file>themes/classic/icons/smallEraser.svg</file>
         <file>themes/classic/icons/smallPen.png</file>
         <file>themes/classic/icons/stylus.png</file>
         <file>themes/classic/icons/tools.png</file>
