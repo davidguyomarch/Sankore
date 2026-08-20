@@ -1088,6 +1088,25 @@ void UBGraphicsScene::eraseLineTo(const QPointF &pEndPoint, const qreal &pWidth)
 
     if (!intersectedItems.empty())
         setModified(true);
+
+    // --- Erase smooth stroke items (new QPainterPath-based strokes) ---
+    for (int i = 0; i < collidItems.size(); i++)
+    {
+        UBSmoothStrokeItem* smoothItem = dynamic_cast<UBSmoothStrokeItem*>(collidItems[i]);
+        if (!smoothItem)
+            continue;
+
+        if (smoothItem->subtractPath(eraserPath))
+        {
+            // Path became empty — remove item entirely
+            mRemovedItems << smoothItem;
+            removeItem(smoothItem);
+        }
+        else
+        {
+            setModified(true);
+        }
+    }
 }
 
 void UBGraphicsScene::drawArcTo(const QPointF& pCenterPoint, qreal pSpanAngle)
