@@ -19,11 +19,14 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QTextStream>
+#include <QThread>
+#include <optional>
 
 #include "core/UBSettings.h"
 
 using namespace winrt;
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Input::Inking;
 
 UBWindowsInkRecognizer::UBWindowsInkRecognizer()
@@ -138,121 +141,116 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
 
         // WinRT Ink uses DIP (device-independent pixels, 96 DPI).
         // Typical handwriting on screen: letters ~30-50 DIP tall.
-        // Scale so that writing height maps to ~40 DIP.
         const qreal targetHeight = 40.0;
         qreal scale = targetHeight / sceneHeight;
 
-        // Build ink strokes using InkStrokeBuilder
-        InkStrokeBuilder builder;
-        InkStrokeContainer container;
-
+        // Run recognition on a worker thread to avoid blocking the UI message pump.
+        // WinRT async operations deadlock if .get() is called on the STA UI thread.
+        QString recognizedText;
+        QStringList candidates;
+        QString recoName;
         int totalStrokesAdded = 0;
+        QString errorMsg;
 
-        for (const auto& stroke : strokes)
-        {
-            if (stroke.points.size() < 2)
-                continue;
+        QThread* thread = QThread::create([&]() {
+            try {
+                winrt::init_apartment(winrt::apartment_type::multi_threaded);
 
-            // Subsample to max 40 points per stroke
-            QVector<QPointF> simplified;
-            int numOriginal = stroke.points.size();
-            int maxPoints = 40;
+                InkStrokeBuilder builder;
+                InkStrokeContainer container;
 
-            if (numOriginal <= maxPoints)
-            {
-                simplified = stroke.points;
-            }
-            else
-            {
-                simplified.append(stroke.points.first());
-                double step = (double)(numOriginal - 1) / (double)(maxPoints - 1);
-                for (int i = 1; i < maxPoints - 1; i++)
+                for (const auto& stroke : strokes)
                 {
-                    int idx = (int)(i * step + 0.5);
-                    if (idx < numOriginal)
-                        simplified.append(stroke.points[idx]);
+                    if (stroke.points.size() < 2)
+                        continue;
+
+                    // Subsample to max 40 points per stroke
+                    QVector<QPointF> simplified;
+                    int numOriginal = stroke.points.size();
+                    int maxPoints = 40;
+
+                    if (numOriginal <= maxPoints)
+                    {
+                        simplified = stroke.points;
+                    }
+                    else
+                    {
+                        simplified.append(stroke.points.first());
+                        double step = (double)(numOriginal - 1) / (double)(maxPoints - 1);
+                        for (int i = 1; i < maxPoints - 1; i++)
+                        {
+                            int idx = (int)(i * step + 0.5);
+                            if (idx < numOriginal)
+                                simplified.append(stroke.points[idx]);
+                        }
+                        simplified.append(stroke.points.last());
+                    }
+
+                    // Create InkPoints
+                    std::vector<InkPoint> inkPoints;
+                    for (const QPointF& p : simplified)
+                    {
+                        float x = (float)((p.x() - minX) * scale);
+                        float y = (float)((p.y() - minY) * scale);
+                        inkPoints.push_back(InkPoint(Windows::Foundation::Point(x, y), 0.5f));
+                    }
+
+                    auto inkStroke = builder.CreateStrokeFromInkPoints(
+                        winrt::single_threaded_vector<InkPoint>(std::move(inkPoints)),
+                        Windows::Foundation::Numerics::float3x2::identity());
+
+                    container.AddStroke(inkStroke);
+                    totalStrokesAdded++;
                 }
-                simplified.append(stroke.points.last());
-            }
 
-            // Create InkPoints
-            std::vector<InkPoint> inkPoints;
-            for (const QPointF& p : simplified)
-            {
-                float x = (float)((p.x() - minX) * scale);
-                float y = (float)((p.y() - minY) * scale);
-                inkPoints.push_back(InkPoint(Windows::Foundation::Point(x, y), 0.5f));
-            }
-
-            // Create the stroke
-            auto inkStroke = builder.CreateStrokeFromInkPoints(
-                winrt::single_threaded_vector<InkPoint>(std::move(inkPoints)),
-                Windows::Foundation::Numerics::float3x2::identity());
-
-            container.AddStroke(inkStroke);
-            totalStrokesAdded++;
-        }
-
-        if (totalStrokesAdded == 0)
-        {
-            result.success = false;
-            result.errorMessage = "No valid strokes to recognize";
-            return result;
-        }
-
-        // Select recognizer based on app language
-        InkRecognizerContainer recoContainer;
-        auto recognizers = recoContainer.GetRecognizers();
-
-        // Find recognizer matching app language
-        QString appLang = UBSettings::settings()->appPreferredLanguage->get().toString();
-        InkRecognizer selectedRecognizer{nullptr};
-
-        if (!appLang.isEmpty())
-        {
-            for (uint32_t i = 0; i < recognizers.Size(); i++)
-            {
-                auto reco = recognizers.GetAt(i);
-                QString name = QString::fromStdString(winrt::to_string(reco.Name()));
-                if (name.contains(appLang, Qt::CaseInsensitive) ||
-                    name.contains(appLang.left(2), Qt::CaseInsensitive))
+                if (totalStrokesAdded == 0)
                 {
-                    selectedRecognizer = reco;
-                    break;
+                    errorMsg = "No valid strokes to recognize";
+                    return;
                 }
-            }
-        }
 
-        // Fallback to first recognizer if no language match
-        if (!selectedRecognizer && recognizers.Size() > 0)
-            selectedRecognizer = recognizers.GetAt(0);
+                // Recognize
+                InkRecognizerContainer recoContainer;
+                auto recognizers = recoContainer.GetRecognizers();
 
-        QString recoName = selectedRecognizer ?
-            QString::fromStdString(winrt::to_string(selectedRecognizer.Name())) : "none";
-        qDebug() << "OCR: using recognizer:" << recoName << "(app lang:" << appLang << ")";
+                // Find recognizer matching app language
+                QString appLang = UBSettings::settings()->appPreferredLanguage->get().toString();
+                recoName = (recognizers.Size() > 0) ?
+                    QString::fromStdString(winrt::to_string(recognizers.GetAt(0).Name())) : "none";
 
-        // Recognize
-        auto recoResults = recoContainer.RecognizeAsync(container, InkRecognitionTarget::All).get();
+                auto recoResults = recoContainer.RecognizeAsync(container, InkRecognitionTarget::All).get();
 
-        // Collect results
-        QString fullText;
-        for (uint32_t i = 0; i < recoResults.Size(); i++)
-        {
-            auto recoResult = recoResults.GetAt(i);
-            auto candidates = recoResult.GetTextCandidates();
-            if (candidates.Size() > 0)
-            {
-                if (!fullText.isEmpty()) fullText += " ";
-                fullText += QString::fromStdString(winrt::to_string(candidates.GetAt(0)));
-
-                // Store alternatives from first result only
-                if (i == 0)
+                // Collect results
+                for (uint32_t i = 0; i < recoResults.Size(); i++)
                 {
-                    for (uint32_t j = 0; j < candidates.Size() && j < 5; j++)
-                        result.candidates.append(QString::fromStdString(winrt::to_string(candidates.GetAt(j))));
+                    auto recoResult = recoResults.GetAt(i);
+                    auto cands = recoResult.GetTextCandidates();
+                    if (cands.Size() > 0)
+                    {
+                        if (!recognizedText.isEmpty()) recognizedText += " ";
+                        recognizedText += QString::fromStdString(winrt::to_string(cands.GetAt(0)));
+
+                        if (i == 0)
+                        {
+                            for (uint32_t j = 0; j < cands.Size() && j < 5; j++)
+                                candidates.append(QString::fromStdString(winrt::to_string(cands.GetAt(j))));
+                        }
+                    }
                 }
+
+                winrt::uninit_apartment();
             }
-        }
+            catch (const winrt::hresult_error& ex) {
+                errorMsg = "WinRT error: " + QString::fromStdString(winrt::to_string(ex.message()));
+            }
+            catch (const std::exception& ex) {
+                errorMsg = QString("Exception: ") + ex.what();
+            }
+        });
+
+        thread->start();
+        thread->wait(10000); // 10 second timeout
+        delete thread;
 
         // Write diagnostic file
         {
@@ -267,13 +265,19 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
                 out << "Scene bounds: X[" << minX << "," << maxX << "] Y[" << minY << "," << maxY << "]\n";
                 out << "Scene size: " << sceneWidth << " x " << sceneHeight << "\n";
                 out << "Recognizer: " << recoName << "\n";
-                out << "Recognition results count: " << recoResults.Size() << "\n";
-                out << "Full text: \"" << fullText << "\"\n";
+                out << "Full text: \"" << recognizedText << "\"\n";
+                if (!errorMsg.isEmpty()) out << "Error: " << errorMsg << "\n";
                 diagFile.close();
             }
         }
 
-        if (fullText.isEmpty())
+        if (!errorMsg.isEmpty())
+        {
+            result.success = false;
+            result.errorMessage = errorMsg;
+            qDebug() << "OCR error:" << errorMsg;
+        }
+        else if (recognizedText.isEmpty())
         {
             result.success = false;
             result.errorMessage = "Recognition produced no text";
@@ -281,14 +285,9 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         else
         {
             result.success = true;
-            result.text = fullText;
+            result.text = recognizedText;
+            result.candidates = candidates;
         }
-    }
-    catch (const winrt::hresult_error& ex)
-    {
-        result.success = false;
-        result.errorMessage = "WinRT error: " + QString::fromStdString(winrt::to_string(ex.message()));
-        qDebug() << "OCR WinRT error:" << result.errorMessage;
     }
     catch (const std::exception& ex)
     {
