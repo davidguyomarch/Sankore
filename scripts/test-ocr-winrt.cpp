@@ -183,9 +183,9 @@ int main(int argc, char* argv[])
     printf("Bounding box: X[%.1f, %.1f] Y[%.1f, %.1f] = %.0f x %.0f\n\n",
         gMinX, gMinY, gMaxX, gMaxY, gMaxX-gMinX, gMaxY-gMinY);
 
-    // Initialize WinRT
+    // Initialize WinRT — MUST be multi_threaded to avoid RecognizeAsync deadlock
     try {
-        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        winrt::init_apartment(winrt::apartment_type::multi_threaded);
     } catch (...) {}
 
     // List recognizers
