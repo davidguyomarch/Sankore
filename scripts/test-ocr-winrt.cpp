@@ -3,7 +3,7 @@
 // Results are printed AND copied to clipboard for easy sharing.
 //
 // Compile (from Developer Command Prompt for VS 2022):
-//   cl /EHsc /std:c++17 /await /bigobj test-ocr-winrt.cpp WindowsApp.lib /Fe:test-ocr-winrt.exe
+//   cl /EHsc /std:c++17 /bigobj test-ocr-winrt.cpp WindowsApp.lib /Fe:test-ocr-winrt.exe
 //
 // Run:
 //   test-ocr-winrt.exe [path_to_dump]

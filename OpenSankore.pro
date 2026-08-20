@@ -146,7 +146,7 @@ win32 {
    LIBS += -lDwmapi -lWtsapi32 -lUser32 -lShell32 -lOle32 -lAdvapi32 -lGdi32 -lCrypt32 -lWs2_32
    # C++/WinRT for modern Ink recognition API
    LIBS += -lWindowsApp
-   QMAKE_CXXFLAGS += /await /bigobj
+   QMAKE_CXXFLAGS += /bigobj
    INCLUDEPATH += $$(VCPKG_ROOT)/installed/x64-windows/include
    UB_LIBRARY.path = $$DESTDIR
    UB_I18N.path = $$DESTDIR/i18n
