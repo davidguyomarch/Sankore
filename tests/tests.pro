@@ -4,7 +4,7 @@ TEMPLATE = app
 CONFIG += testcase console c++17
 CONFIG -= app_bundle
 
-QT += core gui widgets testlib xml network
+QT += core gui widgets testlib xml network svg
 
 # Paths — tests/ shims take priority over ../src for stubbed headers
 INCLUDEPATH += .
