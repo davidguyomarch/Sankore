@@ -7,6 +7,9 @@
 
 #ifdef Q_OS_WIN
 
+// Silence deprecation of experimental coroutines (WinRT headers use them in C++17 mode)
+#define _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
+
 // C++/WinRT headers
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
