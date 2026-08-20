@@ -1,7 +1,7 @@
   TARGET = OpenSankoreTests
 TEMPLATE = app
 
-CONFIG += testcase console c++17
+CONFIG += testcase console c++20
 CONFIG -= app_bundle
 
 QT += core gui widgets testlib xml network svg

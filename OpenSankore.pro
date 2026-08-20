@@ -6,7 +6,7 @@ THIRD_PARTY_PATH=../Sankore-ThirdParty
 CONFIG -= flat
 CONFIG += debug_and_release \
           no_include_pwd \
-          c++17
+          c++20
 
 
 VERSION_MAJ = 4

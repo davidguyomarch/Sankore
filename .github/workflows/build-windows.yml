@@ -180,7 +180,7 @@ jobs:
         if: success()
         shell: cmd
         run: |
-          cl /EHsc /std:c++17 /bigobj scripts\test-ocr-winrt.cpp WindowsApp.lib user32.lib /Fe:build\win32\release\product\test-ocr-winrt.exe
+          cl /EHsc /std:c++20 /bigobj scripts\test-ocr-winrt.cpp WindowsApp.lib user32.lib /Fe:build\win32\release\product\test-ocr-winrt.exe
           if exist build\win32\release\product\test-ocr-winrt.exe echo OCR test tool built successfully
 
       - name: Smoke test (launch and verify no crash)
