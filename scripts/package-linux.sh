@@ -8,7 +8,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 ARCH="${1:-amd64}"
-VERSION="4.0.0"
+VERSION="4.0.1"
 PRODUCT_DIR="$PROJECT_DIR/build/linux/release/product"
 PKG_DIR="$PROJECT_DIR/build/packages"
 
