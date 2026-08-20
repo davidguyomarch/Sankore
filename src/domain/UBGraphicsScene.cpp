@@ -74,6 +74,7 @@
 #include "UBGraphicsTextItem.h"
 #include "UBGraphicsTextItemDelegate.h"
 #include "UBGraphicsStrokesGroup.h"
+#include "UBSmoothStrokeItem.h"
 
 #include "customWidgets/UBGraphicsItemAction.h"
 
@@ -422,17 +423,6 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             // -----------------------------------------------------------------
             qreal width = 0;
 
-            // delete current stroke, if not assigned to any polygon
-            if (mCurrentStroke && mCurrentStroke->polygons().empty()){
-                delete mCurrentStroke;
-                mCurrentStroke = nullptr;
-            }
-
-            // ---------------------------------------------------------------
-            // Create a new Stroke. A Stroke is a collection of QGraphicsLines
-            // ---------------------------------------------------------------
-            mCurrentStroke = new UBGraphicsStroke();
-
             if (currentTool != UBStylusTool::Line){
                 // Handle the pressure
                 width = mContext.drawingController->currentToolWidth() * pressure;
@@ -447,14 +437,68 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             mAddedItems.clear();
             mRemovedItems.clear();
 
-            if (mContext.drawingController->mActiveRuler)
+            // -----------------------------------------------------------------
+            // New smooth stroke pipeline (single QPainterPath item)
+            // Used for Pen and Marker freehand. Line tool uses legacy pipeline.
+            // -----------------------------------------------------------------
+            bool useSmoothStroke = mSettings->appSmoothStrokeItem->get().toBool()
+                                   && currentTool != UBStylusTool::Line
+                                   && !mContext.drawingController->mActiveRuler;
+
+            if (useSmoothStroke)
             {
-                mContext.drawingController->mActiveRuler->StartLine(scenePos, width);
+                mCurrentSmoothStroke = new UBSmoothStrokeItem();
+                mCurrentSmoothStroke->setStrokeWidth(width);
+
+                // Set colors based on tool and background
+                QColor colorOnDarkBG, colorOnLightBG;
+                if (currentTool == UBStylusTool::Marker)
+                {
+                    colorOnDarkBG = mContext.markerColorOnDarkBackground;
+                    colorOnLightBG = mContext.markerColorOnLightBackground;
+                }
+                else
+                {
+                    colorOnDarkBG = mContext.penColorOnDarkBackground;
+                    colorOnLightBG = mContext.penColorOnLightBackground;
+                }
+
+                mCurrentSmoothStroke->setColorOnDarkBackground(colorOnDarkBG);
+                mCurrentSmoothStroke->setColorOnLightBackground(colorOnLightBG);
+
+                if (mDarkBackground)
+                    mCurrentSmoothStroke->setStrokeColor(colorOnDarkBG);
+                else
+                    mCurrentSmoothStroke->setStrokeColor(colorOnLightBG);
+
+                mCurrentSmoothStroke->setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
+
+                addItem(mCurrentSmoothStroke);
+                mCurrentSmoothStroke->addPoint(scenePos, pressure);
+
+                mCurrentStroke = nullptr;
             }
             else
             {
-                moveTo(scenePos);
-                drawLineTo(scenePos, width, mContext.drawingController->stylusTool() == UBStylusTool::Line);
+                // Legacy polygon-based pipeline (Line tool, ruler-guided, or setting disabled)
+                // delete current stroke, if not assigned to any polygon
+                if (mCurrentStroke && mCurrentStroke->polygons().empty()){
+                    delete mCurrentStroke;
+                    mCurrentStroke = nullptr;
+                }
+
+                mCurrentStroke = new UBGraphicsStroke();
+                mCurrentSmoothStroke = nullptr;
+
+                if (mContext.drawingController->mActiveRuler)
+                {
+                    mContext.drawingController->mActiveRuler->StartLine(scenePos, width);
+                }
+                else
+                {
+                    moveTo(scenePos);
+                    drawLineTo(scenePos, width, mContext.drawingController->stylusTool() == UBStylusTool::Line);
+                }
             }
             accepted = true;
         }
@@ -507,6 +551,13 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
     {
         if (dc->isDrawingTool())
         {
+            // --- New smooth stroke pipeline: just accumulate points ---
+            if (mCurrentSmoothStroke)
+            {
+                mCurrentSmoothStroke->addPoint(position, pressure);
+            }
+            else
+            {
             qreal width = 0;
 
             if (currentTool != UBStylusTool::Line){
@@ -589,6 +640,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
                     drawLineTo(position, width, bLineStyle);
                 }
             }
+            } // end legacy else branch
         }
         else if (currentTool == UBStylusTool::Eraser)
         {
@@ -635,6 +687,21 @@ bool UBGraphicsScene::inputDeviceRelease()
 
     if (dc->isDrawingTool() || mDrawWithCompass)
     {
+        // --- New smooth stroke pipeline: finalize and wire undo ---
+        if (mCurrentSmoothStroke)
+        {
+            mCurrentSmoothStroke->finalize();
+
+            // The item was already added to the scene in inputDevicePress.
+            // Wire it into the undo system.
+            mAddedItems.clear();
+            mAddedItems << mCurrentSmoothStroke;
+
+            mCurrentSmoothStroke = nullptr;
+        }
+        else
+        {
+        // --- Legacy polygon pipeline ---
         // Flush any remaining smoothing buffer points
         flushSmoothBuffer(dc->stylusTool() == UBStylusTool::Line);
 
@@ -691,6 +758,7 @@ bool UBGraphicsScene::inputDeviceRelease()
                 mCurrentStroke = 0;
             }
         }
+        } // end legacy else
     }
 
     if (mRemovedItems.size() > 0 || mAddedItems.size() > 0)

@@ -238,6 +238,7 @@ void UBSettings::init()
     appToolBarDisplayText = new UBSetting(this, "App", "ToolBarDisplayText", false);
     appTheme = new UBSetting(this, "App", "Theme", "dark");
     appStrokeSmoothing = new UBSetting(this, "App", "StrokeSmoothing", true);
+    appSmoothStrokeItem = new UBSetting(this, "App", "SmoothStrokeItem", true);
     appEnableAutomaticSoftwareUpdates = new UBSetting(this, "App", "EnableAutomaticSoftwareUpdates", true);
     appEnableSoftwareUpdates = new UBSetting(this, "App", "EnableSoftwareUpdates", true);
     appToolBarOrientationVertical = new UBSetting(this, "App", "ToolBarOrientationVertical", false);    

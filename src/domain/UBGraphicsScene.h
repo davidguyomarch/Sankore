@@ -57,6 +57,7 @@ class UBDocumentProxy;
 class UBSettings;
 class UBGraphicsCurtainItem;
 class UBGraphicsStroke;
+class UBSmoothStrokeItem;
 class UBMagnifierParams;
 class UBMagnifier;
 class UBGraphicsCache;
@@ -457,6 +458,7 @@ public slots:
         RenderingContext mRenderingContext;
 
         UBGraphicsStroke* mCurrentStroke;
+        UBSmoothStrokeItem* mCurrentSmoothStroke = nullptr;
 
         bool mShouldUseOMP;
 
