@@ -52,6 +52,9 @@ public:
     /** Append a point (in scene coordinates) with associated pressure [0..1]. */
     void addPoint(const QPointF& scenePos, qreal pressure = 1.0);
 
+    /** Replace the last point (for Line tool: rubber-band from first to current). */
+    void setLastPoint(const QPointF& scenePos, qreal pressure = 1.0);
+
     /** Called at mouse/stylus release. Marks the stroke as complete. */
     void finalize();
 
@@ -95,6 +98,8 @@ public:
      * Returns true if the item should be removed (path became empty).
      */
     bool subtractPath(const QPainterPath& eraserPath);
+
+    QRectF boundingRect() const override;
 
 protected:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

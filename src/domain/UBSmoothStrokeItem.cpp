@@ -60,6 +60,24 @@ void UBSmoothStrokeItem::finalize()
     rebuildPath();
 }
 
+void UBSmoothStrokeItem::setLastPoint(const QPointF& scenePos, qreal pressure)
+{
+    QPointF localPos = mapFromScene(scenePos);
+
+    if (mRawPoints.size() < 2)
+    {
+        // Not enough points yet — just add
+        addPoint(scenePos, pressure);
+        return;
+    }
+
+    // Replace the last point
+    mRawPoints.last() = localPos;
+    mRawPressures.last() = qBound(0.0, pressure, 1.0);
+
+    rebuildPath();
+}
+
 void UBSmoothStrokeItem::setStrokeColor(const QColor& color)
 {
     QPen p = pen();
@@ -147,9 +165,30 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
     strokePen.setCapStyle(Qt::RoundCap);
     strokePen.setJoinStyle(Qt::RoundJoin);
 
+    // Soft-edge pass: draw a slightly wider, semi-transparent version first
+    // This creates a smooth feathered edge similar to SMART Notebook rendering
+    if (strokePen.widthF() >= 1.5)
+    {
+        QPen softPen = strokePen;
+        QColor softColor = strokePen.color();
+        softColor.setAlphaF(softColor.alphaF() * 0.3);
+        softPen.setColor(softColor);
+        softPen.setWidthF(strokePen.widthF() + 2.0);
+        painter->setPen(softPen);
+        painter->setBrush(Qt::NoBrush);
+        painter->drawPath(path());
+    }
+
+    // Main stroke pass
     painter->setPen(strokePen);
     painter->setBrush(Qt::NoBrush);
     painter->drawPath(path());
+}
+
+QRectF UBSmoothStrokeItem::boundingRect() const
+{
+    // Expand by 1px margin for the soft-edge pass (pen + 2.0 wider → +1.0 each side)
+    return QGraphicsPathItem::boundingRect().adjusted(-1.0, -1.0, 1.0, 1.0);
 }
 
 void UBSmoothStrokeItem::rebuildPath()

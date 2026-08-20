@@ -442,7 +442,6 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             // Used for Pen and Marker freehand. Line tool uses legacy pipeline.
             // -----------------------------------------------------------------
             bool useSmoothStroke = mSettings->appSmoothStrokeItem->get().toBool()
-                                   && currentTool != UBStylusTool::Line
                                    && !mContext.drawingController->mActiveRuler;
 
             if (useSmoothStroke)
@@ -554,7 +553,30 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
             // --- New smooth stroke pipeline: just accumulate points ---
             if (mCurrentSmoothStroke)
             {
-                mCurrentSmoothStroke->addPoint(position, pressure);
+                if (currentTool == UBStylusTool::Line)
+                {
+                    // Line tool: rubber-band from start to snapped endpoint
+                    QPointF startPos = mCurrentSmoothStroke->rawPoints().first();
+                    // Map start from local back to scene for angle calc
+                    QPointF sceneStart = mCurrentSmoothStroke->mapToScene(startPos);
+
+                    QLineF radius(sceneStart, position);
+                    qreal angle = radius.angle();
+                    angle = qRound(angle / 45) * 45;
+                    qreal radiusLength = radius.length();
+                    QPointF snappedPos(
+                        sceneStart.x() + radiusLength * cos((angle * PI) / 180),
+                        sceneStart.y() - radiusLength * sin((angle * PI) / 180));
+                    QLineF chord(position, snappedPos);
+                    if (chord.length() < qMin((int)16, (int)(radiusLength / 20)))
+                        position = snappedPos;
+
+                    mCurrentSmoothStroke->setLastPoint(position, pressure);
+                }
+                else
+                {
+                    mCurrentSmoothStroke->addPoint(position, pressure);
+                }
             }
             else
             {
