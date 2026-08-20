@@ -179,6 +179,13 @@ jobs:
           copy C:\vcpkg\installed\x64-windows\bin\libcrypto-3-x64.dll build\win32\release\product\
           dir build\win32\release\product\
 
+      - name: Build OCR test tool
+        if: success()
+        shell: cmd
+        run: |
+          cl /EHsc /std:c++17 /await /bigobj scripts\test-ocr-winrt.cpp WindowsApp.lib /Fe:build\win32\release\product\test-ocr-winrt.exe
+          if exist build\win32\release\product\test-ocr-winrt.exe echo OCR test tool built successfully
+
       - name: Smoke test (launch and verify no crash)
         if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         shell: pwsh
