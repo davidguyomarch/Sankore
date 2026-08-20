@@ -139,9 +139,9 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         if (sceneWidth < 1.0) sceneWidth = 1.0;
         if (sceneHeight < 1.0) sceneHeight = 1.0;
 
-        // WinRT Ink uses DIP (device-independent pixels, 96 DPI).
-        // Typical handwriting on screen: letters ~30-50 DIP tall.
-        const qreal targetHeight = 40.0;
+        // WinRT Ink coordinates: the recognizer expects stroke sizes similar to
+        // what a user would draw on screen. Typical handwriting is ~200-500 units tall.
+        const qreal targetHeight = 500.0;
         qreal scale = targetHeight / sceneHeight;
 
         // Run recognition on a worker thread to avoid blocking the UI message pump.
