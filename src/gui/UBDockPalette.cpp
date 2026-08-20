@@ -556,11 +556,26 @@ void UBDockPalette::assignParent(QWidget *widget)
 void UBDockPalette::setVisible(bool visible)
 {
     QWidget::setVisible(visible);
-    mTabPalette->setVisible(visible);
+
     if (visible)
     {
+        mTabPalette->setVisible(true);
         raise();
         mTabPalette->raise();
+    }
+    else
+    {
+        // When collapsed (hidden), keep tabs visible so the user can re-expand,
+        // unless there are no tab widgets at all (palette truly removed from UI).
+        if (mTabWidgets.isEmpty())
+        {
+            mTabPalette->setVisible(false);
+        }
+        else
+        {
+            mTabPalette->setVisible(true);
+            mTabPalette->raise();
+        }
     }
 }
 
