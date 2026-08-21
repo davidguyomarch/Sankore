@@ -101,7 +101,7 @@ void UBSmoothStrokeItem::setUuid(const QUuid& pUuid)
 
 UBGraphicsScene* UBSmoothStrokeItem::scene()
 {
-    return qobject_cast<UBGraphicsScene*>(QGraphicsPathItem::scene());
+    return dynamic_cast<UBGraphicsScene*>(QGraphicsPathItem::scene());
 }
 
 UBItem* UBSmoothStrokeItem::deepCopy() const
