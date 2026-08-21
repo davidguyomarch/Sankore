@@ -58,6 +58,8 @@ class UBApplicationController;
 class UBDockTeacherGuideWidget;
 class UBStartupHintsPalette;
 class UBCreateLinkPalette;
+class QQuickWidget;
+class UBStylusController;
 
 class UBBoardPaletteManager : public QObject
 {
@@ -126,6 +128,8 @@ class UBBoardPaletteManager : public QObject
 
         UBDrawingPalette *mDrawingPalette;
         UBStylusPalette *mStylusPalette;
+        QQuickWidget *mStylusPaletteQml;
+        UBStylusController *mStylusController;
 
         UBZoomPalette *mZoomPalette;
         UBStartupHintsPalette* mTipPalette;
