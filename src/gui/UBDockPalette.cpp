@@ -24,7 +24,6 @@
 #include <QPoint>
 #include <QPointF>
 #include <QPainterPath>
-#include <QPropertyAnimation>
 
 #include "UBDockPalette.h"
 
@@ -326,50 +325,21 @@ void UBDockPalette::toggleCollapseExpand()
 {
     if(width() < mCollapseWidth || !isVisible())
     {
-        // Expand with animation
+        // Expand
         show();
+        resize(mLastWidth, height());
         raise();
         mTabPalette->raise();
-
-        QPropertyAnimation* anim = new QPropertyAnimation(this, "minimumWidth");
-        anim->setDuration(200);
-        anim->setStartValue(0);
-        anim->setEndValue(mLastWidth);
-        anim->setEasingCurve(QEasingCurve::OutCubic);
-        connect(anim, &QPropertyAnimation::valueChanged, this, [this](const QVariant& val) {
-            resize(val.toInt(), height());
-            moveTabs();
-        });
-        connect(anim, &QPropertyAnimation::finished, this, [this, anim]() {
-            setMinimumWidth(0); // restore
-            anim->deleteLater();
-        });
-        anim->start();
+        moveTabs();
     }
     else
     {
-        // Collapse with animation
+        // Collapse
         mLastWidth = width();
-
-        QPropertyAnimation* anim = new QPropertyAnimation(this, "minimumWidth");
-        anim->setDuration(150);
-        anim->setStartValue(width());
-        anim->setEndValue(0);
-        anim->setEasingCurve(QEasingCurve::InCubic);
-        connect(anim, &QPropertyAnimation::valueChanged, this, [this](const QVariant& val) {
-            resize(val.toInt(), height());
-            moveTabs();
-        });
-        connect(anim, &QPropertyAnimation::finished, this, [this, anim]() {
-            setMinimumWidth(0); // restore
-            hide();
-            moveTabs();
-            // Force parent to repaint the area we just vacated
-            if (parentWidget())
-                parentWidget()->update();
-            anim->deleteLater();
-        });
-        anim->start();
+        hide();
+        moveTabs();
+        if (parentWidget())
+            parentWidget()->update();
     }
     // Notify subclasses to save collapsed state
     QResizeEvent ev(size(), size());

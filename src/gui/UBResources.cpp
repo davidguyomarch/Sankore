@@ -64,7 +64,7 @@ UBResources* UBResources::resources()
 void UBResources::init()
 {
     // Cursors
-    penCursor       = QCursor(QPixmap(":/images/cursors/pen.svg"), 3, 29);
+    penCursor       = QCursor(QPixmap(":/images/cursors/pen.svg"), 4, 28);
     eraserCursor    = QCursor(QPixmap(":/images/cursors/eraser.png"), 21, 21);
     markerCursor    = QCursor(QPixmap(":/images/cursors/marker.png"), 3, 30);
     pointerCursor   = QCursor(QPixmap(":/images/cursors/laser.png"), 2, 1);

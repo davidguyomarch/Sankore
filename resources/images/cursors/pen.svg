@@ -1,13 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <!-- Pen cursor: tip at bottom-left (4,28), body angled 45° -->
-  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Pen body (dark with white outline for visibility on any background) -->
-    <path d="M4 28 L24 8 L28 12 L8 32 Z" fill="#333333" stroke="white" stroke-width="1.5"/>
-    <!-- Pen tip -->
-    <path d="M4 28 L2 30" stroke="#333333" stroke-width="2"/>
-    <!-- Highlight line on pen body -->
-    <line x1="10" y1="22" x2="22" y2="10" stroke="white" stroke-width="1" opacity="0.6"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+  <!-- Phosphor PencilSimple Bold, with white outline for cursor visibility -->
+  <g>
+    <!-- White outline (thicker, rendered first) -->
+    <path d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,108.69,147.32,64l24-24L216,84.69Z"
+          fill="white" stroke="white" stroke-width="12"/>
+    <!-- Dark fill on top -->
+    <path d="M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.32,96A16,16,0,0,0,227.32,73.37ZM192,108.69,147.32,64l24-24L216,84.69Z"
+          fill="#333333"/>
   </g>
-  <!-- Dot at tip for precision -->
-  <circle cx="3" cy="29" r="1.5" fill="white" stroke="#333333" stroke-width="0.5"/>
 </svg>
