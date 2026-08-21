@@ -9,14 +9,14 @@
 //   UBBoardController::systemScaleFactor()
 //   UBBoardController::currentZoom()
 // Include the full header only in the app build (not tests)
-#ifdef QT_SVG_LIB
+#if defined(QT_SVG_LIB) && !defined(QT_TESTLIB_LIB)
 #include "board/UBBoardController.h"
 #include "board/UBDrawingController.h"
 #endif
 
 qreal UBSceneContext::systemScaleFactor() const
 {
-#ifdef QT_SVG_LIB
+#if defined(QT_SVG_LIB) && !defined(QT_TESTLIB_LIB)
     if (boardController)
         return boardController->systemScaleFactor();
 #endif
@@ -25,7 +25,7 @@ qreal UBSceneContext::systemScaleFactor() const
 
 qreal UBSceneContext::currentZoom() const
 {
-#ifdef QT_SVG_LIB
+#if defined(QT_SVG_LIB) && !defined(QT_TESTLIB_LIB)
     if (boardController)
         return boardController->currentZoom();
 #endif
