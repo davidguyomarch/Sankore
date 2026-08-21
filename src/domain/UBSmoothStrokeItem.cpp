@@ -142,15 +142,24 @@ bool UBSmoothStrokeItem::subtractPath(const QPainterPath& eraserPath)
     // Convert eraser path to local coordinates
     QPainterPath localEraserPath = mapFromScene(eraserPath);
 
-    QPainterPath currentPath = path();
-    QPainterPath newPath = currentPath.subtracted(localEraserPath);
+    // For stroke paths (open curves), QPainterPath::subtracted() doesn't work correctly
+    // because it operates on filled areas, not on stroke outlines.
+    // Instead, we check if the eraser intersects our stroke outline.
+    // If it does, we remove the entire stroke item (whole-stroke eraser behavior,
+    // consistent with how SMART Notebook and most TNI apps handle erasing).
 
-    if (newPath.isEmpty())
+    QPainterPathStroker stroker;
+    stroker.setWidth(mNominalWidth + 2.0); // slightly wider to ensure detection
+    stroker.setCapStyle(Qt::RoundCap);
+    stroker.setJoinStyle(Qt::RoundJoin);
+
+    QPainterPath strokeOutline = stroker.createStroke(path());
+
+    if (localEraserPath.intersects(strokeOutline))
     {
-        return true; // caller should remove this item
+        return true; // eraser touches this stroke → remove entirely
     }
 
-    setPath(newPath);
     return false;
 }
 

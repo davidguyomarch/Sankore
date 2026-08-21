@@ -568,6 +568,10 @@ void UBApplication::themeChanged(QAction* action)
             pm->leftPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
         if (pm->rightPalette())
             pm->rightPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+        if (pm->stylusPalette())
+            pm->stylusPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+        if (pm->drawingPalette())
+            pm->drawingPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
     }
 
     // Reload toolbar icons from theme directory
