@@ -54,6 +54,10 @@
 
 #include "desktop/UBDesktopAnnotationController.h"
 
+#include <QQuickWidget>
+#include <QQmlContext>
+#include "qml/UBThemeManager.h"
+
 
 #include "network/UBNetworkAccessManager.h"
 #include "network/UBServerXMLHttpRequest.h"
@@ -268,6 +272,18 @@ void UBBoardPaletteManager::setupPalettes()
     mZoomPalette = new UBZoomPalette(mContainer);
     mStylusPalette->stackUnder(mZoomPalette);
     mDrawingPalette->stackUnder(mZoomPalette);
+
+    // QML overlay proof-of-concept (Issue #110 Step 1)
+    QQuickWidget* qmlOverlay = new QQuickWidget(mContainer);
+    qmlOverlay->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    qmlOverlay->setClearColor(Qt::transparent);
+    qmlOverlay->setAttribute(Qt::WA_TranslucentBackground);
+    qmlOverlay->setAttribute(Qt::WA_AlwaysStackOnTop);
+    qmlOverlay->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    qmlOverlay->setSource(QUrl("qrc:/qml/TestOverlay.qml"));
+    qmlOverlay->setFixedSize(200, 48);
+    qmlOverlay->move((mContainer->width() - 200) / 2, mContainer->height() - 130);
+    qmlOverlay->show();
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
     // mTipPalette = new UBStartupHintsPalette(mContainer);

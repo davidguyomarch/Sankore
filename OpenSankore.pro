@@ -39,6 +39,8 @@ QT += multimedia
 QT += multimediawidgets
 QT += xml
 QT += qml
+QT += quick
+QT += quickwidgets
 QT += widgets
 QT += printsupport
 QT += core5compat
@@ -73,6 +75,7 @@ include(src/pdf-merger/pdfMerger.pri)
 #plugins
 include(plugins/plugins.pri)
 include(src/recognition/recognition.pri)
+include(src/qml/qml.pri)
 INCLUDEPATH += plugins/cffadaptor/src
 
 
