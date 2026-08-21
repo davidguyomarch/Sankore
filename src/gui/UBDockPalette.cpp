@@ -24,6 +24,7 @@
 #include <QPoint>
 #include <QPointF>
 #include <QPainterPath>
+#include <QPropertyAnimation>
 
 #include "UBDockPalette.h"
 
@@ -214,25 +215,22 @@ void UBDockPalette::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(mBackgroundBrush);
-    QPainterPath path;
-    path.setFillRule(Qt::WindingFill);
 
     int nbTabs = mTabWidgets.size();
-    if(0 < nbTabs)
+    if (0 < nbTabs)
     {
-        // First draw the BIG RECTANGLE (I write it big because the rectangle is big...)
-        if(mOrientation == eUBDockOrientation_Left)
-        {
-            path.addRect(0.0, 0.0, width(), height());
-        }
-        else if(mOrientation == eUBDockOrientation_Right)
-        {
-            path.addRect(0.0, 0.0, width(), height());
-        }
+        // Panel body background
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(mBackgroundBrush);
+        painter.drawRect(rect());
 
-        painter.drawPath(path);
+        // Subtle border on the outer edge (side facing the board)
+        QPen borderPen(UBTheme::borderSubtle(), 1);
+        painter.setPen(borderPen);
+        if (mOrientation == eUBDockOrientation_Left)
+            painter.drawLine(width() - 1, 0, width() - 1, height());
+        else if (mOrientation == eUBDockOrientation_Right)
+            painter.drawLine(0, 0, 0, height());
     }
 }
 
@@ -325,18 +323,47 @@ void UBDockPalette::toggleCollapseExpand()
 {
     if(width() < mCollapseWidth || !isVisible())
     {
-        // Expand
+        // Expand with animation
         show();
-        resize(mLastWidth, height());
         raise();
         mTabPalette->raise();
-        moveTabs();
+
+        QPropertyAnimation* anim = new QPropertyAnimation(this, "minimumWidth");
+        anim->setDuration(200);
+        anim->setStartValue(0);
+        anim->setEndValue(mLastWidth);
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+        connect(anim, &QPropertyAnimation::valueChanged, this, [this](const QVariant& val) {
+            resize(val.toInt(), height());
+            moveTabs();
+        });
+        connect(anim, &QPropertyAnimation::finished, this, [this, anim]() {
+            setMinimumWidth(0); // restore
+            anim->deleteLater();
+        });
+        anim->start();
     }
-    else{
-        // Collapse
+    else
+    {
+        // Collapse with animation
         mLastWidth = width();
-        hide();
-        moveTabs();
+
+        QPropertyAnimation* anim = new QPropertyAnimation(this, "minimumWidth");
+        anim->setDuration(150);
+        anim->setStartValue(width());
+        anim->setEndValue(0);
+        anim->setEasingCurve(QEasingCurve::InCubic);
+        connect(anim, &QPropertyAnimation::valueChanged, this, [this](const QVariant& val) {
+            resize(val.toInt(), height());
+            moveTabs();
+        });
+        connect(anim, &QPropertyAnimation::finished, this, [this, anim]() {
+            setMinimumWidth(0); // restore
+            hide();
+            moveTabs();
+            anim->deleteLater();
+        });
+        anim->start();
     }
     // Notify subclasses to save collapsed state
     QResizeEvent ev(size(), size());
@@ -633,75 +660,83 @@ UBTabDockPalette::UBTabDockPalette(UBDockPalette *dockPalette, QWidget *parent) 
 
 void UBTabDockPalette::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
     int nTabs = dock->mTabWidgets.size();
-    if (nTabs <= 0) {
-        qDebug() << "not enough tabs";
+    if (nTabs <= 0)
         return;
-    }
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(dock->mBackgroundBrush);
+
+    const int tabRadius = 8;
+    const int iconMargin = 8;
+    const int spacing = dock->tabSpacing();
 
     int yFrom = 0;
     for (int i = 0; i < nTabs; i++) {
         UBDockPaletteWidget* pCrntWidget = dock->mTabWidgets.at(i);
-        QPainterPath path;
-        path.setFillRule(Qt::WindingFill);
-        QPixmap iconPixmap;
+        QRectF tabRect(0, yFrom, width(), TABSIZE);
 
-        switch (dock->mOrientation) {
-        case eUBDockOrientation_Left:
-            path.addRect(0, yFrom, width() / 2, TABSIZE);
-            path.addRoundedRect(0, yFrom, width(), TABSIZE, dock->radius(), dock->radius());
-            if (pCrntWidget) {
-                if(dock->mCollapseWidth >= dock->width()) {
-                    // Get the collapsed icon
-                    iconPixmap = pCrntWidget->iconToRight();
-                } else {
-                    // Get the expanded icon
-                    iconPixmap = pCrntWidget->iconToLeft();
-                }
+        // --- Tab background ---
+        bool isActive = (dock->mCurrentTab == i);
 
-            }
-            break;
-
-        case eUBDockOrientation_Right:
-            path.addRect(width() /2, yFrom, width() / 2, TABSIZE);
-            path.addRoundedRect(0, yFrom, width(), TABSIZE, dock->radius(), dock->radius());
-            if (pCrntWidget) {
-                if(dock->mCollapseWidth >= dock->width()) {
-                    // Get the collapsed icon
-                    iconPixmap = pCrntWidget->iconToLeft();
-                } else {
-                    // Get the expanded icon
-                    iconPixmap = pCrntWidget->iconToRight();
-                }
-            }
-            break;
-
-        case eUBDockOrientation_Top: ;
-        case eUBDockOrientation_Bottom: ;
-        default:
-            break;
+        if (isActive)
+        {
+            // Active tab: primary accent color
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(UBTheme::primary());
+        }
+        else
+        {
+            // Inactive tab: surface with subtle border
+            painter.setPen(QPen(UBTheme::border(), 1));
+            painter.setBrush(dock->mBackgroundBrush);
         }
 
-        painter.save();
-        QPixmap transparencyPix(":/images/tab_mask.png");
-        if (dock->mCurrentTab != i) {
-            iconPixmap; // setAlphaChannel removed in Qt6;
-            // Use a slightly dimmed version of the palette color for inactive tabs
-            QColor color = UBSettings::paletteColor;
-            color.setAlpha(160);
-            painter.setBrush(QBrush(color));
+        // Draw pill shape (rounded on outer side, flat on dock side)
+        QPainterPath path;
+        if (dock->mOrientation == eUBDockOrientation_Left)
+        {
+            // Rounded on right side only
+            path.moveTo(tabRect.left(), tabRect.top());
+            path.lineTo(tabRect.right() - tabRadius, tabRect.top());
+            path.arcTo(tabRect.right() - 2 * tabRadius, tabRect.top(), 2 * tabRadius, 2 * tabRadius, 90, -90);
+            path.lineTo(tabRect.right(), tabRect.bottom() - tabRadius);
+            path.arcTo(tabRect.right() - 2 * tabRadius, tabRect.bottom() - 2 * tabRadius, 2 * tabRadius, 2 * tabRadius, 0, -90);
+            path.lineTo(tabRect.left(), tabRect.bottom());
+            path.closeSubpath();
+        }
+        else
+        {
+            // Right dock: rounded on left side only
+            path.moveTo(tabRect.right(), tabRect.top());
+            path.lineTo(tabRect.left() + tabRadius, tabRect.top());
+            path.arcTo(tabRect.left(), tabRect.top(), 2 * tabRadius, 2 * tabRadius, 90, 90);
+            path.lineTo(tabRect.left(), tabRect.bottom() - tabRadius);
+            path.arcTo(tabRect.left(), tabRect.bottom() - 2 * tabRadius, 2 * tabRadius, 2 * tabRadius, 180, 90);
+            path.lineTo(tabRect.right(), tabRect.bottom());
+            path.closeSubpath();
         }
 
         painter.drawPath(path);
+
+        // --- Tab icon ---
+        QPixmap iconPixmap;
+        if (pCrntWidget)
+        {
+            if (dock->mOrientation == eUBDockOrientation_Left)
+                iconPixmap = (dock->mCollapseWidth >= dock->width()) ? pCrntWidget->iconToRight() : pCrntWidget->iconToLeft();
+            else
+                iconPixmap = (dock->mCollapseWidth >= dock->width()) ? pCrntWidget->iconToLeft() : pCrntWidget->iconToRight();
+        }
+
         if (!iconPixmap.isNull())
-            painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);
-        yFrom += (TABSIZE + dock->tabSpacing());
-        painter.restore();
+        {
+            QRectF iconRect = tabRect.adjusted(iconMargin, iconMargin, -iconMargin, -iconMargin);
+            painter.drawPixmap(iconRect.toRect(), iconPixmap);
+        }
+
+        yFrom += (TABSIZE + spacing);
     }
 }
 UBTabDockPalette::~UBTabDockPalette()
