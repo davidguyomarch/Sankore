@@ -190,6 +190,13 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
         styleFile.close();
     }
 
+    // Update palette colors to match the active theme at startup
+    if (theme == "classic" || theme == "light")
+    {
+        UBSettings::paletteColor = QColor(245, 245, 245, 220);
+        UBSettings::opaquePaletteColor = QColor(255, 255, 255, 240);
+    }
+
     setStyle(new UBStyle()); // Style is owned and deleted by the application
 
     QString css = UBFileSystemUtils::readTextFile(UBPlatformUtils::applicationResourcesDirectory() + "/etc/Uniboard.css");
@@ -644,6 +651,19 @@ void UBApplication::reloadThemeIcons(const QString& theme)
         {"actionColor1", "color.svg"},
         {"actionColor2", "color.svg"},
         {"actionColor3", "color.svg"},
+        {"actionPen", "pen.svg"},
+        {"actionEraser", "eraserTool.svg"},
+        {"actionMarker", "marker.svg"},
+        {"actionSelector", "selector.svg"},
+        {"actionHand", "hand.svg"},
+        {"actionZoomIn", "zoomIn.svg"},
+        {"actionZoomOut", "zoomOut.svg"},
+        {"actionPointer", "pointer.svg"},
+        {"actionLine", "lineTool.svg"},
+        {"actionText", "text.svg"},
+        {"actionCapture", "capture.svg"},
+        {"actionPlay", "play.svg"},
+        {"actionDrawing", "drawing.svg"},
     };
 
     // Reload icons for all toolbar actions

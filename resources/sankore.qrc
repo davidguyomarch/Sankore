@@ -210,6 +210,17 @@
         <file>themes/dark/icons/updates.svg</file>
         <file>themes/dark/icons/web.svg</file>
         <file>themes/dark/icons/window.svg</file>
+        <file>themes/dark/icons/pen.svg</file>
+        <file>themes/dark/icons/marker.svg</file>
+        <file>themes/dark/icons/selector.svg</file>
+        <file>themes/dark/icons/hand.svg</file>
+        <file>themes/dark/icons/zoomIn.svg</file>
+        <file>themes/dark/icons/zoomOut.svg</file>
+        <file>themes/dark/icons/pointer.svg</file>
+        <file>themes/dark/icons/text.svg</file>
+        <file>themes/dark/icons/capture.svg</file>
+        <file>themes/dark/icons/play.svg</file>
+        <file>themes/dark/icons/drawing.svg</file>
         <file>themes/classic/style.qss</file>
         <file>themes/classic/icons/addBookmark.png</file>
         <file>themes/classic/icons/addBookmark.svg</file>
@@ -322,6 +333,17 @@
         <file>themes/classic/icons/web.png</file>
         <file>themes/classic/icons/web.svg</file>
         <file>themes/classic/icons/window.svg</file>
+        <file>themes/classic/icons/pen.svg</file>
+        <file>themes/classic/icons/marker.svg</file>
+        <file>themes/classic/icons/selector.svg</file>
+        <file>themes/classic/icons/hand.svg</file>
+        <file>themes/classic/icons/zoomIn.svg</file>
+        <file>themes/classic/icons/zoomOut.svg</file>
+        <file>themes/classic/icons/pointer.svg</file>
+        <file>themes/classic/icons/text.svg</file>
+        <file>themes/classic/icons/capture.svg</file>
+        <file>themes/classic/icons/play.svg</file>
+        <file>themes/classic/icons/drawing.svg</file>
         <file>themes/light/style.qss</file>
         <file>themes/light/icons/addBookmark.svg</file>
         <file>themes/light/icons/addToPage.svg</file>
@@ -385,6 +407,17 @@
         <file>themes/light/icons/updates.svg</file>
         <file>themes/light/icons/web.svg</file>
         <file>themes/light/icons/window.svg</file>
+        <file>themes/light/icons/pen.svg</file>
+        <file>themes/light/icons/marker.svg</file>
+        <file>themes/light/icons/selector.svg</file>
+        <file>themes/light/icons/hand.svg</file>
+        <file>themes/light/icons/zoomIn.svg</file>
+        <file>themes/light/icons/zoomOut.svg</file>
+        <file>themes/light/icons/pointer.svg</file>
+        <file>themes/light/icons/text.svg</file>
+        <file>themes/light/icons/capture.svg</file>
+        <file>themes/light/icons/play.svg</file>
+        <file>themes/light/icons/drawing.svg</file>
         <file>style.qss</file>
         <file>images/libpalette/WebSearchCategory.svg</file>
         <file>images/tab_mask.png</file>
