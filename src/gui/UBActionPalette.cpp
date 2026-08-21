@@ -278,7 +278,26 @@ UBActionPaletteButton::UBActionPaletteButton(QAction* action, QWidget * parent)
 {
     setIconSize(QSize(32, 32));
     setDefaultAction(action);
-    setStyleSheet(QString("QToolButton {color: white; font-weight: bold; font-family: Arial; background-color: transparent; border: none}"));
+    setStyleSheet(QString(
+        "QToolButton {"
+        "  color: white;"
+        "  font-weight: bold;"
+        "  font-family: Arial;"
+        "  background-color: transparent;"
+        "  border: none;"
+        "  border-radius: 8px;"
+        "  padding: 4px;"
+        "}"
+        "QToolButton:hover {"
+        "  background-color: rgba(255, 255, 255, 30);"
+        "}"
+        "QToolButton:pressed {"
+        "  background-color: rgba(255, 255, 255, 50);"
+        "}"
+        "QToolButton:checked {"
+        "  background-color: #4A90D9;"
+        "}"
+    ));
 
     setFocusPolicy(Qt::NoFocus);
 

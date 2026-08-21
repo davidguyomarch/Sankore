@@ -26,6 +26,7 @@
 #include <QApplication>
 #include <QPainter>
 #include <QPainterPath>
+#include <QGraphicsDropShadowEffect>
 
 #include "UBFloatingPalette.h"
 #include "core/UBTheme.h"
@@ -66,6 +67,13 @@ UBFloatingPalette::UBFloatingPalette(Qt::Corner position, QWidget *parent)
 
     mBackgroundBrush = QBrush(UBSettings::paletteColor);
     mbGrip = true;
+
+    // Modern drop shadow
+    QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect(this);
+    shadow->setBlurRadius(16);
+    shadow->setOffset(0, 4);
+    shadow->setColor(QColor(0, 0, 0, 80));
+    setGraphicsEffect(shadow);
 }
 
 void UBFloatingPalette::setGrip(bool newGrip)
@@ -96,7 +104,7 @@ void UBFloatingPalette::setCustomPosition(bool pFlag)
 
 int UBFloatingPalette::radius()
 {
-    return 8;
+    return 12;
 }
 
 
