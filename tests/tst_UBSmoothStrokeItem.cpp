@@ -8,8 +8,8 @@
 
 void TestUBSmoothStrokeItem::testAddPoint_singlePoint()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.addPoint(QPointF(10, 20), 0.5);
@@ -23,8 +23,8 @@ void TestUBSmoothStrokeItem::testAddPoint_singlePoint()
 
 void TestUBSmoothStrokeItem::testAddPoint_twoPoints()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.addPoint(QPointF(0, 0), 1.0);
@@ -39,8 +39,8 @@ void TestUBSmoothStrokeItem::testAddPoint_twoPoints()
 
 void TestUBSmoothStrokeItem::testAddPoint_multiplePoints_bezierCurves()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     // Add 5 points → should produce 4 cubic Bézier segments
@@ -66,8 +66,8 @@ void TestUBSmoothStrokeItem::testAddPoint_multiplePoints_bezierCurves()
 
 void TestUBSmoothStrokeItem::testAddPoint_duplicateSkipped()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.addPoint(QPointF(10, 20), 1.0);
@@ -80,8 +80,8 @@ void TestUBSmoothStrokeItem::testAddPoint_duplicateSkipped()
 
 void TestUBSmoothStrokeItem::testFinalize_marksComplete()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     QVERIFY(!item.isFinalized());
@@ -127,8 +127,8 @@ void TestUBSmoothStrokeItem::testColorOnBackgrounds()
 
 void TestUBSmoothStrokeItem::testSubtractPath_partialErase()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.setStrokeWidth(4.0);
@@ -150,8 +150,8 @@ void TestUBSmoothStrokeItem::testSubtractPath_partialErase()
 
 void TestUBSmoothStrokeItem::testSubtractPath_fullErase()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.setStrokeWidth(2.0);
@@ -172,8 +172,8 @@ void TestUBSmoothStrokeItem::testSubtractPath_fullErase()
 
 void TestUBSmoothStrokeItem::testSetLastPoint_replaceEndpoint()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.addPoint(QPointF(0, 0), 1.0);
@@ -195,8 +195,8 @@ void TestUBSmoothStrokeItem::testSetLastPoint_replaceEndpoint()
 
 void TestUBSmoothStrokeItem::testSetLastPoint_onSinglePoint()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.addPoint(QPointF(10, 20), 1.0);
@@ -209,8 +209,8 @@ void TestUBSmoothStrokeItem::testSetLastPoint_onSinglePoint()
 
 void TestUBSmoothStrokeItem::testBoundingRect_expandedForSoftEdge()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.setStrokeWidth(5.0);
@@ -230,8 +230,8 @@ void TestUBSmoothStrokeItem::testBoundingRect_expandedForSoftEdge()
 
 void TestUBSmoothStrokeItem::testDeepCopy()
 {
-    UBSmoothStrokeItem item;
     QGraphicsScene scene;
+    UBSmoothStrokeItem item;
     scene.addItem(&item);
 
     item.setStrokeWidth(3.5);
