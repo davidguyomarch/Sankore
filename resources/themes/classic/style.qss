@@ -34,8 +34,8 @@ QToolButton
     border: none;
     border-radius: 6px;
     padding: 6px;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 QToolButton:hover

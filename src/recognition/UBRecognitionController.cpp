@@ -14,6 +14,7 @@
 #include "domain/UBGraphicsTextItem.h"
 #include "domain/UBGraphicsPolygonItem.h"
 #include "domain/UBGraphicsStrokesGroup.h"
+#include "domain/UBSmoothStrokeItem.h"
 
 #include <QMessageBox>
 #include <QGraphicsItem>
@@ -224,7 +225,8 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
     for (QGraphicsItem* item : itemsInZone)
     {
         if (dynamic_cast<UBGraphicsStrokesGroup*>(item) ||
-            dynamic_cast<UBGraphicsPolygonItem*>(item))
+            dynamic_cast<UBGraphicsPolygonItem*>(item) ||
+            dynamic_cast<UBSmoothStrokeItem*>(item))
         {
             scene->removeItem(item);
             delete item;

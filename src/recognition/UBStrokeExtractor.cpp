@@ -7,6 +7,7 @@
 #include "domain/UBGraphicsPolygonItem.h"
 #include "domain/UBGraphicsStrokesGroup.h"
 #include "domain/UBGraphicsStroke.h"
+#include "domain/UBSmoothStrokeItem.h"
 
 #include <QSet>
 #include <QPair>
@@ -51,6 +52,24 @@ QVector<UBRecognitionStroke> UBStrokeExtractor::extractFromSelection(const QList
                 UBRecognitionStroke recoStroke = extractFromPolygons(polygon->stroke()->polygons());
                 if (!recoStroke.points.isEmpty())
                     result.append(recoStroke);
+            }
+        }
+    }
+
+    // Third pass: UBSmoothStrokeItem (new QPainterPath-based strokes)
+    for (QGraphicsItem* item : items)
+    {
+        UBSmoothStrokeItem* smoothItem = dynamic_cast<UBSmoothStrokeItem*>(item);
+        if (smoothItem)
+        {
+            QVector<QPointF> rawPoints = smoothItem->rawPoints();
+            if (!rawPoints.isEmpty())
+            {
+                UBRecognitionStroke recoStroke;
+                // rawPoints are in item-local coords — map to scene
+                for (const QPointF& p : rawPoints)
+                    recoStroke.points.append(smoothItem->mapToScene(p));
+                result.append(recoStroke);
             }
         }
     }

@@ -225,7 +225,9 @@ void UBDockPalette::paintEvent(QPaintEvent *event)
         painter.drawRect(rect());
 
         // Subtle border on the outer edge (side facing the board)
-        QPen borderPen(UBTheme::borderSubtle(), 1);
+        QColor borderColor = mBackgroundBrush.color();
+        borderColor.setAlpha(qMin(borderColor.alpha() + 40, 255));
+        QPen borderPen(borderColor, 1);
         painter.setPen(borderPen);
         if (mOrientation == eUBDockOrientation_Left)
             painter.drawLine(width() - 1, 0, width() - 1, height());
@@ -244,6 +246,7 @@ void UBDockPalette::setBackgroundBrush(const QBrush &brush)
     {
         mBackgroundBrush = brush;
         update();
+        mTabPalette->update();
     }
 }
 
@@ -253,7 +256,7 @@ void UBDockPalette::setBackgroundBrush(const QBrush &brush)
  */
 int UBDockPalette::border()
 {
-    return 12;
+    return 20;
 }
 
 /**
@@ -361,6 +364,9 @@ void UBDockPalette::toggleCollapseExpand()
             setMinimumWidth(0); // restore
             hide();
             moveTabs();
+            // Force parent to repaint the area we just vacated
+            if (parentWidget())
+                parentWidget()->update();
             anim->deleteLater();
         });
         anim->start();
@@ -669,7 +675,7 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     const int tabRadius = 8;
-    const int iconMargin = 8;
+    const int iconMargin = 6;
     const int spacing = dock->tabSpacing();
 
     int yFrom = 0;
@@ -688,8 +694,10 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         }
         else
         {
-            // Inactive tab: surface with subtle border
-            painter.setPen(QPen(UBTheme::border(), 1));
+            // Inactive tab: surface with subtle border (adapts to background)
+            QColor borderColor = dock->mBackgroundBrush.color();
+            borderColor.setAlpha(qMin(borderColor.alpha() + 40, 255));
+            painter.setPen(QPen(borderColor, 1));
             painter.setBrush(dock->mBackgroundBrush);
         }
 

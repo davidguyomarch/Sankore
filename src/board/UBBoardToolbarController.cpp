@@ -163,9 +163,9 @@ void UBBoardToolbarController::setToolbarTexts()
     QSize iconSize;
 
     if (highResolution)
-        iconSize = QSize(48, 48);
+        iconSize = QSize(40, 40);
     else
-        iconSize = QSize(36, 36);
+        iconSize = QSize(32, 32);
 
     mMainWindow->boardToolBar->setIconSize(iconSize);
     mMainWindow->webToolBar->setIconSize(iconSize);
