@@ -670,6 +670,22 @@ void UBApplication::reloadThemeIcons(const QString& theme)
             }
         }
     }
+
+    // Also update actions that are inside widget groups (not directly in toolbar->actions())
+    for (auto it = actionIconMap.constBegin(); it != actionIconMap.constEnd(); ++it)
+    {
+        QAction* action = mainWindow->findChild<QAction*>(it.key());
+        if (action)
+        {
+            QString baseName = it.value();
+            QString stem = baseName.left(baseName.lastIndexOf('.'));
+            QString iconPath = iconPrefix + stem + ".svg";
+            if (!QFile::exists(iconPath))
+                iconPath = iconPrefix + stem + ".png";
+            if (QFile::exists(iconPath))
+                action->setIcon(QIcon(iconPath));
+        }
+    }
 }
 
 void UBApplication::onAutoOcrToggled(bool enabled)
