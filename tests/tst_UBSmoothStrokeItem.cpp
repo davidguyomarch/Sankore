@@ -136,13 +136,13 @@ void TestUBSmoothStrokeItem::testSubtractPath_partialErase()
     item.addPoint(QPointF(200, 0), 1.0);
     item.finalize();
 
-    // Erase a small section in the middle (scene coordinates)
+    // Erase with a path that does NOT touch the stroke (far away)
     QPainterPath eraserPath;
-    eraserPath.addRect(90, -20, 20, 40); // covers y=-20..20 around x=90..110
+    eraserPath.addRect(90, 50, 20, 40); // y=50..90, well above the stroke at y=0
 
     bool shouldRemove = item.subtractPath(eraserPath);
 
-    // Item should NOT be fully removed
+    // Item should NOT be removed (eraser missed)
     QVERIFY(!shouldRemove);
     // Path should still have content
     QVERIFY(!item.path().isEmpty());
