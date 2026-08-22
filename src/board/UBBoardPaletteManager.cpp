@@ -58,6 +58,7 @@
 #include <QQmlContext>
 #include "qml/UBThemeManager.h"
 #include "qml/UBStylusController.h"
+#include "qml/UBDrawingPropertiesController.h"
 
 
 #include "network/UBNetworkAccessManager.h"
@@ -86,6 +87,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mStylusPalette(0)
     , mStylusPaletteQml(nullptr)
     , mStylusController(nullptr)
+    , mDrawingPropsQml(nullptr)
+    , mDrawingPropsController(nullptr)
     , mDrawingPalette(nullptr)
     , mZoomPalette(0)
     , mTipPalette(0)
@@ -339,6 +342,43 @@ void UBBoardPaletteManager::setupPalettes()
 
     mStylusPaletteQml->show();
     mStylusPaletteQml->raise();
+
+    // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
+    mDrawingPropsController = new UBDrawingPropertiesController(this);
+
+    mDrawingPropsQml = new QQuickWidget(mContainer);
+    mDrawingPropsQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mDrawingPropsQml->setClearColor(Qt::transparent);
+    mDrawingPropsQml->setAttribute(Qt::WA_TranslucentBackground);
+    mDrawingPropsQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mDrawingPropsQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mDrawingPropsQml->rootContext()->setContextProperty("drawingProps", mDrawingPropsController);
+    mDrawingPropsQml->setSource(QUrl("qrc:/qml/DrawingProperties.qml"));
+
+    // Max size for the widget (7 buttons + separator: 4 colors + sep + 3 widths)
+    int dpBtnSize = 36;
+    int dpSpacing = 6;
+    int dpPadding = 8;
+    int dpMaxButtons = 7; // 4 colors + 3 widths
+    int dpWidth = dpMaxButtons * dpBtnSize + (dpMaxButtons - 1) * dpSpacing
+                  + dpSpacing + 1 + dpSpacing // separator
+                  + dpPadding * 2;
+    int dpHeight = dpBtnSize + dpPadding * 2;
+    mDrawingPropsQml->setFixedSize(dpWidth, dpHeight);
+
+    // Position just above/below the stylus palette
+    if (isVertical) {
+        int posX = mStylusPaletteQml->x() - dpWidth - 10;
+        int posY = mStylusPaletteQml->y();
+        mDrawingPropsQml->move(posX, posY);
+    } else {
+        int posX = (mContainer->width() - dpWidth) / 2;
+        int posY = mStylusPaletteQml->y() - dpHeight - 10;
+        mDrawingPropsQml->move(posX, posY);
+    }
+
+    mDrawingPropsQml->show();
+    mDrawingPropsQml->raise();
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
     // mTipPalette = new UBStartupHintsPalette(mContainer);
@@ -652,6 +692,20 @@ void UBBoardPaletteManager::containerResized()
             int posX = (mContainer->width() - w) / 2;
             int posY = mContainer->height() - h - 20;
             mStylusPaletteQml->move(posX, posY);
+        }
+
+        // Reposition drawing properties panel relative to stylus palette
+        if (mDrawingPropsQml)
+        {
+            int dpW = mDrawingPropsQml->width();
+            int dpH = mDrawingPropsQml->height();
+            if (isVertical) {
+                mDrawingPropsQml->move(mStylusPaletteQml->x() - dpW - 10,
+                                       mStylusPaletteQml->y());
+            } else {
+                int posX = (mContainer->width() - dpW) / 2;
+                mDrawingPropsQml->move(posX, mStylusPaletteQml->y() - dpH - 10);
+            }
         }
     }
 
