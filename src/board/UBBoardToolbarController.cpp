@@ -58,6 +58,9 @@ void UBBoardToolbarController::setupToolbar()
     colorChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
     colorChoice->colorPaletteChanged();
 
+    // Hidden: replaced by QML DrawingProperties panel (Issue #110 Step 3)
+    colorChoice->hide();
+
     // Setup line width choice widget
     QList<QAction *> lineWidthActions;
     lineWidthActions.append(mMainWindow->actionLineSmall);
@@ -79,6 +82,9 @@ void UBBoardToolbarController::setupToolbar()
 
     mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
 
+    // Hidden: replaced by QML DrawingProperties panel (Issue #110 Step 3)
+    lineWidthChoice->hide();
+
     // Setup eraser width choice widget
     QList<QAction *> eraserWidthActions;
     eraserWidthActions.append(mMainWindow->actionEraserSmall);
@@ -95,6 +101,9 @@ void UBBoardToolbarController::setupToolbar()
 
     eraserWidthChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
     eraserWidthChoice->setCurrentIndex(mSettings->eraserWidthIndex());
+
+    // Hidden: replaced by QML DrawingProperties panel (Issue #110 Step 3)
+    eraserWidthChoice->hide();
 
     mMainWindow->boardToolBar->insertSeparator(mMainWindow->actionBackgrounds);
 

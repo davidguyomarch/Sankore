@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/qml">
-        <file>TestOverlay.qml</file>
         <file>StylusPalette.qml</file>
         <file>DrawingProperties.qml</file>
     </qresource>
