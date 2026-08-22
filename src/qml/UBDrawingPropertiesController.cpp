@@ -7,7 +7,9 @@
 
 #include "core/UBSettings.h"
 #include "core/UB.h"
+#include "core/UBApplication.h"
 #include "board/UBDrawingController.h"
+#include "board/UBBoardController.h"
 
 UBDrawingPropertiesController::UBDrawingPropertiesController(QObject* parent)
     : QObject(parent)
@@ -82,7 +84,9 @@ bool UBDrawingPropertiesController::visible() const
 
 void UBDrawingPropertiesController::setColorIndex(int index)
 {
-    mDrawingController->setColorIndex(index);
+    // Route through UBBoardController which also handles tool auto-selection
+    if (UBApplication::boardController)
+        UBApplication::boardController->setColorIndex(index);
 }
 
 void UBDrawingPropertiesController::setWidthIndex(int index)

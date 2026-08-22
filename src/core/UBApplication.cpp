@@ -413,7 +413,7 @@ int UBApplication::exec(const QString& pFileToImport)
     // Deferred reload: some palette buttons may not have updated yet
     // (Qt action-observer updates are asynchronous in some cases)
     QString startupTheme = mSettings->appTheme->get().toString();
-    QTimer::singleShot(100, this, [this, startupTheme]() {
+    QTimer::singleShot(500, this, [this, startupTheme]() {
         reloadThemeIcons(startupTheme);
 
         // Also refresh dock palette backgrounds (they may have been created

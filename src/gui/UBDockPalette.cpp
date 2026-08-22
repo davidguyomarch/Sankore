@@ -241,12 +241,9 @@ void UBDockPalette::paintEvent(QPaintEvent *event)
  */
 void UBDockPalette::setBackgroundBrush(const QBrush &brush)
 {
-    if (mBackgroundBrush != brush)
-    {
-        mBackgroundBrush = brush;
-        update();
-        mTabPalette->update();
-    }
+    mBackgroundBrush = brush;
+    update();
+    mTabPalette->update();
 }
 
 /**
