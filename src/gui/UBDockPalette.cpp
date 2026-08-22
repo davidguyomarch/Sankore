@@ -35,6 +35,8 @@
 #include "core/UBPreferencesController.h"
 #include "core/UBDownloadManager.h"
 
+#include "qml/UBThemeManager.h"
+
 #include "board/UBBoardController.h"
 
 
@@ -85,6 +87,11 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
     }
 
     mBackgroundBrush = QBrush(UBSettings::paletteColor);
+
+    // React to theme changes — update background on theme switch
+    connect(UBThemeManager::instance(), &UBThemeManager::themeChanged, this, [this]() {
+        setBackgroundBrush(QBrush(UBSettings::paletteColor));
+    });
 
     // This is the only way to set the background as transparent!
     setStyleSheet("QWidget {background-color: transparent}");

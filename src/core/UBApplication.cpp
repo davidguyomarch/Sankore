@@ -573,9 +573,6 @@ void UBApplication::themeChanged(QAction* action)
     QString theme = action->data().toString();
     mSettings->appTheme->set(theme);
 
-    // Sync QML ThemeManager with the new theme
-    UBThemeManager::instance()->setCurrentTheme(theme);
-
     // Reload stylesheet from theme directory
     QString qssPath = ":/themes/" + theme + "/style.qss";
     QFile styleFile(qssPath);
@@ -596,6 +593,10 @@ void UBApplication::themeChanged(QAction* action)
         UBSettings::paletteColor = UBTheme::surface();
         UBSettings::opaquePaletteColor = UBTheme::surfaceOpaque();
     }
+
+    // Sync QML ThemeManager AFTER paletteColor is updated
+    // (dock palettes listen to themeChanged and read paletteColor)
+    UBThemeManager::instance()->setCurrentTheme(theme);
 
     // Refresh dock palette backgrounds
     if (boardController && boardController->paletteManager())
