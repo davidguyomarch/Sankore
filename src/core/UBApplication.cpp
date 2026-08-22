@@ -61,6 +61,7 @@
 
 #include "UBSettings.h"
 #include "UBTheme.h"
+#include "qml/UBThemeManager.h"
 #include "recognition/UBRecognitionController.h"
 #include "UBSetting.h"
 #include "UBPersistenceManager.h"
@@ -201,9 +202,13 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
 
     setStyle(new UBStyle()); // Style is owned and deleted by the application
 
-    QString css = UBFileSystemUtils::readTextFile(UBPlatformUtils::applicationResourcesDirectory() + "/etc/Uniboard.css");
-    if (css.length() > 0)
-        setStyleSheet(css);
+    // Legacy Uniboard.css — only apply if no theme stylesheet was loaded
+    if (styleSheet().isEmpty())
+    {
+        QString css = UBFileSystemUtils::readTextFile(UBPlatformUtils::applicationResourcesDirectory() + "/etc/Uniboard.css");
+        if (css.length() > 0)
+            setStyleSheet(css);
+    }
 
     QApplication::setStartDragDistance(8); // default is 4, and is a bit small for tablets
 
@@ -351,6 +356,8 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(mainWindow->actionQuit, SIGNAL(triggered()), this, SLOT(closing()));
     connect(mainWindow, SIGNAL(closeEvent_Signal(QCloseEvent*)), this, SLOT(closeEvent(QCloseEvent*)));
 
+    // Sync QML ThemeManager BEFORE creating palettes so QML starts with correct colors
+    UBThemeManager::instance()->setCurrentTheme(mSettings->appTheme->get().toString());
 
     boardController = new UBBoardController(mainWindow);
 
@@ -408,6 +415,17 @@ int UBApplication::exec(const QString& pFileToImport)
     QString startupTheme = mSettings->appTheme->get().toString();
     QTimer::singleShot(100, this, [this, startupTheme]() {
         reloadThemeIcons(startupTheme);
+
+        // Also refresh dock palette backgrounds (they may have been created
+        // before UBSettings::paletteColor was finalized for the active theme)
+        if (boardController && boardController->paletteManager())
+        {
+            UBBoardPaletteManager* pm = boardController->paletteManager();
+            if (pm->leftPalette())
+                pm->leftPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+            if (pm->rightPalette())
+                pm->rightPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+        }
     });
 
     // Ensure all toolbar actions have tooltips (use text as fallback)
@@ -554,6 +572,9 @@ void UBApplication::themeChanged(QAction* action)
 
     QString theme = action->data().toString();
     mSettings->appTheme->set(theme);
+
+    // Sync QML ThemeManager with the new theme
+    UBThemeManager::instance()->setCurrentTheme(theme);
 
     // Reload stylesheet from theme directory
     QString qssPath = ":/themes/" + theme + "/style.qss";

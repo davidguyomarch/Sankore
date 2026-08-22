@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import Qt5Compat.GraphicalEffects
 
 /**
  * QML Stylus Palette — Issue #110 Step 2
@@ -8,6 +9,7 @@ import QtQuick.Layouts 1.15
  * Replaces the old UBStylusPalette C++ widget with a modern QML equivalent.
  * Adapts orientation (vertical/horizontal) from the stylusController.
  * Theme colors come from themeManager (context property).
+ * Icons are tinted via ColorOverlay to match the active theme.
  */
 Rectangle {
     id: root
@@ -30,19 +32,6 @@ Rectangle {
     color: themeManager.surface
     border.color: themeManager.border
     border.width: 1
-
-    // Subtle drop shadow via inner overlay
-    layer.enabled: true
-    layer.effect: null
-
-    // Mouse interaction: make the palette draggable
-    MouseArea {
-        id: dragArea
-        anchors.fill: parent
-        drag.target: root.parent  // drag the QQuickWidget container? No — handled by C++
-        acceptedButtons: Qt.NoButton
-        hoverEnabled: true
-    }
 
     // Tool buttons grid/flow
     GridLayout {
@@ -69,8 +58,9 @@ Rectangle {
                      : isHovered ? themeManager.surfaceHover
                      : "transparent"
 
-                // Tool icon
+                // Tool icon (hidden, used as source for ColorOverlay)
                 Image {
+                    id: iconImage
                     anchors.centerIn: parent
                     width: 28
                     height: 28
@@ -78,10 +68,15 @@ Rectangle {
                     sourceSize: Qt.size(28, 28)
                     smooth: true
                     mipmap: true
-                    // Tint the icon to match theme
-                    // For active buttons use onPrimary, otherwise onSurface
-                    // Note: SVG colorization requires layer effects; here we use opacity
-                    opacity: isActive ? 1.0 : (isHovered ? 1.0 : 0.85)
+                    visible: false
+                }
+
+                // Tinted icon overlay — colors the icon to match theme
+                ColorOverlay {
+                    anchors.fill: iconImage
+                    source: iconImage
+                    color: btn.isActive ? themeManager.onPrimary : themeManager.onSurface
+                    opacity: btn.isActive ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
                 }
 
                 // Indicator for active tool (small bar below/right)
