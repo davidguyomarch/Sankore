@@ -61,6 +61,7 @@ class UBCreateLinkPalette;
 class QQuickWidget;
 class UBStylusController;
 class UBDrawingPropertiesController;
+class UBShapesController;
 
 class UBBoardPaletteManager : public QObject
 {
@@ -133,6 +134,8 @@ class UBBoardPaletteManager : public QObject
         UBStylusController *mStylusController;
         QQuickWidget *mDrawingPropsQml;
         UBDrawingPropertiesController *mDrawingPropsController;
+        QQuickWidget *mShapesPaletteQml;
+        UBShapesController *mShapesController;
 
         UBZoomPalette *mZoomPalette;
         UBStartupHintsPalette* mTipPalette;

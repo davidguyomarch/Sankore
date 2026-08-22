@@ -59,6 +59,7 @@
 #include "qml/UBThemeManager.h"
 #include "qml/UBStylusController.h"
 #include "qml/UBDrawingPropertiesController.h"
+#include "qml/UBShapesController.h"
 
 
 #include "network/UBNetworkAccessManager.h"
@@ -89,6 +90,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mStylusController(nullptr)
     , mDrawingPropsQml(nullptr)
     , mDrawingPropsController(nullptr)
+    , mShapesPaletteQml(nullptr)
+    , mShapesController(nullptr)
     , mDrawingPalette(nullptr)
     , mZoomPalette(0)
     , mTipPalette(0)
@@ -379,6 +382,33 @@ void UBBoardPaletteManager::setupPalettes()
 
     mDrawingPropsQml->show();
     mDrawingPropsQml->raise();
+
+    // --- QML Shapes Palette (Issue #110 Step 5) ---
+    mShapesController = new UBShapesController(this);
+
+    mShapesPaletteQml = new QQuickWidget(mContainer);
+    mShapesPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mShapesPaletteQml->setClearColor(Qt::transparent);
+    mShapesPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
+    mShapesPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mShapesPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mShapesPaletteQml->rootContext()->setContextProperty("shapesController", mShapesController);
+    mShapesPaletteQml->setSource(QUrl("qrc:/qml/ShapesPalette.qml"));
+    mShapesPaletteQml->setFixedSize(160, 380);
+
+    // Position: to the left of the stylus palette
+    if (isVertical) {
+        mShapesPaletteQml->move(mStylusPaletteQml->x() - 170, mStylusPaletteQml->y());
+    } else {
+        mShapesPaletteQml->move(mStylusPaletteQml->x(), mStylusPaletteQml->y() - 390);
+    }
+    mShapesPaletteQml->show();
+    mShapesPaletteQml->raise();
+
+    // Connect the Drawing action to toggle the shapes palette
+    connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, mShapesController, [this](bool checked) {
+        mShapesController->setVisible(checked);
+    });
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
     // mTipPalette = new UBStartupHintsPalette(mContainer);
@@ -817,7 +847,9 @@ void UBBoardPaletteManager::toggleStylusPalette(bool checked)
 
 void UBBoardPaletteManager::toggleDrawingPalette(bool checked)
 {
-    mDrawingPalette->setVisible(checked);
+    // Old C++ palette hidden — replaced by QML ShapesPalette
+    // mDrawingPalette->setVisible(checked);
+    Q_UNUSED(checked);
 }
 
 
