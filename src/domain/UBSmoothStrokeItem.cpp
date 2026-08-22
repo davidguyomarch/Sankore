@@ -142,16 +142,95 @@ bool UBSmoothStrokeItem::subtractPath(const QPainterPath& eraserPath)
     // Convert eraser path to local coordinates
     QPainterPath localEraserPath = mapFromScene(eraserPath);
 
-    QPainterPath currentPath = path();
-    QPainterPath newPath = currentPath.subtracted(localEraserPath);
+    // Find which raw points are inside or near the eraser zone
+    // A point is "erased" if the eraser path contains it (with stroke width tolerance)
+    qreal tolerance = mNominalWidth / 2.0 + 1.0;
 
-    if (newPath.isEmpty())
+    QVector<bool> erased(mRawPoints.size(), false);
+    bool anyErased = false;
+
+    for (int i = 0; i < mRawPoints.size(); ++i)
     {
-        return true; // caller should remove this item
+        // Check if this point or a small circle around it intersects the eraser
+        QPainterPath pointCircle;
+        pointCircle.addEllipse(mRawPoints[i], tolerance, tolerance);
+        if (localEraserPath.intersects(pointCircle))
+        {
+            erased[i] = true;
+            anyErased = true;
+        }
     }
 
-    setPath(newPath);
-    return false;
+    if (!anyErased)
+        return false; // eraser missed all points
+
+    // Split into surviving segments (contiguous runs of non-erased points)
+    QVector<QVector<QPointF>> segments;
+    QVector<QVector<qreal>> segmentPressures;
+    QVector<QPointF> currentSeg;
+    QVector<qreal> currentPressures;
+
+    for (int i = 0; i < mRawPoints.size(); ++i)
+    {
+        if (!erased[i])
+        {
+            currentSeg.append(mRawPoints[i]);
+            currentPressures.append(mRawPressures[i]);
+        }
+        else
+        {
+            if (currentSeg.size() >= 2)
+            {
+                segments.append(currentSeg);
+                segmentPressures.append(currentPressures);
+            }
+            currentSeg.clear();
+            currentPressures.clear();
+        }
+    }
+    if (currentSeg.size() >= 2)
+    {
+        segments.append(currentSeg);
+        segmentPressures.append(currentPressures);
+    }
+
+    // If no segments survive, remove the item entirely
+    if (segments.isEmpty())
+        return true;
+
+    // Keep the first segment in this item
+    mRawPoints = segments[0];
+    mRawPressures = segmentPressures[0];
+    mFinalized = true;
+    rebuildPath();
+
+    // Create new items for additional segments
+    UBGraphicsScene* ubScene = scene();
+    for (int s = 1; s < segments.size(); ++s)
+    {
+        UBSmoothStrokeItem* newItem = new UBSmoothStrokeItem();
+        newItem->setStrokeWidth(mNominalWidth);
+        newItem->setStrokeColor(pen().color());
+        newItem->setColorOnDarkBackground(mColorOnDark);
+        newItem->setColorOnLightBackground(mColorOnLight);
+        newItem->setZValue(zValue());
+        newItem->setData(UBGraphicsItemData::ItemLayerType, data(UBGraphicsItemData::ItemLayerType));
+
+        // Set raw points directly (they're already in local coords of the original item,
+        // but the new item starts at origin so we need to map to scene then back)
+        for (int i = 0; i < segments[s].size(); ++i)
+        {
+            // mapToScene converts local→scene, then new item will convert scene→local in addPoint
+            QPointF scenePos = mapToScene(segments[s][i]);
+            newItem->addPoint(scenePos, segmentPressures[s][i]);
+        }
+        newItem->finalize();
+
+        if (ubScene)
+            ubScene->addItem(newItem);
+    }
+
+    return false; // item was modified, not removed
 }
 
 void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)

@@ -54,6 +54,13 @@
 
 #include "desktop/UBDesktopAnnotationController.h"
 
+#include <QQuickWidget>
+#include <QQmlContext>
+#include "qml/UBThemeManager.h"
+#include "qml/UBStylusController.h"
+#include "qml/UBDrawingPropertiesController.h"
+#include "qml/UBShapesController.h"
+
 
 #include "network/UBNetworkAccessManager.h"
 #include "network/UBServerXMLHttpRequest.h"
@@ -79,6 +86,12 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mContainer(container)
     , mBoardControler(pBoardController)
     , mStylusPalette(0)
+    , mStylusPaletteQml(nullptr)
+    , mStylusController(nullptr)
+    , mDrawingPropsQml(nullptr)
+    , mDrawingPropsController(nullptr)
+    , mShapesPaletteQml(nullptr)
+    , mShapesController(nullptr)
     , mDrawingPalette(nullptr)
     , mZoomPalette(0)
     , mTipPalette(0)
@@ -258,16 +271,144 @@ void UBBoardPaletteManager::setupPalettes()
 
 
     // Add the other palettes
+    // Keep old C++ stylus palette hidden — it still owns the QActions and button group logic
     mStylusPalette = new UBStylusPalette(mContainer, mSettings->appToolBarOrientationVertical->get().toBool() ? Qt::Vertical : Qt::Horizontal);
     connect(mStylusPalette, SIGNAL(stylusToolDoubleClicked(int)), UBApplication::boardController, SLOT(stylusToolDoubleClicked(int)));
-    mStylusPalette->show(); // always show stylus palette at startup
+    mStylusPalette->hide(); // replaced by QML palette
 
     mDrawingPalette = new UBDrawingPalette(mContainer, mSettings->appDrawingPaletteOrientationHorizontal->get().toBool() ? Qt::Horizontal : Qt::Vertical);
     mDrawingPalette->hide();
 
     mZoomPalette = new UBZoomPalette(mContainer);
-    mStylusPalette->stackUnder(mZoomPalette);
     mDrawingPalette->stackUnder(mZoomPalette);
+
+    // --- QML Stylus Palette (Issue #110 Step 2) ---
+    bool isVertical = mSettings->appToolBarOrientationVertical->get().toBool();
+
+    mStylusController = new UBStylusController(this);
+    mStylusController->setVertical(isVertical);
+
+    // Register tool buttons (same order as old UBStylusPalette)
+    UBMainWindow* mw = UBApplication::mainWindow;
+    mStylusController->addTool(tr("Drawing Palette"), "qrc:/images/stylusPalette/svg/drawing.svg", mw->actionDrawing);
+    mStylusController->addTool(tr("Pen"), "qrc:/images/stylusPalette/svg/pen.svg", mw->actionPen);
+    mStylusController->addTool(tr("Eraser"), "qrc:/images/stylusPalette/svg/eraser.svg", mw->actionEraser);
+    mStylusController->addTool(tr("Marker"), "qrc:/images/stylusPalette/svg/marker.svg", mw->actionMarker);
+    mStylusController->addTool(tr("Selector"), "qrc:/images/stylusPalette/svg/selector.svg", mw->actionSelector);
+    mStylusController->addTool(tr("Play"), "qrc:/images/stylusPalette/svg/play.svg", mw->actionPlay);
+    mStylusController->addTool(tr("Hand"), "qrc:/images/stylusPalette/svg/hand.svg", mw->actionHand);
+    mStylusController->addTool(tr("Zoom In"), "qrc:/images/stylusPalette/svg/zoomIn.svg", mw->actionZoomIn);
+    mStylusController->addTool(tr("Zoom Out"), "qrc:/images/stylusPalette/svg/zoomOut.svg", mw->actionZoomOut);
+    mStylusController->addTool(tr("Pointer"), "qrc:/images/stylusPalette/svg/pointer.svg", mw->actionPointer);
+    mStylusController->addTool(tr("Line"), "qrc:/images/stylusPalette/svg/line.svg", mw->actionLine);
+    mStylusController->addTool(tr("Text"), "qrc:/images/stylusPalette/svg/text.svg", mw->actionText);
+    mStylusController->addTool(tr("Capture"), "qrc:/images/stylusPalette/svg/capture.svg", mw->actionCapture);
+    mStylusController->addTool(tr("OCR"), "qrc:/images/stylusPalette/svg/ocr.svg", mw->actionOcr);
+    if (mw->actionAutoOcr)
+        mStylusController->addTool(tr("Auto OCR"), "qrc:/images/stylusPalette/svg/ocr-auto-off.svg", mw->actionAutoOcr, true);
+    mStylusController->finalize();
+
+    // Create the QQuickWidget for the stylus palette
+    mStylusPaletteQml = new QQuickWidget(mContainer);
+    mStylusPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mStylusPaletteQml->setClearColor(Qt::transparent);
+    mStylusPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
+    mStylusPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mStylusPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mStylusPaletteQml->rootContext()->setContextProperty("stylusController", mStylusController);
+    mStylusPaletteQml->setSource(QUrl("qrc:/qml/StylusPalette.qml"));
+
+    // Size the widget based on orientation and tool count
+    int toolCount = mStylusController->tools().size();
+    int btnSize = 44;
+    int spacing = 2;
+    int padding = 6;
+    int contentLen = toolCount * btnSize + (toolCount - 1) * spacing + padding * 2;
+    int thickness = btnSize + padding * 2;
+
+    if (isVertical) {
+        mStylusPaletteQml->setFixedSize(thickness, contentLen);
+    } else {
+        mStylusPaletteQml->setFixedSize(contentLen, thickness);
+    }
+
+    // Position: bottom-center for horizontal, right-center for vertical
+    if (isVertical) {
+        int posX = mContainer->width() - thickness - 20;
+        int posY = (mContainer->height() - contentLen) / 2;
+        mStylusPaletteQml->move(posX, posY);
+    } else {
+        int posX = (mContainer->width() - contentLen) / 2;
+        int posY = mContainer->height() - thickness - 20;
+        mStylusPaletteQml->move(posX, posY);
+    }
+
+    mStylusPaletteQml->show();
+    mStylusPaletteQml->raise();
+
+    // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
+    mDrawingPropsController = new UBDrawingPropertiesController(this);
+
+    mDrawingPropsQml = new QQuickWidget(mContainer);
+    mDrawingPropsQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mDrawingPropsQml->setClearColor(Qt::transparent);
+    mDrawingPropsQml->setAttribute(Qt::WA_TranslucentBackground);
+    mDrawingPropsQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mDrawingPropsQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mDrawingPropsQml->rootContext()->setContextProperty("drawingProps", mDrawingPropsController);
+    mDrawingPropsQml->setSource(QUrl("qrc:/qml/DrawingProperties.qml"));
+
+    // Max size for the widget (7 buttons + separator: 4 colors + sep + 3 widths)
+    int dpBtnSize = 36;
+    int dpSpacing = 6;
+    int dpPadding = 8;
+    int dpMaxButtons = 7; // 4 colors + 3 widths
+    int dpWidth = dpMaxButtons * dpBtnSize + (dpMaxButtons - 1) * dpSpacing
+                  + dpSpacing + 1 + dpSpacing // separator
+                  + dpPadding * 2;
+    int dpHeight = dpBtnSize + dpPadding * 2;
+    mDrawingPropsQml->setFixedSize(dpWidth, dpHeight);
+
+    // Position just above/below the stylus palette
+    if (isVertical) {
+        int posX = mStylusPaletteQml->x() - dpWidth - 10;
+        int posY = mStylusPaletteQml->y();
+        mDrawingPropsQml->move(posX, posY);
+    } else {
+        int posX = (mContainer->width() - dpWidth) / 2;
+        int posY = mStylusPaletteQml->y() - dpHeight - 10;
+        mDrawingPropsQml->move(posX, posY);
+    }
+
+    mDrawingPropsQml->show();
+    mDrawingPropsQml->raise();
+
+    // --- QML Shapes Palette (Issue #110 Step 5) ---
+    mShapesController = new UBShapesController(this);
+
+    mShapesPaletteQml = new QQuickWidget(mContainer);
+    mShapesPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mShapesPaletteQml->setClearColor(Qt::transparent);
+    mShapesPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
+    mShapesPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mShapesPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mShapesPaletteQml->rootContext()->setContextProperty("shapesController", mShapesController);
+    mShapesPaletteQml->setSource(QUrl("qrc:/qml/ShapesPalette.qml"));
+    mShapesPaletteQml->setFixedSize(160, 380);
+
+    // Position: to the left of the stylus palette
+    if (isVertical) {
+        mShapesPaletteQml->move(mStylusPaletteQml->x() - 170, mStylusPaletteQml->y());
+    } else {
+        mShapesPaletteQml->move(mStylusPaletteQml->x(), mStylusPaletteQml->y() - 390);
+    }
+    mShapesPaletteQml->show();
+    mShapesPaletteQml->raise();
+
+    // Connect the Drawing action to toggle the shapes palette
+    connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, mShapesController, [this](bool checked) {
+        mShapesController->setVisible(checked);
+    });
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
     // mTipPalette = new UBStartupHintsPalette(mContainer);
@@ -566,6 +707,38 @@ void UBBoardPaletteManager::containerResized()
         mStylusPalette->initPosition();
     }
 
+    // Reposition QML stylus palette on resize
+    if (mStylusPaletteQml)
+    {
+        bool isVertical = mStylusController->vertical();
+        int w = mStylusPaletteQml->width();
+        int h = mStylusPaletteQml->height();
+
+        if (isVertical) {
+            int posX = mContainer->width() - w - 20;
+            int posY = (mContainer->height() - h) / 2;
+            mStylusPaletteQml->move(posX, posY);
+        } else {
+            int posX = (mContainer->width() - w) / 2;
+            int posY = mContainer->height() - h - 20;
+            mStylusPaletteQml->move(posX, posY);
+        }
+
+        // Reposition drawing properties panel relative to stylus palette
+        if (mDrawingPropsQml)
+        {
+            int dpW = mDrawingPropsQml->width();
+            int dpH = mDrawingPropsQml->height();
+            if (isVertical) {
+                mDrawingPropsQml->move(mStylusPaletteQml->x() - dpW - 10,
+                                       mStylusPaletteQml->y());
+            } else {
+                int posX = (mContainer->width() - dpW) / 2;
+                mDrawingPropsQml->move(posX, mStylusPaletteQml->y() - dpH - 10);
+            }
+        }
+    }
+
     if (mDrawingPalette)
     {
         mDrawingPalette->adjustSizeAndPosition(true,false);
@@ -668,11 +841,15 @@ void UBBoardPaletteManager::backgroundPaletteClosed()
 void UBBoardPaletteManager::toggleStylusPalette(bool checked)
 {
     mStylusPalette->setVisible(checked);
+    if (mStylusPaletteQml)
+        mStylusPaletteQml->setVisible(checked);
 }
 
 void UBBoardPaletteManager::toggleDrawingPalette(bool checked)
 {
-    mDrawingPalette->setVisible(checked);
+    // Old C++ palette hidden — replaced by QML ShapesPalette
+    // mDrawingPalette->setVisible(checked);
+    Q_UNUSED(checked);
 }
 
 
@@ -840,6 +1017,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 mLeftPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mRightPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mStylusPalette->raise();
+                if (mStylusPaletteQml)
+                    mStylusPaletteQml->raise();
                 mDrawingPalette->raise();
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
@@ -1110,6 +1289,41 @@ void UBBoardPaletteManager::changeStylusPaletteOrientation(QVariant var)
     connect(mStylusPalette, SIGNAL(stylusToolDoubleClicked(int)), UBApplication::boardController, SLOT(stylusToolDoubleClicked(int)));
     mStylusPalette->setVisible(bVisible); // always show stylus palette at startup
     mDrawingPalette->initPosition(); // move de drawing Palette
+
+    // Update QML palette orientation
+    if (mStylusController)
+    {
+        mStylusController->setVertical(bVertical);
+
+        // Resize the QML widget
+        int toolCount = mStylusController->tools().size();
+        int btnSize = 44;
+        int spacing = 2;
+        int padding = 6;
+        int contentLen = toolCount * btnSize + (toolCount - 1) * spacing + padding * 2;
+        int thickness = btnSize + padding * 2;
+
+        if (mStylusPaletteQml)
+        {
+            if (bVertical)
+                mStylusPaletteQml->setFixedSize(thickness, contentLen);
+            else
+                mStylusPaletteQml->setFixedSize(contentLen, thickness);
+
+            // Reposition
+            if (bVertical) {
+                int posX = mContainer->width() - thickness - 20;
+                int posY = (mContainer->height() - contentLen) / 2;
+                mStylusPaletteQml->move(posX, posY);
+            } else {
+                int posX = (mContainer->width() - contentLen) / 2;
+                int posY = mContainer->height() - thickness - 20;
+                mStylusPaletteQml->move(posX, posY);
+            }
+
+            mStylusPaletteQml->setVisible(bVisible);
+        }
+    }
 }
 
 

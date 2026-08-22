@@ -81,8 +81,8 @@ class UBFloatingPalette : public QWidget
 
         QBrush mBackgroundBrush;
         bool mbGrip;
-        static const int sLayoutContentMargin = 12;
-        static const int sLayoutSpacing = 15;
+        static const int sLayoutContentMargin = 10;
+        static const int sLayoutSpacing = 6;
         void moveInsideParent(const QPoint &position);
         bool mCustomPosition;
         bool mIsMoving;

@@ -79,7 +79,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
         actions << UBApplication::mainWindow->actionAutoOcr;
 
     setActions(actions);
-    setButtonIconSize(QSize(39, 39));
+    setButtonIconSize(QSize(44, 44));
 
     // Determine how many buttons to exclude from the group at the end
     // (Auto-OCR toggle is excluded if present)

@@ -42,8 +42,8 @@ QToolButton
     border: none;
     border-radius: 6px;
     padding: 6px;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 QToolButton:hover
@@ -144,6 +144,15 @@ QWidget#UBLibWebView
 QListView
 {
     border: 0px;
+    background: #FFFFFF;
+    color: #1A1A1A;
+}
+
+QTreeView
+{
+    border: 0px;
+    background: #FFFFFF;
+    color: #1A1A1A;
 }
 
 QWidget#UBFeatureProperties

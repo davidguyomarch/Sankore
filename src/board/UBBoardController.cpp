@@ -1891,6 +1891,8 @@ void UBBoardController::setColorIndex(int pColorIndex)
         mMarkerColorOnDarkBackground = mSettings->markerColors(true).at(pColorIndex);
         mMarkerColorOnLightBackground = mSettings->markerColors(false).at(pColorIndex);
     }
+
+    updateSceneContext();
 }
 
 static bool sameRGB(const QColor &lcol, const QColor &rcol)
@@ -1944,6 +1946,7 @@ void UBBoardController::colorPaletteChanged()
     mPenColorOnLightBackground = mSettings->penColor(false);
     mMarkerColorOnDarkBackground = mSettings->markerColor(true);
     mMarkerColorOnLightBackground = mSettings->markerColor(false);
+    updateSceneContext();
 }
 
 
