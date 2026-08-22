@@ -78,23 +78,20 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
     if (parent)
     {
         setAttribute(Qt::WA_NoMousePropagation);
-        setAttribute(Qt::WA_TranslucentBackground);
-    }
-    else
-    {
-        // standalone window
-        setAttribute(Qt::WA_TranslucentBackground);
     }
 
     mBackgroundBrush = QBrush(UBSettings::paletteColor);
 
     // React to theme changes — update background on theme switch
     connect(UBThemeManager::instance(), &UBThemeManager::themeChanged, this, [this]() {
-        setBackgroundBrush(QBrush(UBSettings::paletteColor));
+        mBackgroundBrush = QBrush(UBSettings::paletteColor);
+        update();
+        mTabPalette->update();
     });
 
-    // This is the only way to set the background as transparent!
-    setStyleSheet("QWidget {background-color: transparent}");
+    // Background is painted in paintEvent; child widgets should be transparent
+    setAutoFillBackground(false);
+    setStyleSheet("QWidget { background-color: transparent; }");
 
     // Set the position of the tab
     onToolbarPosUpdated();
