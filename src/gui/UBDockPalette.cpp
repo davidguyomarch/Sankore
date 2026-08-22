@@ -91,7 +91,8 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
 
     // Background is painted in paintEvent; child widgets should be transparent
     setAutoFillBackground(false);
-    setStyleSheet("QWidget { background-color: transparent; }");
+    // NOTE: Do NOT set a blanket QWidget stylesheet here — it would override
+    // the app-level theme stylesheet for child widgets (issue #110)
 
     // Set the position of the tab
     onToolbarPosUpdated();

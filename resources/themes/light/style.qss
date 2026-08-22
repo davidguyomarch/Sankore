@@ -144,6 +144,15 @@ QWidget#UBLibWebView
 QListView
 {
     border: 0px;
+    background: #FFFFFF;
+    color: #1A1A1A;
+}
+
+QTreeView
+{
+    border: 0px;
+    background: #FFFFFF;
+    color: #1A1A1A;
 }
 
 QWidget#UBFeatureProperties
