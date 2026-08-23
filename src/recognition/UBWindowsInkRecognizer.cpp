@@ -17,6 +17,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QThread>
+#include <QtMath>
 #include <optional>
 
 #include "core/UBSettings.h"
@@ -104,6 +105,59 @@ QString UBWindowsInkRecognizer::diagnosticInfo() const
     return info;
 }
 
+/**
+ * @brief Resample a polyline to have at most maxPoints evenly-spaced along arc length.
+ * This ensures the recognizer gets a consistent point density regardless of drawing speed.
+ */
+static QVector<QPointF> resampleEquidistant(const QVector<QPointF>& points, int maxPoints)
+{
+    if (points.size() <= 2 || points.size() <= maxPoints)
+        return points;
+
+    // Compute cumulative arc lengths
+    QVector<qreal> arcLengths;
+    arcLengths.reserve(points.size());
+    arcLengths.append(0.0);
+    for (int i = 1; i < points.size(); ++i)
+    {
+        qreal dx = points[i].x() - points[i-1].x();
+        qreal dy = points[i].y() - points[i-1].y();
+        arcLengths.append(arcLengths.last() + qSqrt(dx*dx + dy*dy));
+    }
+
+    qreal totalLength = arcLengths.last();
+    if (totalLength < 1.0)
+        return points; // degenerate stroke
+
+    // Resample at uniform intervals
+    qreal interval = totalLength / (maxPoints - 1);
+    QVector<QPointF> result;
+    result.reserve(maxPoints);
+    result.append(points.first());
+
+    int srcIdx = 1;
+    for (int i = 1; i < maxPoints - 1; ++i)
+    {
+        qreal targetDist = i * interval;
+
+        // Advance srcIdx to the segment containing targetDist
+        while (srcIdx < points.size() - 1 && arcLengths[srcIdx] < targetDist)
+            ++srcIdx;
+
+        // Linear interpolation within the segment [srcIdx-1, srcIdx]
+        qreal segStart = arcLengths[srcIdx - 1];
+        qreal segEnd = arcLengths[srcIdx];
+        qreal segLen = segEnd - segStart;
+        qreal t = (segLen > 0.0) ? (targetDist - segStart) / segLen : 0.0;
+
+        QPointF interpolated = points[srcIdx - 1] * (1.0 - t) + points[srcIdx] * t;
+        result.append(interpolated);
+    }
+
+    result.append(points.last());
+    return result;
+}
+
 UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitionStroke>& strokes)
 {
     UBRecognitionResult result;
@@ -117,10 +171,25 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
 
     try
     {
-        // Compute bounding box for normalization
-        qreal minX = strokes[0].points[0].x(), minY = strokes[0].points[0].y();
-        qreal maxX = minX, maxY = minY;
+        // Filter out very short strokes (artifacts, accidental taps)
+        QVector<UBRecognitionStroke> validStrokes;
         for (const auto& stroke : strokes)
+        {
+            if (stroke.points.size() >= 3)
+                validStrokes.append(stroke);
+        }
+
+        if (validStrokes.isEmpty())
+        {
+            result.success = false;
+            result.errorMessage = "No valid strokes (all too short)";
+            return result;
+        }
+
+        // Compute bounding box for normalization
+        qreal minX = validStrokes[0].points[0].x(), minY = validStrokes[0].points[0].y();
+        qreal maxX = minX, maxY = minY;
+        for (const auto& stroke : validStrokes)
         {
             for (const QPointF& p : stroke.points)
             {
@@ -136,10 +205,10 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         if (sceneWidth < 1.0) sceneWidth = 1.0;
         if (sceneHeight < 1.0) sceneHeight = 1.0;
 
-        // WinRT Ink coordinates: the recognizer expects stroke sizes similar to
-        // what a user would draw on screen. Typical handwriting is ~200-500 units tall.
-        const qreal targetHeight = 500.0;
-        qreal scale = targetHeight / sceneHeight;
+        // Uniform scale to target size (preserve aspect ratio).
+        // WinRT Ink recognizer works best with realistic handwriting sizes (~40-100 units tall).
+        const qreal targetSize = 80.0;
+        qreal scale = targetSize / qMax(sceneWidth, sceneHeight);
 
         // Run recognition on a worker thread to avoid blocking the UI message pump.
         // WinRT async operations deadlock if .get() is called on the STA UI thread.
@@ -156,36 +225,20 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
                 InkStrokeBuilder builder;
                 InkStrokeContainer container;
 
-                for (const auto& stroke : strokes)
+                for (const auto& stroke : validStrokes)
                 {
-                    if (stroke.points.size() < 2)
+                    // Equidistant resampling: resample the stroke to have evenly-spaced
+                    // points along the arc length. This gives the recognizer a consistent
+                    // point density regardless of drawing speed.
+                    const int maxPoints = 100;
+                    QVector<QPointF> resampled = resampleEquidistant(stroke.points, maxPoints);
+
+                    if (resampled.size() < 2)
                         continue;
 
-                    // Subsample to max 40 points per stroke
-                    QVector<QPointF> simplified;
-                    int numOriginal = stroke.points.size();
-                    int maxPoints = 40;
-
-                    if (numOriginal <= maxPoints)
-                    {
-                        simplified = stroke.points;
-                    }
-                    else
-                    {
-                        simplified.append(stroke.points.first());
-                        double step = (double)(numOriginal - 1) / (double)(maxPoints - 1);
-                        for (int i = 1; i < maxPoints - 1; i++)
-                        {
-                            int idx = (int)(i * step + 0.5);
-                            if (idx < numOriginal)
-                                simplified.append(stroke.points[idx]);
-                        }
-                        simplified.append(stroke.points.last());
-                    }
-
-                    // Create InkPoints
+                    // Create InkPoints with normalized coordinates
                     std::vector<InkPoint> inkPoints;
-                    for (const QPointF& p : simplified)
+                    for (const QPointF& p : resampled)
                     {
                         float x = (float)((p.x() - minX) * scale);
                         float y = (float)((p.y() - minY) * scale);
