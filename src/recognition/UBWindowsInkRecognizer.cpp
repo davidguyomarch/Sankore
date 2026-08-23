@@ -11,6 +11,12 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.UI.Input.Inking.h>
+#include <winrt/Windows.Media.Ocr.h>
+#include <winrt/Windows.Graphics.Imaging.h>
+#include <winrt/Windows.Storage.Streams.h>
+
+// IMemoryBufferByteAccess for direct SoftwareBitmap pixel access
+#include <MemoryBuffer.h>
 
 #include <QDebug>
 #include <QCoreApplication>
@@ -376,6 +382,112 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         result.success = false;
         result.errorMessage = QString("Exception: ") + ex.what();
         qDebug() << "OCR exception:" << result.errorMessage;
+    }
+
+    return result;
+}
+
+UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
+{
+    UBRecognitionResult result;
+
+    if (image.isNull())
+    {
+        result.success = false;
+        result.errorMessage = "Empty image provided";
+        return result;
+    }
+
+    try
+    {
+        QString recognizedText;
+        QString errorMsg;
+
+        QThread* thread = QThread::create([&]() {
+            try {
+                winrt::init_apartment(winrt::apartment_type::multi_threaded);
+
+                // Use Windows.Media.Ocr.OcrEngine for image-based recognition
+                // This is a different API from InkRecognizer — works on bitmap images
+                using namespace winrt::Windows::Media::Ocr;
+                using namespace winrt::Windows::Graphics::Imaging;
+                using namespace winrt::Windows::Storage::Streams;
+
+                // Create OcrEngine with default language
+                OcrEngine engine = OcrEngine::TryCreateFromUserProfileLanguages();
+                if (!engine)
+                {
+                    errorMsg = "OcrEngine not available (no language pack installed)";
+                    return;
+                }
+
+                // Convert QImage to WinRT SoftwareBitmap
+                QImage rgbaImage = image.convertToFormat(QImage::Format_RGBA8888);
+                int w = rgbaImage.width();
+                int h = rgbaImage.height();
+
+                // Create SoftwareBitmap and copy pixel data via DataWriter
+                SoftwareBitmap bitmap(BitmapPixelFormat::Rgba8, w, h, BitmapAlphaMode::Premultiplied);
+                {
+                    auto buffer = bitmap.LockBuffer(BitmapBufferAccessMode::Write);
+                    auto ref = buffer.CreateReference();
+
+                    // Use IMemoryBufferByteAccess to get raw pointer
+                    auto interop = ref.as<::Windows::Foundation::IMemoryBufferByteAccess>();
+                    uint8_t* dstData = nullptr;
+                    uint32_t dstCapacity = 0;
+                    winrt::check_hresult(interop->GetBuffer(&dstData, &dstCapacity));
+
+                    // Copy pixel data row by row
+                    int srcStride = rgbaImage.bytesPerLine();
+                    int dstStride = w * 4;
+                    for (int y = 0; y < h; ++y)
+                    {
+                        memcpy(dstData + y * dstStride,
+                               rgbaImage.constScanLine(y),
+                               qMin(srcStride, dstStride));
+                    }
+                }
+
+                // Recognize
+                auto ocrResult = engine.RecognizeAsync(bitmap).get();
+
+                recognizedText = QString::fromStdString(winrt::to_string(ocrResult.Text()));
+
+                winrt::uninit_apartment();
+            }
+            catch (const winrt::hresult_error& ex) {
+                errorMsg = "WinRT OCR image error: " + QString::fromStdString(winrt::to_string(ex.message()));
+            }
+            catch (const std::exception& ex) {
+                errorMsg = QString("Exception: ") + ex.what();
+            }
+        });
+
+        thread->start();
+        thread->wait(15000); // 15 second timeout for image OCR
+        delete thread;
+
+        if (!errorMsg.isEmpty())
+        {
+            result.success = false;
+            result.errorMessage = errorMsg;
+        }
+        else if (recognizedText.isEmpty())
+        {
+            result.success = false;
+            result.errorMessage = "Image OCR produced no text";
+        }
+        else
+        {
+            result.success = true;
+            result.text = recognizedText.trimmed();
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        result.success = false;
+        result.errorMessage = QString("Exception: ") + ex.what();
     }
 
     return result;

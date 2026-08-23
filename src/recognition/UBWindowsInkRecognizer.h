@@ -29,6 +29,7 @@ public:
     bool isAvailable() const override;
     QString engineName() const override;
     UBRecognitionResult recognize(const QVector<UBRecognitionStroke>& strokes) override;
+    UBRecognitionResult recognizeImage(const QImage& image) override;
     QString diagnosticInfo() const override;
 
 private:

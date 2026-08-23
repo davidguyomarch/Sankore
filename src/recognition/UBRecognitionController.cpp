@@ -21,6 +21,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
+#include <QPainter>
 
 UBRecognitionController::UBRecognitionController(QObject* parent)
     : QObject(parent)
@@ -199,14 +200,70 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
     for (int i = 0; i < strokes.size() && i < 3; i++)
         diagMsg += QString(", s%1=%2pts").arg(i).arg(strokes[i].points.size());
 
-    // Run recognition
+    // Run stroke-based recognition
     UBRecognitionResult result = mRecognizer->recognize(strokes);
 
-    if (!result.success)
+    // If stroke-based fails, try image-based OCR as fallback
+    if (!result.success || result.text.isEmpty())
     {
-        UBApplication::showMessage(tr("Recognition failed: %1\n\nDiag: %2").arg(result.errorMessage).arg(diagMsg));
-        UBApplication::showMessage(tr("Recognition failed: %1").arg(result.errorMessage));
-        return;
+        qDebug() << "OCR: stroke-based failed, trying image-based fallback...";
+
+        // Rasterize the zone: render scene items as black strokes on white background
+        QRectF renderRect = sceneRect;
+        int imgWidth = qMin((int)renderRect.width(), 1024);
+        int imgHeight = qMin((int)renderRect.height(), 1024);
+        if (imgWidth < 50) imgWidth = 200;
+        if (imgHeight < 50) imgHeight = 200;
+
+        // Scale to fit while preserving aspect ratio
+        qreal scaleX = imgWidth / renderRect.width();
+        qreal scaleY = imgHeight / renderRect.height();
+        qreal renderScale = qMin(scaleX, scaleY);
+        imgWidth = (int)(renderRect.width() * renderScale);
+        imgHeight = (int)(renderRect.height() * renderScale);
+
+        QImage ocrImage(imgWidth, imgHeight, QImage::Format_ARGB32);
+        ocrImage.fill(Qt::white);
+
+        QPainter painter(&ocrImage);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.scale(renderScale, renderScale);
+        painter.translate(-renderRect.topLeft());
+
+        // Render only stroke items in the zone
+        for (QGraphicsItem* item : itemsInZone)
+        {
+            if (dynamic_cast<UBGraphicsStrokesGroup*>(item) ||
+                dynamic_cast<UBGraphicsPolygonItem*>(item) ||
+                dynamic_cast<UBSmoothStrokeItem*>(item))
+            {
+                // Temporarily override pen color to black for OCR
+                painter.save();
+                painter.translate(item->scenePos());
+                painter.setTransform(item->sceneTransform(), false);
+                item->paint(&painter, nullptr, nullptr);
+                painter.restore();
+            }
+        }
+        painter.end();
+
+        // Try image-based OCR
+        UBRecognitionResult imageResult = mRecognizer->recognizeImage(ocrImage);
+        if (imageResult.success && !imageResult.text.isEmpty())
+        {
+            result = imageResult;
+            result.text = "[img] " + result.text; // Mark as image-based for diagnostics
+            qDebug() << "OCR: image-based fallback succeeded:" << result.text;
+        }
+        else
+        {
+            // Both methods failed
+            QString fallbackMsg = imageResult.errorMessage.isEmpty() ?
+                "No text recognized" : imageResult.errorMessage;
+            UBApplication::showMessage(tr("Recognition failed.\nStroke: %1\nImage: %2")
+                .arg(result.errorMessage).arg(fallbackMsg));
+            return;
+        }
     }
 
     // Confirm with user

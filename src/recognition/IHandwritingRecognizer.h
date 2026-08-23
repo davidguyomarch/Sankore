@@ -9,6 +9,7 @@
 #include <QString>
 #include <QPointF>
 #include <QVector>
+#include <QImage>
 
 /**
  * @brief A single stroke: ordered list of points captured from the stylus.
@@ -49,6 +50,9 @@ public:
 
     /// Recognize handwriting from a list of strokes.
     virtual UBRecognitionResult recognize(const QVector<UBRecognitionStroke>& strokes) = 0;
+
+    /// Recognize text from a rasterized image (fallback for when stroke-based fails).
+    virtual UBRecognitionResult recognizeImage(const QImage& image) { Q_UNUSED(image); return {}; }
 
     /// Returns diagnostic info about available recognizers (for troubleshooting).
     virtual QString diagnosticInfo() const { return QString(); }
