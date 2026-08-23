@@ -65,12 +65,12 @@ UBPageNavigationWidget::UBPageNavigationWidget(QWidget *parent, const char *name
     mHLayout->addWidget(mClock);
 
     // Configure the page number indicator
-    mPageNbr->setStyleSheet(QString("QLabel { color: white; background-color: transparent; border: none; font-family: Arial; font-weight: bold; font-size: 20px }"));
+    mPageNbr->setObjectName("DockPaletteWidgetTitle");
     setPageNumber(0, 0);
     mPageNbr->setAlignment(Qt::AlignHCenter);
 
     // Configure the clock
-    mClock->setStyleSheet(QString("QLabel {color: white; background-color: transparent; text-align: center; font-family: Arial; font-weight: bold; font-size: 20px}"));
+    mClock->setObjectName("DockPaletteWidgetTitle");
     mTimeFormat = QLocale::system().timeFormat(QLocale::ShortFormat);
     mClock->setAlignment(Qt::AlignHCenter);
 
