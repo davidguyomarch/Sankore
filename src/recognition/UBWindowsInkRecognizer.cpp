@@ -309,14 +309,20 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
             if (diagFile.open(QIODevice::WriteOnly | QIODevice::Text))
             {
                 QTextStream out(&diagFile);
-                out << "OCR Diagnostic (WinRT)\n";
-                out << "Strokes added: " << totalStrokesAdded << "\n";
-                out << "Scale used: " << scale << "\n";
-                out << "Scene bounds: X[" << minX << "," << maxX << "] Y[" << minY << "," << maxY << "]\n";
-                out << "Scene size: " << sceneWidth << " x " << sceneHeight << "\n";
+                out << "=== OCR Diagnostic (WinRT) ===\n";
+                out << "Input strokes: " << strokes.size() << " (valid: " << validStrokes.size() << ")\n";
+                out << "Strokes sent to recognizer: " << totalStrokesAdded << "\n";
+                out << "Scene bounds: X[" << minX << " .. " << maxX << "] Y[" << minY << " .. " << maxY << "]\n";
+                out << "Scene size: " << sceneWidth << " x " << sceneHeight << " (scene units)\n";
+                out << "Target size: " << targetSize << " | Scale factor: " << scale << "\n";
+                out << "Max points per stroke: 100 (equidistant resampling)\n";
                 out << "Recognizer: " << recoName << "\n";
-                out << "Full text: \"" << recognizedText << "\"\n";
-                if (!errorMsg.isEmpty()) out << "Error: " << errorMsg << "\n";
+                out << "Result: \"" << recognizedText << "\"\n";
+                if (!candidates.isEmpty())
+                    out << "Candidates: " << candidates.join(", ") << "\n";
+                if (!errorMsg.isEmpty())
+                    out << "Error: " << errorMsg << "\n";
+                out << "\nTo help tune: share this file + ocr_strokes_dump.txt\n";
                 diagFile.close();
             }
         }
