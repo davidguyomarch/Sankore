@@ -77,6 +77,7 @@ void UBResources::init()
     richTextCursor  = QCursor(Qt::ArrowCursor);
     rotateCursor    = QCursor(QPixmap(":/images/cursors/rotate.png"), 16, 16);
     drawLineRulerCursor = QCursor(QPixmap(":/images/cursors/drawRulerLine.png"), 3, 12);
+    ocrCursor           = QCursor(QPixmap(":/images/cursors/ocr.svg"), 4, 28);
 }
 
 void UBResources::buildFontList()

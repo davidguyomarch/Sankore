@@ -1946,6 +1946,9 @@ UBBoardView::setToolCursor (int tool)
     case UBStylusTool::Capture:
       controlViewport->setCursor (UBResources::resources ()->penCursor);
       break;
+    case UBStylusTool::Ocr:
+      controlViewport->setCursor (UBResources::resources ()->ocrCursor);
+      break;
     default:
       //Q_ASSERT (false);
       //failsafe

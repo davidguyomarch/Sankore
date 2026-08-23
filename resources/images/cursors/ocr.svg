@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- OCR wand cursor: small magic wand pointing down-left -->
+  <line x1="4" y1="28" x2="22" y2="10" stroke="black" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="4" y1="28" x2="22" y2="10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Sparkle at tip -->
+  <line x1="22" y1="6" x2="22" y2="2" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="18" y1="8" x2="16" y2="5" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="26" y1="8" x2="28" y2="5" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Cross at cursor hotspot -->
+  <line x1="2" y1="30" x2="6" y2="26" stroke="white" stroke-width="1" stroke-linecap="round"/>
+</svg>
