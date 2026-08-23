@@ -970,6 +970,14 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 mLeftPalette->assignParent(mContainer);
                 mRightPalette->assignParent(mContainer);
 
+                // Restore QML palettes when returning from desktop mode
+                if (mStylusPaletteQml)
+                    mStylusPaletteQml->show();
+                if (mDrawingPropsQml)
+                    mDrawingPropsQml->show();
+                if (mShapesPaletteQml)
+                    mShapesPaletteQml->show();
+
                 if (mDrawingPalette)
                     mDrawingPalette->stackUnder(mStylusPalette);
 
@@ -1013,12 +1021,19 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         case eUBDockPaletteWidget_DESKTOP:
             {
+                // Hide QML palettes — they are parented to mContainer (board view) which
+                // gets hidden in desktop mode. Calling raise() on them would crash.
+                if (mStylusPaletteQml)
+                    mStylusPaletteQml->hide();
+                if (mDrawingPropsQml)
+                    mDrawingPropsQml->hide();
+                if (mShapesPaletteQml)
+                    mShapesPaletteQml->hide();
+
                 mAddItemPalette->setParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mLeftPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mRightPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mStylusPalette->raise();
-                if (mStylusPaletteQml)
-                    mStylusPaletteQml->raise();
                 mDrawingPalette->raise();
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
