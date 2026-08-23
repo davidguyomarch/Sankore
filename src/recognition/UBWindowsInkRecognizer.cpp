@@ -19,6 +19,7 @@
 #include <QThread>
 #include <QtMath>
 #include <optional>
+#include <algorithm>
 
 #include "core/UBSettings.h"
 
@@ -205,10 +206,24 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
         if (sceneWidth < 1.0) sceneWidth = 1.0;
         if (sceneHeight < 1.0) sceneHeight = 1.0;
 
-        // Uniform scale to target size (preserve aspect ratio).
-        // WinRT Ink recognizer works best with realistic handwriting sizes (~40-100 units tall).
-        const qreal targetSize = 80.0;
-        qreal scale = targetSize / qMax(sceneWidth, sceneHeight);
+        // Scale based on HEIGHT to ensure letters are tall enough for recognition.
+        // WinRT recognizer works best when character height is ~40-100 units.
+        // For horizontal text, width >> height, so scaling by max would squash letters.
+        const qreal targetHeight = 80.0;
+        qreal scale = targetHeight / sceneHeight;
+
+        // Sort strokes left-to-right by their centroid X coordinate.
+        // The recognizer expects chronological/reading order. If strokes arrive
+        // in reverse Z-order (last drawn first), recognition fails.
+        QVector<UBRecognitionStroke> sortedStrokes = validStrokes;
+        std::sort(sortedStrokes.begin(), sortedStrokes.end(),
+            [](const UBRecognitionStroke& a, const UBRecognitionStroke& b) {
+                // Compute centroid X for each stroke
+                qreal axSum = 0, bxSum = 0;
+                for (const QPointF& p : a.points) axSum += p.x();
+                for (const QPointF& p : b.points) bxSum += p.x();
+                return (axSum / a.points.size()) < (bxSum / b.points.size());
+            });
 
         // Run recognition on a worker thread to avoid blocking the UI message pump.
         // WinRT async operations deadlock if .get() is called on the STA UI thread.
@@ -225,7 +240,7 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
                 InkStrokeBuilder builder;
                 InkStrokeContainer container;
 
-                for (const auto& stroke : validStrokes)
+                for (const auto& stroke : sortedStrokes)
                 {
                     // Equidistant resampling: resample the stroke to have evenly-spaced
                     // points along the arc length. This gives the recognizer a consistent
@@ -314,15 +329,26 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
                 out << "Strokes sent to recognizer: " << totalStrokesAdded << "\n";
                 out << "Scene bounds: X[" << minX << " .. " << maxX << "] Y[" << minY << " .. " << maxY << "]\n";
                 out << "Scene size: " << sceneWidth << " x " << sceneHeight << " (scene units)\n";
-                out << "Target size: " << targetSize << " | Scale factor: " << scale << "\n";
+                out << "Target height: " << targetHeight << " | Scale factor: " << scale << "\n";
+                out << "Normalized size: " << (sceneWidth * scale) << " x " << (sceneHeight * scale) << "\n";
                 out << "Max points per stroke: 100 (equidistant resampling)\n";
+                out << "Stroke order: sorted left-to-right by centroid X\n";
                 out << "Recognizer: " << recoName << "\n";
                 out << "Result: \"" << recognizedText << "\"\n";
                 if (!candidates.isEmpty())
                     out << "Candidates: " << candidates.join(", ") << "\n";
                 if (!errorMsg.isEmpty())
                     out << "Error: " << errorMsg << "\n";
-                out << "\nTo help tune: share this file + ocr_strokes_dump.txt\n";
+
+                // Append stroke dump data for single-file diagnostics
+                out << "\n=== STROKE DUMP (sorted order) ===\n";
+                out << "STROKES " << sortedStrokes.size() << "\n";
+                for (int i = 0; i < sortedStrokes.size(); i++)
+                {
+                    out << "STROKE " << i << " POINTS " << sortedStrokes[i].points.size() << "\n";
+                    for (const QPointF& p : sortedStrokes[i].points)
+                        out << p.x() << " " << p.y() << "\n";
+                }
                 diagFile.close();
             }
         }
