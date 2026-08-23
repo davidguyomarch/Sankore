@@ -47,7 +47,7 @@ void UBBoardToolbarController::setupToolbar()
     UBToolbarButtonGroup *colorChoice =
             new UBToolbarButtonGroup(mMainWindow->boardToolBar, colorActions);
 
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
+    QAction* colorChoiceAction = mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
 
     connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), colorChoice, SLOT(displayText(QVariant)));
     connect(colorChoice, SIGNAL(activated(int)), mBoardController->asQObject(), SLOT(setColorIndex(int)));
@@ -59,7 +59,7 @@ void UBBoardToolbarController::setupToolbar()
     colorChoice->colorPaletteChanged();
 
     // Hidden: replaced by QML DrawingProperties panel (Issue #110 Step 3)
-    colorChoice->hide();
+    colorChoiceAction->setVisible(false);
 
     // Setup line width choice widget
     QList<QAction *> lineWidthActions;
@@ -80,10 +80,10 @@ void UBBoardToolbarController::setupToolbar()
 
     lineWidthChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
 
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
+    QAction* lineWidthChoiceAction = mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
 
     // Hidden: replaced by QML DrawingProperties panel (Issue #110 Step 3)
-    lineWidthChoice->hide();
+    lineWidthChoiceAction->setVisible(false);
 
     // Setup eraser width choice widget
     QList<QAction *> eraserWidthActions;
@@ -94,7 +94,7 @@ void UBBoardToolbarController::setupToolbar()
     UBToolbarButtonGroup *eraserWidthChoice =
             new UBToolbarButtonGroup(mMainWindow->boardToolBar, eraserWidthActions);
 
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, eraserWidthChoice);
+    QAction* eraserWidthChoiceAction = mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, eraserWidthChoice);
 
     connect(mSettings->appToolBarDisplayText, SIGNAL(changed(QVariant)), eraserWidthChoice, SLOT(displayText(QVariant)));
     connect(eraserWidthChoice, SIGNAL(activated(int)), UBDrawingController::drawingController(), SLOT(setEraserWidthIndex(int)));
@@ -103,7 +103,7 @@ void UBBoardToolbarController::setupToolbar()
     eraserWidthChoice->setCurrentIndex(mSettings->eraserWidthIndex());
 
     // Hidden: replaced by QML DrawingProperties panel (Issue #110 Step 3)
-    eraserWidthChoice->hide();
+    eraserWidthChoiceAction->setVisible(false);
 
     mMainWindow->boardToolBar->insertSeparator(mMainWindow->actionBackgrounds);
 

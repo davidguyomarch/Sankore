@@ -69,6 +69,14 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
     mpStackWidget = new QStackedWidget(this);
     mpLayout->addWidget(mpStackWidget);
 
+    // Set stacked widget background to match theme
+    {
+        QColor bgColor = UBSettings::paletteColor;
+        bgColor.setAlpha(255);
+        mpStackWidget->setStyleSheet(
+            QString("QStackedWidget { background-color: %1; }").arg(bgColor.name()));
+    }
+
     // clear the tab widgets
     mTabWidgets.clear();
 
@@ -85,14 +93,20 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
     // React to theme changes — update background on theme switch
     connect(UBThemeManager::instance(), &UBThemeManager::themeChanged, this, [this]() {
         mBackgroundBrush = QBrush(UBSettings::paletteColor);
+        // Also update stacked widget background
+        if (mpStackWidget)
+        {
+            QColor bgColor = UBSettings::paletteColor;
+            bgColor.setAlpha(255); // fully opaque for content area
+            mpStackWidget->setStyleSheet(
+                QString("QStackedWidget { background-color: %1; }").arg(bgColor.name()));
+        }
         update();
         mTabPalette->update();
     });
 
-    // Background is painted in paintEvent; child widgets should be transparent
+    // Background is painted in paintEvent; child widgets use theme QSS
     setAutoFillBackground(false);
-    // NOTE: Do NOT set a blanket QWidget stylesheet here — it would override
-    // the app-level theme stylesheet for child widgets (issue #110)
 
     // Set the position of the tab
     onToolbarPosUpdated();
