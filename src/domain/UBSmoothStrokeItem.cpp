@@ -43,7 +43,29 @@ void UBSmoothStrokeItem::addPoint(const QPointF& scenePos, qreal pressure)
     // Convert scene coordinates to local item coordinates
     QPointF localPos = mapFromScene(scenePos);
 
-    // Skip duplicate points
+    // --- Stabilizer: exponential moving average filter ---
+    // Reduces micro-trembling from TNI sensors without adding perceptible latency
+    const qreal alpha = 0.5; // smoothing factor (0 = no smoothing, 1 = no filter)
+    if (!mRawPoints.isEmpty())
+    {
+        QPointF prev = mRawPoints.last();
+        localPos = alpha * localPos + (1.0 - alpha) * prev;
+        pressure = alpha * pressure + (1.0 - alpha) * mRawPressures.last();
+    }
+
+    // --- Minimum distance filter ---
+    // Only add a point if it's far enough from the previous one.
+    // Prevents point clusters in slow writing and ensures consistent density.
+    const qreal minDistance = 3.0; // pixels
+    if (!mRawPoints.isEmpty())
+    {
+        QPointF delta = localPos - mRawPoints.last();
+        qreal dist = qSqrt(delta.x() * delta.x() + delta.y() * delta.y());
+        if (dist < minDistance)
+            return;
+    }
+
+    // Skip exact duplicate points (safety check)
     if (!mRawPoints.isEmpty() && mRawPoints.last() == localPos)
         return;
 
@@ -244,8 +266,78 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
     strokePen.setCapStyle(Qt::RoundCap);
     strokePen.setJoinStyle(Qt::RoundJoin);
 
+    // --- Velocity-based width modulation ---
+    // Compute per-point widths based on velocity between consecutive points.
+    // Slow movement → thick (natural pen behavior at start of stroke)
+    // Fast movement → thin (liaisons, quick strokes)
+    if (mRawPoints.size() >= 3 && mNominalWidth >= 1.5)
+    {
+        QVector<qreal> widths(mRawPoints.size(), mNominalWidth);
+
+        // Compute velocities (distance between consecutive points)
+        QVector<qreal> velocities(mRawPoints.size(), 0.0);
+        qreal maxVelocity = 1.0;
+        for (int i = 1; i < mRawPoints.size(); ++i)
+        {
+            QPointF delta = mRawPoints[i] - mRawPoints[i - 1];
+            velocities[i] = qSqrt(delta.x() * delta.x() + delta.y() * delta.y());
+            if (velocities[i] > maxVelocity)
+                maxVelocity = velocities[i];
+        }
+        velocities[0] = velocities.size() > 1 ? velocities[1] : 0.0;
+
+        // Normalize and compute widths
+        // width = nominal × (0.6 + 0.4 × (1 - velocityNorm))
+        // Also factor in pressure if available
+        for (int i = 0; i < mRawPoints.size(); ++i)
+        {
+            qreal vNorm = velocities[i] / maxVelocity; // 0..1
+            qreal velocityFactor = 0.6 + 0.4 * (1.0 - vNorm);
+
+            // Pressure modulation (if stylus provides it)
+            qreal pressureFactor = 0.5 + 0.5 * mRawPressures[i]; // 0.5..1.0
+
+            widths[i] = mNominalWidth * velocityFactor * pressureFactor;
+            widths[i] = qMax(widths[i], 0.5); // minimum width
+        }
+
+        // Smooth the widths to avoid abrupt changes
+        QVector<qreal> smoothWidths = widths;
+        for (int pass = 0; pass < 2; ++pass)
+        {
+            for (int i = 1; i < smoothWidths.size() - 1; ++i)
+                smoothWidths[i] = 0.25 * widths[i - 1] + 0.5 * widths[i] + 0.25 * widths[i + 1];
+        }
+
+        // Draw as a filled outline (variable width) using QPainterPathStroker per segment
+        // Simplified approach: draw each segment with its own pen width
+        QColor strokeColor = strokePen.color();
+
+        // Soft-edge pass
+        QColor softColor = strokeColor;
+        softColor.setAlphaF(softColor.alphaF() * 0.25);
+        for (int i = 0; i < mRawPoints.size() - 1; ++i)
+        {
+            QPen segPen(softColor, smoothWidths[i] + 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            painter->setPen(segPen);
+            painter->drawLine(mRawPoints[i], mRawPoints[i + 1]);
+        }
+
+        // Main pass
+        for (int i = 0; i < mRawPoints.size() - 1; ++i)
+        {
+            qreal w = (smoothWidths[i] + smoothWidths[i + 1]) / 2.0;
+            QPen segPen(strokeColor, w, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            painter->setPen(segPen);
+            painter->drawLine(mRawPoints[i], mRawPoints[i + 1]);
+        }
+
+        return; // skip fixed-width rendering below
+    }
+
+    // Fallback: fixed-width rendering for short strokes or thin lines
+
     // Soft-edge pass: draw a slightly wider, semi-transparent version first
-    // This creates a smooth feathered edge similar to SMART Notebook rendering
     if (strokePen.widthF() >= 1.5)
     {
         QPen softPen = strokePen;
