@@ -25,6 +25,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QApplication>
 #include <QPainter>
+#include <QTextDocument>
+#include <QAbstractTextDocumentLayout>
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItem.h"
 #include "UBGraphicsTextItemDelegate.h"
@@ -87,17 +89,17 @@ UBGraphicsTextItem::UBGraphicsTextItem(QGraphicsItem * parent) :
 
     setUuid(QUuid::createUuid());
 
-    connect(document(), SIGNAL(contentsChanged()), Delegate(), SLOT(contentsChanged()));
-    connect(document(), SIGNAL(undoCommandAdded()), this, SLOT(undoCommandAdded()));
-    connect(this, SIGNAL(linkActivated(QString)), this, SLOT(loadUrl(QString)));
+    connect(document(), &QTextDocument::contentsChanged, static_cast<UBGraphicsTextItemDelegate*>(Delegate()), &UBGraphicsTextItemDelegate::contentsChanged);
+    connect(document(), &QTextDocument::undoCommandAdded, this, &UBGraphicsTextItem::undoCommandAdded);
+    connect(this, &QGraphicsTextItem::linkActivated, this, &UBGraphicsTextItem::loadUrl);
 
 
-    connect(document()->documentLayout(), SIGNAL(documentSizeChanged(const QSizeF &)),
-            this, SLOT(documentSizeChanged(const QSizeF &)));
+    connect(document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged,
+            this, &UBGraphicsTextItem::documentSizeChanged);
 
-    connect(UBApplication::boardController->controlView(), SIGNAL(clickOnBoard()), this, SLOT(changeHTMLMode()));
+    connect(UBApplication::boardController->controlView(), &UBBoardView::clickOnBoard, this, &UBGraphicsTextItem::changeHTMLMode);
 
-    connect(this, SIGNAL(linkHovered(QString)), this, SLOT(onLinkHovered(QString))); // ALTI/AOU - 20140602 : make possible to click on Links with Play tool
+    connect(this, &QGraphicsTextItem::linkHovered, this, &UBGraphicsTextItem::onLinkHovered); // ALTI/AOU - 20140602 : make possible to click on Links with Play tool
 }
 
 UBGraphicsTextItem::~UBGraphicsTextItem()
