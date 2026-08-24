@@ -124,6 +124,15 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
 
 UBBoardPaletteManager::~UBBoardPaletteManager()
 {
+    // Destroy QML widgets BEFORE their controllers are deleted.
+    // The QQuickWidgets hold context property references to controllers;
+    // if controllers die first, QML may try to access dangling pointers.
+    delete mShapesPaletteQml;
+    mShapesPaletteQml = nullptr;
+    delete mDrawingPropsQml;
+    mDrawingPropsQml = nullptr;
+    delete mStylusPaletteQml;
+    mStylusPaletteQml = nullptr;
 
 // mAddedItemPalette is delete automatically because of is parent
 // that changes depending on the mode
