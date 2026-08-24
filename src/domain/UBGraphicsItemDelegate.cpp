@@ -96,7 +96,7 @@ void DelegateButton::setFileName(const QString & fileName)
 void DelegateButton::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (mShowProgressIndicator) {
-        QTimer::singleShot(300, this, &UBGraphicsItemDelegate::startShowProgress);
+        QTimer::singleShot(300, this, &DelegateButton::startShowProgress);
     }
 
     mIsPressed = true;
