@@ -3,12 +3,14 @@ HEADERS += \
     src/recognition/IHandwritingRecognizer.h \
     src/recognition/UBStubRecognizer.h \
     src/recognition/UBStrokeExtractor.h \
-    src/recognition/UBRecognitionController.h
+    src/recognition/UBRecognitionController.h \
+    src/recognition/UBSpellCorrector.h
 
 SOURCES += \
     src/recognition/UBHandwritingRecognizerFactory.cpp \
     src/recognition/UBStrokeExtractor.cpp \
-    src/recognition/UBRecognitionController.cpp
+    src/recognition/UBRecognitionController.cpp \
+    src/recognition/UBSpellCorrector.cpp
 
 win32 {
     HEADERS += src/recognition/UBWindowsInkRecognizer.h

@@ -12,6 +12,7 @@
 
 class IHandwritingRecognizer;
 class UBGraphicsScene;
+class UBSpellCorrector;
 
 /**
  * @brief Controller that manages handwriting recognition on the board.
@@ -47,6 +48,7 @@ private slots:
 
 private:
     IHandwritingRecognizer* mRecognizer;
+    UBSpellCorrector* mSpellCorrector;
     bool mAutoMode;
     QTimer* mAutoTimer;
 };

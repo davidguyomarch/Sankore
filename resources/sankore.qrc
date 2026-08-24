@@ -420,6 +420,9 @@
         <file>themes/light/icons/play.svg</file>
         <file>themes/light/icons/drawing.svg</file>
         <file>style.qss</file>
+        <!-- Dictionaries for OCR post-correction -->
+        <file>dictionaries/en.txt</file>
+        <file>dictionaries/fr.txt</file>
         <file>images/libpalette/WebSearchCategory.svg</file>
         <file>images/tab_mask.png</file>
         <file>images/licenses/ccby.png</file>

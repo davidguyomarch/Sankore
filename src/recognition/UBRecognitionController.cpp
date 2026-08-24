@@ -6,6 +6,7 @@
 #include "UBRecognitionController.h"
 #include "IHandwritingRecognizer.h"
 #include "UBStrokeExtractor.h"
+#include "UBSpellCorrector.h"
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
@@ -28,10 +29,16 @@ UBRecognitionController::UBRecognitionController(QObject* parent)
     , mRecognizer(IHandwritingRecognizer::createDefault())
     , mAutoMode(false)
     , mAutoTimer(new QTimer(this))
+    , mSpellCorrector(new UBSpellCorrector())
 {
     mAutoTimer->setSingleShot(true);
     mAutoTimer->setInterval(2000); // 2 seconds pause before auto-recognition
     connect(mAutoTimer, &QTimer::timeout, this, &UBRecognitionController::onAutoTimerExpired);
+
+    // Load dictionaries for post-recognition spell correction
+    mSpellCorrector->loadDictionary(":/dictionaries/en.txt");
+    mSpellCorrector->loadDictionary(":/dictionaries/fr.txt");
+    qDebug() << "OCR spell corrector:" << mSpellCorrector->wordCount() << "words loaded";
 
     // Log diagnostic info about available recognizers at startup
     if (mRecognizer)
@@ -51,6 +58,7 @@ UBRecognitionController::UBRecognitionController(QObject* parent)
 UBRecognitionController::~UBRecognitionController()
 {
     delete mRecognizer;
+    delete mSpellCorrector;
 }
 
 bool UBRecognitionController::isAvailable() const
@@ -92,6 +100,14 @@ void UBRecognitionController::recognizeSelection()
     {
         UBApplication::showMessage(tr("Recognition failed: %1").arg(result.errorMessage));
         return;
+    }
+
+    // Apply spell correction
+    {
+        QString rawText = result.text;
+        result.text = mSpellCorrector->correctSentence(result.text);
+        if (result.text != rawText)
+            qDebug() << "OCR spell correction:" << rawText << "→" << result.text;
     }
 
     // Confirm with user
@@ -265,6 +281,12 @@ void UBRecognitionController::recognizeZone(const QRectF& sceneRect)
             return;
         }
     }
+
+    // Apply spell correction
+    QString rawText = result.text;
+    result.text = mSpellCorrector->correctSentence(result.text);
+    if (result.text != rawText)
+        qDebug() << "OCR spell correction:" << rawText << "→" << result.text;
 
     // Confirm with user
     QString message = tr("Recognized text: \"%1\"\n\nReplace strokes with this text?").arg(result.text);
