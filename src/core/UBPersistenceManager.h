@@ -24,13 +24,24 @@
 #ifndef UBPERSISTENCEMANAGER_H_
 #define UBPERSISTENCEMANAGER_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QList>
+#include <QHash>
+#include <QMutex>
+#include <QUuid>
+#include <QDir>
+#include <QFileInfo>
+#include <QByteArray>
 #include <QDialog>
 
 #include "UBSceneCache.h"
 
 class QDomNode;
 class QDomElement;
+class QXmlStreamWriter;
+class QModelIndex;
 class UBDocument;
 class UBDocumentProxy;
 class UBGraphicsScene;
