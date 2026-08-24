@@ -15,8 +15,15 @@
 #include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Storage.Streams.h>
 
-// IMemoryBufferByteAccess for direct SoftwareBitmap pixel access
-#include <robuffer.h>
+// Declare IMemoryBufferByteAccess manually to avoid including robuffer.h
+// which introduces a conflicting global ::Windows namespace
+MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
+IMemoryBufferByteAccess : public IUnknown
+{
+    virtual HRESULT STDMETHODCALLTYPE GetBuffer(
+        BYTE** value,
+        UINT32* capacity) = 0;
+};
 
 #include <QDebug>
 #include <QCoreApplication>
@@ -29,9 +36,10 @@
 
 #include "core/UBSettings.h"
 
+// NOTE: We CANNOT use 'using namespace winrt::Windows::Foundation' because
+// it exposes the symbol 'Windows' which conflicts with ::Windows from Win32 headers.
+// Only use 'using namespace winrt' and qualify everything else.
 using namespace winrt;
-using namespace winrt::Windows::Foundation;
-using namespace winrt::Windows::Foundation::Collections;
 using namespace winrt::Windows::UI::Input::Inking;
 
 UBWindowsInkRecognizer::UBWindowsInkRecognizer()
@@ -263,12 +271,12 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
                     {
                         float x = (float)((p.x() - minX) * scale);
                         float y = (float)((p.y() - minY) * scale);
-                        inkPoints.push_back(InkPoint(Windows::Foundation::Point(x, y), 0.5f));
+                        inkPoints.push_back(InkPoint(winrt::Windows::Foundation::Point(x, y), 0.5f));
                     }
 
                     auto inkStroke = builder.CreateStrokeFromInkPoints(
                         winrt::single_threaded_vector<InkPoint>(std::move(inkPoints)),
-                        Windows::Foundation::Numerics::float3x2::identity());
+                        winrt::Windows::Foundation::Numerics::float3x2::identity());
 
                     container.AddStroke(inkStroke);
                     totalStrokesAdded++;
@@ -429,12 +437,12 @@ UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
                     auto ref = buffer.CreateReference();
 
                     // Get raw pixel pointer via IMemoryBufferByteAccess COM interface
+                    winrt::com_ptr<::IMemoryBufferByteAccess> byteAccess;
+                    winrt::check_hresult(ref.as<::IUnknown>()->QueryInterface(
+                        __uuidof(::IMemoryBufferByteAccess),
+                        byteAccess.put_void()));
                     BYTE* dstData = nullptr;
                     UINT32 dstCapacity = 0;
-                    winrt::com_ptr<::Windows::Foundation::IMemoryBufferByteAccess> byteAccess;
-                    winrt::check_hresult(ref.as<IUnknown>()->QueryInterface(
-                        __uuidof(::Windows::Foundation::IMemoryBufferByteAccess),
-                        byteAccess.put_void()));
                     winrt::check_hresult(byteAccess->GetBuffer(&dstData, &dstCapacity));
 
                     // Copy pixel data row by row
