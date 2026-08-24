@@ -96,7 +96,7 @@ void DelegateButton::setFileName(const QString & fileName)
 void DelegateButton::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (mShowProgressIndicator) {
-        QTimer::singleShot(300, this, SLOT(startShowProgress()));
+        QTimer::singleShot(300, this, &UBGraphicsItemDelegate::startShowProgress);
     }
 
     mIsPressed = true;
@@ -196,7 +196,7 @@ UBGraphicsItemDelegate::UBGraphicsItemDelegate(QGraphicsItem* pDelegated, QObjec
     , mMoved(false)
 {
     mSettings = UBSettings::settings();
-    connect(UBApplication::boardController, SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged()));
+    connect(UBApplication::boardController, &UBBoardController::zoomChanged, this, [this]() { onZoomChanged(); });
 }
 
 void UBGraphicsItemDelegate::init()
@@ -210,26 +210,26 @@ void UBGraphicsItemDelegate::init()
 
     mDeleteButton = new DelegateButton(":/images/close.svg", mDelegated, mFrame, Qt::TopLeftSection);
     mButtons << mDeleteButton;
-    connect(mDeleteButton, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(mDeleteButton, &DelegateButton::clicked, this, [this]() { remove(); });
     if (canDuplicate()){
         mDuplicateButton = new DelegateButton(":/images/duplicate.svg", mDelegated, mFrame, Qt::TopLeftSection);
-        connect(mDuplicateButton, SIGNAL(clicked(bool)), this, SLOT(duplicate()));
+        connect(mDuplicateButton, &DelegateButton::clicked, this, [this]() { duplicate(); });
         mButtons << mDuplicateButton;
     }
     mMenuButton = new DelegateButton(":/images/menu.svg", mDelegated, mFrame, Qt::TopLeftSection);
-    connect(mMenuButton, SIGNAL(clicked()), this, SLOT(showMenu()));
+    connect(mMenuButton, &DelegateButton::clicked, this, [this]() { showMenu(); });
     mButtons << mMenuButton;
 
     mZOrderUpButton = new DelegateButton(":/images/z_layer_up.svg", mDelegated, mFrame, Qt::BottomLeftSection);
     mZOrderUpButton->setShowProgressIndicator(true);
-    connect(mZOrderUpButton, SIGNAL(clicked()), this, SLOT(increaseZLevelUp()));
-    connect(mZOrderUpButton, SIGNAL(longClicked()), this, SLOT(increaseZlevelTop()));
+    connect(mZOrderUpButton, &DelegateButton::clicked, this, [this]() { increaseZLevelUp(); });
+    connect(mZOrderUpButton, &DelegateButton::longClicked, this, &UBGraphicsItemDelegate::increaseZlevelTop);
     mButtons << mZOrderUpButton;
 
     mZOrderDownButton = new DelegateButton(":/images/z_layer_down.svg", mDelegated, mFrame, Qt::BottomLeftSection);
     mZOrderDownButton->setShowProgressIndicator(true);
-    connect(mZOrderDownButton, SIGNAL(clicked()), this, SLOT(increaseZLevelDown()));
-    connect(mZOrderDownButton, SIGNAL(longClicked()), this, SLOT(increaseZlevelBottom()));
+    connect(mZOrderDownButton, &DelegateButton::clicked, this, [this]() { increaseZLevelDown(); });
+    connect(mZOrderDownButton, &DelegateButton::longClicked, this, &UBGraphicsItemDelegate::increaseZlevelBottom);
     mButtons << mZOrderDownButton;
 
     buildButtons();
@@ -256,7 +256,7 @@ void UBGraphicsItemDelegate::init()
 UBGraphicsItemDelegate::~UBGraphicsItemDelegate()
 {
     if (UBApplication::boardController)
-        disconnect(UBApplication::boardController, SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged()));
+        disconnect(UBApplication::boardController, &UBBoardController::zoomChanged, this, nullptr);
         // do not release mMimeData.
         // the mMimeData is owned by QDrag since the setMimeData call as specified in the documentation
 
@@ -646,14 +646,14 @@ void UBGraphicsItemDelegate::buildButtons()
 
 void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 {
-    mLockAction = menu->addAction(tr("Locked"), this, SLOT(lock(bool)));
+    mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsItemDelegate::lock);
     QIcon lockIcon;
     lockIcon.addPixmap(QPixmap(":/images/locked.svg"), QIcon::Normal, QIcon::On);
     lockIcon.addPixmap(QPixmap(":/images/unlocked.svg"), QIcon::Normal, QIcon::Off);
     mLockAction->setIcon(lockIcon);
     mLockAction->setCheckable(true);
 
-    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, SLOT(showHide(bool)));
+    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsItemDelegate::showHide);
     mShowOnDisplayAction->setCheckable(true);
 
     QIcon showIcon;
@@ -663,7 +663,7 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 
     if (mShowGoContentButton)
     {
-        mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, SLOT(gotoContentSource()));
+        mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, [this]() { gotoContentSource(); });
 
         QIcon sourceIcon;
         sourceIcon.addPixmap(QPixmap(":/images/toolbar/internet.png"), QIcon::Normal, QIcon::On);
@@ -671,17 +671,17 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
     }
 
     if(mCanTrigAnAction)
-        mShowPanelToAddAnAction = menu->addAction(tr("Add an action"),this,SLOT(onAddActionClicked()));
+        mShowPanelToAddAnAction = menu->addAction(tr("Add an action"), this, [this]() { onAddActionClicked(); });
 
     if (mCanReturnInCreationMode)
-        menu->addAction(tr("Return to creation mode"), this, SLOT(onReturnToCreationModeClicked()));
+        menu->addAction(tr("Return to creation mode"), this, [this]() { onReturnToCreationModeClicked(); });
 
     //N/C - NNE - 20140505 : add vertical and horizontal flip
     if(mHorizontalMirror)
-        menu->addAction(tr("Flip on horizontal axis"), this, SLOT(flipHorizontally()));
+        menu->addAction(tr("Flip on horizontal axis"), this, [this]() { flipHorizontally(); });
 
     if(mVerticalMirror)
-        menu->addAction(tr("Flip on vertical axis"), this, SLOT(flipVertically()));
+        menu->addAction(tr("Flip on vertical axis"), this, [this]() { flipVertically(); });
     //N/C - NNE - 20140505 : END
 
 }
@@ -710,7 +710,7 @@ void UBGraphicsItemDelegate::onAddActionClicked()
 {
     UBCreateLinkPalette* linkPalette = UBApplication::boardController->paletteManager()->linkPalette();
     linkPalette->show();
-    connect(linkPalette,SIGNAL(definedAction(UBGraphicsItemAction*)),this,SLOT(saveAction(UBGraphicsItemAction*)));
+    connect(linkPalette, &UBCreateLinkPalette::definedAction, this, &UBGraphicsItemDelegate::saveAction);
 }
 
 void UBGraphicsItemDelegate::onReturnToCreationModeClicked()
@@ -727,7 +727,7 @@ void UBGraphicsItemDelegate::saveAction(UBGraphicsItemAction* action)
     case eLinkToAudio:{
         actionLabel= tr("Remove link to audio");
         UBGraphicsItemPlayAudioAction* audioAction = dynamic_cast<UBGraphicsItemPlayAudioAction*>(action);
-        connect(mDeleteButton,SIGNAL(clicked()),audioAction,SLOT(onSourceHide()));
+        connect(mDeleteButton, &DelegateButton::clicked, audioAction, [audioAction]() { audioAction->onSourceHide(); });
         break;
     }
     case eLinkToPage:
@@ -739,7 +739,7 @@ void UBGraphicsItemDelegate::saveAction(UBGraphicsItemAction* action)
         break;
     }
 
-    mRemoveAnAction = mMenu->addAction(actionLabel,this,SLOT(onRemoveActionClicked()));
+    mRemoveAnAction = mMenu->addAction(actionLabel, this, [this]() { onRemoveActionClicked(); });
     mMenu->addAction(mRemoveAnAction);
 }
 
