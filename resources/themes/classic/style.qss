@@ -16,8 +16,8 @@ QToolBar
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
         stop:0 #F8F8F8, stop:1 #D8D8D8);
     border-bottom: 1px solid #B0B0B0;
-    spacing: 4px;
-    padding: 4px 6px;
+    spacing: 6px;
+    padding: 4px 8px;
 }
 
 QToolBar::separator
@@ -34,8 +34,8 @@ QToolButton
     border: none;
     border-radius: 6px;
     padding: 6px;
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 48px;
+    min-height: 48px;
 }
 
 QToolButton:hover
