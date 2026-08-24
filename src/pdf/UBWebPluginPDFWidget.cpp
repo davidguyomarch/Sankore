@@ -47,8 +47,8 @@ UBWebPluginPDFWidget::UBWebPluginPDFWidget(const QUrl &url, QWidget *parent)
     mPreviousPageAction = new QAction(previousPageIcon, QString(), this);
     mNextPageAction = new QAction(nextPageIcon, QString(), this);
 
-    connect(mPreviousPageAction, SIGNAL(triggered()), this, SLOT(previousPage()));
-    connect(mNextPageAction, SIGNAL(triggered()), this, SLOT(nextPage()));
+    connect(mPreviousPageAction, &QAction::triggered, this, [this]() { previousPage(); });
+    connect(mNextPageAction, &QAction::triggered, this, [this]() { nextPage(); });
 
     mPreviousPageButton.setFixedSize(32, 32);
     mNextPageButton.setFixedSize(32, 32);

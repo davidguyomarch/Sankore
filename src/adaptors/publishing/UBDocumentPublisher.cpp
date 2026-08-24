@@ -567,7 +567,7 @@ void UBDocumentPublisher::init()
     mpCookieJar = new QNetworkCookieJar();
     mpNetworkMgr = new QNetworkAccessManager(this);
 
-    connect(mpNetworkMgr, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
+    connect(mpNetworkMgr, &QNetworkAccessManager::finished, this, &UBDocumentPublisher::onFinished);
 }
 
 void UBDocumentPublisher::onFinished(QNetworkReply *reply)
@@ -697,8 +697,8 @@ UBProxyLoginDlg::UBProxyLoginDlg(QWidget *parent, const char *name):QDialog(pare
     mpButtons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
     mpLayout->addWidget(mpButtons);
 
-    connect(mpButtons, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(mpButtons, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(mpButtons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(mpButtons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
 }
 
@@ -773,10 +773,10 @@ UBPublicationDlg::UBPublicationDlg(QWidget *parent, const char *name):QDialog(pa
 
     mpButtons->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-    connect(mpButtons, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(mpButtons, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(mpTitle, SIGNAL(textChanged(QString)), this, SLOT(onTextChanged()));
-    connect(mpDescription, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
+    connect(mpButtons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(mpButtons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(mpTitle, &QLineEdit::textChanged, this, [this]() { onTextChanged(); });
+    connect(mpDescription, &QTextEdit::textChanged, this, &UBPublicationDlg::onTextChanged);
 }
 
 UBPublicationDlg::~UBPublicationDlg()

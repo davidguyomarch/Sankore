@@ -2844,7 +2844,7 @@ UBGraphicsMediaItem* UBSvgSubsetAdaptor::UBSvgSubsetReader::audioItemFromSvg()
 
     UBGraphicsMediaItem* audioItem = new UBGraphicsMediaItem(QUrl::fromLocalFile(href));
     if(audioItem){
-        audioItem->connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), audioItem, SLOT(activeSceneChanged()));
+        audioItem->connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, audioItem, &UBGraphicsMediaItem::activeSceneChanged);
     }
 
     graphicsItemFromSvg(audioItem);
@@ -2882,7 +2882,7 @@ UBGraphicsMediaItem* UBSvgSubsetAdaptor::UBSvgSubsetReader::videoItemFromSvg()
 
     UBGraphicsMediaItem* videoItem = new UBGraphicsMediaItem(QUrl::fromLocalFile(href));
     if(videoItem){
-        videoItem->connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), videoItem, SLOT(activeSceneChanged()));
+        videoItem->connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, videoItem, &UBGraphicsMediaItem::activeSceneChanged);
     }
 
     graphicsItemFromSvg(videoItem);

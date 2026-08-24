@@ -41,7 +41,7 @@ UBOEmbedParser::UBOEmbedParser(QObject *parent, const char* name)
     Q_UNUSED(parent);
     setObjectName(name);
     mParsedTitles.clear();
-    connect(this, SIGNAL(parseContent(QString)), this, SLOT(onParseContent(QString)));
+    connect(this, &UBOEmbedParser::parseContent, this, &UBOEmbedParser::onParseContent);
 }
 
 UBOEmbedParser::~UBOEmbedParser()
@@ -52,7 +52,7 @@ UBOEmbedParser::~UBOEmbedParser()
 void UBOEmbedParser::setNetworkAccessManager(QNetworkAccessManager *nam)
 {
     mpNam = nam;
-    connect(mpNam, SIGNAL(finished(QNetworkReply*)), this, SLOT(onFinished(QNetworkReply*)));
+    connect(mpNam, &QNetworkAccessManager::finished, this, &UBOEmbedParser::onFinished);
 }
 
 void UBOEmbedParser::parse(const QString& html)

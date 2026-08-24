@@ -210,11 +210,11 @@ void UBServerXMLHttpRequest::connectReply()
 {
     if (mReply)
     {
-        connect(mReply, SIGNAL(finished ()), this, SLOT(finished ()));
-        connect(mReply, SIGNAL(error ( QNetworkReply::NetworkError )), this, SLOT(error ( QNetworkReply::NetworkError)));
-        connect(mReply, SIGNAL(downloadProgress ( qint64 , qint64  )), this, SLOT(downloadProgress ( qint64 , qint64  )));
-        connect(mReply, SIGNAL(uploadProgress ( qint64 , qint64  )), this, SLOT(uploadProgress ( qint64 , qint64  )));
-        connect(mReply, SIGNAL(readyRead (   )), this, SLOT( readyRead( )));
+        connect(mReply, &QNetworkReply::finished, this, &UBServerXMLHttpRequest::finished);
+        connect(mReply, &QNetworkReply::errorOccurred, this, &UBServerXMLHttpRequest::error);
+        connect(mReply, &QNetworkReply::downloadProgress, this, &UBServerXMLHttpRequest::downloadProgress);
+        connect(mReply, &QNetworkReply::uploadProgress, this, &UBServerXMLHttpRequest::uploadProgress);
+        connect(mReply, &QNetworkReply::readyRead, this, &UBServerXMLHttpRequest::readyRead);
     }
 }
 
