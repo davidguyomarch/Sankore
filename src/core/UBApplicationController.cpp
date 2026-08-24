@@ -199,11 +199,11 @@ void UBApplicationController::adaptToolBar()
 
     if (Document == mMainMode)
     {
-        connect(UBApplication::instance(), &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
+        connect(qApp, &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
     }
     else
     {
-        disconnect(UBApplication::instance(), &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
+        disconnect(qApp, &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
         if (Board == mMainMode)
             mMainWindow->actionDuplicate->setEnabled(true);
     }

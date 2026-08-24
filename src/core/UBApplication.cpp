@@ -394,7 +394,7 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(mainWindow->actionDesktop, &QAction::triggered, applicationController, &UBApplicationController::showDesktop);
     connect(mainWindow->actionDesktop, &QAction::triggered, this, [this]() { stopScript(); });
 #ifndef Q_OS_MACOS
-    connect(mainWindow->actionHideApplication, &QAction::triggered, mainWindow, [mainWindow]() { mainWindow->showMinimized(); });
+    connect(mainWindow->actionHideApplication, &QAction::triggered, mainWindow, []() { UBApplication::mainWindow->showMinimized(); });
 #else
     connect(mainWindow->actionHideApplication, &QAction::triggered, this, [this]() { showMinimized(); });
 #endif
@@ -446,9 +446,9 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(mainWindow->actionWidePageSize_16_10, &QAction::triggered, boardController, &UBBoardController::setWidePageSize16_10);
     connect(mainWindow->actionRegularPageSize, &QAction::triggered, boardController, &UBBoardController::setRegularPageSize);
 
-    connect(mainWindow->actionCut, &QAction::triggered, applicationController, [applicationController]() { applicationController->actionCut(); });
-    connect(mainWindow->actionCopy, &QAction::triggered, applicationController, [applicationController]() { applicationController->actionCopy(); });
-    connect(mainWindow->actionPaste, &QAction::triggered, applicationController, [applicationController]() { applicationController->actionPaste(); });
+    connect(mainWindow->actionCut, &QAction::triggered, applicationController, []() { UBApplication::applicationController->actionCut(); });
+    connect(mainWindow->actionCopy, &QAction::triggered, applicationController, []() { UBApplication::applicationController->actionCopy(); });
+    connect(mainWindow->actionPaste, &QAction::triggered, applicationController, []() { UBApplication::applicationController->actionPaste(); });
 
     applicationController->initScreenLayout(bUseMultiScreen);
     boardController->setupLayout();
