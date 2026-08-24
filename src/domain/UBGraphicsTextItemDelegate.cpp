@@ -91,9 +91,9 @@ UBGraphicsTextItemDelegate::UBGraphicsTextItemDelegate(UBGraphicsTextItem* pDele
     mLinkPalette->move(delegated()->boundingRect().width()/2.0, 0 );
     mCellPropertiesPalette->move(delegated()->boundingRect().width()/2.0, 0 );
 
-    connect(mTablePalette, SIGNAL(validationRequired()), this, SLOT(insertTable()));
-    connect(mLinkPalette, SIGNAL(validationRequired()), this, SLOT(insertLink()));
-    connect(mCellPropertiesPalette, SIGNAL(validationRequired()), this, SLOT(applyCellProperties()));
+    connect(mTablePalette, &UBCreateTablePalette::validationRequired, this, &UBGraphicsTextItemDelegate::insertTable);
+    connect(mLinkPalette, &UBCreateHyperLinkPalette::validationRequired, this, &UBGraphicsTextItemDelegate::insertLink);
+    connect(mCellPropertiesPalette, &UBCellPropertiesPalette::validationRequired, this, &UBGraphicsTextItemDelegate::applyCellProperties);
 }
 
 UBGraphicsTextItemDelegate::~UBGraphicsTextItemDelegate()
@@ -149,42 +149,42 @@ void UBGraphicsTextItemDelegate::buildButtons()
     mHyperLinkButton = new DelegateButton(":/images/textEditor/link.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
     mTableButton = new DelegateButton(":/images/textEditor/table.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
 
-    connect(mFontButton, SIGNAL(clicked(bool)), this, SLOT(pickFont()));
-    connect(mFontBoldButton, SIGNAL(clicked()), this, SLOT(setFontBold()));
-    connect(mFontItalicButton, SIGNAL(clicked()), this, SLOT(setFontItalic()));
-    connect(mFontUnderlineButton, SIGNAL(clicked()), this, SLOT(setFontUnderline()));
-    connect(mColorButton, SIGNAL(clicked(bool)), this, SLOT(pickColor()));    
-    connect(mDecreaseSizeButton, SIGNAL(clicked(bool)), this, SLOT(decreaseSize()));
-    connect(mIncreaseSizeButton, SIGNAL(clicked(bool)), this, SLOT(increaseSize()));
-    connect(mBackgroundColorButton, SIGNAL(clicked(bool)), this, SLOT(pickBackgroundColor()));    
-    connect(mLeftAlignmentButton, SIGNAL(clicked(bool)), this, SLOT(setAlignmentToLeft()));
-    connect(mCenterAlignmentButton, SIGNAL(clicked(bool)), this, SLOT(setAlignmentToCenter()));
-    connect(mRightAlignmentButton, SIGNAL(clicked(bool)), this, SLOT(setAlignmentToRight()));
-    connect(mCodeButton, SIGNAL(clicked(bool)), this, SLOT(alternHtmlMode()));
-    connect(mUnorderedListButton, SIGNAL(clicked(bool)), this, SLOT(insertUnorderedList()));
-    connect(mOrderedListButton, SIGNAL(clicked(bool)), this, SLOT(insertOrderedList()));
-    connect(mAddIndentButton, SIGNAL(clicked(bool)), this, SLOT(addIndent()));
-    connect(mRemoveIndentButton, SIGNAL(clicked(bool)), this, SLOT(removeIndent()));
-    connect(mHyperLinkButton, SIGNAL(clicked(bool)), this, SLOT(addLink()));
-    connect(mTableButton, SIGNAL(clicked(bool)), this, SLOT(showMenuTable()));
+    connect(mFontButton, &DelegateButton::clicked, this, [this]() { pickFont(); });
+    connect(mFontBoldButton, &DelegateButton::clicked, this, [this]() { setFontBold(); });
+    connect(mFontItalicButton, &DelegateButton::clicked, this, [this]() { setFontItalic(); });
+    connect(mFontUnderlineButton, &DelegateButton::clicked, this, [this]() { setFontUnderline(); });
+    connect(mColorButton, &DelegateButton::clicked, this, [this]() { pickColor(); });    
+    connect(mDecreaseSizeButton, &DelegateButton::clicked, this, [this]() { decreaseSize(); });
+    connect(mIncreaseSizeButton, &DelegateButton::clicked, this, [this]() { increaseSize(); });
+    connect(mBackgroundColorButton, &DelegateButton::clicked, this, [this]() { pickBackgroundColor(); });    
+    connect(mLeftAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToLeft(); });
+    connect(mCenterAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToCenter(); });
+    connect(mRightAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToRight(); });
+    connect(mCodeButton, &DelegateButton::clicked, this, [this]() { alternHtmlMode(); });
+    connect(mUnorderedListButton, &DelegateButton::clicked, this, [this]() { insertUnorderedList(); });
+    connect(mOrderedListButton, &DelegateButton::clicked, this, [this]() { insertOrderedList(); });
+    connect(mAddIndentButton, &DelegateButton::clicked, this, [this]() { addIndent(); });
+    connect(mRemoveIndentButton, &DelegateButton::clicked, this, [this]() { removeIndent(); });
+    connect(mHyperLinkButton, &DelegateButton::clicked, this, [this]() { addLink(); });
+    connect(mTableButton, &DelegateButton::clicked, this, [this]() { showMenuTable(); });
 
     // Create actions and subMenus of the "Table" menu :
     mTableMenu = new QMenu();
 
-    mTableMenu->addAction(QIcon(":/images/textEditor/svg/add-table.svg"), tr("Insert table"), this, SLOT(setTableSize()))->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/images/textEditor/svg/add-table.svg"), tr("Insert table"), this, [this]() { setTableSize(); })->setIconVisibleInMenu(true);
 
     QMenu *columnMenu = mTableMenu->addMenu(tr("Column"));
-    columnMenu->addAction(QIcon(":/images/textEditor/svg/insert-column-left.svg"), tr("Insert column after"), this, SLOT(insertColumnOnRight()))->setIconVisibleInMenu(true);
-    columnMenu->addAction(QIcon(":/images/textEditor/svg/insert-column-right.svg"), tr("Insert column before"), this, SLOT(insertColumnOnLeft()))->setIconVisibleInMenu(true);
-    columnMenu->addAction(QIcon(":/images/textEditor/svg/delete-column.svg"), tr("Delete column"), this, SLOT(deleteColumn()))->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/images/textEditor/svg/insert-column-left.svg"), tr("Insert column after"), this, [this]() { insertColumnOnRight(); })->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/images/textEditor/svg/insert-column-right.svg"), tr("Insert column before"), this, [this]() { insertColumnOnLeft(); })->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/images/textEditor/svg/delete-column.svg"), tr("Delete column"), this, [this]() { deleteColumn(); })->setIconVisibleInMenu(true);
 
     QMenu *rowMenu = mTableMenu->addMenu(tr("Row"));
-    rowMenu->addAction(QIcon(":/images/textEditor/svg/insert-row-top.svg"), tr("Insert row after"), this, SLOT(insertRowOnBottom()))->setIconVisibleInMenu(true);
-    rowMenu->addAction(QIcon(":/images/textEditor/svg/insert-row-bottom.svg"), tr("Insert row before"), this, SLOT(insertRowOnTop()))->setIconVisibleInMenu(true);
-    rowMenu->addAction(QIcon(":/images/textEditor/svg/delete-row.svg"), tr("Delete row"), this, SLOT(deleteRow()))->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/images/textEditor/svg/insert-row-top.svg"), tr("Insert row after"), this, [this]() { insertRowOnBottom(); })->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/images/textEditor/svg/insert-row-bottom.svg"), tr("Insert row before"), this, [this]() { insertRowOnTop(); })->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/images/textEditor/svg/delete-row.svg"), tr("Delete row"), this, [this]() { deleteRow(); })->setIconVisibleInMenu(true);
 
-    mTableMenu->addAction(QIcon(":/images/textEditor/svg/cell-properties.svg"), tr("Cell properties"), this, SLOT(setCellProperties()))->setIconVisibleInMenu(true);
-    mTableMenu->addAction(QIcon(), tr("Evenly distribute the columns"), this, SLOT(distributeColumn()))->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/images/textEditor/svg/cell-properties.svg"), tr("Cell properties"), this, [this]() { setCellProperties(); })->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(), tr("Evenly distribute the columns"), this, [this]() { distributeColumn(); })->setIconVisibleInMenu(true);
 
     //update the position of the menu and the sub menu
     mTableMenu->show();
@@ -853,7 +853,7 @@ void UBGraphicsTextItemDelegate::decorateMenu(QMenu *menu)
 {
     UBGraphicsItemDelegate::decorateMenu(menu);
 
-    mEditableAction = menu->addAction(tr("Editable"), this, SLOT(setEditable(bool)));
+    mEditableAction = menu->addAction(tr("Editable"), this, &UBGraphicsTextItemDelegate::setEditable);
     mEditableAction->setCheckable(true);
     mEditableAction->setChecked(isEditable());
 
