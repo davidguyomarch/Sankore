@@ -122,30 +122,32 @@ void UBBoardToolbarController::setupToolbar()
 
 void UBBoardToolbarController::connectToolbar()
 {
-    connect(mMainWindow->actionAdd, &QAction::triggered, mBoardController, &UBBoardController::addItem);
-    connect(mMainWindow->actionNewPage, &QAction::triggered, mBoardController, &UBBoardController::addScene);
-    connect(mMainWindow->actionDuplicatePage, &QAction::triggered, mBoardController, &UBBoardController::duplicateScene);
+    auto* bc = static_cast<UBBoardController*>(mBoardController->asQObject());
 
-    connect(mMainWindow->actionClearPage, &QAction::triggered, mBoardController, &UBBoardController::clearScene);
-    connect(mMainWindow->actionEraseItems, &QAction::triggered, mBoardController, &UBBoardController::clearSceneItems);
-    connect(mMainWindow->actionEraseAnnotations, &QAction::triggered, mBoardController, &UBBoardController::clearSceneAnnotation);
-    connect(mMainWindow->actionEraseBackground, &QAction::triggered, mBoardController, &UBBoardController::clearSceneBackground);
+    connect(mMainWindow->actionAdd, &QAction::triggered, bc, &UBBoardController::addItem);
+    connect(mMainWindow->actionNewPage, &QAction::triggered, bc, &UBBoardController::addScene);
+    connect(mMainWindow->actionDuplicatePage, &QAction::triggered, bc, &UBBoardController::duplicateScene);
 
-    connect(mMainWindow->actionCenterImageBackground, &QAction::triggered, mBoardController, &UBBoardController::centerImageBackground);
-    connect(mMainWindow->actionAdjustImageBackground, &QAction::triggered, mBoardController, &UBBoardController::adjustImageBackground);
-    connect(mMainWindow->actionMosaicImageBackground, &QAction::triggered, mBoardController, &UBBoardController::mosaicImageBackground);
-    connect(mMainWindow->actionFillImageBackground, &QAction::triggered, mBoardController, &UBBoardController::fillImageBackground);
-    connect(mMainWindow->actionExtendImageBackground, &QAction::triggered, mBoardController, &UBBoardController::extendImageBackground);
+    connect(mMainWindow->actionClearPage, &QAction::triggered, bc, &UBBoardController::clearScene);
+    connect(mMainWindow->actionEraseItems, &QAction::triggered, bc, &UBBoardController::clearSceneItems);
+    connect(mMainWindow->actionEraseAnnotations, &QAction::triggered, bc, &UBBoardController::clearSceneAnnotation);
+    connect(mMainWindow->actionEraseBackground, &QAction::triggered, bc, &UBBoardController::clearSceneBackground);
+
+    connect(mMainWindow->actionCenterImageBackground, &QAction::triggered, bc, &UBBoardController::centerImageBackground);
+    connect(mMainWindow->actionAdjustImageBackground, &QAction::triggered, bc, &UBBoardController::adjustImageBackground);
+    connect(mMainWindow->actionMosaicImageBackground, &QAction::triggered, bc, &UBBoardController::mosaicImageBackground);
+    connect(mMainWindow->actionFillImageBackground, &QAction::triggered, bc, &UBBoardController::fillImageBackground);
+    connect(mMainWindow->actionExtendImageBackground, &QAction::triggered, bc, &UBBoardController::extendImageBackground);
 
     connect(mMainWindow->actionUndo, &QAction::triggered, UBApplication::undoStack, &QUndoStack::undo);
     connect(mMainWindow->actionRedo, &QAction::triggered, UBApplication::undoStack, &QUndoStack::redo);
-    connect(mMainWindow->actionRedo, &QAction::triggered, mBoardController, &UBBoardController::startScript);
-    connect(mMainWindow->actionBack, &QAction::triggered, mBoardController, &UBBoardController::previousScene);
-    connect(mMainWindow->actionForward, &QAction::triggered, mBoardController, &UBBoardController::nextScene);
-    connect(mMainWindow->actionSleep, &QAction::triggered, mBoardController, &UBBoardController::stopScript);
-    connect(mMainWindow->actionSleep, &QAction::triggered, mBoardController, &UBBoardController::blackout);
-    connect(mMainWindow->actionVirtualKeyboard, &QAction::triggered, mBoardController, &UBBoardController::showKeyboard);
-    connect(mMainWindow->actionImportPage, &QAction::triggered, mBoardController, &UBBoardController::importPage);
+    connect(mMainWindow->actionRedo, &QAction::triggered, bc, &UBBoardController::startScript);
+    connect(mMainWindow->actionBack, &QAction::triggered, bc, &UBBoardController::previousScene);
+    connect(mMainWindow->actionForward, &QAction::triggered, bc, &UBBoardController::nextScene);
+    connect(mMainWindow->actionSleep, &QAction::triggered, bc, &UBBoardController::stopScript);
+    connect(mMainWindow->actionSleep, &QAction::triggered, bc, &UBBoardController::blackout);
+    connect(mMainWindow->actionVirtualKeyboard, &QAction::triggered, bc, &UBBoardController::showKeyboard);
+    connect(mMainWindow->actionImportPage, &QAction::triggered, bc, &UBBoardController::importPage);
 }
 
 void UBBoardToolbarController::initToolbarTexts()
