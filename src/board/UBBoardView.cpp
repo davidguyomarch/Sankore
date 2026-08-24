@@ -140,14 +140,14 @@ UBBoardView::~UBBoardView () {
 
 void UBBoardView::init ()
 {
-  connect (UBSettings::settings ()->boardPenPressureSensitive, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardPenPressureSensitive, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
-  connect (UBSettings::settings ()->boardMarkerPressureSensitive, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardMarkerPressureSensitive, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
-  connect (UBSettings::settings ()->boardUseHighResTabletEvent, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardUseHighResTabletEvent, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
   setWindowFlags (Qt::FramelessWindowHint);
   setFrameStyle (QFrame::NoFrame);

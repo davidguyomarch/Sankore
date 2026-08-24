@@ -110,10 +110,10 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
 
     // Set the position of the tab
     onToolbarPosUpdated();
-    connect(mSettings->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(onToolbarPosUpdated()));
-    connect(UBDownloadManager::downloadManager(), SIGNAL(allDownloadsFinished()), this, SLOT(onAllDownloadsFinished()));
+    connect(mSettings->appToolBarPositionedAtTop, &UBSetting::changed, this, [this]() { onToolbarPosUpdated(); });
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::allDownloadsFinished, this, &UBDockPalette::onAllDownloadsFinished);
 
-    connect(UBApplication::boardController,SIGNAL(documentSet(UBDocumentProxy*)),this,SLOT(onDocumentSet(UBDocumentProxy*)));
+    connect(UBApplication::boardController, &UBBoardController::documentSet, this, &UBDockPalette::onDocumentSet);
 }
 
 /**
@@ -488,8 +488,8 @@ void UBDockPalette::connectSignals()
 {
     for(int i=0; i < mRegisteredWidgets.size(); i++)
     {
-        connect(mRegisteredWidgets.at(i), SIGNAL(showTab(UBDockPaletteWidget*)), this, SLOT(onShowTabWidget(UBDockPaletteWidget*)));
-        connect(mRegisteredWidgets.at(i), SIGNAL(hideTab(UBDockPaletteWidget*)), this, SLOT(onHideTabWidget(UBDockPaletteWidget*)));
+        connect(mRegisteredWidgets.at(i), &UBDockPaletteWidget::showTab, this, &UBDockPalette::onShowTabWidget);
+        connect(mRegisteredWidgets.at(i), &UBDockPaletteWidget::hideTab, this, &UBDockPalette::onHideTabWidget);
     }
 }
 

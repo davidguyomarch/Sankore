@@ -1,22 +1,22 @@
 /*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2010-2013 Groupement d'Intï¿½rï¿½t Public pour l'Education Numï¿½rique en Afrique (GIP ENA)
  *
- * This file is part of Open-Sankoré.
+ * This file is part of Open-Sankorï¿½.
  *
- * Open-Sankoré is free software: you can redistribute it and/or modify
+ * Open-Sankorï¿½ is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, version 3 of the License,
  * with a specific linking exception for the OpenSSL project's
  * "OpenSSL" library (or with modified versions of it that use the
  * same license as the "OpenSSL" library).
  *
- * Open-Sankoré is distributed in the hope that it will be useful,
+ * Open-Sankorï¿½ is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Open-Sankorï¿½.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -39,7 +39,7 @@ UBDrawingStrokePropertiesPalette::UBDrawingStrokePropertiesPalette(Qt::Orientati
     // Color button
     mBtnColorPicker = new UBColorPickerButton(this);
     layout()->addWidget(mBtnColorPicker);
-    connect(mBtnColorPicker, SIGNAL(clicked()), this, SLOT(onBtnSelectStrokeColor()));
+    connect(mBtnColorPicker, &QAbstractButton::clicked, this, [this]() { onBtnSelectStrokeColor(); });
 
     //layout "thickness"
     QHBoxLayout* thicknessLayout = new QHBoxLayout();
@@ -68,7 +68,7 @@ UBDrawingStrokePropertiesPalette::UBDrawingStrokePropertiesPalette(Qt::Orientati
     {
         mButtonGroupStrokeThickness->addButton(button);
         thicknessLayout->addWidget(button);
-        connect(button, SIGNAL(clicked()), this, SLOT(onBtnSelectThickness()));
+        connect(button, &QAbstractButton::clicked, this, [this]() { onBtnSelectThickness(); });
     }
 
     //layout "Style"
@@ -98,7 +98,7 @@ UBDrawingStrokePropertiesPalette::UBDrawingStrokePropertiesPalette(Qt::Orientati
     {
         mButtonGroupStrokeStyle->addButton(button);
         styleLayout->addWidget(button);
-        connect(button, SIGNAL(clicked()), this, SLOT(onBtnSelectStyle()));
+        connect(button, &QAbstractButton::clicked, this, [this]() { onBtnSelectStyle(); });
     }
 
     //group layouts to main layout

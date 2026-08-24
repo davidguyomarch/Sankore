@@ -87,9 +87,9 @@ UBUpdateDlg::UBUpdateDlg(QWidget *parent, int nbFiles, const QString& bkpPath)
     mpDlgBttn->button(QDialogButtonBox::Ok)->setText(tr("Update"));
     mpDlgBttn->button(QDialogButtonBox::Cancel)->setText(tr("Remind me later"));
 
-    QObject::connect(mBrowseBttn, SIGNAL(clicked()), this, SLOT(onBrowse()));
-    QObject::connect(mpDlgBttn, SIGNAL(accepted()), this, SLOT(onUpdate()));
-    QObject::connect(mpDlgBttn, SIGNAL(rejected()), this, SLOT(reject()));
+    QObject::connect(mBrowseBttn, &QPushButton::clicked, this, [this]() { onBrowse(); });
+    QObject::connect(mpDlgBttn, &QDialogButtonBox::accepted, this, &UBUpdateDlg::onUpdate);
+    QObject::connect(mpDlgBttn, &QDialogButtonBox::rejected, this, &QDialog::reject);
     mDialogWidget->setLayout(mLayout);
     mStackedWidget->setCurrentWidget(mDialogWidget);
 

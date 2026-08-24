@@ -107,8 +107,8 @@ UBActionPaletteButton* UBActionPalette::createPaletteButton(QAction* action, QWi
 
     mMapActionToButton[action] = button;
 
-    connect(button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
-    connect(action, SIGNAL(changed()), this, SLOT(actionChanged()));
+    connect(button, &QAbstractButton::clicked, this, [this]() { buttonClicked(); });
+    connect(action, &QAction::changed, this, &UBActionPalette::actionChanged);
 
     return button;
 }
@@ -163,7 +163,7 @@ void UBActionPalette::groupActions()
         ++i;
     }
 
-    connect(mButtonGroup, SIGNAL(idClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
+    connect(mButtonGroup, &QButtonGroup::idClicked, this, &UBActionPalette::buttonGroupClicked);
 }
 
 
