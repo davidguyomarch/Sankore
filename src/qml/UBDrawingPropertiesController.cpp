@@ -18,10 +18,10 @@ UBDrawingPropertiesController::UBDrawingPropertiesController(QObject* parent)
     mSettings = UBSettings::settings();
     mDrawingController = UBDrawingController::drawingController();
 
-    connect(mDrawingController, SIGNAL(stylusToolChanged(int)), this, SLOT(onStylusToolChanged(int)));
-    connect(mDrawingController, SIGNAL(colorPaletteChanged()), this, SLOT(onColorPaletteChanged()));
-    connect(mDrawingController, SIGNAL(colorIndexChanged(int)), this, SLOT(onColorIndexChangedFromController(int)));
-    connect(mDrawingController, SIGNAL(lineWidthIndexChanged(int)), this, SLOT(onLineWidthIndexChanged(int)));
+    connect(mDrawingController, &UBDrawingController::stylusToolChanged, this, &UBDrawingPropertiesController::onStylusToolChanged);
+    connect(mDrawingController, &UBDrawingController::colorPaletteChanged, this, &UBDrawingPropertiesController::onColorPaletteChanged);
+    connect(mDrawingController, &UBDrawingController::colorIndexChanged, this, &UBDrawingPropertiesController::onColorIndexChangedFromController);
+    connect(mDrawingController, &UBDrawingController::lineWidthIndexChanged, this, &UBDrawingPropertiesController::onLineWidthIndexChanged);
 }
 
 QString UBDrawingPropertiesController::activeTool() const

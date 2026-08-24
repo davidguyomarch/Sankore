@@ -42,7 +42,7 @@ UBDrawingFillPropertiesPalette::UBDrawingFillPropertiesPalette(Qt::Orientation o
     mBtnColorPicker->setToolTip(tr("Select and set filling color"));
     mBtnColorPicker->setColor(UBApplication::boardController->shapeFactory().fillFirstColor());
     layout()->addWidget(mBtnColorPicker);
-    connect(mBtnColorPicker, SIGNAL(clicked()), this, SLOT(onBtnSelectFillFirstColor()));    
+    connect(mBtnColorPicker, &QAbstractButton::clicked, this, [this]() { onBtnSelectFillFirstColor(); });    
 
     //layout "ColorStyle"
     QHBoxLayout* colorStyleLayout = new QHBoxLayout();
@@ -73,11 +73,11 @@ UBDrawingFillPropertiesPalette::UBDrawingFillPropertiesPalette(Qt::Orientation o
     mButtonGroupColorStyle->addButton(btnFullColor);
     mButtonGroupColorStyle->addButton(btnGradientColor);
 
-    connect(btnAlphaColor, SIGNAL(clicked()), this, SLOT(onBtnColorTransparent()));
-    connect(btnFillStyleDense, SIGNAL(clicked()), this, SLOT(onBtnFillStyleDense()));
-    connect(btnFillStyleDiag, SIGNAL(clicked()), this, SLOT(onBtnFillStyleDiag()));
-    connect(btnFullColor, SIGNAL(clicked()), this, SLOT(onBtnColorFull()));
-    connect(btnGradientColor, SIGNAL(clicked()), this, SLOT(onBtnColorGradient()));
+    connect(btnAlphaColor, &QAbstractButton::clicked, this, [this]() { onBtnColorTransparent(); });
+    connect(btnFillStyleDense, &QAbstractButton::clicked, this, [this]() { onBtnFillStyleDense(); });
+    connect(btnFillStyleDiag, &QAbstractButton::clicked, this, [this]() { onBtnFillStyleDiag(); });
+    connect(btnFullColor, &QAbstractButton::clicked, this, [this]() { onBtnColorFull(); });
+    connect(btnGradientColor, &QAbstractButton::clicked, this, [this]() { onBtnColorGradient(); });
 
     //group layouts to main layout
     QHBoxLayout* mainLayout = dynamic_cast<QHBoxLayout*>(layout());
@@ -93,7 +93,7 @@ UBDrawingFillPropertiesPalette::UBDrawingFillPropertiesPalette(Qt::Orientation o
     mBtnColor2Picker->setColor(UBApplication::boardController->shapeFactory().fillSecondColor());
     mBtnColor2Picker->setEnabled(false);
     layout()->addWidget(mBtnColor2Picker);
-    connect(mBtnColor2Picker, SIGNAL(clicked()), this, SLOT(onBtnSelectFillSecondColor()));
+    connect(mBtnColor2Picker, &QAbstractButton::clicked, this, [this]() { onBtnSelectFillSecondColor(); });
 
     adjustSizeAndPosition();
 }

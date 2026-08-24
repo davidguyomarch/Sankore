@@ -51,13 +51,13 @@ UBAlignObjectPalette::UBAlignObjectPalette(Qt::Orientation orient, QWidget *pare
     layout()->addWidget(btnAlignHorizontalCenter);
     layout()->addWidget(btnAlignToBottom);
 
-    connect(btnAlignToLeft, SIGNAL(clicked()), this, SLOT(onBtnAlignToLeft()));
-    connect(btnAlignVerticalCenter, SIGNAL(clicked()), this, SLOT(onBtnAlignVerticalCenter()));
-    connect(btnAlignToRight, SIGNAL(clicked()), this, SLOT(onBtnAlignToRight()));
+    connect(btnAlignToLeft, &QAbstractButton::clicked, this, [this]() { onBtnAlignToLeft(); });
+    connect(btnAlignVerticalCenter, &QAbstractButton::clicked, this, [this]() { onBtnAlignVerticalCenter(); });
+    connect(btnAlignToRight, &QAbstractButton::clicked, this, [this]() { onBtnAlignToRight(); });
 
-    connect(btnAlignToTop, SIGNAL(clicked()), this, SLOT(onBtnAlignToTop()));
-    connect(btnAlignHorizontalCenter, SIGNAL(clicked()), this, SLOT(onBtnAlignHorizontalCenter()));
-    connect(btnAlignToBottom, SIGNAL(clicked()), this, SLOT(onBtnAlignToBottom()));
+    connect(btnAlignToTop, &QAbstractButton::clicked, this, [this]() { onBtnAlignToTop(); });
+    connect(btnAlignHorizontalCenter, &QAbstractButton::clicked, this, [this]() { onBtnAlignHorizontalCenter(); });
+    connect(btnAlignToBottom, &QAbstractButton::clicked, this, [this]() { onBtnAlignToBottom(); });
 
     adjustSizeAndPosition();
 }
