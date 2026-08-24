@@ -84,7 +84,7 @@ UBMagnifier::UBMagnifier(QWidget *parent, bool isInteractive)
 #endif
     }
 
-    connect(&mRefreshTimer, SIGNAL(timeout()), this, SLOT(slot_refresh()));
+    connect(&mRefreshTimer, &QTimer::timeout, this, &UBMagnifier::slot_refresh);
 }
 
 UBMagnifier::~UBMagnifier()

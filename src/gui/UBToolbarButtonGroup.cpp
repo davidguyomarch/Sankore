@@ -88,7 +88,7 @@ UBToolbarButtonGroup::UBToolbarButtonGroup(QToolBar *toolBar, const QList<QActio
             button->setObjectName("ubButtonGroupCenter");
         }
 
-        connect(button, SIGNAL(triggered(QAction*)), this, SLOT(selected(QAction*)));
+        connect(button, &QToolButton::triggered, this, &UBToolbarButtonGroup::selected);
 
         horizontalLayout->addWidget(button);
         mLabel = action->text();

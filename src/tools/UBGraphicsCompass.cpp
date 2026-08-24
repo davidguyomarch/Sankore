@@ -88,8 +88,8 @@ UBGraphicsCompass::UBGraphicsCompass()
     setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::CppTool)); //Necessary to set if we want z value to be assigned correctly
     setFlag(QGraphicsItem::ItemIsSelectable, false);
 
-    connect(UBApplication::boardController, SIGNAL(penColorChanged()), this, SLOT(penColorChanged()));
-    connect(UBDrawingController::drawingController(), SIGNAL(lineWidthIndexChanged(int)), this, SLOT(lineWidthChanged()));
+    connect(UBApplication::boardController, &UBBoardController::penColorChanged, this, &UBGraphicsCompass::penColorChanged);
+    connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged, this, [this]() { lineWidthChanged(); });
 }
 
 UBGraphicsCompass::~UBGraphicsCompass()

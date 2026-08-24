@@ -161,18 +161,18 @@ void UBCreateLinkPalette::init()
     audioBackButtonLayout->addWidget(audioBackButton);
     audioBackButtonLayout->addStretch();
     audioWidgetLayout->addLayout(audioBackButtonLayout);
-    connect(audioBackButton,SIGNAL(clicked()),this,SLOT(onBackButtonClicked()));
+    connect(audioBackButton, &QPushButton::clicked, this, [this]() { onBackButtonClicked(); });
     mpAudioLabel = new UBCreateLinkLabel(tr("Drag and drop the audio file from the library in this box"),mAudioWidget);
-    connect(mpAudioLabel,SIGNAL(droppedFile(QString&)),this,SLOT(onDroppedAudioFile(QString&)));
+    connect(mpAudioLabel, &UBCreateLinkLabel::droppedFile, this, &UBCreateLinkPalette::onDroppedAudioFile);
     audioWidgetLayout->addWidget(mpAudioLabel);
     QHBoxLayout* audioOkButtonLayout = new QHBoxLayout();
     audioOkButtonLayout->addStretch();
     QPushButton* audioOkButton = new QPushButton(tr("Ok"),mAudioWidget);
     audioOkButtonLayout->addWidget(audioOkButton);
     audioWidgetLayout->addLayout(audioOkButtonLayout);
-    connect(audioOkButton,SIGNAL(clicked()),this,SLOT(onOkAudioClicked()));
+    connect(audioOkButton, &QPushButton::clicked, this, [this]() { onOkAudioClicked(); });
     mStackedWidget->addWidget(mAudioWidget);
-    connect(actionPlayAudio,SIGNAL(clicked()),this,SLOT(onPlayAudioClicked()));
+    connect(actionPlayAudio, &QPushButton::clicked, this, [this]() { onPlayAudioClicked(); });
 
 
     mPageLinkWidget = new QWidget(this);
@@ -218,19 +218,19 @@ void UBCreateLinkPalette::init()
     if(!mPageComboBox->count())
         pageNumberCheckBox->setEnabled(false);
     mPageComboBox->setEnabled(false);
-    connect(pageNumberCheckBox,SIGNAL(clicked(bool)),this,SLOT(onPageNumberCheckBoxClicked(bool)));
+    connect(pageNumberCheckBox, &QCheckBox::clicked, this, &UBCreateLinkPalette::onPageNumberCheckBoxClicked);
     pageLinkWidgetLayout->addLayout(toPageNumberLayout);
 
 
-    connect(pageLinkBackButton,SIGNAL(clicked()),this,SLOT(onBackButtonClicked()));
+    connect(pageLinkBackButton, &QPushButton::clicked, this, [this]() { onBackButtonClicked(); });
     QHBoxLayout* pageLinkOkButtonLayout = new QHBoxLayout();
     pageLinkOkButtonLayout->addStretch();
     QPushButton* pageLinkOkButton = new QPushButton(tr("Ok"), mPageLinkWidget);
     pageLinkOkButtonLayout->addWidget(pageLinkOkButton);
     pageLinkWidgetLayout->addLayout(pageLinkOkButtonLayout);
-    connect(pageLinkOkButton,SIGNAL(clicked()),this,SLOT(onOkLinkToPageClicked()));
+    connect(pageLinkOkButton, &QPushButton::clicked, this, [this]() { onOkLinkToPageClicked(); });
     mStackedWidget->addWidget(mPageLinkWidget);
-    connect(actionAddLinkToPage,SIGNAL(clicked()),this,SLOT(onAddLinkToPageClicked()));
+    connect(actionAddLinkToPage, &QPushButton::clicked, this, [this]() { onAddLinkToPageClicked(); });
 
 
     mUrlLinkWidget = new QWidget(this);
@@ -242,7 +242,7 @@ void UBCreateLinkPalette::init()
     urlLinkBackButtonLayout->addWidget(urlLinkBackButton);
     urlLinkBackButtonLayout->addStretch();
     urlLinkWidgetLayout->addLayout(urlLinkBackButtonLayout);
-    connect(urlLinkBackButton,SIGNAL(clicked()),this,SLOT(onBackButtonClicked()));
+    connect(urlLinkBackButton, &QPushButton::clicked, this, [this]() { onBackButtonClicked(); });
     mUrlLineEdit = new QLineEdit(mUrlLinkWidget);
     mUrlLineEdit->setPlaceholderText(tr("Insert url text here"));
     mUrlLineEdit->setAcceptDrops(true);
@@ -252,9 +252,9 @@ void UBCreateLinkPalette::init()
     QPushButton* urlLinkOkButton = new QPushButton(tr("Ok"), mUrlLinkWidget);
     urlLinkOkButtonLayout->addWidget(urlLinkOkButton);
     urlLinkWidgetLayout->addLayout(urlLinkOkButtonLayout);
-    connect(urlLinkOkButton,SIGNAL(clicked()),this,SLOT(onOkLinkToWebClicked()));
+    connect(urlLinkOkButton, &QPushButton::clicked, this, [this]() { onOkLinkToWebClicked(); });
     mStackedWidget->addWidget(mUrlLinkWidget);
-    connect(actionAddLinkToWeb,SIGNAL(clicked()),this,SLOT(onAddLinkToWebClicked()));
+    connect(actionAddLinkToWeb, &QPushButton::clicked, this, [this]() { onAddLinkToWebClicked(); });
 
 }
 
