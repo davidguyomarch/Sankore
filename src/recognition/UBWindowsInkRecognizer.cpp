@@ -11,19 +11,10 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.UI.Input.Inking.h>
-#include <winrt/Windows.Media.Ocr.h>
-#include <winrt/Windows.Graphics.Imaging.h>
-#include <winrt/Windows.Storage.Streams.h>
 
-// Declare IMemoryBufferByteAccess manually to avoid including robuffer.h
-// which introduces a conflicting global ::Windows namespace
-MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
-IMemoryBufferByteAccess : public IUnknown
-{
-    virtual HRESULT STDMETHODCALLTYPE GetBuffer(
-        BYTE** value,
-        UINT32* capacity) = 0;
-};
+// NOTE: Windows.Media.Ocr image-based fallback is implemented in a separate
+// compilation unit (UBWindowsImageOcr.cpp) to avoid namespace conflicts
+// between the classic COM IUnknown and winrt::Windows::Foundation::IUnknown.
 
 #include <QDebug>
 #include <QCoreApplication>
@@ -397,106 +388,9 @@ UBRecognitionResult UBWindowsInkRecognizer::recognize(const QVector<UBRecognitio
 
 UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
 {
-    UBRecognitionResult result;
-
-    if (image.isNull())
-    {
-        result.success = false;
-        result.errorMessage = "Empty image provided";
-        return result;
-    }
-
-    try
-    {
-        QString recognizedText;
-        QString errorMsg;
-
-        QThread* thread = QThread::create([&]() {
-            try {
-                winrt::init_apartment(winrt::apartment_type::multi_threaded);
-
-                // Use fully qualified names to avoid ambiguity with ::Windows from MemoryBuffer.h
-                auto engine = winrt::Windows::Media::Ocr::OcrEngine::TryCreateFromUserProfileLanguages();
-                if (!engine)
-                {
-                    errorMsg = "OcrEngine not available (no language pack installed)";
-                    return;
-                }
-
-                // Convert QImage to WinRT SoftwareBitmap
-                QImage rgbaImage = image.convertToFormat(QImage::Format_RGBA8888);
-                int w = rgbaImage.width();
-                int h = rgbaImage.height();
-
-                winrt::Windows::Graphics::Imaging::SoftwareBitmap bitmap(
-                    winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8, w, h,
-                    winrt::Windows::Graphics::Imaging::BitmapAlphaMode::Premultiplied);
-                {
-                    auto buffer = bitmap.LockBuffer(
-                        winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode::Write);
-                    auto ref = buffer.CreateReference();
-
-                    // Get raw pixel pointer via IMemoryBufferByteAccess COM interface
-                    winrt::com_ptr<::IMemoryBufferByteAccess> byteAccess;
-                    winrt::check_hresult(ref.as<::IUnknown>()->QueryInterface(
-                        __uuidof(::IMemoryBufferByteAccess),
-                        byteAccess.put_void()));
-                    BYTE* dstData = nullptr;
-                    UINT32 dstCapacity = 0;
-                    winrt::check_hresult(byteAccess->GetBuffer(&dstData, &dstCapacity));
-
-                    // Copy pixel data row by row
-                    int srcStride = rgbaImage.bytesPerLine();
-                    int dstStride = w * 4;
-                    for (int y = 0; y < h; ++y)
-                    {
-                        memcpy(dstData + y * dstStride,
-                               rgbaImage.constScanLine(y),
-                               qMin(srcStride, dstStride));
-                    }
-                }
-
-                // Recognize
-                auto ocrResult = engine.RecognizeAsync(bitmap).get();
-                recognizedText = QString::fromStdString(winrt::to_string(ocrResult.Text()));
-
-                winrt::uninit_apartment();
-            }
-            catch (const winrt::hresult_error& ex) {
-                errorMsg = "WinRT OCR image error: " + QString::fromStdString(winrt::to_string(ex.message()));
-            }
-            catch (const std::exception& ex) {
-                errorMsg = QString("Exception: ") + ex.what();
-            }
-        });
-
-        thread->start();
-        thread->wait(15000); // 15 second timeout for image OCR
-        delete thread;
-
-        if (!errorMsg.isEmpty())
-        {
-            result.success = false;
-            result.errorMessage = errorMsg;
-        }
-        else if (recognizedText.isEmpty())
-        {
-            result.success = false;
-            result.errorMessage = "Image OCR produced no text";
-        }
-        else
-        {
-            result.success = true;
-            result.text = recognizedText.trimmed();
-        }
-    }
-    catch (const std::exception& ex)
-    {
-        result.success = false;
-        result.errorMessage = QString("Exception: ") + ex.what();
-    }
-
-    return result;
+    // Delegate to separate compilation unit to avoid WinRT namespace conflicts
+    extern UBRecognitionResult ubWindowsImageOcrRecognize(const QImage& image);
+    return ubWindowsImageOcrRecognize(image);
 }
 
 #endif // Q_OS_WIN
