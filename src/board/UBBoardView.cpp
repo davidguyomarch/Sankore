@@ -1036,7 +1036,7 @@ void UBBoardView::longPressEvent()
    UBDrawingController *drawingController = UBDrawingController::drawingController();
    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
 
-   disconnect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+   disconnect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
 
    if (UBStylusTool::Selector == currentTool)
    {
@@ -1123,7 +1123,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             if (scene()->backgroundObject() == movingItem)
                 movingItem = nullptr;
 
-            connect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+            connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
             if (!movingItem && !mController->cacheIsVisible())
                 mLongPressTimer.start();
 
@@ -1223,7 +1223,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             {
                 if (currentTool == UBStylusTool::Eraser)
                 {
-                    connect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+                    connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
                     mLongPressTimer.start();
                 }
                 scene ()->inputDevicePress (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())));
