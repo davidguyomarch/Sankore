@@ -181,7 +181,11 @@ void UBBoardController::init()
             this, &UBBoardController::lastWindowClosed);
 
     connect(UBDownloadManager::downloadManager(), &UBDownloadManager::downloadModalFinished, this, &UBBoardController::onDownloadModalFinished);
-    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::addDownloadedFileToBoard, this, &UBBoardController::downloadFinished);
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::addDownloadedFileToBoard,
+            this, [this](bool pSuccess, QUrl sourceUrl, QUrl contentUrl, QString pHeader,
+                         QByteArray pData, QPointF pPos, QSize pSize, bool isSyncOperation, bool isBackground) {
+                downloadFinished(pSuccess, sourceUrl, contentUrl, pHeader, pData, pPos, pSize, isSyncOperation, isBackground);
+            });
 
     UBDocumentProxy* doc = UBPersistenceManager::persistenceManager()->createNewDocument();
 
