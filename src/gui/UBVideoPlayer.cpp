@@ -64,8 +64,8 @@ UBVideoPlayer::UBVideoPlayer(QWidget* pParent)
     mSeekSlider->setRange(0, 0);
     transportLayout->addWidget(mSeekSlider);
 
-    connect(mPlayPause, SIGNAL(clicked()),
-            this, SLOT(tooglePlayPause()));
+    connect(mPlayPause, &QPushButton::clicked,
+            this, [this]() { tooglePlayPause(); });
 
     connect(mMediaPlayer, &QMediaPlayer::playbackStateChanged,
             this, &UBVideoPlayer::mediaStateChanged);

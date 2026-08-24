@@ -48,10 +48,12 @@ public slots:
 signals:
     void updateFiles();
 
+public slots:
+    void transitioningFile(QString fileName);
+
 private slots:
     void onBrowse();
     void onUpdate();
-    void transitioningFile(QString fileName);
 
 private:
     QVBoxLayout* mMainLayout;
