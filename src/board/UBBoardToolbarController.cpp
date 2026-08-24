@@ -122,7 +122,7 @@ void UBBoardToolbarController::setupToolbar()
 
 void UBBoardToolbarController::connectToolbar()
 {
-    auto* bc = static_cast<UBBoardController*>(mBoardController->asQObject());
+    UBBoardController* bc = qobject_cast<UBBoardController*>(mBoardController->asQObject());
 
     connect(mMainWindow->actionAdd, &QAction::triggered, bc, &UBBoardController::addItem);
     connect(mMainWindow->actionNewPage, &QAction::triggered, bc, &UBBoardController::addScene);
