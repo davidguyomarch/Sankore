@@ -104,12 +104,12 @@ UBFeaturesActionBar::UBFeaturesActionBar( UBFeaturesController *controller, QWid
     connect(mSearchBar, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
     connect(mpNewFolderAction, SIGNAL(triggered()), this, SLOT(onActionNewFolder()));*/
 
-    connect(mpFavoriteAction,SIGNAL(triggered()), this, SLOT(onActionFavorite()));
-	connect(mSearchBar, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
-	connect(mpNewFolderAction, SIGNAL(triggered()), this, SLOT(onActionNewFolder()));
-    connect(mpRemoveFavorite, SIGNAL(triggered()), this, SLOT(onActionRemoveFavorite()));
-    connect(mpRescanModelAction, SIGNAL(triggered()), this , SLOT(onActionRescanModel()));
-    connect(mpDeleteAction,SIGNAL(triggered()), this, SLOT(onActionTrash()));
+    connect(mpFavoriteAction, &QAction::triggered, this, [this]() { onActionFavorite(); });
+	connect(mSearchBar, &QLineEdit::textChanged, this, &UBFeaturesActionBar::onSearchTextChanged);
+	connect(mpNewFolderAction, &QAction::triggered, this, [this]() { onActionNewFolder(); });
+    connect(mpRemoveFavorite, &QAction::triggered, this, [this]() { onActionRemoveFavorite(); });
+    connect(mpRescanModelAction, &QAction::triggered, this, [this]() { onActionRescanModel(); });
+    connect(mpDeleteAction, &QAction::triggered, this, [this]() { onActionTrash(); });
 
 
     // Build the default toolbar

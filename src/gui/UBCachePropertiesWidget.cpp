@@ -187,8 +187,8 @@ UBCachePropertiesWidget::UBCachePropertiesWidget(QWidget *parent, const char *na
     mpCircleButton->setChecked(true);
 
     // Shape Size
-    connect(UBApplication::boardController->controlView(), SIGNAL(resized(QResizeEvent *)), this, SLOT(onControlViewResized(QResizeEvent *)));
-    connect(UBApplication::boardController, SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged(qreal)));
+    connect(UBApplication::boardController->controlView(), &UBBoardView::resized, this, &UBCachePropertiesWidget::onControlViewResized);
+    connect(UBApplication::boardController, &UBBoardController::zoomChanged, this, &UBCachePropertiesWidget::onZoomChanged);
     minimumShapeSize = QSize(100,100);
 
     mpSizeLayout = new QVBoxLayout(0);
@@ -255,17 +255,17 @@ UBCachePropertiesWidget::UBCachePropertiesWidget(QWidget *parent, const char *na
     mpPropertiesLayout->addStretch(1);
 
     // Connect signals / slots
-    connect(mpCloseButton, SIGNAL(clicked()), this, SLOT(onCloseClicked()));
-    connect(mpSelectColorButton, SIGNAL(clicked()), this, SLOT(onColorClicked()));
-    connect(mpCircleButton, SIGNAL(clicked()), this, SLOT(updateShapeButtons()));
-    connect(mpSquareButton, SIGNAL(clicked()), this, SLOT(updateShapeButtons()));
-    connect(mpWidthSlider, SIGNAL(valueChanged(int)), this, SLOT(onWidthChanged(int)));
-    connect(mpHeightSlider, SIGNAL(valueChanged(int)), this, SLOT(onHeightChanged(int)));
-    connect(mpKeepAspectRatioCheckbox, SIGNAL(stateChanged(int)), this, SLOT(onKeepAspectRatioChanged(int)));
-    connect(mpModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onModeChanged(int)));
-    connect(mpAplhaSlider, SIGNAL(valueChanged(int)), this, SLOT(onAlphaChanged(int)));
-    connect(UBApplication::boardController, SIGNAL(pageChanged()), this, SLOT(updateCurrentCache()));
-    connect(UBApplication::boardController, SIGNAL(cacheEnabled()), this, SLOT(onCacheEnabled()));
+    connect(mpCloseButton, &QPushButton::clicked, this, [this]() { onCloseClicked(); });
+    connect(mpSelectColorButton, &QPushButton::clicked, this, [this]() { onColorClicked(); });
+    connect(mpCircleButton, &QPushButton::clicked, this, [this]() { updateShapeButtons(); });
+    connect(mpSquareButton, &QPushButton::clicked, this, [this]() { updateShapeButtons(); });
+    connect(mpWidthSlider, &QSlider::valueChanged, this, &UBCachePropertiesWidget::onWidthChanged);
+    connect(mpHeightSlider, &QSlider::valueChanged, this, &UBCachePropertiesWidget::onHeightChanged);
+    connect(mpKeepAspectRatioCheckbox, &QCheckBox::stateChanged, this, &UBCachePropertiesWidget::onKeepAspectRatioChanged);
+    connect(mpModeComboBox, &QComboBox::currentIndexChanged, this, &UBCachePropertiesWidget::onModeChanged);
+    connect(mpAplhaSlider, &QSlider::valueChanged, this, &UBCachePropertiesWidget::onAlphaChanged);
+    connect(UBApplication::boardController, &UBBoardController::pageChanged, this, &UBCachePropertiesWidget::updateCurrentCache);
+    connect(UBApplication::boardController, &UBBoardController::cacheEnabled, this, &UBCachePropertiesWidget::onCacheEnabled);
 
     mOldHoleSize = QSize(mpWidthSlider->value(), mpHeightSlider->value());
 }
