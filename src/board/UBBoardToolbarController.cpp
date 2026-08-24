@@ -122,32 +122,30 @@ void UBBoardToolbarController::setupToolbar()
 
 void UBBoardToolbarController::connectToolbar()
 {
-    UBBoardController* bc = qobject_cast<UBBoardController*>(mBoardController->asQObject());
+    connect(mMainWindow->actionAdd, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(addItem()));
+    connect(mMainWindow->actionNewPage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(addScene()));
+    connect(mMainWindow->actionDuplicatePage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(duplicateScene()));
 
-    connect(mMainWindow->actionAdd, &QAction::triggered, bc, &UBBoardController::addItem);
-    connect(mMainWindow->actionNewPage, &QAction::triggered, bc, &UBBoardController::addScene);
-    connect(mMainWindow->actionDuplicatePage, &QAction::triggered, bc, &UBBoardController::duplicateScene);
+    connect(mMainWindow->actionClearPage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearScene()));
+    connect(mMainWindow->actionEraseItems, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearSceneItems()));
+    connect(mMainWindow->actionEraseAnnotations, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearSceneAnnotation()));
+    connect(mMainWindow->actionEraseBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(clearSceneBackground()));
 
-    connect(mMainWindow->actionClearPage, &QAction::triggered, bc, &UBBoardController::clearScene);
-    connect(mMainWindow->actionEraseItems, &QAction::triggered, bc, &UBBoardController::clearSceneItems);
-    connect(mMainWindow->actionEraseAnnotations, &QAction::triggered, bc, &UBBoardController::clearSceneAnnotation);
-    connect(mMainWindow->actionEraseBackground, &QAction::triggered, bc, &UBBoardController::clearSceneBackground);
+    connect(mMainWindow->actionCenterImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(centerImageBackground()));
+    connect(mMainWindow->actionAdjustImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(adjustImageBackground()));
+    connect(mMainWindow->actionMosaicImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(mosaicImageBackground()));
+    connect(mMainWindow->actionFillImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(fillImageBackground()));
+    connect(mMainWindow->actionExtendImageBackground, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(extendImageBackground()));
 
-    connect(mMainWindow->actionCenterImageBackground, &QAction::triggered, bc, &UBBoardController::centerImageBackground);
-    connect(mMainWindow->actionAdjustImageBackground, &QAction::triggered, bc, &UBBoardController::adjustImageBackground);
-    connect(mMainWindow->actionMosaicImageBackground, &QAction::triggered, bc, &UBBoardController::mosaicImageBackground);
-    connect(mMainWindow->actionFillImageBackground, &QAction::triggered, bc, &UBBoardController::fillImageBackground);
-    connect(mMainWindow->actionExtendImageBackground, &QAction::triggered, bc, &UBBoardController::extendImageBackground);
-
-    connect(mMainWindow->actionUndo, &QAction::triggered, UBApplication::undoStack, &QUndoStack::undo);
-    connect(mMainWindow->actionRedo, &QAction::triggered, UBApplication::undoStack, &QUndoStack::redo);
-    connect(mMainWindow->actionRedo, &QAction::triggered, bc, &UBBoardController::startScript);
-    connect(mMainWindow->actionBack, &QAction::triggered, bc, &UBBoardController::previousScene);
-    connect(mMainWindow->actionForward, &QAction::triggered, bc, &UBBoardController::nextScene);
-    connect(mMainWindow->actionSleep, &QAction::triggered, bc, &UBBoardController::stopScript);
-    connect(mMainWindow->actionSleep, &QAction::triggered, bc, &UBBoardController::blackout);
-    connect(mMainWindow->actionVirtualKeyboard, &QAction::triggered, bc, &UBBoardController::showKeyboard);
-    connect(mMainWindow->actionImportPage, &QAction::triggered, bc, &UBBoardController::importPage);
+    connect(mMainWindow->actionUndo, SIGNAL(triggered()), UBApplication::undoStack, SLOT(undo()));
+    connect(mMainWindow->actionRedo, SIGNAL(triggered()), UBApplication::undoStack, SLOT(redo()));
+    connect(mMainWindow->actionRedo, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(startScript()));
+    connect(mMainWindow->actionBack, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(previousScene()));
+    connect(mMainWindow->actionForward, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(nextScene()));
+    connect(mMainWindow->actionSleep, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(stopScript()));
+    connect(mMainWindow->actionSleep, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(blackout()));
+    connect(mMainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), mBoardController->asQObject(), SLOT(showKeyboard(bool)));
+    connect(mMainWindow->actionImportPage, SIGNAL(triggered()), mBoardController->asQObject(), SLOT(importPage()));
 }
 
 void UBBoardToolbarController::initToolbarTexts()
