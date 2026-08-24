@@ -112,7 +112,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 
     for (UBActionPaletteButton* button : mButtons)
     {
-        connect(button, &UBActionPaletteButton::doubleClicked, this, &UBStylusPalette::stylusToolDoubleClicked);
+        connect(button, &UBActionPaletteButton::doubleClicked, this, qOverload<>(&UBStylusPalette::stylusToolDoubleClicked));
     }
 
 }
