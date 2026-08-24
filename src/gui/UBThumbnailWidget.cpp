@@ -61,7 +61,7 @@ UBThumbnailWidget::UBThumbnailWidget(QWidget* parent)
 
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
-    connect(&mThumbnailsScene, SIGNAL(selectionChanged()), this, SLOT(sceneSelectionChanged()));
+    connect(&mThumbnailsScene, &QGraphicsScene::selectionChanged, this, &UBThumbnailWidget::sceneSelectionChanged);
 
     //
     qDebug() << "mThumbnailWidth: " << mThumbnailWidth;
@@ -71,7 +71,7 @@ UBThumbnailWidget::UBThumbnailWidget(QWidget* parent)
 
 UBThumbnailWidget::~UBThumbnailWidget()
 {
-    disconnect(&mThumbnailsScene, SIGNAL(selectionChanged()));
+    disconnect(&mThumbnailsScene, &QGraphicsScene::selectionChanged, this, &UBThumbnailWidget::sceneSelectionChanged);
 }
 
 

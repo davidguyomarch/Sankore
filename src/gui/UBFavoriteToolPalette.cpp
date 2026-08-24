@@ -57,7 +57,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
             QAction *action = new QAction(desc.label + " " + desc.version, this);
             action->setData(QUrl(desc.id));
             action->setIcon(desc.icon);
-            connect(action, SIGNAL(triggered()), this, SLOT(addFavorite()));
+            connect(action, &QAction::triggered, this, [this]() { addFavorite(); });
 
             toolsActions << action;
         }
@@ -77,7 +77,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
         QAction *action = new QAction(UBGraphicsWidgetItem::widgetName(QUrl::fromLocalFile(widgetPath)), this);
         action->setData(QUrl::fromLocalFile(widgetPath));
         action->setIcon(QIcon(UBGraphicsWidgetItem::iconFilePath(QUrl::fromLocalFile(widgetPath))));
-        connect(action, SIGNAL(triggered()), this, SLOT(addFavorite()));
+        connect(action, &QAction::triggered, this, [this]() { addFavorite(); });
 
         toolsActions << action;
     }
@@ -99,7 +99,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
                 QAction *action = new QAction(desc.label + " " + desc.version, this);
                 action->setData(QUrl(desc.id));
                 action->setIcon(desc.icon);
-                connect(action, SIGNAL(triggered()), this, SLOT(addFavorite()));
+                connect(action, &QAction::triggered, this, [this]() { addFavorite(); });
 
                 toolsActions << action;
             }

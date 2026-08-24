@@ -143,8 +143,8 @@ UBGraphicsMediaItem::UBGraphicsMediaItem(const QUrl& pMediaFileUrl, QGraphicsIte
 
     setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::ObjectItem)); //Necessary to set if we want z value to be assigned correctly
 
-    connect(Delegate(), SIGNAL(showOnDisplayChanged(bool)), this, SLOT(showOnDisplayChanged(bool)));
-    connect(mMediaObject, SIGNAL(hasVideoChanged(bool)), this, SLOT(hasMediaChanged(bool)));
+    connect(Delegate(), &UBGraphicsItemDelegate::showOnDisplayChanged, this, &UBGraphicsMediaItem::showOnDisplayChanged);
+    connect(mMediaObject, &QMediaPlayer::hasVideoChanged, this, &UBGraphicsMediaItem::hasMediaChanged);
 }
 
 
@@ -309,7 +309,7 @@ void UBGraphicsMediaItem::copyItemParameters(UBItem *copy) const
         cp->setSourceUrl(this->sourceUrl());
         cp->resize(this->size());
 
-        connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), cp, SLOT(activeSceneChanged()));
+        connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, cp, &UBGraphicsMediaItem::activeSceneChanged);
         // TODO UB 4.7 complete all members
     }
 }

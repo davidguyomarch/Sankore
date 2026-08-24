@@ -34,7 +34,7 @@ UBDrawingPolygonPalette::UBDrawingPolygonPalette(Qt::Orientation orient, QWidget
 
     for (UBActionPaletteButton* button : mButtons)
     {
-        connect(button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+        connect(button, &QAbstractButton::clicked, this, [this]() { buttonClicked(); });
     }
 }
 
