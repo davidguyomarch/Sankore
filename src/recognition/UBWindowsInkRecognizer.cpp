@@ -30,9 +30,9 @@
 #include "core/UBSettings.h"
 
 using namespace winrt;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
-using namespace Windows::UI::Input::Inking;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Foundation::Collections;
+using namespace winrt::Windows::UI::Input::Inking;
 
 UBWindowsInkRecognizer::UBWindowsInkRecognizer()
     : mAvailable(false)
@@ -428,10 +428,13 @@ UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
                         winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode::Write);
                     auto ref = buffer.CreateReference();
 
-                    // Get raw pixel pointer via IMemoryBufferByteAccess
-                    auto byteAccess = ref.as<::Windows::Foundation::IMemoryBufferByteAccess>();
-                    uint8_t* dstData = nullptr;
-                    uint32_t dstCapacity = 0;
+                    // Get raw pixel pointer via IMemoryBufferByteAccess COM interface
+                    BYTE* dstData = nullptr;
+                    UINT32 dstCapacity = 0;
+                    winrt::com_ptr<::Windows::Foundation::IMemoryBufferByteAccess> byteAccess;
+                    winrt::check_hresult(ref.as<IUnknown>()->QueryInterface(
+                        __uuidof(::Windows::Foundation::IMemoryBufferByteAccess),
+                        byteAccess.put_void()));
                     winrt::check_hresult(byteAccess->GetBuffer(&dstData, &dstCapacity));
 
                     // Copy pixel data row by row
