@@ -175,8 +175,8 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
 
     UBPlatformUtils::init();
 
-    connect(settings->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(toolBarPositionChanged(QVariant)));
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), this, SLOT(toolBarDisplayTextChanged(QVariant)));
+    connect(settings->appToolBarPositionedAtTop, &UBSetting::changed, this, &UBApplication::toolBarPositionChanged);
+    connect(settings->appToolBarDisplayText, &UBSetting::changed, this, &UBApplication::toolBarDisplayTextChanged);
     updateProtoActionsState();
 
 #ifndef Q_OS_MACOS
@@ -350,11 +350,11 @@ int UBApplication::exec(const QString& pFileToImport)
     mainWindow->actionCut->setShortcuts(QKeySequence::Cut);
 
 
-    connect(mainWindow->actionBoard, SIGNAL(triggered()), this, SLOT(showBoard()));
-    connect(mainWindow->actionWeb, SIGNAL(triggered()), this, SLOT(showInternet()));
-    connect(mainWindow->actionDocument, SIGNAL(triggered()), this, SLOT(showDocument()));
-    connect(mainWindow->actionQuit, SIGNAL(triggered()), this, SLOT(closing()));
-    connect(mainWindow, SIGNAL(closeEvent_Signal(QCloseEvent*)), this, SLOT(closeEvent(QCloseEvent*)));
+    connect(mainWindow->actionBoard, &QAction::triggered, this, [this]() { showBoard(); });
+    connect(mainWindow->actionWeb, &QAction::triggered, this, [this]() { showInternet(); });
+    connect(mainWindow->actionDocument, &QAction::triggered, this, [this]() { showDocument(); });
+    connect(mainWindow->actionQuit, &QAction::triggered, this, [this]() { closing(); });
+    connect(mainWindow, &UBMainWindow::closeEvent_Signal, this, &UBApplication::closeEvent);
 
     // Sync QML ThemeManager BEFORE creating palettes so QML starts with correct colors
     UBThemeManager::instance()->setCurrentTheme(mSettings->appTheme->get().toString());
@@ -383,26 +383,26 @@ int UBApplication::exec(const QString& pFileToImport)
 
 
 
-    connect(applicationController, SIGNAL(mainModeChanged(UBApplicationController::MainMode)),
-            boardController->paletteManager(), SLOT(slot_changeMainMode(UBApplicationController::MainMode)));
+    connect(applicationController, &UBApplicationController::mainModeChanged,
+            boardController->paletteManager(), &UBBoardPaletteManager::slot_changeMainMode);
 
-    connect(applicationController, SIGNAL(desktopMode(bool)),
-            boardController->paletteManager(), SLOT(slot_changeDesktopMode(bool)));
+    connect(applicationController, &UBApplicationController::desktopMode,
+            boardController->paletteManager(), &UBBoardPaletteManager::slot_changeDesktopMode);
 
 
 
-    connect(mainWindow->actionDesktop, SIGNAL(triggered(bool)), applicationController, SLOT(showDesktop(bool)));
-    connect(mainWindow->actionDesktop, SIGNAL(triggered(bool)), this, SLOT(stopScript()));
+    connect(mainWindow->actionDesktop, &QAction::triggered, applicationController, &UBApplicationController::showDesktop);
+    connect(mainWindow->actionDesktop, &QAction::triggered, this, [this]() { stopScript(); });
 #ifndef Q_OS_MACOS
-    connect(mainWindow->actionHideApplication, SIGNAL(triggered()), mainWindow, SLOT(showMinimized()));
+    connect(mainWindow->actionHideApplication, &QAction::triggered, mainWindow, [mainWindow]() { mainWindow->showMinimized(); });
 #else
-    connect(mainWindow->actionHideApplication, SIGNAL(triggered()), this, SLOT(showMinimized()));
+    connect(mainWindow->actionHideApplication, &QAction::triggered, this, [this]() { showMinimized(); });
 #endif
 
     mPreferencesController = new UBPreferencesController(mainWindow);
     mRecognitionController = new UBRecognitionController(this);
 
-    connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
+    connect(mainWindow->actionPreferences, &QAction::triggered, mPreferencesController, [this]() { mPreferencesController->show(); });
 
     toolBarDisplayTextChanged(mSettings->appToolBarDisplayText->get());
     toolBarPositionChanged(mSettings->appToolBarPositionedAtTop->get());
@@ -441,29 +441,29 @@ int UBApplication::exec(const QString& pFileToImport)
 
     bool bUseMultiScreen = mSettings->appUseMultiscreen->get().toBool();
     mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
-    connect(mainWindow->actionMultiScreen, SIGNAL(triggered(bool)), applicationController, SLOT(useMultiScreen(bool)));
-    connect(mainWindow->actionWidePageSize, SIGNAL(triggered(bool)), boardController, SLOT(setWidePageSize(bool)));
-    connect(mainWindow->actionWidePageSize_16_10, SIGNAL(triggered(bool)), boardController, SLOT(setWidePageSize16_10(bool)));
-    connect(mainWindow->actionRegularPageSize, SIGNAL(triggered(bool)), boardController, SLOT(setRegularPageSize(bool)));
+    connect(mainWindow->actionMultiScreen, &QAction::triggered, applicationController, &UBApplicationController::useMultiScreen);
+    connect(mainWindow->actionWidePageSize, &QAction::triggered, boardController, &UBBoardController::setWidePageSize);
+    connect(mainWindow->actionWidePageSize_16_10, &QAction::triggered, boardController, &UBBoardController::setWidePageSize16_10);
+    connect(mainWindow->actionRegularPageSize, &QAction::triggered, boardController, &UBBoardController::setRegularPageSize);
 
-    connect(mainWindow->actionCut, SIGNAL(triggered()), applicationController, SLOT(actionCut()));
-    connect(mainWindow->actionCopy, SIGNAL(triggered()), applicationController, SLOT(actionCopy()));
-    connect(mainWindow->actionPaste, SIGNAL(triggered()), applicationController, SLOT(actionPaste()));
+    connect(mainWindow->actionCut, &QAction::triggered, applicationController, [applicationController]() { applicationController->actionCut(); });
+    connect(mainWindow->actionCopy, &QAction::triggered, applicationController, [applicationController]() { applicationController->actionCopy(); });
+    connect(mainWindow->actionPaste, &QAction::triggered, applicationController, [applicationController]() { applicationController->actionPaste(); });
 
     applicationController->initScreenLayout(bUseMultiScreen);
     boardController->setupLayout();
 
     // Connect OCR zone selection from board view to recognition controller
-    connect(boardController->controlView(), SIGNAL(ocrZoneSelected(QRectF)),
-            mRecognitionController, SLOT(recognizeZone(QRectF)));
+    connect(boardController->controlView(), &UBBoardView::ocrZoneSelected,
+            mRecognitionController, &UBRecognitionController::recognizeZone);
 
     // Connect Auto-OCR toggle (palette button + menu entry)
     if (mainWindow->actionAutoOcr)
         connect(mainWindow->actionAutoOcr, &QAction::toggled, this, &UBApplication::onAutoOcrToggled);
 
     // Notify OCR controller when a stroke finishes (mouse release on board)
-    connect(boardController->controlView(), SIGNAL(mouseRelease(QMouseEvent*)),
-            mRecognitionController, SLOT(onStrokeFinished()));
+    connect(boardController->controlView(), &UBBoardView::mouseRelease,
+            mRecognitionController, [this]() { mRecognitionController->onStrokeFinished(); });
 
     if (pFileToImport.length() > 0)
         UBApplication::applicationController->importFile(pFileToImport);
@@ -860,7 +860,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             else
                 actionThemeDark->setChecked(true);
 
-            connect(themeGroup, SIGNAL(triggered(QAction*)), this, SLOT(themeChanged(QAction*)));
+            connect(themeGroup, &QActionGroup::triggered, this, &UBApplication::themeChanged);
 
             menu->addAction(mainWindow->actionMultiScreen);
 
