@@ -165,29 +165,29 @@ void UBBoardController::init()
 
     mTextDelegateDialogHandler = new UBTextDelegateDialogHandler(mControlContainer, UBSettings::settings(), this);
 
-    connect(UBApplication::undoStack, SIGNAL(canUndoChanged(bool))
-            , this, SLOT(undoRedoStateChange(bool)));
+    connect(UBApplication::undoStack, &QUndoStack::canUndoChanged,
+            this, &UBBoardController::undoRedoStateChange);
 
-    connect(UBApplication::undoStack, SIGNAL(canRedoChanged (bool))
-            , this, SLOT(undoRedoStateChange(bool)));
+    connect(UBApplication::undoStack, &QUndoStack::canRedoChanged,
+            this, &UBBoardController::undoRedoStateChange);
 
-    connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int))
-            , this, SLOT(setToolCursor(int)));
+    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+            this, &UBBoardController::setToolCursor);
 
-    connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int))
-            , this, SLOT(stylusToolChanged(int)));
+    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+            this, &UBBoardController::stylusToolChanged);
 
-    connect(UBApplication::app(), SIGNAL(lastWindowClosed())
-            , this, SLOT(lastWindowClosed()));
+    connect(UBApplication::app(), &QApplication::lastWindowClosed,
+            this, &UBBoardController::lastWindowClosed);
 
-    connect(UBDownloadManager::downloadManager(), SIGNAL(downloadModalFinished()), this, SLOT(onDownloadModalFinished()));
-    connect(UBDownloadManager::downloadManager(), SIGNAL(addDownloadedFileToBoard(bool,QUrl,QUrl,QString,QByteArray,QPointF,QSize,bool,bool)), this, SLOT(downloadFinished(bool,QUrl,QUrl,QString,QByteArray,QPointF,QSize,bool,bool)));
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::downloadModalFinished, this, &UBBoardController::onDownloadModalFinished);
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::addDownloadedFileToBoard, this, &UBBoardController::downloadFinished);
 
     UBDocumentProxy* doc = UBPersistenceManager::persistenceManager()->createNewDocument();
 
     setActiveDocumentScene(doc);
 
-    connect(UBApplication::mainWindow->actionGroupItems, SIGNAL(triggered()), this, SLOT(groupButtonClicked()));
+    connect(UBApplication::mainWindow->actionGroupItems, &QAction::triggered, this, &UBBoardController::groupButtonClicked);
 
     undoRedoStateChange(true);
 
@@ -231,7 +231,7 @@ void UBBoardController::setupViews()
     mControlContainer->setObjectName("ubBoardControlContainer");
     mMainWindow->addBoardWidget(mControlContainer);
 
-    connect(mControlView, SIGNAL(resized(QResizeEvent*)), this, SLOT(boardViewResized(QResizeEvent*)));
+    connect(mControlView, &UBBoardView::resized, this, &UBBoardController::boardViewResized);
 
     mDisplayView = new UBBoardView(this, UBItemLayerType::FixedBackground, UBItemLayerType::Tool, 0);
     mDisplayView->setInteractive(false);
@@ -255,7 +255,7 @@ void UBBoardController::setupViews()
 #endif
 
     mPaletteManager = new UBBoardPaletteManager(mControlContainer, this);
-    connect(this, SIGNAL(activeSceneChanged()), mPaletteManager, SLOT(activeSceneChanged()));
+    connect(this, &UBBoardController::activeSceneChanged, mPaletteManager, &UBBoardPaletteManager::activeSceneChanged);
 
 }
 
@@ -1260,7 +1260,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             else
                 mediaVideoItem->setSourceUrl(contentUrl);
             mediaVideoItem->setUuid(uuid);
-            connect(this, SIGNAL(activeSceneChanged()), mediaVideoItem, SLOT(activeSceneChanged()));
+            connect(this, &UBBoardController::activeSceneChanged, mediaVideoItem, &UBGraphicsMediaItem::activeSceneChanged);
         }
 
         UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
@@ -1304,7 +1304,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             else
                 audioMediaItem->setSourceUrl(contentUrl);
             audioMediaItem->setUuid(uuid);
-            connect(this, SIGNAL(activeSceneChanged()), audioMediaItem, SLOT(activeSceneChanged()));
+            connect(this, &UBBoardController::activeSceneChanged, audioMediaItem, &UBGraphicsMediaItem::activeSceneChanged);
         }
 
         UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
