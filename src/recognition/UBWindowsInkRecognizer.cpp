@@ -16,7 +16,7 @@
 #include <winrt/Windows.Storage.Streams.h>
 
 // IMemoryBufferByteAccess for direct SoftwareBitmap pixel access
-#include <MemoryBuffer.h>
+#include <robuffer.h>
 
 #include <QDebug>
 #include <QCoreApplication>
@@ -407,14 +407,8 @@ UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
             try {
                 winrt::init_apartment(winrt::apartment_type::multi_threaded);
 
-                // Use Windows.Media.Ocr.OcrEngine for image-based recognition
-                // This is a different API from InkRecognizer — works on bitmap images
-                using namespace winrt::Windows::Media::Ocr;
-                using namespace winrt::Windows::Graphics::Imaging;
-                using namespace winrt::Windows::Storage::Streams;
-
-                // Create OcrEngine with default language
-                OcrEngine engine = OcrEngine::TryCreateFromUserProfileLanguages();
+                // Use fully qualified names to avoid ambiguity with ::Windows from MemoryBuffer.h
+                auto engine = winrt::Windows::Media::Ocr::OcrEngine::TryCreateFromUserProfileLanguages();
                 if (!engine)
                 {
                     errorMsg = "OcrEngine not available (no language pack installed)";
@@ -426,17 +420,19 @@ UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
                 int w = rgbaImage.width();
                 int h = rgbaImage.height();
 
-                // Create SoftwareBitmap and copy pixel data via DataWriter
-                SoftwareBitmap bitmap(BitmapPixelFormat::Rgba8, w, h, BitmapAlphaMode::Premultiplied);
+                winrt::Windows::Graphics::Imaging::SoftwareBitmap bitmap(
+                    winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8, w, h,
+                    winrt::Windows::Graphics::Imaging::BitmapAlphaMode::Premultiplied);
                 {
-                    auto buffer = bitmap.LockBuffer(BitmapBufferAccessMode::Write);
+                    auto buffer = bitmap.LockBuffer(
+                        winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode::Write);
                     auto ref = buffer.CreateReference();
 
-                    // Use IMemoryBufferByteAccess to get raw pointer
-                    auto interop = ref.as<::Windows::Foundation::IMemoryBufferByteAccess>();
+                    // Get raw pixel pointer via IMemoryBufferByteAccess
+                    auto byteAccess = ref.as<::Windows::Foundation::IMemoryBufferByteAccess>();
                     uint8_t* dstData = nullptr;
                     uint32_t dstCapacity = 0;
-                    winrt::check_hresult(interop->GetBuffer(&dstData, &dstCapacity));
+                    winrt::check_hresult(byteAccess->GetBuffer(&dstData, &dstCapacity));
 
                     // Copy pixel data row by row
                     int srcStride = rgbaImage.bytesPerLine();
@@ -451,7 +447,6 @@ UBRecognitionResult UBWindowsInkRecognizer::recognizeImage(const QImage& image)
 
                 // Recognize
                 auto ocrResult = engine.RecognizeAsync(bitmap).get();
-
                 recognizedText = QString::fromStdString(winrt::to_string(ocrResult.Text()));
 
                 winrt::uninit_apartment();
