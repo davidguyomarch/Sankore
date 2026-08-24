@@ -100,35 +100,35 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
 
     if (UBPlatformUtils::hasVirtualKeyboard())
     {
-        connect( UBApplication::boardController->paletteManager()->mKeyboardPalette, SIGNAL(keyboardActivated(bool)), 
-                 mTransparentDrawingView, SLOT(virtualKeyboardActivated(bool)));
+        connect( UBApplication::boardController->paletteManager()->mKeyboardPalette, &UBKeyboardPalette::keyboardActivated, 
+                 mTransparentDrawingView, &UBBoardView::virtualKeyboardActivated);
 
 #ifdef Q_OS_LINUX
-        connect(UBApplication::boardController->paletteManager()->mKeyboardPalette, SIGNAL(moved(QPoint)), this, SLOT(refreshMask()));
-        connect(UBApplication::mainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(refreshMask()));
-        connect(mDesktopPalette,SIGNAL(refreshMask()), this, SLOT(refreshMask()));
+        connect(UBApplication::boardController->paletteManager()->mKeyboardPalette, &UBKeyboardPalette::moved, this, [this]() { refreshMask(); });
+        connect(UBApplication::mainWindow->actionVirtualKeyboard, &QAction::triggered, this, [this]() { refreshMask(); });
+        connect(mDesktopPalette, &UBDesktopPalette::refreshMask, this, &UBDesktopAnnotationController::refreshMask);
 #endif
     }
 
-    connect(mDesktopPalette, SIGNAL(uniboardClick()), this, SLOT(goToUniboard()));
-    connect(mDesktopPalette, SIGNAL(customClick()), this, SLOT(customCapture()));
-    connect(mDesktopPalette, SIGNAL(windowClick()), this, SLOT(windowCapture()));
-    connect(mDesktopPalette, SIGNAL(screenClick()), this, SLOT(screenCapture()));
-    connect(UBApplication::mainWindow->actionPointer, SIGNAL(triggered()), this, SLOT(onToolClicked()));
-    connect(UBApplication::mainWindow->actionSelector, SIGNAL(triggered()), this, SLOT(onToolClicked()));
-    connect(mDesktopPalette, SIGNAL(maximized()), this, SLOT(onDesktopPaletteMaximized()));
-    connect(mDesktopPalette, SIGNAL(minimizeStart(eMinimizedLocation)), this, SLOT(onDesktopPaletteMinimize()));
+    connect(mDesktopPalette, &UBDesktopPalette::uniboardClick, this, &UBDesktopAnnotationController::goToUniboard);
+    connect(mDesktopPalette, &UBDesktopPalette::customClick, this, &UBDesktopAnnotationController::customCapture);
+    connect(mDesktopPalette, &UBDesktopPalette::windowClick, this, &UBDesktopAnnotationController::windowCapture);
+    connect(mDesktopPalette, &UBDesktopPalette::screenClick, this, &UBDesktopAnnotationController::screenCapture);
+    connect(UBApplication::mainWindow->actionPointer, &QAction::triggered, this, [this]() { onToolClicked(); });
+    connect(UBApplication::mainWindow->actionSelector, &QAction::triggered, this, [this]() { onToolClicked(); });
+    connect(mDesktopPalette, &UBFloatingPalette::maximized, this, &UBDesktopAnnotationController::onDesktopPaletteMaximized);
+    connect(mDesktopPalette, &UBFloatingPalette::minimizeStart, this, [this]() { onDesktopPaletteMinimize(); });
 
-    connect(mTransparentDrawingView, SIGNAL(resized(QResizeEvent*)), this, SLOT(onTransparentWidgetResized()));
+    connect(mTransparentDrawingView, &UBBoardView::resized, this, [this]() { onTransparentWidgetResized(); });
 
 
-    connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int)), this, SLOT(stylusToolChanged(int)));
+    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged, this, &UBDesktopAnnotationController::stylusToolChanged);
 
     // Add the desktop associated palettes
     mDesktopPenPalette = new UBDesktopPenPalette(mTransparentDrawingView, rightPalette); 
 
-    connect(mDesktopPalette, SIGNAL(maximized()), mDesktopPenPalette, SLOT(onParentMaximized()));
-    connect(mDesktopPalette, SIGNAL(minimizeStart(eMinimizedLocation)), mDesktopPenPalette, SLOT(onParentMinimized()));
+    connect(mDesktopPalette, &UBFloatingPalette::maximized, mDesktopPenPalette, &UBDesktopPenPalette::onParentMaximized);
+    connect(mDesktopPalette, &UBFloatingPalette::minimizeStart, mDesktopPenPalette, [this]() { mDesktopPenPalette->onParentMinimized(); });
 
     mDesktopMarkerPalette = new UBDesktopMarkerPalette(mTransparentDrawingView, rightPalette);
     mDesktopEraserPalette = new UBDesktopEraserPalette(mTransparentDrawingView, rightPalette);
@@ -149,16 +149,16 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
     mDesktopMarkerPalette->setVisible(false);
     mDesktopEraserPalette->setVisible(false);
 
-    connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, SIGNAL(triggered()), this, SLOT(eraseDesktopAnnotations()));
+    connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, &QAction::triggered, this, [this]() { eraseDesktopAnnotations(); });
 
-    connect(&mHoldTimerPen, SIGNAL(timeout()), this, SLOT(penActionReleased()));
-    connect(&mHoldTimerMarker, SIGNAL(timeout()), this, SLOT(markerActionReleased()));
-    connect(&mHoldTimerEraser, SIGNAL(timeout()), this, SLOT(eraserActionReleased()));
+    connect(&mHoldTimerPen, &QTimer::timeout, this, &UBDesktopAnnotationController::penActionReleased);
+    connect(&mHoldTimerMarker, &QTimer::timeout, this, &UBDesktopAnnotationController::markerActionReleased);
+    connect(&mHoldTimerEraser, &QTimer::timeout, this, &UBDesktopAnnotationController::eraserActionReleased);
 
 #ifdef Q_OS_LINUX
-    connect(mDesktopPalette, SIGNAL(moving()), this, SLOT(refreshMask()));
-    connect(UBApplication::boardController->paletteManager()->rightPalette(), SIGNAL(resized()), this, SLOT(refreshMask()));
-    connect(UBApplication::boardController->paletteManager()->addItemPalette(), SIGNAL(closed()), this, SLOT(refreshMask()));
+    connect(mDesktopPalette, &UBFloatingPalette::moving, this, &UBDesktopAnnotationController::refreshMask);
+    connect(UBApplication::boardController->paletteManager()->rightPalette(), &UBRightPalette::resized, this, &UBDesktopAnnotationController::refreshMask);
+    connect(UBApplication::boardController->paletteManager()->addItemPalette(), &UBActionPalette::closed, this, &UBDesktopAnnotationController::refreshMask);
 #endif
     onDesktopPaletteMaximized();
 
@@ -291,8 +291,8 @@ void UBDesktopAnnotationController::showWindow()
 {
     mDesktopPalette->setDisplaySelectButtonVisible(true);
 
-    connect(UBApplication::applicationController, SIGNAL(desktopMode(bool))
-            , mDesktopPalette, SLOT(setDisplaySelectButtonVisible(bool)));
+    connect(UBApplication::applicationController, &UBApplicationController::desktopMode,
+            mDesktopPalette, &UBDesktopPalette::setDisplaySelectButtonVisible);
 
     mDesktopPalette->show();
 
@@ -764,40 +764,40 @@ void UBDesktopAnnotationController::onDesktopPaletteMaximized()
     UBActionPaletteButton* pPenButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPen);
     if(nullptr != pPenButton)
     {
-        connect(pPenButton, SIGNAL(pressed()), this, SLOT(penActionPressed()));
-        connect(pPenButton, SIGNAL(released()), this, SLOT(penActionReleased()));
+        connect(pPenButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::penActionPressed);
+        connect(pPenButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::penActionReleased);
     }
 
     // Eraser
     UBActionPaletteButton* pEraserButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionEraser);
     if(nullptr != pEraserButton)
     {
-        connect(pEraserButton, SIGNAL(pressed()), this, SLOT(eraserActionPressed()));
-        connect(pEraserButton, SIGNAL(released()), this, SLOT(eraserActionReleased()));
+        connect(pEraserButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::eraserActionPressed);
+        connect(pEraserButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::eraserActionReleased);
     }
 
     // Marker
     UBActionPaletteButton* pMarkerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionMarker);
     if(nullptr != pMarkerButton)
     {
-        connect(pMarkerButton, SIGNAL(pressed()), this, SLOT(markerActionPressed()));
-        connect(pMarkerButton, SIGNAL(released()), this, SLOT(markerActionReleased()));
+        connect(pMarkerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::markerActionPressed);
+        connect(pMarkerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::markerActionReleased);
     }
 
     // Pointer
     UBActionPaletteButton* pSelectorButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionSelector);
     if(nullptr != pSelectorButton)
     {
-        connect(pSelectorButton, SIGNAL(pressed()), this, SLOT(selectorActionPressed()));
-        connect(pSelectorButton, SIGNAL(released()), this, SLOT(selectorActionReleased()));
+        connect(pSelectorButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::selectorActionPressed);
+        connect(pSelectorButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::selectorActionReleased);
     }
 
     // Pointer
     UBActionPaletteButton* pPointerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPointer);
     if(nullptr != pPointerButton)
     {
-        connect(pPointerButton, SIGNAL(pressed()), this, SLOT(pointerActionPressed()));
-        connect(pPointerButton, SIGNAL(released()), this, SLOT(pointerActionReleased()));
+        connect(pPointerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::pointerActionPressed);
+        connect(pPointerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::pointerActionReleased);
     }
 }
 
@@ -811,24 +811,24 @@ void UBDesktopAnnotationController::onDesktopPaletteMinimize()
     UBActionPaletteButton* pPenButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPen);
     if(nullptr != pPenButton)
     {
-        disconnect(pPenButton, SIGNAL(pressed()), this, SLOT(penActionPressed()));
-        disconnect(pPenButton, SIGNAL(released()), this, SLOT(penActionReleased()));
+        disconnect(pPenButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::penActionPressed);
+        disconnect(pPenButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::penActionReleased);
     }
 
     // Marker
     UBActionPaletteButton* pMarkerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionMarker);
     if(nullptr != pMarkerButton)
     {
-        disconnect(pMarkerButton, SIGNAL(pressed()), this, SLOT(markerActionPressed()));
-        disconnect(pMarkerButton, SIGNAL(released()), this, SLOT(markerActionReleased()));
+        disconnect(pMarkerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::markerActionPressed);
+        disconnect(pMarkerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::markerActionReleased);
     }
 
     // Eraser
     UBActionPaletteButton* pEraserButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionEraser);
     if(nullptr != pEraserButton)
     {
-        disconnect(pEraserButton, SIGNAL(pressed()), this, SLOT(eraserActionPressed()));
-        disconnect(pEraserButton, SIGNAL(released()), this, SLOT(eraserActionReleased()));
+        disconnect(pEraserButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::eraserActionPressed);
+        disconnect(pEraserButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::eraserActionReleased);
     }
 }
 
