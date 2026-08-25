@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open-Sankore UI Mockup — Target Interface</title>
+<style>
+:root {
+    --bg: #1e1e2e;
+    --surface: #2b2b3d;
+    --surface-hover: #363650;
+    --border: #3d3d5c;
+    --primary: #5b8def;
+    --primary-hover: #7aa3f5;
+    --on-primary: #ffffff;
+    --on-surface: #e0e0e0;
+    --on-surface-dim: #a0a0b0;
+    --canvas-bg: #f5f5f5;
+    --danger: #e55050;
+    --success: #50c878;
+    --radius: 8px;
+    --toolbar-h: 48px;
+    --sidebar-w: 240px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--on-surface); height: 100vh; overflow: hidden; }
+
+/* Layout */
+.app { display: grid; grid-template-rows: var(--toolbar-h) 1fr var(--toolbar-h); grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
+.top-bar { grid-column: 1 / -1; }
+.sidebar { grid-row: 2; overflow-y: auto; }
+.canvas-area { grid-row: 2; }
+.bottom-bar { grid-column: 1 / -1; }
+
+/* Top Toolbar */
+.top-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 12px; gap: 4px;
+}
+.top-bar .separator { width: 1px; height: 28px; background: var(--border); margin: 0 8px; }
+.top-bar .spacer { flex: 1; }
+.top-bar .mode-tabs { display: flex; gap: 2px; background: var(--bg); border-radius: 6px; padding: 2px; }
+.mode-tab { padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; color: var(--on-surface-dim); border: none; background: none; }
+.mode-tab.active { background: var(--primary); color: var(--on-primary); }
+.mode-tab:hover:not(.active) { background: var(--surface-hover); color: var(--on-surface); }
+
+/* Buttons */
+.btn { width: 36px; height: 36px; border-radius: var(--radius); border: none; background: transparent; color: var(--on-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
+.btn:hover { background: var(--surface-hover); }
+.btn.active { background: var(--primary); color: var(--on-primary); }
+.btn .badge { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; }
+.btn-group { display: flex; gap: 2px; }
+.btn-text { width: auto; padding: 0 12px; font-size: 12px; gap: 4px; }
+
+/* Sidebar */
+.sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+}
+.sidebar-header { padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--on-surface-dim); border-bottom: 1px solid var(--border); }
+.page-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.page-thumb { background: white; border-radius: 4px; aspect-ratio: 16/9; border: 2px solid transparent; cursor: pointer; position: relative; overflow: hidden; }
+.page-thumb.active { border-color: var(--primary); }
+.page-thumb:hover:not(.active) { border-color: var(--on-surface-dim); }
+.page-thumb .num { position: absolute; bottom: 2px; right: 4px; font-size: 10px; color: #666; }
+.sidebar-footer { padding: 8px; border-top: 1px solid var(--border); display: flex; gap: 4px; justify-content: center; }
+
+/* Canvas */
+.canvas-area {
+    background: #444;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+}
+.canvas {
+    background: var(--canvas-bg);
+    width: 85%; height: 85%;
+    border-radius: 2px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    position: relative;
+}
+.canvas-hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #ccc; font-size: 14px; }
+
+/* Bottom Toolbar (Stylus) */
+.bottom-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; gap: 2px; padding: 0 12px;
+}
+.tool-btn { width: 40px; height: 40px; border-radius: var(--radius); border: none; background: transparent; color: var(--on-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.15s; }
+.tool-btn:hover { background: var(--surface-hover); }
+.tool-btn.active { background: var(--primary); color: var(--on-primary); }
+.tool-btn .indicator { position: absolute; bottom: 3px; width: 16px; height: 3px; background: var(--on-primary); border-radius: 2px; }
+.tool-separator { width: 1px; height: 28px; background: var(--border); margin: 0 6px; }
+
+/* Drawing Properties Bar */
+.props-bar {
+    position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 6px 12px; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.color-swatch { width: 28px; height: 28px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+.color-swatch.active { border-color: var(--on-primary); box-shadow: 0 0 0 2px var(--primary); }
+.color-swatch:hover { transform: scale(1.1); }
+.width-dot { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
+.width-dot:hover { background: var(--surface-hover); }
+.width-dot.active { background: var(--primary); }
+.width-dot .dot { background: var(--on-surface); border-radius: 50%; }
+.width-dot.active .dot { background: var(--on-primary); }
+
+/* Floating palette (shapes) */
+.shapes-palette {
+    position: absolute; left: calc(var(--sidebar-w) + 20px); bottom: 70px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 8px; display: grid; grid-template-columns: repeat(3, 40px); gap: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.shape-btn { width: 40px; height: 40px; border-radius: 6px; border: none; background: transparent; color: var(--on-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.shape-btn:hover { background: var(--surface-hover); }
+.shape-btn.active { background: var(--primary); color: var(--on-primary); }
+
+/* Tooltip */
+[data-tooltip] { position: relative; }
+[data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #111; color: #eee; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; z-index: 100; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ═══ TOP TOOLBAR ═══ -->
+<div class="top-bar">
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+        <button class="mode-tab active">Tableau</button>
+        <button class="mode-tab">Documents</button>
+        <button class="mode-tab">Bureau</button>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- Undo/Redo -->
+    <div class="btn-group">
+        <button class="btn" data-tooltip="Annuler">&#x21A9;</button>
+        <button class="btn" data-tooltip="Refaire">&#x21AA;</button>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- Page navigation -->
+    <div class="btn-group">
+        <button class="btn" data-tooltip="Page precedente">&#x25C0;</button>
+        <span style="font-size:12px;color:var(--on-surface-dim);padding:0 8px;line-height:36px;">3 / 12</span>
+        <button class="btn" data-tooltip="Page suivante">&#x25B6;</button>
+        <button class="btn" data-tooltip="Nouvelle page">&#x2795;</button>
+        <button class="btn" data-tooltip="Dupliquer page">&#x2398;</button>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- Background -->
+    <div class="btn-group">
+        <button class="btn" data-tooltip="Fond clair">&#x2600;</button>
+        <button class="btn" data-tooltip="Fond sombre">&#x263D;</button>
+        <button class="btn" data-tooltip="Grille">&#x2317;</button>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- Right actions -->
+    <div class="btn-group">
+        <button class="btn" data-tooltip="Plein ecran">&#x26F6;</button>
+        <button class="btn" data-tooltip="Multi-ecran">&#x2261;</button>
+        <button class="btn" data-tooltip="Preferences">&#x2699;</button>
+        <button class="btn" data-tooltip="Menu">&#x2630;</button>
+    </div>
+</div>
+
+<!-- ═══ SIDEBAR (Page Navigator) ═══ -->
+<div class="sidebar">
+    <div class="sidebar-header">Pages</div>
+    <div class="page-list">
+        <div class="page-thumb"><span class="num">1</span></div>
+        <div class="page-thumb"><span class="num">2</span></div>
+        <div class="page-thumb active"><span class="num">3</span></div>
+        <div class="page-thumb"><span class="num">4</span></div>
+        <div class="page-thumb"><span class="num">5</span></div>
+        <div class="page-thumb"><span class="num">6</span></div>
+    </div>
+    <div class="sidebar-footer">
+        <button class="btn" data-tooltip="Ajouter page">&#x2795;</button>
+        <button class="btn" data-tooltip="Supprimer page">&#x1F5D1;</button>
+        <button class="btn" data-tooltip="Importer">&#x1F4C2;</button>
+    </div>
+</div>
+
+<!-- ═══ CANVAS ═══ -->
+<div class="canvas-area">
+    <div class="canvas">
+        <span class="canvas-hint">Zone de dessin (QGraphicsView C++)</span>
+    </div>
+
+    <!-- Floating: Drawing Properties -->
+    <div class="props-bar">
+        <div class="color-swatch active" style="background:#111;"></div>
+        <div class="color-swatch" style="background:#e53935;"></div>
+        <div class="color-swatch" style="background:#1565c0;"></div>
+        <div class="color-swatch" style="background:#2e7d32;"></div>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <div class="width-dot active"><div class="dot" style="width:4px;height:4px;"></div></div>
+        <div class="width-dot"><div class="dot" style="width:8px;height:8px;"></div></div>
+        <div class="width-dot"><div class="dot" style="width:12px;height:12px;"></div></div>
+    </div>
+
+    <!-- Floating: Shapes Palette (shown when Drawing tool active) -->
+    <div class="shapes-palette" style="display:none;" id="shapesPalette">
+        <button class="shape-btn active" data-tooltip="Ellipse">&#x25EF;</button>
+        <button class="shape-btn" data-tooltip="Cercle">&#x25CB;</button>
+        <button class="shape-btn" data-tooltip="Rectangle">&#x25AD;</button>
+        <button class="shape-btn" data-tooltip="Carre">&#x25A1;</button>
+        <button class="shape-btn" data-tooltip="Ligne">&#x2571;</button>
+        <button class="shape-btn" data-tooltip="Polygone">&#x2B23;</button>
+        <button class="shape-btn" data-tooltip="Couleur remplissage">&#x1F3A8;</button>
+        <button class="shape-btn" data-tooltip="Contour">&#x1F58D;</button>
+        <button class="shape-btn" data-tooltip="Aligner">&#x2261;</button>
+    </div>
+</div>
+
+<!-- ═══ BOTTOM TOOLBAR (Stylus Tools) ═══ -->
+<div class="bottom-bar">
+    <!-- Drawing palette toggle -->
+    <button class="tool-btn" data-tooltip="Formes" id="btnShapes" onclick="toggleShapes()">&#x1F3A8;</button>
+    <div class="tool-separator"></div>
+
+    <!-- Main tools -->
+    <button class="tool-btn active" data-tooltip="Stylo" onclick="selectTool(this)">&#x270F;</button>
+    <button class="tool-btn" data-tooltip="Gomme" onclick="selectTool(this)">&#x1F4AD;</button>
+    <button class="tool-btn" data-tooltip="Marqueur" onclick="selectTool(this)">&#x1F58C;</button>
+    <button class="tool-btn" data-tooltip="Selection" onclick="selectTool(this)">&#x1F5D7;</button>
+
+    <div class="tool-separator"></div>
+
+    <!-- Navigation tools -->
+    <button class="tool-btn" data-tooltip="Lecture" onclick="selectTool(this)">&#x25B6;</button>
+    <button class="tool-btn" data-tooltip="Main" onclick="selectTool(this)">&#x270B;</button>
+    <button class="tool-btn" data-tooltip="Zoom +" onclick="selectTool(this)">&#x1F50D;</button>
+    <button class="tool-btn" data-tooltip="Zoom -" onclick="selectTool(this)">&#x1F50E;</button>
+    <button class="tool-btn" data-tooltip="Pointeur" onclick="selectTool(this)">&#x1F4A1;</button>
+
+    <div class="tool-separator"></div>
+
+    <!-- Creation tools -->
+    <button class="tool-btn" data-tooltip="Ligne" onclick="selectTool(this)">&#x2571;</button>
+    <button class="tool-btn" data-tooltip="Texte" onclick="selectTool(this)">T</button>
+    <button class="tool-btn" data-tooltip="Capture" onclick="selectTool(this)">&#x1F4F7;</button>
+    <button class="tool-btn" data-tooltip="OCR" onclick="selectTool(this)">&#x1F524;</button>
+</div>
+
+</div>
+
+<script>
+function selectTool(el) {
+    document.querySelectorAll('.bottom-bar .tool-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+}
+function toggleShapes() {
+    const p = document.getElementById('shapesPalette');
+    const btn = document.getElementById('btnShapes');
+    const shown = p.style.display !== 'none';
+    p.style.display = shown ? 'none' : 'grid';
+    btn.classList.toggle('active', !shown);
+}
+</script>
+
+</body>
+</html>
