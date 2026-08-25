@@ -1949,6 +1949,9 @@ UBBoardView::setToolCursor (int tool)
     case UBStylusTool::Ocr:
       controlViewport->setCursor (UBResources::resources ()->ocrCursor);
       break;
+    case UBStylusTool::Drawing:
+      controlViewport->setCursor (Qt::CrossCursor);
+      break;
     default:
       //Q_ASSERT (false);
       //failsafe
