@@ -6,6 +6,7 @@
 #include "UBStylusController.h"
 
 #include <QAction>
+#include <QActionGroup>
 #include <QVariantMap>
 
 UBStylusController::UBStylusController(QObject* parent)
@@ -27,6 +28,10 @@ void UBStylusController::finalize()
 {
     mTools.clear();
 
+    // Create an exclusive action group for non-toggle tool actions
+    QActionGroup* exclusiveGroup = new QActionGroup(this);
+    exclusiveGroup->setExclusive(true);
+
     for (int i = 0; i < mEntries.size(); ++i)
     {
         const ToolEntry& e = mEntries[i];
@@ -37,9 +42,13 @@ void UBStylusController::finalize()
         tool["isToggle"] = e.isToggle;
         mTools.append(tool);
 
-        // Listen for external changes (keyboard shortcuts, other UI elements)
         if (e.action)
         {
+            // Non-toggle actions participate in exclusive group
+            if (!e.isToggle)
+                exclusiveGroup->addAction(e.action);
+
+            // Listen for external changes (keyboard shortcuts, other UI elements)
             connect(e.action, &QAction::toggled, this, &UBStylusController::onActionToggled);
             connect(e.action, &QAction::changed, this, [this]() { updateActiveFromActions(); });
         }
