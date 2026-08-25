@@ -413,12 +413,14 @@ void UBBoardPaletteManager::setupPalettes()
     } else {
         mShapesPaletteQml->move(mStylusPaletteQml->x(), mStylusPaletteQml->y() - 390);
     }
-    mShapesPaletteQml->show();
-    mShapesPaletteQml->raise();
+    mShapesPaletteQml->hide(); // starts hidden, toggled by Drawing button
 
     // Connect the Drawing action to toggle the shapes palette
     connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, mShapesController, [this](bool checked) {
         mShapesController->setVisible(checked);
+        mShapesPaletteQml->setVisible(checked);
+        if (checked)
+            mShapesPaletteQml->raise();
     });
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
