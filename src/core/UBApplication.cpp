@@ -769,21 +769,29 @@ void UBApplication::closeEvent(QCloseEvent *event)
 
 void UBApplication::closing()
 {
+    static bool alreadyClosing = false;
+    if (alreadyClosing)
+        return;
+    alreadyClosing = true;
 
-    if (boardController)
-        boardController->closing();
+    // Defer actual shutdown to let menu event processing complete
+    // (avoids crash when Quit is triggered from a QMenu)
+    QTimer::singleShot(0, this, [this]() {
+        if (boardController)
+            boardController->closing();
 
-    if (applicationController)
-        applicationController->closing();
+        if (applicationController)
+            applicationController->closing();
 
-    if (webController)
-        webController->closing();
+        if (webController)
+            webController->closing();
 
-    mSettings->closing();
+        mSettings->closing();
 
-    mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
+        mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
 
-    quit();
+        quit();
+    });
 }
 
 
