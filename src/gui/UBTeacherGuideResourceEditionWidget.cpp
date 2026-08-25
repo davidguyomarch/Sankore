@@ -48,7 +48,7 @@ UBTeacherGuideResourceEditionWidget::UBTeacherGuideResourceEditionWidget(QWidget
     connect(mpTreeWidget->verticalScrollBar(), &QScrollBar::valueChanged, this, &UBTeacherGuideResourceEditionWidget::onSliderMoved);
 #endif
 
-    connect(mpTreeWidget, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem* item, int col) { onAddItemClicked(item, col); });
+    connect(mpTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onAddItemClicked(QTreeWidgetItem*,int)));
     connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBTeacherGuideResourceEditionWidget::onActiveSceneChanged);
     UBSvgSubsetAdaptor::addElementToBeStored(QString("resourcesGuide"), this);
 
