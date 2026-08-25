@@ -84,7 +84,7 @@ class UBPreferencesController : public QObject
         UBBrushPropertiesFrame* mPenProperties;
         UBBrushPropertiesFrame* mMarkerProperties;
 
-    protected slots:
+    public slots:
 
         void close();
         void defaultSettings();

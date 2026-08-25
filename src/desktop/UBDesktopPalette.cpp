@@ -48,7 +48,7 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     QList<QAction*> actions;
 
     mActionUniboard = new QAction(QIcon(":/images/toolbar/svg/board.svg"), tr("Show Open-Sankore"), this);
-    connect(mActionUniboard, SIGNAL(triggered()), this, SIGNAL(uniboardClick()));
+    connect(mActionUniboard, &QAction::triggered, this, [this]() { emit uniboardClick(); });
     actions << mActionUniboard;
 
 
@@ -62,11 +62,11 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
         actions << UBApplication::mainWindow->actionVirtualKeyboard;
 
     mActionCustomSelect = new QAction(QIcon(":/images/toolbar/svg/window.svg"), tr("Capture Part of the Screen"), this);
-    connect(mActionCustomSelect, SIGNAL(triggered()), this, SIGNAL(customClick()));
+    connect(mActionCustomSelect, &QAction::triggered, this, [this]() { emit customClick(); });
     actions << mActionCustomSelect;
 
     mDisplaySelectAction = new QAction(QIcon(":/images/toolbar/captureScreen.png"), tr("Capture the Screen"), this);
-    connect(mDisplaySelectAction, SIGNAL(triggered()), this, SIGNAL(screenClick()));
+    connect(mDisplaySelectAction, &QAction::triggered, this, [this]() { emit screenClick(); });
     actions << mDisplaySelectAction;
 
     QIcon showHideIcon;
@@ -75,7 +75,7 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     mShowHideAction = new QAction(showHideIcon, "", this);
     mShowHideAction->setCheckable(true);
 
-    connect(mShowHideAction, SIGNAL(triggered(bool)), this, SLOT(showHideClick(bool)));
+    connect(mShowHideAction, &QAction::triggered, this, &UBDesktopPalette::showHideClick);
     actions << mShowHideAction;
 
     setActions(actions);
@@ -87,12 +87,12 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     QIcon maximizeIcon;
     maximizeIcon.addPixmap(QPixmap(":/images/toolbar/stylusTab.png"), QIcon::Normal, QIcon::On);
     mMaximizeAction = new QAction(maximizeIcon, tr("Show the stylus palette"), this);
-    connect(mMaximizeAction, SIGNAL(triggered()), this, SLOT(maximizeMe()));
-    connect(this, SIGNAL(maximizeStart()), this, SLOT(maximizeMe()));
-    connect(this, SIGNAL(minimizeStart(eMinimizedLocation)), this, SLOT(minimizeMe(eMinimizedLocation)));
+    connect(mMaximizeAction, &QAction::triggered, this, [this]() { maximizeMe(); });
+    connect(this, &UBFloatingPalette::maximizeStart, this, &UBDesktopPalette::maximizeMe);
+    connect(this, &UBFloatingPalette::minimizeStart, this, &UBDesktopPalette::minimizeMe);
     setMinimizePermission(true);
 
-    connect(rightPalette, SIGNAL(resized()), this, SLOT(parentResized()));
+    connect(rightPalette, &UBRightPalette::resized, this, &UBDesktopPalette::parentResized);
 }
 
 

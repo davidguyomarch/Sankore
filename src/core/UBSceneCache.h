@@ -24,7 +24,8 @@
 #ifndef UBSCENECACHE_H
 #define UBSCENECACHE_H
 
-#include <QtCore>
+#include <QHash>
+#include <QQueue>
 
 #include "domain/UBGraphicsScene.h"
 

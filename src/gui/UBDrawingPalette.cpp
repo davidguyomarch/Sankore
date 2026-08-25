@@ -94,7 +94,7 @@ UBActionPaletteButton * UBDrawingPalette::addButtonSubPalette(UBAbstractSubPalet
         mSubPalettes[button] = subPalette;
         layout()->addWidget(button);
         layout()->setAlignment(button,Qt::AlignHCenter | Qt::AlignVCenter);
-        connect(button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+        connect(button, &QAbstractButton::clicked, this, [this]() { buttonClicked(); });
     }
     return button;
 }
@@ -106,7 +106,7 @@ UBActionPaletteButton * UBDrawingPalette::addActionButton(QAction * action)
     layout()->addWidget(actionButton);
     layout()->setAlignment(actionButton, Qt::AlignHCenter | Qt::AlignVCenter);
 
-    connect(action, SIGNAL(triggered()), this, SLOT(buttonClicked()));
+    connect(action, &QAction::triggered, this, [this]() { buttonClicked(); });
 
     return actionButton;
 }

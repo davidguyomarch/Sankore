@@ -112,6 +112,7 @@ class UBApplication : public QtSingleApplication
         void showDocument();
         void startScript();
         void stopScript();
+        void closing();
 
         void toolBarPositionChanged(QVariant topOrBottom);
         void toolBarDisplayTextChanged(QVariant display);
@@ -130,7 +131,6 @@ class UBApplication : public QtSingleApplication
 
     private slots:
 
-        void closing();
 #ifdef Q_OS_MACOS
         void showMinimized();
 #endif

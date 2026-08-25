@@ -92,12 +92,13 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
 
     mUninoteController = new UBDesktopAnnotationController(this, rightPalette);
 
-    connect(mDisplayManager, SIGNAL(screenLayoutChanged()), this, SLOT(screenLayoutChanged()));
-    connect(mDisplayManager, SIGNAL(screenLayoutChanged()), mUninoteController, SLOT(screenLayoutChanged()));
-    connect(mDisplayManager, SIGNAL(screenLayoutChanged()), UBApplication::webController, SLOT(screenLayoutChanged()));
+    connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, this, &UBApplicationController::screenLayoutChanged);
+    connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, mUninoteController, &UBDesktopAnnotationController::screenLayoutChanged);
+    connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, UBApplication::webController, &UBWebController::screenLayoutChanged);
 
-    connect(mUninoteController, SIGNAL(imageCaptured(const QPixmap &, bool)), this, SLOT(addCapturedPixmap(const QPixmap &, bool)));
-    connect(mUninoteController, SIGNAL(restoreUniboard()), this, SLOT(hideDesktop()));
+    connect(mUninoteController, &UBDesktopAnnotationController::imageCaptured, this,
+            [this](const QPixmap &pPixmap, bool pageMode) { addCapturedPixmap(pPixmap, pageMode); });
+    connect(mUninoteController, &UBDesktopAnnotationController::restoreUniboard, this, &UBApplicationController::hideDesktop);
 
     for(int i = 0; i < mDisplayManager->numPreviousViews(); i++)
     {
@@ -114,8 +115,8 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
         mMirror = new UBScreenMirror();
     }
 
-    connect(UBApplication::webController, SIGNAL(imageCaptured(const QPixmap &, bool, const QUrl&))
-            , this, SLOT(addCapturedPixmap(const QPixmap &, bool, const QUrl&)));
+    connect(UBApplication::webController, &UBWebController::imageCaptured,
+            this, &UBApplicationController::addCapturedPixmap);
 
     networkAccessManager = new QNetworkAccessManager (this);
 
@@ -198,11 +199,11 @@ void UBApplicationController::adaptToolBar()
 
     if (Document == mMainMode)
     {
-        connect(UBApplication::instance(), SIGNAL(focusChanged(QWidget *, QWidget *)), UBApplication::documentController, SLOT(focusChanged(QWidget *, QWidget *)));
+        connect(qApp, &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
     }
     else
     {
-        disconnect(UBApplication::instance(), SIGNAL(focusChanged(QWidget *, QWidget *)), UBApplication::documentController, SLOT(focusChanged(QWidget *, QWidget *)));
+        disconnect(qApp, &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
         if (Board == mMainMode)
             mMainWindow->actionDuplicate->setEnabled(true);
     }

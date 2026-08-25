@@ -97,7 +97,7 @@ UBWidgetUniboardAPI::UBWidgetUniboardAPI(UBGraphicsScene *pScene, UBGraphicsWidg
         mDatastoreAPI = new UBDatastoreAPI(w3CGraphicsWidget);
     }
 
-    connect(UBDownloadManager::downloadManager(), SIGNAL(downloadFinished(bool,sDownloadFileDesc,QByteArray)), this, SLOT(onDownloadFinished(bool,sDownloadFileDesc,QByteArray)));
+    connect(UBDownloadManager::downloadManager(), qOverload<bool, sDownloadFileDesc, QByteArray>(&UBDownloadManager::downloadFinished), this, &UBWidgetUniboardAPI::onDownloadFinished);
 }
 
 

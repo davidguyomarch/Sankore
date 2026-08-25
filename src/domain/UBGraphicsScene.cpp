@@ -328,7 +328,7 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
 
 //    Just for debug. Do not delete please
 //    connect(this, SIGNAL(selectionChanged()), this, SLOT(selectionChangedProcessing()));
-    connect(this, SIGNAL(selectionChanged()), this, SLOT(updateGroupButtonState()));
+    connect(this, &QGraphicsScene::selectionChanged, this, &UBGraphicsScene::updateGroupButtonState);
 }
 
 UBGraphicsScene::~UBGraphicsScene()
@@ -1523,7 +1523,7 @@ UBGraphicsMediaItem* UBGraphicsScene::addMedia(const QUrl& pMediaFileUrl, bool s
 
     UBGraphicsMediaItem* mediaItem = new UBGraphicsMediaItem(pMediaFileUrl);
     if(mediaItem){
-        connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), mediaItem, SLOT(activeSceneChanged()));
+        connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, mediaItem, &UBGraphicsMediaItem::activeSceneChanged);
     }
 
     mediaItem->setPos(pPos);
@@ -1869,7 +1869,7 @@ UBGraphicsTextItem* UBGraphicsScene::addTextWithFont(const QString& pString, con
         UBApplication::undoStack->push(uc);
     }
 
-    connect(textItem, SIGNAL(textUndoCommandAdded(UBGraphicsTextItem *)), this, SLOT(textUndoCommandAdded(UBGraphicsTextItem *)));
+    connect(textItem, &UBGraphicsTextItem::textUndoCommandAdded, this, &UBGraphicsScene::textUndoCommandAdded);
 
     textItem->setSelected(true);
     textItem->setFocus();
@@ -1901,8 +1901,8 @@ UBGraphicsTextItem *UBGraphicsScene::addTextHtml(const QString &pString, const Q
         UBApplication::undoStack->push(uc);
     }
 
-    connect(textItem, SIGNAL(textUndoCommandAdded(UBGraphicsTextItem *)),
-            this,     SLOT(textUndoCommandAdded(UBGraphicsTextItem *)));
+    connect(textItem, &UBGraphicsTextItem::textUndoCommandAdded,
+            this,     &UBGraphicsScene::textUndoCommandAdded);
 
     textItem->setFocus();
     textItem->setPos(pTopLeft);
@@ -2314,12 +2314,12 @@ void UBGraphicsScene::addMagnifier(UBMagnifierParams params)
     magniferControlViewWidget->show();
     magniferDisplayViewWidget->show();
 
-    connect(magniferControlViewWidget, SIGNAL(magnifierMoved_Signal(QPoint)), this, SLOT(moveMagnifier(QPoint)));
-    connect(magniferControlViewWidget, SIGNAL(magnifierClose_Signal()), this, SLOT(closeMagnifier()));
-    connect(magniferControlViewWidget, SIGNAL(magnifierZoomIn_Signal()), this, SLOT(zoomInMagnifier()));
-    connect(magniferControlViewWidget, SIGNAL(magnifierZoomOut_Signal()), this, SLOT(zoomOutMagnifier()));
-    connect(magniferControlViewWidget, SIGNAL(magnifierDrawingModeChange_Signal(int)), this, SLOT(changeMagnifierMode(int)));
-    connect(magniferControlViewWidget, SIGNAL(magnifierResized_Signal(qreal)), this, SLOT(resizedMagnifier(qreal)));
+    connect(magniferControlViewWidget, &UBMagnifier::magnifierMoved_Signal, this, [this](QPoint pos) { moveMagnifier(pos); });
+    connect(magniferControlViewWidget, &UBMagnifier::magnifierClose_Signal, this, &UBGraphicsScene::closeMagnifier);
+    connect(magniferControlViewWidget, &UBMagnifier::magnifierZoomIn_Signal, this, &UBGraphicsScene::zoomInMagnifier);
+    connect(magniferControlViewWidget, &UBMagnifier::magnifierZoomOut_Signal, this, &UBGraphicsScene::zoomOutMagnifier);
+    connect(magniferControlViewWidget, &UBMagnifier::magnifierDrawingModeChange_Signal, this, &UBGraphicsScene::changeMagnifierMode);
+    connect(magniferControlViewWidget, &UBMagnifier::magnifierResized_Signal, this, &UBGraphicsScene::resizedMagnifier);
 
     setModified(true);
 }

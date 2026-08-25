@@ -35,7 +35,7 @@ UBActionableWidget::UBActionableWidget(QWidget *parent, const char *name):QWidge
     mCloseButtons.setIcon(QIcon(QPixmap(":images/close.svg")));
     mCloseButtons.setGeometry(0, 0, 2*ACTIONSIZE, ACTIONSIZE);
     mCloseButtons.setVisible(false);
-    connect(&mCloseButtons, SIGNAL(clicked()), this, SLOT(onCloseClicked()));
+    connect(&mCloseButtons, &QPushButton::clicked, this, [this]() { onCloseClicked(); });
 }
 
 UBActionableWidget::~UBActionableWidget()

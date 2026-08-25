@@ -58,12 +58,12 @@ UBNetworkAccessManager::UBNetworkAccessManager(QObject *parent)
       , mProxyAuthenticationCount(0)
 {
     mSettings = UBSettings::settings();
-    connect(this, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
-            SLOT(authenticationRequired(QNetworkReply*,QAuthenticator*)));
-    connect(this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)),
-            SLOT(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)));
-    connect(this, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)),
-            SLOT(sslErrors(QNetworkReply*, const QList<QSslError>&)));
+    connect(this, &QNetworkAccessManager::authenticationRequired,
+            this, &UBNetworkAccessManager::authenticationRequired);
+    connect(this, &QNetworkAccessManager::proxyAuthenticationRequired,
+            this, &UBNetworkAccessManager::proxyAuthenticationRequired);
+    connect(this, &QNetworkAccessManager::sslErrors,
+            this, &UBNetworkAccessManager::sslErrors);
 
     QNetworkProxy* proxy = mSettings->httpProxy();
 
@@ -148,8 +148,8 @@ void UBNetworkAccessManager::proxyAuthenticationRequired(const QNetworkProxy &pr
     if (mProxyAuthenticationCount == 3)
     {
         UBApplication::showMessage(tr("Failed to log to Proxy"));
-        disconnect(SIGNAL(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*))
-                , this, SLOT(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)));
+        disconnect(this, &QNetworkAccessManager::proxyAuthenticationRequired,
+                this, &UBNetworkAccessManager::proxyAuthenticationRequired);
 
     }
 

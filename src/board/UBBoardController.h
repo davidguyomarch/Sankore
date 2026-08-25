@@ -238,6 +238,7 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 
     public slots:
         void ClearUndoStack();
+        void stylusToolDoubleClicked(int tool);
 
         void showDocumentsDialog();
         void showKeyboard(bool show);
@@ -380,7 +381,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         UBShapeFactory mShapeFactory;        
 
     private slots:
-        void stylusToolDoubleClicked(int tool);
         void boardViewResized(QResizeEvent* event);
         void documentWillBeDeleted(UBDocumentProxy* pProxy);
         void updateBackgroundActionsState(bool isDark, bool isCrossed);

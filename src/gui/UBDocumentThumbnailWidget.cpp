@@ -43,7 +43,7 @@ UBDocumentThumbnailWidget::UBDocumentThumbnailWidget(QWidget* parent)
 {
 	bCanDrag = false;
     mScrollTimer = new QTimer(this);
-	connect(mScrollTimer, SIGNAL(timeout()), this, SLOT(autoScroll()));
+	connect(mScrollTimer, &QTimer::timeout, this, &UBDocumentThumbnailWidget::autoScroll);
 }
 
 

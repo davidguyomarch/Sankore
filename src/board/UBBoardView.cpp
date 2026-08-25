@@ -140,14 +140,14 @@ UBBoardView::~UBBoardView () {
 
 void UBBoardView::init ()
 {
-  connect (UBSettings::settings ()->boardPenPressureSensitive, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardPenPressureSensitive, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
-  connect (UBSettings::settings ()->boardMarkerPressureSensitive, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardMarkerPressureSensitive, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
-  connect (UBSettings::settings ()->boardUseHighResTabletEvent, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardUseHighResTabletEvent, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
   setWindowFlags (Qt::FramelessWindowHint);
   setFrameStyle (QFrame::NoFrame);
@@ -1036,7 +1036,7 @@ void UBBoardView::longPressEvent()
    UBDrawingController *drawingController = UBDrawingController::drawingController();
    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
 
-   disconnect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+   disconnect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
 
    if (UBStylusTool::Selector == currentTool)
    {
@@ -1123,7 +1123,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             if (scene()->backgroundObject() == movingItem)
                 movingItem = nullptr;
 
-            connect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+            connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
             if (!movingItem && !mController->cacheIsVisible())
                 mLongPressTimer.start();
 
@@ -1223,7 +1223,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             {
                 if (currentTool == UBStylusTool::Eraser)
                 {
-                    connect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+                    connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
                     mLongPressTimer.start();
                 }
                 scene ()->inputDevicePress (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())));
@@ -1948,6 +1948,9 @@ UBBoardView::setToolCursor (int tool)
       break;
     case UBStylusTool::Ocr:
       controlViewport->setCursor (UBResources::resources ()->ocrCursor);
+      break;
+    case UBStylusTool::Drawing:
+      controlViewport->setCursor (Qt::CrossCursor);
       break;
     default:
       //Q_ASSERT (false);

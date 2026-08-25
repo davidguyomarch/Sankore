@@ -44,7 +44,7 @@ UniboardSankoreTransition::UniboardSankoreTransition(QObject *parent) :
 #else
     mUniboardSourceDirectory.replace("Sankore/Sankore 3.1", "Mnemis/Uniboard");
 #endif
-    connect(this, SIGNAL(docAdded(UBDocumentProxy*)), UBPersistenceManager::persistenceManager(), SIGNAL(documentCreated(UBDocumentProxy*)));
+    connect(this, &UniboardSankoreTransition::docAdded, UBPersistenceManager::persistenceManager(), &UBPersistenceManager::documentCreated);
 }
 
 UniboardSankoreTransition::~UniboardSankoreTransition()
@@ -97,8 +97,8 @@ void UniboardSankoreTransition::documentTransition()
 
         if (fileInfoList.count() != 0){
             mTransitionDlg = new UBUpdateDlg(nullptr, fileInfoList.count(), backupDirectoryPath);
-            connect(mTransitionDlg, SIGNAL(updateFiles()), this, SLOT(startDocumentTransition()));
-            connect(this, SIGNAL(transitionFinished(bool)), mTransitionDlg, SLOT(onFilesUpdated(bool)));
+            connect(mTransitionDlg, &UBUpdateDlg::updateFiles, this, &UniboardSankoreTransition::startDocumentTransition);
+            connect(this, &UniboardSankoreTransition::transitionFinished, mTransitionDlg, &UBUpdateDlg::onFilesUpdated);
             mTransitionDlg->show();
         }
     }
@@ -111,7 +111,7 @@ void UniboardSankoreTransition::startDocumentTransition()
 {
     mThread = new UniboardSankoreThread(this);
     mThread->start();
-    connect(this,SIGNAL(transitioningFile(QString)),mTransitionDlg,SLOT(transitioningFile(QString)));
+    connect(this, &UniboardSankoreTransition::transitioningFile, mTransitionDlg, &UBUpdateDlg::transitioningFile);
 }
 
 

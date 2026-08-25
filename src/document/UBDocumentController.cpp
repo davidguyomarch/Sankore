@@ -136,9 +136,9 @@ UBDocumentReplaceDialog::UBDocumentReplaceDialog(const QString &pIncommingName, 
 
     acceptButton->setEnabled(false);
 
-    connect(acceptButton, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(mLineEdit, SIGNAL(textEdited(QString)), this, SLOT(reactOnTextChanged(QString)));
+    connect(acceptButton, &QPushButton::clicked, this, [this]() { accept(); });
+    connect(cancelButton, &QPushButton::clicked, this, [this]() { reject(); });
+    connect(mLineEdit, &QLineEdit::textEdited, this, &UBDocumentReplaceDialog::reactOnTextChanged);
 
     reactOnTextChanged(mIncommingName);
 }
@@ -1619,8 +1619,8 @@ QWidget *UBDocumentTreeItemDelegate::createEditor(QWidget *parent, const QStyleO
         }
 
         QLineEdit *nameEditor = new QLineEdit(parent);
-        connect(nameEditor, SIGNAL(editingFinished()), this, SLOT(commitAndCloseEditor()));
-        connect(nameEditor, SIGNAL(textChanged(QString)), this, SLOT(processChangedText(QString)));
+        connect(nameEditor, &QLineEdit::editingFinished, this, &UBDocumentTreeItemDelegate::commitAndCloseEditor);
+        connect(nameEditor, &QLineEdit::textChanged, this, &UBDocumentTreeItemDelegate::processChangedText);
         return nameEditor;
     }
 
@@ -1671,8 +1671,8 @@ UBDocumentController::UBDocumentController(UBMainWindow* mainWindow)
 
     setupViews();
     setupToolbar();
-    connect(this, SIGNAL(exportDone()), mMainWindow, SLOT(onExportDone()));
-    connect(this, SIGNAL(documentThumbnailsUpdated(UBDocumentContainer*)), this, SLOT(refreshDocumentThumbnailsView(UBDocumentContainer*)));
+    connect(this, &UBDocumentController::exportDone, mMainWindow, &UBMainWindow::onExportDone);
+    connect(this, &UBDocumentContainer::documentThumbnailsUpdated, this, &UBDocumentController::refreshDocumentThumbnailsView);
 
     mUserHasChangedSortOrder = false;
 }
@@ -1934,23 +1934,23 @@ void UBDocumentController::setupViews()
         mDocumentUI->documentZoomSlider->setValue(thumbWidth);
         mDocumentUI->thumbnailWidget->setThumbnailWidth(thumbWidth);
 
-        connect(mDocumentUI->documentZoomSlider, SIGNAL(valueChanged(int)), this,
-                SLOT(documentZoomSliderValueChanged(int)));
+        connect(mDocumentUI->documentZoomSlider, &QSlider::valueChanged, this,
+                &UBDocumentController::documentZoomSliderValueChanged);
 
-        connect(mMainWindow->actionOpen, SIGNAL(triggered()), this, SLOT(openSelectedItem()));
-        connect(mMainWindow->actionNewFolder, SIGNAL(triggered()), this, SLOT(createNewDocumentGroup()));
-        connect(mMainWindow->actionNewDocument, SIGNAL(triggered()), this, SLOT(createNewDocument()));
+        connect(mMainWindow->actionOpen, &QAction::triggered, this, [this]() { openSelectedItem(); });
+        connect(mMainWindow->actionNewFolder, &QAction::triggered, this, [this]() { createNewDocumentGroup(); });
+        connect(mMainWindow->actionNewDocument, &QAction::triggered, this, [this]() { createNewDocument(); });
 
-        connect(mMainWindow->actionImport, SIGNAL(triggered(bool)), this, SLOT(importFile()));
+        connect(mMainWindow->actionImport, &QAction::triggered, this, [this]() { importFile(); });
 
         QMenu* addMenu = new QMenu(mDocumentWidget);
         mAddFolderOfImagesAction = addMenu->addAction(tr("Add Folder of Images"));
         mAddImagesAction = addMenu->addAction(tr("Add Images"));
         mAddFileToDocumentAction = addMenu->addAction(tr("Add Pages from File"));
 
-        connect(mAddFolderOfImagesAction, SIGNAL(triggered(bool)), this, SLOT(addFolderOfImages()));
-        connect(mAddFileToDocumentAction, SIGNAL(triggered(bool)), this, SLOT(addFileToDocument()));
-        connect(mAddImagesAction, SIGNAL(triggered(bool)), this, SLOT(addImages()));
+        connect(mAddFolderOfImagesAction, &QAction::triggered, this, [this]() { addFolderOfImages(); });
+        connect(mAddFileToDocumentAction, &QAction::triggered, this, [this]() { addFileToDocument(); });
+        connect(mAddImagesAction, &QAction::triggered, this, [this]() { addImages(); });
 
         for (QWidget* menuWidget : mMainWindow->actionDocumentAdd->associatedWidgets())
         {
@@ -1979,7 +1979,7 @@ void UBDocumentController::setupViews()
             UBExportAdaptor* adaptor = documentManager->supportedExportAdaptors()[i];
             QAction *currentExportAction = exportMenu->addAction(adaptor->exportName());
             currentExportAction->setData(i);
-            connect(currentExportAction, SIGNAL(triggered (bool)), this, SLOT(exportDocument()));
+            connect(currentExportAction, &QAction::triggered, this, [this]() { exportDocument(); });
             exportMenu->addAction(currentExportAction);
             adaptor->setAssociatedAction(currentExportAction);
         }
@@ -2001,10 +2001,10 @@ void UBDocumentController::setupViews()
         mMainWindow->actionDelete->setShortcut(QKeySequence(Qt::Key_Backspace));
 #endif
 
-        connect(mMainWindow->actionDelete, SIGNAL(triggered()), this, SLOT(deleteSelectedItem()));
-        connect(mMainWindow->actionDuplicate, SIGNAL(triggered()), this, SLOT(duplicateSelectedItem()));
-        connect(mMainWindow->actionRename, SIGNAL(triggered()), this, SLOT(renameSelectedItem()));
-        connect(mMainWindow->actionAddToWorkingDocument, SIGNAL(triggered()), this, SLOT(addToDocument()));
+        connect(mMainWindow->actionDelete, &QAction::triggered, this, [this]() { deleteSelectedItem(); });
+        connect(mMainWindow->actionDuplicate, &QAction::triggered, this, [this]() { duplicateSelectedItem(); });
+        connect(mMainWindow->actionRename, &QAction::triggered, this, [this]() { renameSelectedItem(); });
+        connect(mMainWindow->actionAddToWorkingDocument, &QAction::triggered, this, [this]() { addToDocument(); });
 
         UBDocumentTreeModel *model = UBPersistenceManager::persistenceManager()->mDocumentTreeStructureModel;
 
@@ -2031,29 +2031,29 @@ void UBDocumentController::setupViews()
 
         mDocumentUI->sortOrder->hide();
 
-        connect(mDocumentUI->sortKind, SIGNAL(activated(int)), this, SLOT(onSortKindChanged(int)));
-        connect(mDocumentUI->sortOrder, SIGNAL(activated(int)), this, SLOT(onSortOrderChanged(int)));
+        connect(mDocumentUI->sortKind, &QComboBox::activated, this, &UBDocumentController::onSortKindChanged);
+        connect(mDocumentUI->sortOrder, &QComboBox::activated, this, &UBDocumentController::onSortOrderChanged);
 
-        connect(mDocumentUI->collapseAll, SIGNAL(clicked()), this, SLOT(collapseAll()));
+        connect(mDocumentUI->collapseAll, &QPushButton::clicked, this, [this]() { collapseAll(); });
 
-        connect(mDocumentUI->expandAll, SIGNAL(clicked()), this, SLOT(expandAll()));
+        connect(mDocumentUI->expandAll, &QPushButton::clicked, this, [this]() { expandAll(); });
 
-        connect(mDocumentUI->documentTreeView->itemDelegate(), SIGNAL(closeEditor(QWidget*,QAbstractItemDelegate::EndEditHint)), mDocumentUI->documentTreeView->viewport(), SLOT(update()));
-        connect(mDocumentUI->documentTreeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(TreeViewSelectionChanged(QItemSelection,QItemSelection)));
-        connect(UBPersistenceManager::persistenceManager()->mDocumentTreeStructureModel, SIGNAL(indexChanged(QModelIndex,QModelIndex))
-                ,mDocumentUI->documentTreeView, SLOT(onModelIndexChanged(QModelIndex,QModelIndex)));
-        connect(UBPersistenceManager::persistenceManager()->mDocumentTreeStructureModel, SIGNAL(currentIndexMoved(QModelIndex,QModelIndex))
-                ,this, SLOT(currentIndexMoved(QModelIndex,QModelIndex)));
+        connect(mDocumentUI->documentTreeView->itemDelegate(), &QAbstractItemDelegate::closeEditor, mDocumentUI->documentTreeView->viewport(), [this]() { mDocumentUI->documentTreeView->viewport()->update(); });
+        connect(mDocumentUI->documentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, qOverload<const QItemSelection&, const QItemSelection&>(&UBDocumentController::TreeViewSelectionChanged));
+        connect(UBPersistenceManager::persistenceManager()->mDocumentTreeStructureModel, &UBDocumentTreeModel::indexChanged,
+                mDocumentUI->documentTreeView, &UBDocumentTreeView::onModelIndexChanged);
+        connect(UBPersistenceManager::persistenceManager()->mDocumentTreeStructureModel, &UBDocumentTreeModel::currentIndexMoved,
+                this, &UBDocumentController::currentIndexMoved);
 
-        connect(mDocumentUI->thumbnailWidget, SIGNAL(sceneDropped(UBDocumentProxy*, int, int)), this, SLOT(moveSceneToIndex ( UBDocumentProxy*, int, int)));
-        connect(mDocumentUI->thumbnailWidget, SIGNAL(resized()), this, SLOT(thumbnailViewResized()));
-        connect(mDocumentUI->thumbnailWidget, SIGNAL(mouseDoubleClick(QGraphicsItem*,int)), this, SLOT(thumbnailPageDoubleClicked(QGraphicsItem*,int)));
-        connect(mDocumentUI->thumbnailWidget, SIGNAL(mouseClick(QGraphicsItem*, int)), this, SLOT(pageClicked(QGraphicsItem*, int)));
+        connect(mDocumentUI->thumbnailWidget, &UBDocumentThumbnailWidget::sceneDropped, this, &UBDocumentController::moveSceneToIndex);
+        connect(mDocumentUI->thumbnailWidget, &UBThumbnailWidget::resized, this, &UBDocumentController::thumbnailViewResized);
+        connect(mDocumentUI->thumbnailWidget, &UBThumbnailWidget::mouseDoubleClick, this, &UBDocumentController::thumbnailPageDoubleClicked);
+        connect(mDocumentUI->thumbnailWidget, &UBThumbnailWidget::mouseClick, this, &UBDocumentController::pageClicked);
 
-        connect(mDocumentUI->thumbnailWidget->scene(), SIGNAL(selectionChanged()), this, SLOT(pageSelectionChanged()));
+        connect(mDocumentUI->thumbnailWidget->scene(), &QGraphicsScene::selectionChanged, this, &UBDocumentController::pageSelectionChanged);
 
-        connect(UBPersistenceManager::persistenceManager(), SIGNAL(documentSceneCreated(UBDocumentProxy*, int)), this, SLOT(documentSceneChanged(UBDocumentProxy*, int)));
-        connect(UBPersistenceManager::persistenceManager(), SIGNAL(documentSceneWillBeDeleted(UBDocumentProxy*, int)), this, SLOT(documentSceneChanged(UBDocumentProxy*, int)));
+        connect(UBPersistenceManager::persistenceManager(), &UBPersistenceManager::documentSceneCreated, this, &UBDocumentController::documentSceneChanged);
+        connect(UBPersistenceManager::persistenceManager(), &UBPersistenceManager::documentSceneWillBeDeleted, this, &UBDocumentController::documentSceneChanged);
 
         mDocumentUI->thumbnailWidget->setBackgroundBrush(UBTheme::documentViewLight());
 
@@ -2140,7 +2140,7 @@ QWidget* UBDocumentController::controlView()
 void UBDocumentController::setupToolbar()
 {
     UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->documentToolBar, mMainWindow->actionBoard);
-    connect(mMainWindow->actionDocumentTools, SIGNAL(triggered()), this, SLOT(toggleDocumentToolsPalette()));
+    connect(mMainWindow->actionDocumentTools, &QAction::triggered, this, [this]() { toggleDocumentToolsPalette(); });
 }
 
 void UBDocumentController::setupPalettes()
@@ -3365,11 +3365,11 @@ void UBDocumentController::refreshDocumentThumbnailsView(UBDocumentContainer*)
     mDocumentUI->thumbnailWidget->ensureVisible(0, 0, 10, 10);
 
     if (selection) {
-        disconnect(mDocumentUI->thumbnailWidget->scene(), SIGNAL(selectionChanged()), this, SLOT(pageSelectionChanged()));
+        disconnect(mDocumentUI->thumbnailWidget->scene(), &QGraphicsScene::selectionChanged, this, &UBDocumentController::pageSelectionChanged);
         UBSceneThumbnailPixmap *currentScene = dynamic_cast<UBSceneThumbnailPixmap*>(selection);
         if (currentScene)
             mDocumentUI->thumbnailWidget->hightlightItem(currentScene->sceneIndex());
-        connect(mDocumentUI->thumbnailWidget->scene(), SIGNAL(selectionChanged()), this, SLOT(pageSelectionChanged()));
+        connect(mDocumentUI->thumbnailWidget->scene(), &QGraphicsScene::selectionChanged, this, &UBDocumentController::pageSelectionChanged);
     }
 
     QApplication::restoreOverrideCursor();

@@ -184,9 +184,9 @@ void UBShapeFactory::init()
     //Our custom dash is a point follow by a space
     mDotDashes << 0.1 << 3;
 
-    connect(mBoardView, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(onMouseMove(QMouseEvent*)));
-    connect(mBoardView, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(onMouseRelease(QMouseEvent*)));
-    connect(mBoardView, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(onMousePress(QMouseEvent*)));
+    connect(mBoardView, &UBBoardView::mouseMove, this, &UBShapeFactory::onMouseMove);
+    connect(mBoardView, &UBBoardView::mouseRelease, this, &UBShapeFactory::onMouseRelease);
+    connect(mBoardView, &UBBoardView::mousePress, this, &UBShapeFactory::onMousePress);
 
 }
 
@@ -282,7 +282,10 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
 void UBShapeFactory::createEllipse(bool create)
 {
     if(create){
-        mDrawingController->setStylusTool(UBStylusTool::Drawing);
+        if (mDrawingController->stylusTool() == UBStylusTool::Drawing)
+            UBApplication::boardController->setToolCursor(UBStylusTool::Drawing);
+        else
+            mDrawingController->setStylusTool(UBStylusTool::Drawing);
         mIsRegularShape = true;
         mIsCreating = true;
         mShapeType = Ellipse;
@@ -292,7 +295,10 @@ void UBShapeFactory::createEllipse(bool create)
 void UBShapeFactory::createCircle(bool create)
 {
     if(create){
-        mDrawingController->setStylusTool(UBStylusTool::Drawing);
+        if (mDrawingController->stylusTool() == UBStylusTool::Drawing)
+            UBApplication::boardController->setToolCursor(UBStylusTool::Drawing);
+        else
+            mDrawingController->setStylusTool(UBStylusTool::Drawing);
         mIsRegularShape = true;
         mIsCreating = true;
         mShapeType = Circle;
@@ -303,7 +309,10 @@ void UBShapeFactory::createRectangle(bool create)
 {
     if(create)
     {
-        mDrawingController->setStylusTool(UBStylusTool::Drawing);
+        if (mDrawingController->stylusTool() == UBStylusTool::Drawing)
+            UBApplication::boardController->setToolCursor(UBStylusTool::Drawing);
+        else
+            mDrawingController->setStylusTool(UBStylusTool::Drawing);
         mIsRegularShape = true;
         mIsCreating = true;
         mShapeType = Rectangle;
@@ -314,7 +323,10 @@ void UBShapeFactory::createSquare(bool create)
 {
     if(create)
     {
-        mDrawingController->setStylusTool(UBStylusTool::Drawing);
+        if (mDrawingController->stylusTool() == UBStylusTool::Drawing)
+            UBApplication::boardController->setToolCursor(UBStylusTool::Drawing);
+        else
+            mDrawingController->setStylusTool(UBStylusTool::Drawing);
         mIsRegularShape = true;
         mIsCreating = true;
         mShapeType = Square;

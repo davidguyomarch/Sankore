@@ -89,6 +89,7 @@
         <file>images/cursors/zoomIn.png</file>
         <file>images/cursors/zoomOut.png</file>
         <file>images/cursors/rotate.png</file>
+        <file>images/cursors/ocr.svg</file>
         <file>images/cursors/resize.png</file>
         <file>images/cursors/drawCompass.png</file>
         <file>images/cursors/drawRulerLine.png</file>

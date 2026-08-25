@@ -30,7 +30,7 @@ UBWidgetMessageAPI::UBWidgetMessageAPI(UBGraphicsWidgetItem *graphicsWidgetItem,
     : QObject(parent)
     , mGraphicsWidgetItem(graphicsWidgetItem)
 {
-    connect(UBWidgetAPIMessageBroker::instance(), SIGNAL(newMessage(const QString&, const QString&)), this, SLOT(onNewMessage(const QString&, const QString&)), Qt::QueuedConnection);
+    connect(UBWidgetAPIMessageBroker::instance(), &UBWidgetAPIMessageBroker::newMessage, this, &UBWidgetMessageAPI::onNewMessage, Qt::QueuedConnection);
 }
 
 UBWidgetMessageAPI::~UBWidgetMessageAPI()

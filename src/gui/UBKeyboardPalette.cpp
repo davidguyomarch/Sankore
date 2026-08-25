@@ -96,10 +96,10 @@ void UBKeyboardPalette::init()
 
     setKeyButtonSize(mSettings->boardKeyboardPaletteKeyBtnSize->get().toString());
 
-    connect(this, SIGNAL(keyboardActivated(bool)), this, SLOT(onActivated(bool)));
-    connect(mSettings->boardKeyboardPaletteKeyBtnSize, SIGNAL(changed(QVariant)), this, SLOT(keyboardPaletteButtonSizeChanged(QVariant)));
-    connect(UBApplication::mainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(showKeyboard(bool)));
-    connect(this, SIGNAL(closed()), this, SLOT(hideKeyboard()));
+    connect(this, &UBKeyboardPalette::keyboardActivated, this, &UBKeyboardPalette::onActivated);
+    connect(mSettings->boardKeyboardPaletteKeyBtnSize, &UBSetting::changed, this, &UBKeyboardPalette::keyboardPaletteButtonSizeChanged);
+    connect(UBApplication::mainWindow->actionVirtualKeyboard, &QAction::triggered, this, &UBKeyboardPalette::showKeyboard);
+    connect(this, &UBActionPalette::closed, this, &UBKeyboardPalette::hideKeyboard);
 
     //------------------------------//
 

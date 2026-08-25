@@ -94,7 +94,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
-        connect(mButtonGroup, SIGNAL(idClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
+        connect(mButtonGroup, &QButtonGroup::idClicked, this, &UBStylusPalette::buttonGroupClicked);
     }
     else
     {
@@ -103,7 +103,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
-        connect(mButtonGroup, SIGNAL(idClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
+        connect(mButtonGroup, &QButtonGroup::idClicked, this, &UBStylusPalette::buttonGroupClicked);
     }
 
     adjustSizeAndPosition();
@@ -112,7 +112,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 
     for (UBActionPaletteButton* button : mButtons)
     {
-        connect(button, SIGNAL(doubleClicked()), this, SLOT(stylusToolDoubleClicked()));
+        connect(button, &UBActionPaletteButton::doubleClicked, this, [this]() { stylusToolDoubleClicked(); });
     }
 
 }

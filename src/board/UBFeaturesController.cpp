@@ -26,6 +26,8 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QTimer>
+#include <QSortFilterProxyModel>
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
@@ -426,17 +428,17 @@ UBFeaturesController::UBFeaturesController(QWidget *pParentWidget) :
     featuresPathModel->setPath(rootData.categoryFeature().getFullVirtualPath());
     featuresPathModel->setSourceModel(featuresModel);
 
-    connect(featuresModel, SIGNAL(dataRestructured()), featuresProxyModel, SLOT(invalidate()));
-    connect(&mCThread, SIGNAL(sendFeature(UBFeature)), featuresModel, SLOT(addItem(UBFeature)));
-    connect(&mCThread, SIGNAL(featureSent()), this, SIGNAL(featureAddedFromThread()));
-    connect(&mCThread, SIGNAL(scanStarted()), this, SIGNAL(scanStarted()));
-    connect(&mCThread, SIGNAL(scanFinished()), this, SIGNAL(scanFinished()));
-    connect(&mCThread, SIGNAL(maxFilesCountEvaluated(int)), this, SIGNAL(maxFilesCountEvaluated(int)));
-    connect(&mCThread, SIGNAL(scanCategory(QString)), this, SIGNAL(scanCategory(QString)));
-    connect(&mCThread, SIGNAL(scanPath(QString)), this, SIGNAL(scanPath(QString)));
-    connect(UBApplication::boardController, SIGNAL(npapiWidgetCreated(QString)), this, SLOT(createNpApiFeature(QString)));
+    connect(featuresModel, &UBFeaturesModel::dataRestructured, featuresProxyModel, &QSortFilterProxyModel::invalidate);
+    connect(&mCThread, &UBFeaturesComputingThread::sendFeature, featuresModel, &UBFeaturesModel::addItem);
+    connect(&mCThread, &UBFeaturesComputingThread::featureSent, this, &UBFeaturesController::featureAddedFromThread);
+    connect(&mCThread, &UBFeaturesComputingThread::scanStarted, this, &UBFeaturesController::scanStarted);
+    connect(&mCThread, &UBFeaturesComputingThread::scanFinished, this, &UBFeaturesController::scanFinished);
+    connect(&mCThread, &UBFeaturesComputingThread::maxFilesCountEvaluated, this, &UBFeaturesController::maxFilesCountEvaluated);
+    connect(&mCThread, &UBFeaturesComputingThread::scanCategory, this, &UBFeaturesController::scanCategory);
+    connect(&mCThread, &UBFeaturesComputingThread::scanPath, this, &UBFeaturesController::scanPath);
+    connect(UBApplication::boardController, &UBBoardController::npapiWidgetCreated, this, &UBFeaturesController::createNpApiFeature);
 
-    QTimer::singleShot(0, this, SLOT(scanFS()));
+    QTimer::singleShot(0, this, &UBFeaturesController::scanFS);
 
     //issue 1474 - NNE - 201310
     mTrashRegistery.synchronizeWith(UBSettings::userTrashDirPath());

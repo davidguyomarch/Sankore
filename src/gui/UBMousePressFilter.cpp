@@ -65,7 +65,7 @@ bool UBMousePressFilter::eventFilter(QObject *obj, QEvent *event)
 
             mObject = obj;
 
-            QTimer::singleShot(1000, this, SLOT(mouseDownElapsed()));
+            QTimer::singleShot(1000, this, &UBMousePressFilter::mouseDownElapsed);
         }
     }
     else if (isMouseRelease || isMouseMove)

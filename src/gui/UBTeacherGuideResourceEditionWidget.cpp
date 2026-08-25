@@ -45,11 +45,11 @@ UBTeacherGuideResourceEditionWidget::UBTeacherGuideResourceEditionWidget(QWidget
 
 #ifdef Q_OS_MACOS
     // on mac and with the custom qt the widget on the tree are not automatically relocated when using the vertical scrollbar. To relocate them we link the valueChange signal of the vertical scrollbar with a local signal to trig a change and a repaint of the tree widget
-    connect(mpTreeWidget->verticalScrollBar(),SIGNAL(valueChanged(int)),this,SLOT(onSliderMoved(int)));
+    connect(mpTreeWidget->verticalScrollBar(), &QScrollBar::valueChanged, this, &UBTeacherGuideResourceEditionWidget::onSliderMoved);
 #endif
 
     connect(mpTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onAddItemClicked(QTreeWidgetItem*,int)));
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(onActiveSceneChanged()));
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBTeacherGuideResourceEditionWidget::onActiveSceneChanged);
     UBSvgSubsetAdaptor::addElementToBeStored(QString("resourcesGuide"), this);
 
 }
@@ -74,9 +74,9 @@ void UBTeacherGuideResourceEditionWidget::onAddItemClicked(QTreeWidgetItem* widg
             if (element)
                 mediaWidget->initializeWithDom(*element);
             mpTreeWidget->setItemWidget(newWidgetItem,0, mediaWidget);
-            connect(actionColumn, SIGNAL(clickOnUp()), mediaWidget, SLOT(onUpButton()));
-            connect(actionColumn, SIGNAL(clickOnDown()), mediaWidget, SLOT(onDownButton()));
-            connect(actionColumn, SIGNAL(clickOnClose()), mediaWidget, SLOT(onClose()));
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnUp), mediaWidget, &UBTGMediaWidget::onUpButton);
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnDown), mediaWidget, &UBTGMediaWidget::onDownButton);
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnClose), mediaWidget, &UBTGMediaWidget::onClose);
             break;
         }
         case eUBTGAddSubItemWidgetType_Url: {
@@ -84,9 +84,9 @@ void UBTeacherGuideResourceEditionWidget::onAddItemClicked(QTreeWidgetItem* widg
             if (element)
                 urlWidget->initializeWithDom(*element);
             mpTreeWidget->setItemWidget(newWidgetItem, 0, urlWidget);
-            connect(actionColumn, SIGNAL(clickOnUp()), urlWidget, SLOT(onUpButton()));
-            connect(actionColumn, SIGNAL(clickOnDown()), urlWidget, SLOT(onDownButton()));
-            connect(actionColumn, SIGNAL(clickOnClose()), urlWidget, SLOT(onClose()));
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnUp), urlWidget, &UBTGUrlWidget::onUpButton);
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnDown), urlWidget, &UBTGUrlWidget::onDownButton);
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnClose), urlWidget, &UBTGUrlWidget::onClose);
             break;
         }
         case eUBTGAddSubItemWidgetType_File: { //Issue 1716 - ALTI/AOU - 20140128
@@ -94,9 +94,9 @@ void UBTeacherGuideResourceEditionWidget::onAddItemClicked(QTreeWidgetItem* widg
             if (element)
                 fileWidget->initializeWithDom(*element);
             mpTreeWidget->setItemWidget(newWidgetItem, 0, fileWidget);
-            connect(actionColumn, SIGNAL(clickOnUp()), fileWidget, SLOT(onUpButton()));
-            connect(actionColumn, SIGNAL(clickOnDown()), fileWidget, SLOT(onDownButton()));
-            connect(actionColumn, SIGNAL(clickOnClose()), fileWidget, SLOT(onClose()));
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnUp), fileWidget, &UBTGFileWidget::onUpButton);
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnDown), fileWidget, &UBTGFileWidget::onDownButton);
+            connect(actionColumn, qOverload<>(&UBTGActionColumn::clickOnClose), fileWidget, &UBTGFileWidget::onClose);
             break;
         }
         default:

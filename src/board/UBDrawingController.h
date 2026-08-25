@@ -24,7 +24,8 @@
 #ifndef UBDRAWINGCONTROLLER_H_
 #define UBDRAWINGCONTROLLER_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QColor>
 
 #include "core/UB.h"
 

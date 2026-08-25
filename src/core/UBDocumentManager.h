@@ -24,7 +24,12 @@
 #ifndef UBDOCUMENTMANAGER_H_
 #define UBDOCUMENTMANAGER_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QFileInfo>
+#include <QDir>
+#include <QList>
 
 class UBExportAdaptor;
 class UBImportAdaptor;
