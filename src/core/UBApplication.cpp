@@ -373,6 +373,7 @@ int UBApplication::exec(const QString& pFileToImport)
 
     boardController->paletteManager()->connectToDocumentController();
 
+    UBApplication::mainWindow->actionPen->setChecked(false); // force re-trigger
     UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
 
     applicationController = new UBApplicationController(boardController->controlView(),
@@ -774,24 +775,21 @@ void UBApplication::closing()
         return;
     alreadyClosing = true;
 
-    // Defer actual shutdown to let menu event processing complete
-    // (avoids crash when Quit is triggered from a QMenu)
-    QTimer::singleShot(0, this, [this]() {
-        if (boardController)
-            boardController->closing();
+    if (boardController)
+        boardController->closing();
 
-        if (applicationController)
-            applicationController->closing();
+    if (applicationController)
+        applicationController->closing();
 
-        if (webController)
-            webController->closing();
+    if (webController)
+        webController->closing();
 
-        mSettings->closing();
+    mSettings->closing();
 
-        mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
+    mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
 
-        quit();
-    });
+    // Use QueuedConnection to let any pending menu events finish before quit
+    QMetaObject::invokeMethod(this, "quit", Qt::QueuedConnection);
 }
 
 
