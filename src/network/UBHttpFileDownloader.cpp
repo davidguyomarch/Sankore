@@ -67,7 +67,7 @@ void UBHttpFileDownloader::downloadNext()
                 QNetworkRequest request(url);
             mReply = nam->get(request); // UB 4.2 TODO who owns and delete the reply ?
 
-            connect(mReply, &QNetworkReply::finished, this, &UBHttpFileDownloader::finished);
+            connect(mReply, &QNetworkReply::finished, this, [this]() { finished(); });
                 connect(mReply, &QNetworkReply::errorOccurred,
                                 this, &UBHttpFileDownloader::error);
                 connect(mReply, &QNetworkReply::downloadProgress,
