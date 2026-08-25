@@ -478,6 +478,11 @@ int UBApplication::exec(const QString& pFileToImport)
     showBoard();
     mainWindow->showMaximized();
 
+    // Force Pen tool selection after all init is complete (deferred to ensure QML is ready)
+    QTimer::singleShot(0, this, [this]() {
+        UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+    });
+
     onScreenCountChanged(1);
     return QApplication::exec();
 }
@@ -788,8 +793,8 @@ void UBApplication::closing()
 
     mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
 
-    // Use QueuedConnection to let any pending menu events finish before quit
-    QMetaObject::invokeMethod(this, "quit", Qt::QueuedConnection);
+    // Defer quit to let any pending menu/widget events finish
+    QTimer::singleShot(0, qApp, &QApplication::quit);
 }
 
 

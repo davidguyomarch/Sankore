@@ -76,13 +76,36 @@ void UBStylusController::selectTool(int index)
     // Trigger the action (this goes through UBDrawingController)
     entry.action->trigger();
 
-    // The action's toggled signal will update mActiveIndex via onActionToggled
+    // Force active index update (don't rely solely on signal propagation)
+    if (mActiveIndex != index)
+    {
+        mActiveIndex = index;
+        emit activeToolChanged();
+    }
 }
 
 void UBStylusController::onActionToggled(bool checked)
 {
     if (checked)
-        updateActiveFromActions();
+    {
+        // Find which action was just checked and update mActiveIndex
+        QAction* sender = qobject_cast<QAction*>(this->sender());
+        if (sender)
+        {
+            for (int i = 0; i < mEntries.size(); ++i)
+            {
+                if (!mEntries[i].isToggle && mEntries[i].action == sender)
+                {
+                    if (mActiveIndex != i)
+                    {
+                        mActiveIndex = i;
+                        emit activeToolChanged();
+                    }
+                    return;
+                }
+            }
+        }
+    }
 }
 
 void UBStylusController::updateActiveFromActions()
