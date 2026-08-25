@@ -210,7 +210,7 @@ void UBServerXMLHttpRequest::connectReply()
 {
     if (mReply)
     {
-        connect(mReply, &QNetworkReply::finished, this, &UBServerXMLHttpRequest::finished);
+        connect(mReply, &QNetworkReply::finished, this, qOverload<>(&UBServerXMLHttpRequest::finished));
         connect(mReply, &QNetworkReply::errorOccurred, this, &UBServerXMLHttpRequest::error);
         connect(mReply, &QNetworkReply::downloadProgress, this, &UBServerXMLHttpRequest::downloadProgress);
         connect(mReply, &QNetworkReply::uploadProgress, this, &UBServerXMLHttpRequest::uploadProgress);
