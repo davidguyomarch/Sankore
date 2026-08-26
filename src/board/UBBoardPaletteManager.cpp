@@ -433,7 +433,7 @@ void UBBoardPaletteManager::setupPalettes()
     mDrawingPropsBarQml->setFixedSize(280, 48);
     // Positioned above the bottom bar, centered
     int propsX = (mContainer->width() - 280) / 2;
-    int propsY = mContainer->height() - 52 - 60; // above bottom bar
+    int propsY = mContainer->height() - 52 - 70; // above bottom bar
     mDrawingPropsBarQml->move(propsX, propsY);
     mDrawingPropsBarQml->show();
     mDrawingPropsBarQml->raise();
@@ -911,7 +911,7 @@ void UBBoardPaletteManager::containerResized()
     if (mDrawingPropsBarQml)
     {
         int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
-        int posY = mContainer->height() - 52 - 60;
+        int posY = mStylusPaletteQml->y() - mDrawingPropsBarQml->height() - 8;
         mDrawingPropsBarQml->move(posX, posY);
         mDrawingPropsBarQml->show();
         mDrawingPropsBarQml->raise();

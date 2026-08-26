@@ -25,8 +25,9 @@ UBToolController::UBToolController(QObject* parent)
     connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged,
             this, &UBToolController::onExternalWidthChanged);
 
-    // Init from current state
-    m_activeTool = UBDrawingController::drawingController()->stylusTool();
+    // Init from current state — default to Pen
+    int currentTool = UBDrawingController::drawingController()->stylusTool();
+    m_activeTool = (currentTool >= 0) ? currentTool : Pen;
 }
 
 // --- Active Tool ---
