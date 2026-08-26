@@ -430,9 +430,9 @@ void UBBoardPaletteManager::setupPalettes()
     if (mDrawingPropsBarQml->status() == QQuickWidget::Error)
         for (const auto& e : mDrawingPropsBarQml->errors())
             qWarning() << "DrawingPropsBar QML error:" << e.toString();
-    mDrawingPropsBarQml->setFixedSize(360, 56);
+    mDrawingPropsBarQml->setFixedSize(280, 48);
     // Positioned above the bottom bar, centered
-    int propsX = (mContainer->width() - 360) / 2;
+    int propsX = (mContainer->width() - 280) / 2;
     int propsY = mContainer->height() - 52 - 60; // above bottom bar
     mDrawingPropsBarQml->move(propsX, propsY);
     mDrawingPropsBarQml->show();
@@ -1185,8 +1185,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                         mKeyboardPalette->setParent(UBApplication::boardController->controlContainer());
                 }
 
-                mLeftPalette->setVisible(leftPaletteVisible);
-                mRightPalette->setVisible(rightPaletteVisible);
+                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
+                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 #ifdef Q_OS_WIN
                 if (rightPaletteVisible)
                     mRightPalette->setAdditionalVOffset(0);
@@ -1253,8 +1253,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
                 }
 
-                mLeftPalette->setVisible(leftPaletteVisible);
-                mRightPalette->setVisible(rightPaletteVisible);
+                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
+                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 #ifdef Q_OS_WIN
                 if (rightPaletteVisible)
                 {
@@ -1284,7 +1284,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 #ifdef SANKORE_WEBENGINE
                 mRightPalette->assignParent(UBApplication::webController->GetCurrentWebBrowser());
 #endif
-                mRightPalette->setVisible(rightPaletteVisible);
+                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
@@ -1303,8 +1303,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         case eUBDockPaletteWidget_DOCUMENT:
             {
-                mLeftPalette->setVisible(leftPaletteVisible);
-                mRightPalette->setVisible(rightPaletteVisible);
+                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
+                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
                 mLeftPalette->assignParent(UBApplication::documentController->controlView());
                 mRightPalette->assignParent(UBApplication::documentController->controlView());
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
@@ -1326,8 +1326,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         default:
             {
-                mLeftPalette->setVisible(leftPaletteVisible);
-                mRightPalette->setVisible(rightPaletteVisible);
+                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
+                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
                 mLeftPalette->assignParent(0);
                 mRightPalette->assignParent(0);
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)

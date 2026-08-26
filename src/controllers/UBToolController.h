@@ -60,6 +60,7 @@ public:
         Text,
         Capture,
         RichText,
+        ChangeFill,
         Drawing,
         Ocr
     };

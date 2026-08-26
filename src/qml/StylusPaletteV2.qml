@@ -25,12 +25,14 @@ Rectangle {
 
     width: isVertical ? thickness : contentLength
     height: isVertical ? contentLength : thickness
-    radius: 12
+    radius: 0  // No radius on root — avoids white corners on Windows QQuickWidget
     color: themeManager.surface
     border.color: themeManager.border
     border.width: 1
 
     // Tool definitions — IDs match UBStylusTool::Enum
+    // Pen=0 Eraser=1 Marker=2 Selector=3 Play=4 Hand=5 ZoomIn=6 ZoomOut=7
+    // Pointer=8 Line=9 Text=10 Capture=11 RichText=12 ChangeFill=13 Drawing=14 Ocr=15
     readonly property var tools: [
         { id: -1,  icon: "shapes",                  tooltip: "Formes",          isToggle: true },
         { id: 0,   icon: "pen",                     tooltip: "Stylo" },
@@ -47,7 +49,7 @@ Rectangle {
         { id: 9,   icon: "line-segment",            tooltip: "Ligne" },
         { id: 10,  icon: "text-t",                  tooltip: "Texte" },
         { id: 11,  icon: "selection",               tooltip: "Capture" },
-        { id: 14,  icon: "text-aa",                 tooltip: "OCR" }
+        { id: 15,  icon: "text-aa",                 tooltip: "OCR" }
     ]
 
     Row {

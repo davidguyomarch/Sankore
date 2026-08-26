@@ -24,15 +24,6 @@ Rectangle {
     border.color: themeManager.border
     border.width: 1
 
-    layer.enabled: true
-    layer.effect: DropShadow {
-        transparentBorder: true
-        radius: 12
-        samples: 25
-        color: "#40000000"
-        verticalOffset: 4
-    }
-
     // Is this eraser mode? (show eraser widths instead of colors)
     property bool isEraser: toolController.activeTool === 1
 

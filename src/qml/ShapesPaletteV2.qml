@@ -24,15 +24,6 @@ Rectangle {
     border.color: themeManager.border
     border.width: 1
 
-    layer.enabled: true
-    layer.effect: DropShadow {
-        transparentBorder: true
-        radius: 12
-        samples: 25
-        color: "#40000000"
-        verticalOffset: 4
-    }
-
     Column {
         id: contentCol
         anchors.centerIn: parent
@@ -46,8 +37,6 @@ Rectangle {
             color: themeManager.onSurface
             opacity: 0.5
             leftPadding: 2
-        }
-
         Grid {
             columns: 3
             spacing: 4
@@ -109,8 +98,6 @@ Rectangle {
             opacity: 0.5
             leftPadding: 2
             topPadding: 4
-        }
-
         Grid {
             columns: 3
             spacing: 4
