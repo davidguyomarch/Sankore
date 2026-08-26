@@ -58,6 +58,8 @@
 #include <QQmlContext>
 #include <QTimer>
 #include <QToolBar>
+#include <QFile>
+#include <QTextStream>
 #include "qml/UBThemeManager.h"
 #include "qml/UBStylusController.h"
 #include "qml/UBDrawingPropertiesController.h"
@@ -457,13 +459,43 @@ void UBBoardPaletteManager::setupPalettes()
     });
 
     // Debug: log QML widget positions
-    qDebug() << "=== QML UI V2 Widget Positions ===";
-    qDebug() << "Container:" << mContainer->size();
-    qDebug() << "StylusPalette:" << mStylusPaletteQml->pos() << mStylusPaletteQml->size() << "visible:" << mStylusPaletteQml->isVisible();
-    qDebug() << "TopBar:" << mTopBarQml->pos() << mTopBarQml->size() << "visible:" << mTopBarQml->isVisible();
-    qDebug() << "PageNav:" << mPageNavQml->pos() << mPageNavQml->size() << "visible:" << mPageNavQml->isVisible();
-    qDebug() << "DrawingPropsBar:" << mDrawingPropsBarQml->pos() << mDrawingPropsBarQml->size() << "visible:" << mDrawingPropsBarQml->isVisible();
-    qDebug() << "===================================";
+    // Diagnostic: write widget positions to startup.log
+    {
+        QString exePath = QCoreApplication::applicationDirPath();
+        QFile logFile(exePath + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text))
+        {
+            QTextStream out(&logFile);
+            out << "\n=== QML UI V2 Widget Positions ===\n";
+            out << "Container: " << mContainer->width() << "x" << mContainer->height() << "\n";
+            out << "StylusPalette: pos=" << mStylusPaletteQml->x() << "," << mStylusPaletteQml->y()
+                << " size=" << mStylusPaletteQml->width() << "x" << mStylusPaletteQml->height()
+                << " visible=" << mStylusPaletteQml->isVisible() << "\n";
+            out << "TopBar: pos=" << mTopBarQml->x() << "," << mTopBarQml->y()
+                << " size=" << mTopBarQml->width() << "x" << mTopBarQml->height()
+                << " visible=" << mTopBarQml->isVisible()
+                << " status=" << mTopBarQml->status() << "\n";
+            out << "PageNav: pos=" << mPageNavQml->x() << "," << mPageNavQml->y()
+                << " size=" << mPageNavQml->width() << "x" << mPageNavQml->height()
+                << " visible=" << mPageNavQml->isVisible()
+                << " status=" << mPageNavQml->status() << "\n";
+            out << "DrawingPropsBar: pos=" << mDrawingPropsBarQml->x() << "," << mDrawingPropsBarQml->y()
+                << " size=" << mDrawingPropsBarQml->width() << "x" << mDrawingPropsBarQml->height()
+                << " visible=" << mDrawingPropsBarQml->isVisible()
+                << " status=" << mDrawingPropsBarQml->status() << "\n";
+            // Log QML errors
+            for (const auto& e : mStylusPaletteQml->errors())
+                out << "StylusPalette ERROR: " << e.toString() << "\n";
+            for (const auto& e : mTopBarQml->errors())
+                out << "TopBar ERROR: " << e.toString() << "\n";
+            for (const auto& e : mPageNavQml->errors())
+                out << "PageNav ERROR: " << e.toString() << "\n";
+            for (const auto& e : mDrawingPropsBarQml->errors())
+                out << "DrawingPropsBar ERROR: " << e.toString() << "\n";
+            out << "===================================\n";
+            logFile.close();
+        }
+    }
 
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
     mDrawingPropsController = new UBDrawingPropertiesController(this);
