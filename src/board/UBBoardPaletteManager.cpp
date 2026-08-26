@@ -181,6 +181,7 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
     // Add the dock palettes
     mLeftPalette = new UBLeftPalette(mContainer);
+    mLeftPalette->hide(); // Hidden: replaced by QML PageNavigator
 
     // LEFT palette widgets
     mpPageNavigWidget = new UBPageNavigationWidget();
@@ -206,6 +207,7 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
 
     mRightPalette = new UBRightPalette(mContainer);
+    mRightPalette->hide(); // Hidden: replaced by QML
     // RIGHT palette widgets
     mpFeaturesWidget = new UBFeaturesWidget();
     mRightPalette->registerWidget(mpFeaturesWidget);
@@ -453,9 +455,17 @@ void UBBoardPaletteManager::setupPalettes()
     mShapesPaletteV2Qml->hide(); // starts hidden, controlled by toolController.shapesVisible
     // Show/hide based on controller
     connect(mToolController, &UBToolController::shapesVisibleChanged, this, [this]() {
-        mShapesPaletteV2Qml->setVisible(mToolController->shapesVisible());
         if (mToolController->shapesVisible())
+        {
+            // Position above bottom bar, to the right of sidebar
+            mShapesPaletteV2Qml->move(190, mStylusPaletteQml->y() - mShapesPaletteV2Qml->height() - 8);
+            mShapesPaletteV2Qml->show();
             mShapesPaletteV2Qml->raise();
+        }
+        else
+        {
+            mShapesPaletteV2Qml->hide();
+        }
     });
 
     // Debug: log QML widget positions
@@ -992,10 +1002,10 @@ void UBBoardPaletteManager::activeSceneChanged()
     if(pageIndex > 0){
         int currentTabIndex = mLeftPalette->currentTabIndex();
         mLeftPalette->onShowTabWidget(mTeacherResources); // ALTI/AOU - 20140217 : instead of addTab(), we use onShowTabWidget() because it calls moveTabs().
-        mLeftPalette->showTabWidget(currentTabIndex); // Stay on same tab. Don't go to the added tab.
+        // mLeftPalette->showTabWidget(currentTabIndex); // Disabled: QML PageNavigator // Stay on same tab. Don't go to the added tab.
     }else{
         mLeftPalette->onHideTabWidget(mTeacherResources); // ALTI/AOU - 20140217 : instead of removeTab(), we use onHideTabWidget() because it calls moveTabs().
-        mLeftPalette->showTabWidget(mLeftPalette->currentTabIndex());
+        // mLeftPalette->showTabWidget(mLeftPalette->currentTabIndex()); // Disabled: QML PageNavigator
     }
     //issue 1682 - NNE - 20140113 : END
 

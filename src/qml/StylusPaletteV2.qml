@@ -84,7 +84,7 @@ Rectangle {
             }
             property bool isHovered: btnMouse.containsMouse
 
-            color: isActive ? themeManager.primary
+            color: isActive ? (toolData.isToggle ? themeManager.surfaceHover : themeManager.primary)
                  : isHovered ? themeManager.surfaceHover
                  : "transparent"
 
@@ -105,7 +105,7 @@ Rectangle {
             ColorOverlay {
                 anchors.fill: iconImg
                 source: iconImg
-                color: btn.isActive ? themeManager.onPrimary : themeManager.onSurface
+                color: (btn.isActive && !toolData.isToggle) ? themeManager.onPrimary : themeManager.onSurface
                 opacity: btn.isActive ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
             }
 
