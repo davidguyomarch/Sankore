@@ -97,6 +97,7 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPageController(nullptr)
     , mAppController(nullptr)
     , mTopBarQml(nullptr)
+    , mPageNavQml(nullptr)
     , mDrawingPropsQml(nullptr)
     , mDrawingPropsController(nullptr)
     , mShapesPaletteQml(nullptr)
@@ -389,6 +390,20 @@ void UBBoardPaletteManager::setupPalettes()
     mTopBarQml->move(0, 0);
     mTopBarQml->show();
     mTopBarQml->raise();
+
+    // --- QML Page Navigator Sidebar (Issue #121 Step 4) ---
+    mPageNavQml = new QQuickWidget(mContainer);
+    mPageNavQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mPageNavQml->setClearColor(Qt::transparent);
+    mPageNavQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mPageNavQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mPageNavQml->rootContext()->setContextProperty("pageController", mPageController);
+    mPageNavQml->setSource(QUrl("qrc:/qml/PageNavigator.qml"));
+    int sidebarWidth = 180;
+    mPageNavQml->setFixedSize(sidebarWidth, mContainer->height() - 48 - 52); // between top bar and bottom bar
+    mPageNavQml->move(0, 48);
+    mPageNavQml->show();
+    mPageNavQml->raise();
 
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
     mDrawingPropsController = new UBDrawingPropertiesController(this);
