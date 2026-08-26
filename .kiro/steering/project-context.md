@@ -145,32 +145,13 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.p
 
 ## Important Notes for Development
 
-- **Do NOT compile locally** — use GitHub Actions CI only (no Windows machine available)
+- **Compilation locale** : via Docker Linux uniquement (voir `.kiro/steering/dev-workflow.md`)
 - **Push to master** triggers CI automatically
 - **Web module is stubbed** — UBWebController.cpp is a minimal stub, browser/ excluded from build
 - **QuaZip stubs deleted** — real QuaZip headers come from C:/quazip via INCLUDEPATH prepend
 - **Warnings are non-blocking**: D9025 (/O2 vs /Od) and LNK4217 (UBCFFAdaptor dllimport)
+- **Workflow complet** : Docker Linux → Push → CI Windows → VM test → startup.log (voir `dev-workflow.md`)
 
-## Testing Workflow (Deploy & Run on Windows VM)
+## Testing Workflow
 
-The dev machine is macOS ARM (M4 Pro). Testing happens on a Windows 11 ARM64 VM via UTM.
-The exe is x64 and runs via Windows 11's built-in x64 emulation.
-
-### Steps:
-
-1. **Push code** → CI builds automatically (~25 min)
-2. **Deploy on Mac**: `./scripts/deploy-latest.sh`
-   - Downloads latest artifact from GitHub Actions
-   - Places all files in `../sankore-install/` (shared with VM)
-3. **Run on VM**: Execute `Z:\sankore-install\run-test.bat`
-   - Deletes `C:\Sankore` (force fresh copy)
-   - Copies all files to `C:\Sankore` (local disk, required for x64 emulation)
-   - Launches `Open-Sankore.exe`
-   - Displays `startup.log` content after crash/exit
-
-### Important:
-- **Must run from C:\** — the x64 emulator cannot reliably load DLLs from network shares (Z:\)
-- **run-test.bat deletes C:\Sankore first** to avoid stale file cache
-- **startup.log** is written next to the exe using `GetModuleFileNameW` for absolute path
-- The log is also readable from Mac: `cat ../sankore-install/startup.log` (if VirtIO sync works)
-  but prefer reading from VM with `type C:\Sankore\startup.log` for reliability
+Voir `.kiro/steering/dev-workflow.md` pour le workflow complet (Docker → CI → VM → startup.log).
