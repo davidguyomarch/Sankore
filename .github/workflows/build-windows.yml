@@ -170,7 +170,7 @@ jobs:
         if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         shell: cmd
         run: |
-          windeployqt --release --no-translations --qmldir src\qml build\win32\release\product\Open-Sankore.exe
+          windeployqt --release --no-translations --compiler-runtime --qmldir src\qml build\win32\release\product\Open-Sankore.exe
           copy C:\zlib\bin\zlib.dll build\win32\release\product\
           copy C:\vcpkg\installed\x64-windows\bin\libssl-3-x64.dll build\win32\release\product\
           copy C:\vcpkg\installed\x64-windows\bin\libcrypto-3-x64.dll build\win32\release\product\
