@@ -9,6 +9,7 @@
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
 #include "board/UBBoardController.h"
+#include "domain/UBGraphicsScene.h"
 #include "domain/UBShapeFactory.h"
 
 UBToolController::UBToolController(QObject* parent)
