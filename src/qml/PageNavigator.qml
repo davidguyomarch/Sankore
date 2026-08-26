@@ -95,15 +95,23 @@ Rectangle {
                 border.color: (index === pageList.currentIndex) ? themeManager.primary : (thumbMouse.containsMouse ? themeManager.onSurface : "transparent")
                 opacity: (index === pageList.currentIndex) ? 1.0 : (thumbMouse.containsMouse ? 0.9 : 0.75)
 
-                // Page number
-                Text {
+                // Page number badge
+                Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.right: parent.right
                     anchors.margins: 4
-                    text: (index + 1)
-                    font.pixelSize: 10
-                    color: "#666"
-                    background: Rectangle { color: "rgba(255,255,255,0.8)"; radius: 2; width: parent.contentWidth + 6; height: parent.contentHeight + 2; anchors.centerIn: parent }
+                    width: pageNumText.contentWidth + 6
+                    height: pageNumText.contentHeight + 2
+                    radius: 2
+                    color: "rgba(255,255,255,0.8)"
+
+                    Text {
+                        id: pageNumText
+                        anchors.centerIn: parent
+                        text: (index + 1)
+                        font.pixelSize: 10
+                        color: "#666"
+                    }
                 }
 
                 MouseArea {
