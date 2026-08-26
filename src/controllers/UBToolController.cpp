@@ -56,6 +56,9 @@ void UBToolController::setActiveTool(int tool)
     }
 
     emit activeToolChanged();
+    emit currentColorsChanged();
+    emit currentColorIndexChanged();
+    emit currentWidthIndexChanged();
 }
 
 // --- Pen ---
@@ -125,6 +128,62 @@ void UBToolController::setMarkerWidthIndex(int index)
     emit markerWidthChanged();
 }
 
+// --- Marker Colors ---
+
+QList<QColor> UBToolController::markerColors() const
+{
+    UBSettings* s = UBSettings::settings();
+    bool dark = UBApplication::boardController->activeScene()
+                && UBApplication::boardController->activeScene()->isDarkBackground();
+    return dark ? s->boardMarkerDarkBackgroundSelectedColors->colors()
+                : s->boardMarkerLightBackgroundSelectedColors->colors();
+}
+
+// --- Tool-aware convenience accessors for DrawingPropsBar QML ---
+
+QList<QColor> UBToolController::currentColors() const
+{
+    if (m_activeTool == Marker)
+        return markerColors();
+    return penColors(); // Pen, Line, and other drawing tools use pen colors
+}
+
+int UBToolController::currentColorIndex() const
+{
+    if (m_activeTool == Marker)
+        return markerColorIndex();
+    return penColorIndex();
+}
+
+void UBToolController::setCurrentColorIndex(int index)
+{
+    if (m_activeTool == Marker)
+        setMarkerColorIndex(index);
+    else
+        setPenColorIndex(index);
+    emit currentColorIndexChanged();
+}
+
+int UBToolController::currentWidthIndex() const
+{
+    if (m_activeTool == Eraser)
+        return eraserWidthIndex();
+    if (m_activeTool == Marker)
+        return markerWidthIndex();
+    return penWidthIndex();
+}
+
+void UBToolController::setCurrentWidthIndex(int index)
+{
+    if (m_activeTool == Eraser)
+        setEraserWidthIndex(index);
+    else if (m_activeTool == Marker)
+        setMarkerWidthIndex(index);
+    else
+        setPenWidthIndex(index);
+    emit currentWidthIndexChanged();
+}
+
 // --- Eraser ---
 
 int UBToolController::eraserWidthIndex() const
@@ -188,6 +247,9 @@ void UBToolController::onExternalToolChanged(int tool)
     {
         m_activeTool = tool;
         emit activeToolChanged();
+        emit currentColorsChanged();
+        emit currentColorIndexChanged();
+        emit currentWidthIndexChanged();
     }
 }
 
@@ -195,10 +257,12 @@ void UBToolController::onExternalColorChanged(int /*index*/)
 {
     emit penColorChanged();
     emit markerColorChanged();
+    emit currentColorIndexChanged();
 }
 
 void UBToolController::onExternalWidthChanged(int /*index*/)
 {
     emit penWidthChanged();
     emit markerWidthChanged();
+    emit currentWidthIndexChanged();
 }

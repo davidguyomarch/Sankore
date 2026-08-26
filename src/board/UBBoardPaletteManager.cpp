@@ -179,55 +179,34 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     mpDownloadWidget = new UBDockDownloadWidget();
 
 
-    // Add the dock palettes
+    // Add the dock palettes (kept for legacy code references, but fully hidden — QML V2 replaces them)
     mLeftPalette = new UBLeftPalette(mContainer);
-    mLeftPalette->hide();
-    mLeftPalette->setMaximumSize(0, 0); // Prevent re-showing
 
-    // LEFT palette widgets
+    // LEFT palette widgets — register but do NOT addTab (keeps mTabWidgets empty → tab palette hidden)
     mpPageNavigWidget = new UBPageNavigationWidget();
     mLeftPalette->registerWidget(mpPageNavigWidget);
-    mLeftPalette->addTab(mpPageNavigWidget);
-
 
     // Teacher Guide disabled - UBDockTeacherGuideWidget crashes (uses QWebEngineView stubs)
-    // if(mSettings->teacherGuidePageZeroActivated->get().toBool() || mSettings->teacherGuideLessonPagesActivated->get().toBool()){
-    //     mpTeacherGuideWidget = new UBDockTeacherGuideWidget();
-    //     mLeftPalette->registerWidget(mpTeacherGuideWidget);
-    //     mLeftPalette->addTab(mpTeacherGuideWidget);
-    // }
-
 
     //issue 1682 - NNE - 20131218
     mTeacherResources = new UBDockResourcesWidget;
     mLeftPalette->registerWidget(mTeacherResources);
-    mLeftPalette->addTab(mTeacherResources);
     //issue 1682 - NNE - 20131218 : END
 
-    mLeftPalette->connectSignals();
+    mLeftPalette->hide();
+    mLeftPalette->setMaximumSize(0, 0);
 
 
     mRightPalette = new UBRightPalette(mContainer);
-    mRightPalette->hide();
-    mRightPalette->setMaximumSize(0, 0); // Prevent re-showing
-    // RIGHT palette widgets
+
+    // RIGHT palette widgets — register but do NOT addTab
     mpFeaturesWidget = new UBFeaturesWidget();
     mRightPalette->registerWidget(mpFeaturesWidget);
-    mRightPalette->addTab(mpFeaturesWidget);
-
-
-    // The cache widget will be visible only if a cache is put on the page
     mRightPalette->registerWidget(mpCachePropWidget);
-
-    //  The download widget will be part of the right palette but
-    //  will become visible only when the first download starts
     mRightPalette->registerWidget(mpDownloadWidget);
-    mRightPalette->connectSignals();
-    changeMode(eUBDockPaletteWidget_BOARD, true);
 
-    // Hide the tabs that must be hidden
-    mRightPalette->removeTab(mpDownloadWidget);
-    mRightPalette->removeTab(mpCachePropWidget);
+    mRightPalette->hide();
+    mRightPalette->setMaximumSize(0, 0);
 
 }
 
@@ -1053,14 +1032,8 @@ void UBBoardPaletteManager::activeSceneChanged()
     }
 
     //issue 1682 - NNE - 20140113
-    if(pageIndex > 0){
-        int currentTabIndex = mLeftPalette->currentTabIndex();
-        mLeftPalette->onShowTabWidget(mTeacherResources); // ALTI/AOU - 20140217 : instead of addTab(), we use onShowTabWidget() because it calls moveTabs().
-        // mLeftPalette->showTabWidget(currentTabIndex); // Disabled: QML PageNavigator // Stay on same tab. Don't go to the added tab.
-    }else{
-        mLeftPalette->onHideTabWidget(mTeacherResources); // ALTI/AOU - 20140217 : instead of removeTab(), we use onHideTabWidget() because it calls moveTabs().
-        // mLeftPalette->showTabWidget(mLeftPalette->currentTabIndex()); // Disabled: QML PageNavigator
-    }
+    // Disabled: QML V2 PageNavigator replaces the dock palette tabs.
+    // onShowTabWidget/onHideTabWidget would re-add tabs and re-show the tab palette.
     //issue 1682 - NNE - 20140113 : END
 
     if (mZoomPalette)

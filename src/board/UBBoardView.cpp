@@ -175,6 +175,10 @@ void UBBoardView::init ()
 
   unsetCursor();
 
+  // Update cursor immediately when tool changes (QML toolbar, keyboard shortcuts, etc.)
+  connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+          this, &UBBoardView::setToolCursor);
+
   movingItem = nullptr;
   mWidgetMoved = false;
 }
@@ -1206,6 +1210,13 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
 
             event->accept ();
         }
+        else if (currentTool == UBStylusTool::Pointer)
+        {
+            // Pointer tool shows a laser dot — do NOT send inputDevicePress
+            // which would trigger drawing strokes and crash.
+            viewport()->setCursor(UBResources::resources()->pointerCursor);
+            event->accept();
+        }
         else if (currentTool == UBStylusTool::ChangeFill)
         {
             qDebug() << "on est dans le cas du pot de peinture, on va remplir l'objet si possible";
@@ -1340,6 +1351,11 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
         {
           QGraphicsView::mouseMoveEvent (event);
         }
+    }
+  else if (currentTool == UBStylusTool::Pointer)
+    {
+      // Pointer tool — do NOT send inputDeviceMove (no drawing)
+      event->accept ();
     }
   else
     {

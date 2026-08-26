@@ -34,9 +34,15 @@ class UBToolController : public QObject
     Q_PROPERTY(QColor markerColor READ markerColor NOTIFY markerColorChanged)
     Q_PROPERTY(int markerColorIndex READ markerColorIndex WRITE setMarkerColorIndex NOTIFY markerColorChanged)
     Q_PROPERTY(int markerWidthIndex READ markerWidthIndex WRITE setMarkerWidthIndex NOTIFY markerWidthChanged)
+    Q_PROPERTY(QList<QColor> markerColors READ markerColors NOTIFY markerColorsChanged)
 
     // Eraser
     Q_PROPERTY(int eraserWidthIndex READ eraserWidthIndex WRITE setEraserWidthIndex NOTIFY eraserWidthChanged)
+
+    // Tool-aware convenience properties for DrawingPropsBar QML
+    Q_PROPERTY(QList<QColor> currentColors READ currentColors NOTIFY currentColorsChanged)
+    Q_PROPERTY(int currentColorIndex READ currentColorIndex WRITE setCurrentColorIndex NOTIFY currentColorIndexChanged)
+    Q_PROPERTY(int currentWidthIndex READ currentWidthIndex WRITE setCurrentWidthIndex NOTIFY currentWidthIndexChanged)
 
     // Drawing properties panel visibility
     Q_PROPERTY(bool showDrawingProps READ showDrawingProps NOTIFY activeToolChanged)
@@ -83,9 +89,17 @@ public:
     void setMarkerColorIndex(int index);
     int markerWidthIndex() const;
     void setMarkerWidthIndex(int index);
+    QList<QColor> markerColors() const;
 
     int eraserWidthIndex() const;
     void setEraserWidthIndex(int index);
+
+    // Tool-aware convenience accessors
+    QList<QColor> currentColors() const;
+    int currentColorIndex() const;
+    void setCurrentColorIndex(int index);
+    int currentWidthIndex() const;
+    void setCurrentWidthIndex(int index);
 
     bool showDrawingProps() const;
 
@@ -104,8 +118,12 @@ signals:
     void penColorsChanged();
     void markerColorChanged();
     void markerWidthChanged();
+    void markerColorsChanged();
     void eraserWidthChanged();
     void shapesVisibleChanged();
+    void currentColorsChanged();
+    void currentColorIndexChanged();
+    void currentWidthIndexChanged();
 
 private slots:
     void onExternalToolChanged(int tool);

@@ -9,7 +9,7 @@ import Qt5Compat.GraphicalEffects
  * Toggled by the Shapes button in the stylus palette.
  * Binds to toolController.shapesVisible.
  *
- * Issue #121 Step 5.
+ * Issue #121 Step 5 / Issue #122 Bug 3.
  */
 Rectangle {
     id: root
@@ -37,6 +37,8 @@ Rectangle {
             color: themeManager.onSurface
             opacity: 0.5
             leftPadding: 2
+        }
+
         Grid {
             columns: 3
             spacing: 4
@@ -98,6 +100,8 @@ Rectangle {
             opacity: 0.5
             leftPadding: 2
             topPadding: 4
+        }
+
         Grid {
             columns: 3
             spacing: 4

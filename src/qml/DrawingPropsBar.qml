@@ -8,8 +8,10 @@ import Qt5Compat.GraphicalEffects
  *
  * Binds to toolController (UBToolController).
  * Appears contextually when Pen, Marker, Line, or Eraser is active.
+ * Uses tool-aware currentColors / currentColorIndex / currentWidthIndex
+ * so the bar automatically adapts to Pen vs Marker vs Eraser.
  *
- * Issue #121 Step 5.
+ * Issue #121 Step 5 / Issue #122 Bug 2.
  */
 Rectangle {
     id: root
@@ -24,7 +26,7 @@ Rectangle {
     border.color: themeManager.border
     border.width: 1
 
-    // Is this eraser mode? (show eraser widths instead of colors)
+    // Is this eraser mode? (show only widths, no colors)
     property bool isEraser: toolController.activeTool === 1
 
     Row {
@@ -39,17 +41,17 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
 
             Repeater {
-                model: toolController.penColors
+                model: toolController.currentColors
 
                 Rectangle {
                     width: 28; height: 28
                     radius: 6
                     color: modelData
                     border.width: 2
-                    border.color: (index === toolController.penColorIndex) ? themeManager.onPrimary : "transparent"
+                    border.color: (index === toolController.currentColorIndex) ? themeManager.onPrimary : "transparent"
 
                     Rectangle {
-                        visible: index === toolController.penColorIndex
+                        visible: index === toolController.currentColorIndex
                         anchors.fill: parent
                         anchors.margins: -3
                         radius: 8
@@ -61,7 +63,7 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: toolController.penColorIndex = index
+                        onClicked: toolController.currentColorIndex = index
                     }
                 }
             }
@@ -79,15 +81,13 @@ Rectangle {
             spacing: 4
             anchors.verticalCenter: parent.verticalCenter
 
-            property int currentWidth: root.isEraser ? toolController.eraserWidthIndex : toolController.penWidthIndex
-
             Repeater {
                 model: 3
 
                 Rectangle {
                     width: 28; height: 28
                     radius: 6
-                    color: (index === parent.parent.currentWidth) ? themeManager.primary
+                    color: (index === toolController.currentWidthIndex) ? themeManager.primary
                          : widthMouse.containsMouse ? themeManager.surfaceHover
                          : "transparent"
 
@@ -96,7 +96,7 @@ Rectangle {
                         width: 4 + index * 4
                         height: 4 + index * 4
                         radius: width / 2
-                        color: (index === parent.parent.parent.currentWidth) ? themeManager.onPrimary : themeManager.onSurface
+                        color: (index === toolController.currentWidthIndex) ? themeManager.onPrimary : themeManager.onSurface
                     }
 
                     MouseArea {
@@ -104,12 +104,7 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (root.isEraser)
-                                toolController.eraserWidthIndex = index
-                            else
-                                toolController.penWidthIndex = index
-                        }
+                        onClicked: toolController.currentWidthIndex = index
                     }
                 }
             }
