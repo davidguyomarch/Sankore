@@ -465,6 +465,10 @@ void UBBoardPaletteManager::setupPalettes()
     qDebug() << "DrawingPropsBar:" << mDrawingPropsBarQml->pos() << mDrawingPropsBarQml->size() << "visible:" << mDrawingPropsBarQml->isVisible();
     qDebug() << "===================================";
 
+    // --- Hide old QWidget palettes (replaced by QML V2) ---
+    mLeftPalette->hide();
+    mRightPalette->hide();
+
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
     mDrawingPropsController = new UBDrawingPropertiesController(this);
 
@@ -499,8 +503,7 @@ void UBBoardPaletteManager::setupPalettes()
         mDrawingPropsQml->move(posX, posY);
     }
 
-    mDrawingPropsQml->show();
-    mDrawingPropsQml->raise();
+    mDrawingPropsQml->hide(); // Hidden: replaced by QML DrawingPropsBar (Issue #121)
 
     // --- QML Shapes Palette (Issue #110 Step 5) ---
     mShapesController = new UBShapesController(this);
@@ -521,15 +524,15 @@ void UBBoardPaletteManager::setupPalettes()
     } else {
         mShapesPaletteQml->move(mStylusPaletteQml->x(), mStylusPaletteQml->y() - 390);
     }
-    mShapesPaletteQml->hide(); // starts hidden, toggled by Drawing button
-
-    // Connect the Drawing action to toggle the shapes palette
-    connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, mShapesController, [this](bool checked) {
-        mShapesController->setVisible(checked);
-        mShapesPaletteQml->setVisible(checked);
-        if (checked)
-            mShapesPaletteQml->raise();
-    });
+//     mShapesPaletteQml->hide(); // starts hidden, toggled by Drawing button
+// 
+//     // Connect the Drawing action to toggle the shapes palette
+//     connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, mShapesController, [this](bool checked) {
+//         mShapesController->setVisible(checked);
+//         mShapesPaletteQml->setVisible(checked);
+//         if (checked)
+//             mShapesPaletteQml->raise();
+//     });
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
     // mTipPalette = new UBStartupHintsPalette(mContainer);
@@ -1095,7 +1098,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 if (mStylusPaletteQml)
                     mStylusPaletteQml->show();
                 if (mDrawingPropsQml)
-                    mDrawingPropsQml->show();
+                    // mDrawingPropsQml->show(); // Disabled: replaced by DrawingPropsBar V2
                 if (mShapesPaletteQml)
                     mShapesPaletteQml->show();
 
