@@ -347,6 +347,9 @@ void UBBoardPaletteManager::setupPalettes()
     mStylusPaletteQml->rootContext()->setContextProperty("appController", mAppController);
 
     mStylusPaletteQml->setSource(QUrl("qrc:/qml/StylusPaletteV2.qml"));
+    if (mStylusPaletteQml->status() == QQuickWidget::Error)
+        for (const auto& e : mStylusPaletteQml->errors())
+            qWarning() << "StylusPaletteV2 QML error:" << e.toString();
 
     // Size the widget — let QML compute, use a generous max
     int btnSize = 40;
@@ -388,6 +391,9 @@ void UBBoardPaletteManager::setupPalettes()
     mTopBarQml->rootContext()->setContextProperty("pageController", mPageController);
     mTopBarQml->rootContext()->setContextProperty("toolController", mToolController);
     mTopBarQml->setSource(QUrl("qrc:/qml/TopBar.qml"));
+    if (mTopBarQml->status() == QQuickWidget::Error)
+        for (const auto& e : mTopBarQml->errors())
+            qWarning() << "TopBar QML error:" << e.toString();
     mTopBarQml->setFixedSize(mContainer->width(), 48);
     mTopBarQml->move(0, 0);
     mTopBarQml->show();
@@ -401,6 +407,9 @@ void UBBoardPaletteManager::setupPalettes()
     mPageNavQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mPageNavQml->rootContext()->setContextProperty("pageController", mPageController);
     mPageNavQml->setSource(QUrl("qrc:/qml/PageNavigator.qml"));
+    if (mPageNavQml->status() == QQuickWidget::Error)
+        for (const auto& e : mPageNavQml->errors())
+            qWarning() << "PageNavigator QML error:" << e.toString();
     int sidebarWidth = 180;
     mPageNavQml->setFixedSize(sidebarWidth, mContainer->height() - 48 - 52); // between top bar and bottom bar
     mPageNavQml->move(0, 48);
@@ -416,6 +425,9 @@ void UBBoardPaletteManager::setupPalettes()
     mDrawingPropsBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mDrawingPropsBarQml->rootContext()->setContextProperty("toolController", mToolController);
     mDrawingPropsBarQml->setSource(QUrl("qrc:/qml/DrawingPropsBar.qml"));
+    if (mDrawingPropsBarQml->status() == QQuickWidget::Error)
+        for (const auto& e : mDrawingPropsBarQml->errors())
+            qWarning() << "DrawingPropsBar QML error:" << e.toString();
     mDrawingPropsBarQml->setFixedSize(360, 56);
     // Positioned above the bottom bar, centered
     int propsX = (mContainer->width() - 360) / 2;
@@ -442,6 +454,16 @@ void UBBoardPaletteManager::setupPalettes()
         mShapesPaletteV2Qml->setVisible(mToolController->shapesVisible());
         if (mToolController->shapesVisible())
             mShapesPaletteV2Qml->raise();
+    });
+
+    // Debug: log QML widget positions
+    qDebug() << "=== QML UI V2 Widget Positions ===";
+    qDebug() << "Container:" << mContainer->size();
+    qDebug() << "StylusPalette:" << mStylusPaletteQml->pos() << mStylusPaletteQml->size() << "visible:" << mStylusPaletteQml->isVisible();
+    qDebug() << "TopBar:" << mTopBarQml->pos() << mTopBarQml->size() << "visible:" << mTopBarQml->isVisible();
+    qDebug() << "PageNav:" << mPageNavQml->pos() << mPageNavQml->size() << "visible:" << mPageNavQml->isVisible();
+    qDebug() << "DrawingPropsBar:" << mDrawingPropsBarQml->pos() << mDrawingPropsBarQml->size() << "visible:" << mDrawingPropsBarQml->isVisible();
+    qDebug() << "===================================";
     });
 
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
