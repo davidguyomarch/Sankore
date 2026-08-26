@@ -464,7 +464,6 @@ void UBBoardPaletteManager::setupPalettes()
     qDebug() << "PageNav:" << mPageNavQml->pos() << mPageNavQml->size() << "visible:" << mPageNavQml->isVisible();
     qDebug() << "DrawingPropsBar:" << mDrawingPropsBarQml->pos() << mDrawingPropsBarQml->size() << "visible:" << mDrawingPropsBarQml->isVisible();
     qDebug() << "===================================";
-    });
 
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
     mDrawingPropsController = new UBDrawingPropertiesController(this);
