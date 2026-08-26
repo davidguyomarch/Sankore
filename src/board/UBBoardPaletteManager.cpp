@@ -182,16 +182,9 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     // Add the dock palettes (kept for legacy code references, but fully hidden — QML V2 replaces them)
     mLeftPalette = new UBLeftPalette(mContainer);
 
-    // LEFT palette widgets — register but do NOT addTab (keeps mTabWidgets empty → tab palette hidden)
+    // LEFT palette widgets — create but do NOT register (prevents switchMode from re-adding tabs)
     mpPageNavigWidget = new UBPageNavigationWidget();
-    mLeftPalette->registerWidget(mpPageNavigWidget);
-
-    // Teacher Guide disabled - UBDockTeacherGuideWidget crashes (uses QWebEngineView stubs)
-
-    //issue 1682 - NNE - 20131218
     mTeacherResources = new UBDockResourcesWidget;
-    mLeftPalette->registerWidget(mTeacherResources);
-    //issue 1682 - NNE - 20131218 : END
 
     mLeftPalette->hide();
     mLeftPalette->setMaximumSize(0, 0);
@@ -199,11 +192,8 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
     mRightPalette = new UBRightPalette(mContainer);
 
-    // RIGHT palette widgets — register but do NOT addTab
+    // RIGHT palette widgets — create but do NOT register
     mpFeaturesWidget = new UBFeaturesWidget();
-    mRightPalette->registerWidget(mpFeaturesWidget);
-    mRightPalette->registerWidget(mpCachePropWidget);
-    mRightPalette->registerWidget(mpDownloadWidget);
 
     mRightPalette->hide();
     mRightPalette->setMaximumSize(0, 0);
@@ -325,6 +315,9 @@ void UBBoardPaletteManager::setupPalettes()
 
     // New V2 controller — direct binding, no QAction
     mToolController = new UBToolController(this);
+    // Force Pen as the active tool at startup (the old UBStylusController/QActionGroup
+    // may have changed UBDrawingController to Selector during finalize())
+    mToolController->setActiveTool(UBToolController::Pen);
     mPageController = new UBPageController(this);
     mAppController = new UBAppController(this);
     mStylusPaletteQml->rootContext()->setContextProperty("toolController", mToolController);
@@ -1149,8 +1142,10 @@ void UBBoardPaletteManager::addItem(const QUrl& pUrl)
 
 void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool isInit)
 {
-    bool rightPaletteVisible = mRightPalette->switchMode(newMode);
-    bool leftPaletteVisible = mLeftPalette->switchMode(newMode);
+    // Dock palettes are disabled (QML V2 replaces them) — skip switchMode to prevent
+    // re-adding tabs and re-showing the tab palette.
+    // bool rightPaletteVisible = mRightPalette->switchMode(newMode);
+    // bool leftPaletteVisible = mLeftPalette->switchMode(newMode);
 
     if (newMode != eUBDockPaletteWidget_BOARD)
     {
@@ -1194,6 +1189,9 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 }
                 mLeftPalette->assignParent(mContainer);
                 mRightPalette->assignParent(mContainer);
+                // Force dock palettes hidden after re-parenting (assignParent shows mTabPalette)
+                mLeftPalette->hide();
+                mRightPalette->hide();
 
                 // Restore QML palettes when returning from desktop mode
                 if (mStylusPaletteQml)
@@ -1225,8 +1223,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
                 // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 #ifdef Q_OS_WIN
-                if (rightPaletteVisible)
-                    mRightPalette->setAdditionalVOffset(0);
+                // Disabled: dock palettes replaced by QML V2
 #endif
 
                 if( !isInit )
@@ -1258,6 +1255,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 mAddItemPalette->setParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mLeftPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 mRightPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
+                mLeftPalette->hide();
+                mRightPalette->hide();
                 mStylusPalette->raise();
                 mDrawingPalette->raise();
 
@@ -1293,17 +1292,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
                 // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 #ifdef Q_OS_WIN
-                if (rightPaletteVisible)
-                {
-                    if (mSettings->appToolBarPositionedAtTop->get().toBool())
-                        mRightPalette->setAdditionalVOffset(30);
-                    else
-                    {
-                        QScreen *screen = mRightPalette->screen();
-                        int taskBarOffset = screen->geometry().height() - screen->availableGeometry().height();
-                        mRightPalette->setAdditionalVOffset(-taskBarOffset);
-                    }
-                }
+                // Disabled: dock palettes replaced by QML V2
 #endif
 
                 if(!isInit)
@@ -1320,6 +1309,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
 #ifdef SANKORE_WEBENGINE
                 mRightPalette->assignParent(UBApplication::webController->GetCurrentWebBrowser());
+                mRightPalette->hide();
 #endif
                 // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 
@@ -1344,6 +1334,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
                 mLeftPalette->assignParent(UBApplication::documentController->controlView());
                 mRightPalette->assignParent(UBApplication::documentController->controlView());
+                mLeftPalette->hide();
+                mRightPalette->hide();
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
 
@@ -1367,6 +1359,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
                 mLeftPalette->assignParent(0);
                 mRightPalette->assignParent(0);
+                mLeftPalette->hide();
+                mRightPalette->hide();
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
 

@@ -77,9 +77,7 @@ Rectangle {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            // Activate drawing tool with the selected shape
-                            toolController.activeTool = 13  // Drawing enum
-                            // TODO: set shape type on ShapeFactory via controller
+                            toolController.createShape(modelData.action)
                         }
                     }
                     ToolTip {

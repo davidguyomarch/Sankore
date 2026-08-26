@@ -106,6 +106,9 @@ public:
     bool shapesVisible() const;
     void setShapesVisible(bool visible);
 
+    // Shape creation — called from QML ShapesPaletteV2
+    Q_INVOKABLE void createShape(const QString& shape);
+
 public slots:
     void toggleShapes();
     void undo();

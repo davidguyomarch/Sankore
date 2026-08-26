@@ -225,6 +225,37 @@ void UBToolController::toggleShapes()
     setShapesVisible(!m_shapesVisible);
 }
 
+// --- Shape creation ---
+
+void UBToolController::createShape(const QString& shape)
+{
+    auto& factory = UBApplication::boardController->shapeFactory();
+
+    if (shape == "ellipse")
+        factory.createEllipse(true);
+    else if (shape == "rectangle")
+        factory.createRectangle(true);
+    else if (shape == "triangle")
+        factory.createRegularPolygon(3);
+    else if (shape == "diamond")
+        factory.createRegularPolygon(4);
+    else if (shape == "hexagon")
+        factory.createRegularPolygon(6);
+    else if (shape == "star")
+        factory.createRegularPolygon(5); // TODO: proper star shape when available
+    else if (shape == "circle")
+        factory.createCircle(true);
+    else if (shape == "square")
+        factory.createSquare(true);
+    else if (shape == "line")
+        factory.createLine(true);
+
+    // Set Drawing as the active tool
+    m_activeTool = Drawing;
+    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Drawing);
+    emit activeToolChanged();
+}
+
 // --- Actions ---
 
 void UBToolController::undo()
