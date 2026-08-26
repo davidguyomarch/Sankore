@@ -892,6 +892,41 @@ void UBBoardPaletteManager::containerResized()
         }
     }
 
+    // Reposition QML V2 widgets on container resize
+    if (mTopBarQml)
+    {
+        mTopBarQml->setFixedSize(mContainer->width(), 48);
+        mTopBarQml->move(0, 0);
+        mTopBarQml->show();
+        mTopBarQml->raise();
+    }
+    if (mPageNavQml)
+    {
+        int sidebarHeight = mContainer->height() - 48 - 52; // between top bar and bottom bar
+        mPageNavQml->setFixedSize(180, qMax(100, sidebarHeight));
+        mPageNavQml->move(0, 48);
+        mPageNavQml->show();
+        mPageNavQml->raise();
+    }
+    if (mDrawingPropsBarQml)
+    {
+        int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
+        int posY = mContainer->height() - 52 - 60;
+        mDrawingPropsBarQml->move(posX, posY);
+        mDrawingPropsBarQml->show();
+        mDrawingPropsBarQml->raise();
+    }
+    if (mShapesPaletteV2Qml && mToolController && mToolController->shapesVisible())
+    {
+        mShapesPaletteV2Qml->move(190, mContainer->height() - 52 - 330);
+        mShapesPaletteV2Qml->raise();
+    }
+
+    // Hide old palettes (replaced by QML V2)
+    if (mLeftPalette) mLeftPalette->hide();
+    if (mRightPalette) mRightPalette->hide();
+    if (mDrawingPropsQml) mDrawingPropsQml->hide();
+
     if (mDrawingPalette)
     {
         mDrawingPalette->adjustSizeAndPosition(true,false);

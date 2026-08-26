@@ -350,7 +350,7 @@ void UBApplicationController::showBoard()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
-    mMainWindow->boardToolBar->show();
+    mMainWindow->boardToolBar->hide(); // Hidden: replaced by QML TopBar
 
 //    if (mMainMode == Document)
 //    {
