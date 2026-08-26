@@ -103,7 +103,7 @@ Rectangle {
                     width: pageNumText.contentWidth + 6
                     height: pageNumText.contentHeight + 2
                     radius: 2
-                    color: "rgba(255,255,255,0.8)"
+                    color: Qt.rgba(1, 1, 1, 0.8)
 
                     Text {
                         id: pageNumText
