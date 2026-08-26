@@ -35,6 +35,8 @@
 
 #include <QWidget>
 #include <QApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QPainter>
 #include <QFile>
 
@@ -475,6 +477,16 @@ int UBApplication::exec(const QString& pFileToImport)
 #endif
 
     // Restored: call showBoard() to properly initialize the board view and palettes
+    // In headless/offscreen mode, the window starts tiny (100x30) because there's
+    // no window manager. Force a reasonable size BEFORE showBoard() creates palettes.
+    if (mainWindow->width() < 800 || mainWindow->height() < 600) {
+        QSize fallback(1920, 1080);
+        QScreen* screen = QGuiApplication::primaryScreen();
+        if (screen && screen->availableSize().width() >= 800)
+            fallback = screen->availableSize();
+        mainWindow->resize(fallback);
+        qDebug() << "Headless mode: forced window resize to" << fallback;
+    }
     showBoard();
     mainWindow->showMaximized();
 
