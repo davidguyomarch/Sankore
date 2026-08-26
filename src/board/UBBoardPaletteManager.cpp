@@ -79,6 +79,7 @@
 #include "UBBoardController.h"
 
 #include "document/UBDocumentController.h"
+#include "controllers/UBToolController.h"
 
 
 UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardController* pBoardController)
@@ -90,6 +91,7 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mStylusPalette(0)
     , mStylusPaletteQml(nullptr)
     , mStylusController(nullptr)
+    , mToolController(nullptr)
     , mDrawingPropsQml(nullptr)
     , mDrawingPropsController(nullptr)
     , mShapesPaletteQml(nullptr)
@@ -327,14 +329,21 @@ void UBBoardPaletteManager::setupPalettes()
     mStylusPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mStylusPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mStylusPaletteQml->rootContext()->setContextProperty("stylusController", mStylusController);
-    mStylusPaletteQml->setSource(QUrl("qrc:/qml/StylusPalette.qml"));
 
-    // Size the widget based on orientation and tool count
-    int toolCount = mStylusController->tools().size();
-    int btnSize = 44;
+    // New V2 controller — direct binding, no QAction
+    mToolController = new UBToolController(this);
+    mStylusPaletteQml->rootContext()->setContextProperty("toolController", mToolController);
+
+    mStylusPaletteQml->setSource(QUrl("qrc:/qml/StylusPaletteV2.qml"));
+
+    // Size the widget — let QML compute, use a generous max
+    int btnSize = 40;
+    int numTools = 14; // excluding separators
+    int numSeps = 2;
+    int sepWidth = 1 + 12; // sep + margins
     int spacing = 2;
     int padding = 6;
-    int contentLen = toolCount * btnSize + (toolCount - 1) * spacing + padding * 2;
+    int contentLen = numTools * btnSize + (numTools - 1) * spacing + numSeps * sepWidth + padding * 2;
     int thickness = btnSize + padding * 2;
 
     if (isVertical) {

@@ -59,6 +59,7 @@ public:
         Line,
         Text,
         Capture,
+        RichText,
         Drawing,
         Ocr
     };
