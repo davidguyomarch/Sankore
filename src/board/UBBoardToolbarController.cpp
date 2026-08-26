@@ -115,7 +115,6 @@ void UBBoardToolbarController::setupToolbar()
 
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
-    mMainWindow->boardToolBar->hide(); // Hidden: replaced by QML TopBar (Issue #121)
 
     connectToolbar();
     initToolbarTexts();
