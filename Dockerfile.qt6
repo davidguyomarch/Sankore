@@ -26,6 +26,16 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     qmake6 \
     git \
+    # QML runtime modules (for local smoke test with QT_QPA_PLATFORM=offscreen)
+    qml6-module-qtquick \
+    qml6-module-qtquick-controls \
+    qml6-module-qtquick-layouts \
+    qml6-module-qtquick-templates \
+    qml6-module-qtquick-window \
+    qml6-module-qt5compat-graphicaleffects \
+    qml6-module-qtqml-workerscript \
+    # Virtual framebuffer for headless smoke tests
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace

@@ -31,6 +31,31 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c \
   'make clean; qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'
 ```
 
+### Étape 1b : Smoke test local — Docker Linux (~10 sec)
+
+Après compilation, on peut lancer l'app en headless pour valider le démarrage et lire `startup.log` :
+
+```bash
+docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c '
+  rm -f /src/build/linux/release/product/startup.log
+  xvfb-run -s "-screen 0 1920x1080x24" timeout 10 \
+    ./build/linux/release/product/Open-Sankore --quit-after=5 2>&1
+  echo ""; echo "=== STARTUP LOG ==="; echo ""
+  cat /src/build/linux/release/product/startup.log 2>/dev/null || echo "NO LOG"
+'
+```
+
+- **Ce que ça valide** : démarrage de l'app, chargement des QML (status=1 = OK), positions des widgets, outil actif, visibilité des palettes
+- **Ce que ça NE valide PAS** : rendu visuel, interaction souris, comportement réel des outils
+- **Limitation** : la fenêtre est 100x30 en headless (pas maximisée), donc les widgets ont des positions négatives et l'app segfault après quelques secondes — c'est normal, le `startup.log` est écrit avant le crash
+- **Durée** : ~10 secondes
+
+Ce qu'il faut vérifier dans le log :
+- `ToolController activeTool=0` → Pen sélectionné au démarrage
+- `LeftPalette: visible=0` / `RightPalette: visible=0` → Dock palettes cachées
+- `status=1` pour tous les QML widgets → Pas d'erreur de parsing QML
+- Aucune ligne `ERROR:` → Pas de crash QML
+
 ### Étape 2 : CI Windows — GitHub Actions (~25 min)
 
 Pousser le code déclenche le build Windows CI :
