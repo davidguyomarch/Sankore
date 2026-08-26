@@ -181,7 +181,8 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
     // Add the dock palettes
     mLeftPalette = new UBLeftPalette(mContainer);
-    mLeftPalette->hide(); // Hidden: replaced by QML PageNavigator
+    mLeftPalette->hide();
+    mLeftPalette->setMaximumSize(0, 0); // Prevent re-showing
 
     // LEFT palette widgets
     mpPageNavigWidget = new UBPageNavigationWidget();
@@ -207,7 +208,8 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
 
     mRightPalette = new UBRightPalette(mContainer);
-    mRightPalette->hide(); // Hidden: replaced by QML
+    mRightPalette->hide();
+    mRightPalette->setMaximumSize(0, 0); // Prevent re-showing
     // RIGHT palette widgets
     mpFeaturesWidget = new UBFeaturesWidget();
     mRightPalette->registerWidget(mpFeaturesWidget);
@@ -458,7 +460,8 @@ void UBBoardPaletteManager::setupPalettes()
         if (mToolController->shapesVisible())
         {
             // Position above bottom bar, to the right of sidebar
-            mShapesPaletteV2Qml->move(190, mStylusPaletteQml->y() - mShapesPaletteV2Qml->height() - 8);
+            int y = mContainer->height() - mStylusPaletteQml->height() - mShapesPaletteV2Qml->height() - 28;
+            mShapesPaletteV2Qml->move(190, qMax(50, y));
             mShapesPaletteV2Qml->show();
             mShapesPaletteV2Qml->raise();
         }
