@@ -457,6 +457,19 @@ void UBBoardPaletteManager::setupPalettes()
     mShapesPaletteV2Qml->hide(); // starts hidden, controlled by toolController.shapesVisible
     // Show/hide based on controller
     connect(mToolController, &UBToolController::shapesVisibleChanged, this, [this]() {
+        // Log to startup.log
+        {
+            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream out(&logFile);
+                out << "\n[SHAPES TOGGLE] visible=" << mToolController->shapesVisible()
+                    << " container=" << mContainer->width() << "x" << mContainer->height()
+                    << " stylusY=" << mStylusPaletteQml->y()
+                    << " shapesSize=" << mShapesPaletteV2Qml->width() << "x" << mShapesPaletteV2Qml->height()
+                    << "\n";
+                logFile.close();
+            }
+        }
         if (mToolController->shapesVisible())
         {
             // Position above bottom bar, to the right of sidebar
@@ -505,6 +518,14 @@ void UBBoardPaletteManager::setupPalettes()
                 out << "PageNav ERROR: " << e.toString() << "\n";
             for (const auto& e : mDrawingPropsBarQml->errors())
                 out << "DrawingPropsBar ERROR: " << e.toString() << "\n";
+            for (const auto& e : mShapesPaletteV2Qml->errors())
+                out << "ShapesPaletteV2 ERROR: " << e.toString() << "\n";
+            out << "ShapesPaletteV2: status=" << mShapesPaletteV2Qml->status() << "\n";
+            out << "LeftPalette: visible=" << mLeftPalette->isVisible()
+                << " size=" << mLeftPalette->width() << "x" << mLeftPalette->height() << "\n";
+            out << "RightPalette: visible=" << mRightPalette->isVisible()
+                << " size=" << mRightPalette->width() << "x" << mRightPalette->height() << "\n";
+            out << "ToolController activeTool=" << mToolController->activeTool() << "\n";
             out << "===================================\n";
             logFile.close();
         }
@@ -939,6 +960,36 @@ void UBBoardPaletteManager::containerResized()
     if (mLeftPalette) mLeftPalette->hide();
     if (mRightPalette) mRightPalette->hide();
     if (mDrawingPropsQml) mDrawingPropsQml->hide();
+
+    // Log final positions once container is big enough
+    static bool loggedResize = false;
+    if (!loggedResize && mContainer->width() > 200) {
+        loggedResize = true;
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n=== containerResized FINAL ===\n";
+            out << "Container: " << mContainer->width() << "x" << mContainer->height() << "\n";
+            out << "StylusPalette: " << mStylusPaletteQml->x() << "," << mStylusPaletteQml->y()
+                << " " << mStylusPaletteQml->width() << "x" << mStylusPaletteQml->height()
+                << " vis=" << mStylusPaletteQml->isVisible() << "\n";
+            out << "TopBar: " << mTopBarQml->x() << "," << mTopBarQml->y()
+                << " " << mTopBarQml->width() << "x" << mTopBarQml->height()
+                << " vis=" << mTopBarQml->isVisible() << "\n";
+            out << "PageNav: " << mPageNavQml->x() << "," << mPageNavQml->y()
+                << " " << mPageNavQml->width() << "x" << mPageNavQml->height()
+                << " vis=" << mPageNavQml->isVisible() << "\n";
+            out << "PropsBar: " << mDrawingPropsBarQml->x() << "," << mDrawingPropsBarQml->y()
+                << " " << mDrawingPropsBarQml->width() << "x" << mDrawingPropsBarQml->height()
+                << " vis=" << mDrawingPropsBarQml->isVisible() << "\n";
+            out << "LeftPalette: vis=" << mLeftPalette->isVisible()
+                << " " << mLeftPalette->width() << "x" << mLeftPalette->height() << "\n";
+            out << "RightPalette: vis=" << mRightPalette->isVisible()
+                << " " << mRightPalette->width() << "x" << mRightPalette->height() << "\n";
+            out << "================================\n";
+            logFile.close();
+        }
+    }
 
     if (mDrawingPalette)
     {
