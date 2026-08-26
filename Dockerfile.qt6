@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Qt 6 + build tools
+# Install Qt 6 + build tools + all modules needed by Open-Sankoré
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -10,18 +10,22 @@ RUN apt-get update && apt-get install -y \
     qt6-base-dev-tools \
     qt6-svg-dev \
     qt6-multimedia-dev \
-    qt6-webengine-dev \
     qt6-declarative-dev \
     qt6-tools-dev \
     qt6-tools-dev-tools \
     qt6-l10n-tools \
+    qt6-5compat-dev \
     libqt6opengl6-dev \
+    libqt6quick6 \
+    libqt6quickwidgets6 \
+    libqt6quickcontrols2-6 \
+    libquazip1-qt6-dev \
+    libzinnia-dev \
     libgl1-mesa-dev \
     libssl-dev \
     zlib1g-dev \
     qmake6 \
     git \
-    lcov \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
