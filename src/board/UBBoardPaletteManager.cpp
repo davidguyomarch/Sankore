@@ -80,6 +80,8 @@
 
 #include "document/UBDocumentController.h"
 #include "controllers/UBToolController.h"
+#include "controllers/UBPageController.h"
+#include "controllers/UBAppController.h"
 
 
 UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardController* pBoardController)
@@ -92,6 +94,9 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mStylusPaletteQml(nullptr)
     , mStylusController(nullptr)
     , mToolController(nullptr)
+    , mPageController(nullptr)
+    , mAppController(nullptr)
+    , mTopBarQml(nullptr)
     , mDrawingPropsQml(nullptr)
     , mDrawingPropsController(nullptr)
     , mShapesPaletteQml(nullptr)
@@ -332,7 +337,11 @@ void UBBoardPaletteManager::setupPalettes()
 
     // New V2 controller — direct binding, no QAction
     mToolController = new UBToolController(this);
+    mPageController = new UBPageController(this);
+    mAppController = new UBAppController(this);
     mStylusPaletteQml->rootContext()->setContextProperty("toolController", mToolController);
+    mStylusPaletteQml->rootContext()->setContextProperty("pageController", mPageController);
+    mStylusPaletteQml->rootContext()->setContextProperty("appController", mAppController);
 
     mStylusPaletteQml->setSource(QUrl("qrc:/qml/StylusPaletteV2.qml"));
 
@@ -365,6 +374,21 @@ void UBBoardPaletteManager::setupPalettes()
 
     mStylusPaletteQml->show();
     mStylusPaletteQml->raise();
+
+    // --- QML Top Bar (Issue #121 Step 3) ---
+    mTopBarQml = new QQuickWidget(mContainer);
+    mTopBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mTopBarQml->setClearColor(Qt::transparent);
+    mTopBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mTopBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mTopBarQml->rootContext()->setContextProperty("appController", mAppController);
+    mTopBarQml->rootContext()->setContextProperty("pageController", mPageController);
+    mTopBarQml->rootContext()->setContextProperty("toolController", mToolController);
+    mTopBarQml->setSource(QUrl("qrc:/qml/TopBar.qml"));
+    mTopBarQml->setFixedSize(mContainer->width(), 48);
+    mTopBarQml->move(0, 0);
+    mTopBarQml->show();
+    mTopBarQml->raise();
 
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
     mDrawingPropsController = new UBDrawingPropertiesController(this);
