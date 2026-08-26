@@ -140,6 +140,8 @@ class UBBoardPaletteManager : public QObject
         UBAppController *mAppController;
         QQuickWidget *mTopBarQml;
         QQuickWidget *mPageNavQml;
+        QQuickWidget *mDrawingPropsBarQml;
+        QQuickWidget *mShapesPaletteV2Qml;
         QQuickWidget *mDrawingPropsQml;
         UBDrawingPropertiesController *mDrawingPropsController;
         QQuickWidget *mShapesPaletteQml;

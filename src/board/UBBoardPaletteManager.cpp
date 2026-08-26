@@ -98,6 +98,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mAppController(nullptr)
     , mTopBarQml(nullptr)
     , mPageNavQml(nullptr)
+    , mDrawingPropsBarQml(nullptr)
+    , mShapesPaletteV2Qml(nullptr)
     , mDrawingPropsQml(nullptr)
     , mDrawingPropsController(nullptr)
     , mShapesPaletteQml(nullptr)
@@ -404,6 +406,43 @@ void UBBoardPaletteManager::setupPalettes()
     mPageNavQml->move(0, 48);
     mPageNavQml->show();
     mPageNavQml->raise();
+
+    // --- QML Drawing Props Bar (Issue #121 Step 5) ---
+    mDrawingPropsBarQml = new QQuickWidget(mContainer);
+    mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mDrawingPropsBarQml->setClearColor(Qt::transparent);
+    mDrawingPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
+    mDrawingPropsBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mDrawingPropsBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mDrawingPropsBarQml->rootContext()->setContextProperty("toolController", mToolController);
+    mDrawingPropsBarQml->setSource(QUrl("qrc:/qml/DrawingPropsBar.qml"));
+    mDrawingPropsBarQml->setFixedSize(360, 56);
+    // Positioned above the bottom bar, centered
+    int propsX = (mContainer->width() - 360) / 2;
+    int propsY = mContainer->height() - 52 - 60; // above bottom bar
+    mDrawingPropsBarQml->move(propsX, propsY);
+    mDrawingPropsBarQml->show();
+    mDrawingPropsBarQml->raise();
+
+    // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
+    mShapesPaletteV2Qml = new QQuickWidget(mContainer);
+    mShapesPaletteV2Qml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mShapesPaletteV2Qml->setClearColor(Qt::transparent);
+    mShapesPaletteV2Qml->setAttribute(Qt::WA_TranslucentBackground);
+    mShapesPaletteV2Qml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mShapesPaletteV2Qml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mShapesPaletteV2Qml->rootContext()->setContextProperty("toolController", mToolController);
+    mShapesPaletteV2Qml->setSource(QUrl("qrc:/qml/ShapesPaletteV2.qml"));
+    mShapesPaletteV2Qml->setFixedSize(160, 320);
+    // Positioned to the left of center, above bottom bar
+    mShapesPaletteV2Qml->move(sidebarWidth + 20, mContainer->height() - 52 - 330);
+    mShapesPaletteV2Qml->hide(); // starts hidden, controlled by toolController.shapesVisible
+    // Show/hide based on controller
+    connect(mToolController, &UBToolController::shapesVisibleChanged, this, [this]() {
+        mShapesPaletteV2Qml->setVisible(mToolController->shapesVisible());
+        if (mToolController->shapesVisible())
+            mShapesPaletteV2Qml->raise();
+    });
 
     // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
     mDrawingPropsController = new UBDrawingPropertiesController(this);
