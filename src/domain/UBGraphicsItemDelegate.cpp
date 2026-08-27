@@ -73,14 +73,16 @@ DelegateButton::DelegateButton(const QString & fileName, QGraphicsItem* pDelegat
     , mDelegated(pDelegated)
     , mIsTransparentToMouseEvent(false)
     , mIsPressed(false)
+    , mIsHovered(false)
     , mProgressTimerId(-1)
     , mPressProgres(0)
     , mShowProgressIndicator(false)
     , mButtonAlignmentSection(section)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
+    setAcceptHoverEvents(true);
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Control));
-    setCacheMode(QGraphicsItem::NoCache); /* because of SANKORE-1017: this allows pixmap to be refreshed when grabbing window, thus teacher screen is synchronized with main screen. */
+    setCacheMode(QGraphicsItem::NoCache);
 }
 
 DelegateButton::~DelegateButton()
@@ -90,7 +92,16 @@ DelegateButton::~DelegateButton()
 
 QRectF DelegateButton::boundingRect() const
 {
-    return QRectF(0, 0, kButtonSize, kButtonSize);
+    int s = effectiveSize();
+    return QRectF(0, 0, s, s);
+}
+
+int DelegateButton::effectiveSize() const
+{
+    // Frame buttons (TopLeft/BottomLeft) are smaller than toolbar buttons
+    if (mButtonAlignmentSection == Qt::TitleBarArea || mButtonAlignmentSection == Qt::NoSection)
+        return kButtonSize + kButtonPadding * 2;
+    return kFrameButtonSize + kButtonPadding * 2;
 }
 
 void DelegateButton::setFileName(const QString & fileName)
@@ -138,25 +149,56 @@ void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    // Render the SVG scaled into our fixed-size button rect
-    if (renderer() && renderer()->isValid()) {
-        renderer()->render(painter, boundingRect());
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    QRectF br = boundingRect();
+
+    // Draw hover/press background for toolbar buttons
+    if (mButtonAlignmentSection == Qt::TitleBarArea || mButtonAlignmentSection == Qt::NoSection) {
+        if (mIsPressed) {
+            painter->setBrush(QColor(0, 0, 0, 30));
+            painter->setPen(Qt::NoPen);
+            painter->drawRoundedRect(br, 4, 4);
+        } else if (mIsHovered) {
+            painter->setBrush(QColor(0, 0, 0, 15));
+            painter->setPen(Qt::NoPen);
+            painter->drawRoundedRect(br, 4, 4);
+        }
     }
 
+    // Render the SVG icon with padding, centered in the bounding rect
+    if (renderer() && renderer()->isValid()) {
+        QRectF iconRect = br.adjusted(kButtonPadding, kButtonPadding, -kButtonPadding, -kButtonPadding);
+        renderer()->render(painter, iconRect);
+    }
+
+    // Progress indicator for long-press (z-order buttons)
     if (mIsPressed && mShowProgressIndicator) {
         QPen pen;
-        pen.setBrush(Qt::white);
-        pen.setWidth(3);
+        pen.setBrush(QColor(74, 144, 217)); // primary blue
+        pen.setWidth(2);
         painter->save();
-
         painter->setPen(pen);
-
-        QRectF arcRect = boundingRect().adjusted(pen.width(), pen.width(), -pen.width(), -pen.width());
+        QRectF arcRect = br.adjusted(2, 2, -2, -2);
         int spanAngle = qMin(mPressProgres, UBSettings::longClickInterval) * 360 / UBSettings::longClickInterval;
         painter->drawArc(arcRect, 16 * 90, -16 * spanAngle);
-
         painter->restore();
     }
+}
+
+void DelegateButton::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    Q_UNUSED(event);
+    mIsHovered = true;
+    update();
+}
+
+void DelegateButton::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    Q_UNUSED(event);
+    mIsHovered = false;
+    update();
 }
 
 void DelegateButton::timerEvent(QTimerEvent *event)
@@ -863,14 +905,16 @@ void UBGraphicsItemDelegate::updateButtons(bool showUpdated)
     QTransform tr;
     tr.scale(mAntiScaleRatio, mAntiScaleRatio);
 
+    int frameButtonSize = DelegateButton::kFrameButtonSize + DelegateButton::kButtonPadding * 2;
+
     mDeleteButton->setParentItem(mFrame);
     mDeleteButton->setTransform(tr);
 
-    qreal topX = mFrame->rect().left() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
-    qreal topY = mFrame->rect().top() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
+    qreal topX = mFrame->rect().left() - frameButtonSize * mAntiScaleRatio / 2;
+    qreal topY = mFrame->rect().top() - frameButtonSize * mAntiScaleRatio / 2;
 
-    qreal bottomX = mFrame->rect().left() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
-    qreal bottomY = mFrame->rect().bottom() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
+    qreal bottomX = mFrame->rect().left() - frameButtonSize * mAntiScaleRatio / 2;
+    qreal bottomY = mFrame->rect().bottom() - frameButtonSize * mAntiScaleRatio / 2;
 
     mDeleteButton->setPos(topX, topY);
 
@@ -887,16 +931,17 @@ void UBGraphicsItemDelegate::updateButtons(bool showUpdated)
         mDeleteButton->hide();
 
     int i = 1, j = 0, k = 0;
+    qreal buttonSpacing = 1.6 * mFrameWidth * mAntiScaleRatio;
     while ((i + j + k) < mButtons.size())  {
         DelegateButton* button = mButtons[i + j];
 
         if (button->getSection() == Qt::TopLeftSection) {
             button->setParentItem(mFrame);
-            button->setPos(topX + (i++ * 1.6 * mFrameWidth * mAntiScaleRatio), topY);
+            button->setPos(topX + (i++ * buttonSpacing), topY);
             button->setTransform(tr);
         } else if (button->getSection() == Qt::BottomLeftSection) {
             button->setParentItem(mFrame);
-            button->setPos(bottomX + (++j * 1.6 * mFrameWidth * mAntiScaleRatio), bottomY);
+            button->setPos(bottomX + (++j * buttonSpacing), bottomY);
             button->setTransform(tr);
         } else if (button->getSection() == Qt::TitleBarArea || button->getSection() == Qt::NoSection){
             ++k;
@@ -943,8 +988,8 @@ UBGraphicsToolBarItem::UBGraphicsToolBarItem(QGraphicsItem * parent) :
     mShifting(true),
     mVisible(false),
     mMinWidth(200),
-    mInitialHeight(26),
-    mElementsPadding(0)
+    mInitialHeight(kToolbarHeight),
+    mElementsPadding(2)
 {
     QRectF rect = this->rect();
     rect.setHeight(mInitialHeight);
@@ -960,17 +1005,22 @@ UBGraphicsToolBarItem::UBGraphicsToolBarItem(QGraphicsItem * parent) :
 
 void UBGraphicsToolBarItem::positionHandles()
 {
-    int itemXOffset = 0;
+    int itemXOffset = kToolbarPaddingH;
+    int buttonY = (kToolbarHeight - DelegateButton::kButtonSize - DelegateButton::kButtonPadding * 2) / 2;
+
     for (QGraphicsItem* item : mItemsOnToolBar)
     {
-        if(item == DelegateButton::Spacer){
-            itemXOffset += 10;
-        }else{
-            item->setPos(itemXOffset, 0);
+        if (item == DelegateButton::Spacer) {
+            // Spacer renders as a separator line — just advance by margin + line + margin
+            itemXOffset += kSeparatorMargin;
+            // The separator is drawn in paint(), we just track position
+            itemXOffset += kSeparatorMargin;
+        } else {
+            item->setPos(itemXOffset, buttonY);
 
             itemXOffset += item->boundingRect().width();
 
-            if(itemXOffset < rect().width())
+            if (itemXOffset < rect().width())
                 item->show();
             else
                 item->hide();
@@ -990,12 +1040,44 @@ void UBGraphicsToolBarItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    QPainterPath path;
-    path.addRoundedRect(rect(), 10, 10);
+    painter->setRenderHint(QPainter::Antialiasing, true);
 
-    setBrush(QBrush(UBSettings::paletteColor));
+    // White background with subtle shadow
+    QRectF r = rect();
 
-    painter->fillPath(path, brush());
+    // Drop shadow (slight offset, soft)
+    QPainterPath shadowPath;
+    shadowPath.addRoundedRect(r.adjusted(0, 1, 0, 1), 8, 8);
+    painter->fillPath(shadowPath, QColor(0, 0, 0, 25));
+
+    // Main background — white, slightly translucent
+    QPainterPath bgPath;
+    bgPath.addRoundedRect(r, 8, 8);
+    painter->fillPath(bgPath, QColor(255, 255, 255, 240));
+
+    // Subtle border
+    painter->setPen(QPen(QColor(0, 0, 0, 30), 0.5));
+    painter->drawRoundedRect(r, 8, 8);
+
+    // Draw separator lines at Spacer positions
+    int itemXOffset = kToolbarPaddingH;
+    int buttonY = (kToolbarHeight - DelegateButton::kButtonSize - DelegateButton::kButtonPadding * 2) / 2;
+
+    for (QGraphicsItem* item : mItemsOnToolBar)
+    {
+        if (item == DelegateButton::Spacer) {
+            itemXOffset += kSeparatorMargin;
+            // Draw a thin vertical separator line
+            qreal lineX = itemXOffset;
+            qreal lineTop = buttonY + 2;
+            qreal lineBottom = kToolbarHeight - buttonY - 2;
+            painter->setPen(QPen(QColor(0, 0, 0, 40), kSeparatorWidth));
+            painter->drawLine(QPointF(lineX, lineTop), QPointF(lineX, lineBottom));
+            itemXOffset += kSeparatorMargin;
+        } else {
+            itemXOffset += item->boundingRect().width() + mElementsPadding;
+        }
+    }
 }
 
 MediaTimer::MediaTimer(QGraphicsItem * parent): QGraphicsRectItem(parent)

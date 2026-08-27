@@ -37,6 +37,7 @@
 #include "domain/UBGraphicsProxyWidget.h"
 
 class QGraphicsSceneMouseEvent;
+class QGraphicsSceneHoverEvent;
 class QGraphicsItem;
 class UBGraphicsScene;
 class UBAbstractGraphicsProxyWidget;
@@ -51,7 +52,9 @@ class DelegateButton: public QGraphicsSvgItem
 
     public:
         static DelegateButton *Spacer;
-        static constexpr int kButtonSize = 26;
+        static constexpr int kButtonSize = 20;
+        static constexpr int kFrameButtonSize = 16;
+        static constexpr int kButtonPadding = 4;
 
         DelegateButton(const QString & fileName, QGraphicsItem* pDelegated, QGraphicsItem * parent = 0, Qt::WindowFrameSection section = Qt::TopLeftSection);
 
@@ -75,12 +78,16 @@ class DelegateButton: public QGraphicsSvgItem
 
         QRectF boundingRect() const override;
 
+        int effectiveSize() const;
+
     protected:
 
         virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
         virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
         void timerEvent(QTimerEvent *event);
+        virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+        virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
         void modified();
 
@@ -96,6 +103,7 @@ private slots:
         QTime mPressedTime;
         bool mIsTransparentToMouseEvent;
         bool mIsPressed;
+        bool mIsHovered;
         int mProgressTimerId;
         int mPressProgres;
         bool mShowProgressIndicator;
@@ -229,6 +237,12 @@ class UBGraphicsToolBarItem : public QGraphicsRectItem, public QObject
         void positionHandles();
         void update();
         int getElementsPadding(){return mElementsPadding;}
+
+        static constexpr int kToolbarHeight = 32;
+        static constexpr int kToolbarPaddingH = 6;
+        static constexpr int kToolbarPaddingV = 6;
+        static constexpr int kSeparatorWidth = 1;
+        static constexpr int kSeparatorMargin = 6;
 
     private:
         void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
