@@ -134,17 +134,25 @@ void UBGraphicsDelegateFrame::paint(QPainter *painter, const QStyleOptionGraphic
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    QPainterPath path;
-    path.addRoundedRect(rect(), mFrameWidth / 2, mFrameWidth / 2);
+    if (rect().width() <= 1 || rect().height() <= 1)
+        return;
 
-    if (rect().width() > 1 && rect().height() > 1)
-    {
-        QPainterPath extruded;
-        extruded.addRect(rect().adjusted(mFrameWidth, mFrameWidth, (mFrameWidth * -1), (mFrameWidth * -1)));
-        path = path.subtracted(extruded);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    // Draw a thin, subtle border instead of a thick filled frame
+    QRectF innerRect = rect().adjusted(mFrameWidth, mFrameWidth, -mFrameWidth, -mFrameWidth);
+
+    QColor borderColor(0, 0, 0, 60); // subtle dark border
+    QVariant vLocked = delegated()->data(UBGraphicsItemData::ItemLocked);
+    if (vLocked.isValid() && vLocked.toBool()) {
+        borderColor.setAlpha(25);
     }
 
-    painter->fillPath(path, brush());
+    QPen borderPen(borderColor, 1.5);
+    borderPen.setStyle(Qt::SolidLine);
+    painter->setPen(borderPen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRoundedRect(innerRect, 3, 3);
 }
 
 
@@ -881,12 +889,12 @@ void UBGraphicsDelegateFrame::positionHandles()
     bool bShowVerticalResizers   = ResizingHorizontally != mOperationMode && mOperationMode != NoResizing; // EV-7 - ALTI/AOU - 20131231 : new NoResizing possibility
     bool bShowAllResizers        = Resizing == mOperationMode || Scaling == mOperationMode ;
 
-    mBottomRightResizeGripSvgItem->setVisible(!isLocked && bShowAllResizers);
-    mBottomResizeGripSvgItem->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
-    mLeftResizeGripSvgItem->setVisible(!isLocked && (bShowHorizontalResizers || bShowAllResizers));
-    mRightResizeGripSvgItem->setVisible(!isLocked && (bShowHorizontalResizers || bShowAllResizers));
-    mTopResizeGripSvgItem->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
-    mRotateButton->setVisible(mDelegate->canRotate() && !isLocked);
+    mBottomRightResizeGripSvgItem->setVisible(false);
+    mBottomResizeGripSvgItem->setVisible(false);
+    mLeftResizeGripSvgItem->setVisible(false);
+    mRightResizeGripSvgItem->setVisible(false);
+    mTopResizeGripSvgItem->setVisible(false);
+    mRotateButton->setVisible(false);
 
     mBottomRightResizeGrip->setVisible(!isLocked && bShowAllResizers);
     mBottomResizeGrip->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
@@ -896,13 +904,12 @@ void UBGraphicsDelegateFrame::positionHandles()
 
     if (isLocked)
     {
-        QColor baseColor = UBSettings::paletteColor;
-        baseColor.setAlphaF(baseColor.alphaF() / 3);
-        setBrush(QBrush(baseColor));
+        // Locked state is handled in paint() with reduced border opacity
+        setBrush(Qt::NoBrush);
     }
     else
     {
-        setBrush(QBrush(UBSettings::paletteColor));
+        setBrush(Qt::NoBrush);
     }
 
     //make frame interact like delegated item when selected. Maybe should be deleted if selection logic will change

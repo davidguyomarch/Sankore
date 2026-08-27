@@ -114,6 +114,7 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         DelegateButton* mRemoveIndentButton;
         DelegateButton* mHyperLinkButton;
         DelegateButton* mTableButton;
+        DelegateButton* mOverflowButton;
 
         UBCreateTablePalette* mTablePalette;
         UBCreateHyperLinkPalette* mLinkPalette;
@@ -131,6 +132,7 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         QAction *mEditableAction;
 
         QMenu * mTableMenu;
+        QMenu * mOverflowMenu;
 
     private slots:
 
@@ -166,6 +168,7 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         void applyCellProperties();
         void distributeColumn();
         void showMenuTable();
+        void showOverflowMenu();
 
 private:
       UBSettings* mSettings;

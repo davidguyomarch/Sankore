@@ -47,7 +47,7 @@ QPointer<UBSettings> UBSettings::sSingleton = 0;
 int UBSettings::pointerDiameter = 40;
 int UBSettings::crossSize = 32;
 int UBSettings::colorPaletteSize = 4;
-int UBSettings::objectFrameWidth = 20;
+int UBSettings::objectFrameWidth = 12;
 int UBSettings::boardMargin = 10;
 
 QString UBSettings::documentGroupName = QString("Subject");
