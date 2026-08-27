@@ -107,11 +107,38 @@ jobs:
           mkdir build\win32\release\product 2>NUL
 
       - name: Run qmake
-        shell: cmd
+        shell: pwsh
         run: |
-          set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
-          for /f %%i in ('git rev-parse --short HEAD') do echo #define GIT_COMMIT "%%i" > src\core\git_version.h
-          for /f %%i in ('git describe --tags --always') do echo #define GIT_VERSION "%%i" >> src\core\git_version.h
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          # Determine version from git tag (v4.1.0 -> 4.1.0) or fall back to .pro
+          $gitTag = git describe --tags --exact-match 2>$null
+          if ($gitTag -match '^v(\d+\.\d+\.\d+)') {
+            $version = $Matches[1]
+          } else {
+            $version = "4.0.2"  # fallback
+          }
+          Write-Host "Build version: $version"
+          echo "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          # Update .pro version numbers
+          $parts = $version.Split('.')
+          $content = Get-Content OpenSankore.pro -Raw
+          $content = $content -replace 'VERSION_MAJ = \d+', "VERSION_MAJ = $($parts[0])"
+          $content = $content -replace 'VERSION_MIN = \d+', "VERSION_MIN = $($parts[1])"
+          $content = $content -replace 'VERSION_PATCH = \d+', "VERSION_PATCH = $($parts[2])"
+          Set-Content OpenSankore.pro $content
+
+          # Update installer.iss version
+          $issContent = Get-Content scripts\installer.iss -Raw
+          $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion ""$version"""
+          Set-Content scripts\installer.iss $issContent
+
+          # Generate git version header
+          $commit = git rev-parse --short HEAD
+          $desc = git describe --tags --always
+          "#define GIT_COMMIT ""$commit""" | Out-File -FilePath src\core\git_version.h -Encoding utf8
+          "#define GIT_VERSION ""$desc""" | Out-File -FilePath src\core\git_version.h -Encoding utf8 -Append
+
           qmake OpenSankore.pro CONFIG+=no_webengine
 
       - name: Build

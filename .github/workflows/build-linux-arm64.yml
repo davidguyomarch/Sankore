@@ -33,11 +33,20 @@ jobs:
       - name: Build in ARM64 container
         uses: docker/setup-buildx-action@v3
 
-      - name: Generate git version header
+      - name: Generate git version header and set version
         run: |
           echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
           echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
           cat src/core/git_version.h
+          # Extract version from git tag (v4.1.0 -> 4.1.0) or fall back
+          GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
+          if [[ "$GIT_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
+            echo "Updating version to $MAJ.$MIN.$PATCH from tag $GIT_TAG"
+            sed -i "s/VERSION_MAJ = .*/VERSION_MAJ = $MAJ/" OpenSankore.pro
+            sed -i "s/VERSION_MIN = .*/VERSION_MIN = $MIN/" OpenSankore.pro
+            sed -i "s/VERSION_PATCH = .*/VERSION_PATCH = $PATCH/" OpenSankore.pro
+          fi
 
       - name: Build and test in ARM64
         run: |
