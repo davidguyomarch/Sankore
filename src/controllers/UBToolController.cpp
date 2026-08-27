@@ -13,6 +13,10 @@
 #include "domain/UBShapeFactory.h"
 #include "domain/UBAlignObjectManager.h"
 
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
 UBToolController::UBToolController(QObject* parent)
     : QObject(parent)
     , m_activeTool(Pen)
@@ -76,6 +80,15 @@ int UBToolController::penColorIndex() const
 void UBToolController::setPenColorIndex(int index)
 {
     UBSettings::settings()->setPenColorIndex(index);
+    // Log to startup.log for debugging
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[PEN COLOR] setPenColorIndex(" << index << ") penColorIndex now=" << UBSettings::settings()->penColorIndex() << "\n";
+            logFile.close();
+        }
+    }
     emit penColorChanged();
     emit currentColorIndexChanged();
 }

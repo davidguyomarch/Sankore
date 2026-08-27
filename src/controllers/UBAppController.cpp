@@ -167,13 +167,16 @@ void UBAppController::quit()
         QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
         if (logFile.open(QIODevice::Append | QIODevice::Text)) {
             QTextStream out(&logFile);
-            out << "\n[QUIT] quit() called, invoking QApplication::quit()\n";
+            out << "\n[QUIT] quit() called\n";
             logFile.close();
         }
     }
-    // Call quit directly — UBApplication::closing() has a static guard that may
-    // block if it was called previously (e.g., during startup close event).
-    QApplication::quit();
+    // UBMainWindow::closeEvent ignores QCloseEvent, so QApplication::quit() alone
+    // won't close the window. We must call closing() to save state, then exit directly.
+    UBApplication::app()->closing();
+    // closing() defers quit via singleShot, but the static guard blocks subsequent calls.
+    // Force exit in case closing() was already called once.
+    QTimer::singleShot(500, []() { ::exit(0); });
 }
 
 // --- Private slots ---
