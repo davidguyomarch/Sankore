@@ -889,12 +889,12 @@ void UBGraphicsDelegateFrame::positionHandles()
     bool bShowVerticalResizers   = ResizingHorizontally != mOperationMode && mOperationMode != NoResizing; // EV-7 - ALTI/AOU - 20131231 : new NoResizing possibility
     bool bShowAllResizers        = Resizing == mOperationMode || Scaling == mOperationMode ;
 
-    mBottomRightResizeGripSvgItem->setVisible(!isLocked && bShowAllResizers);
-    mBottomResizeGripSvgItem->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
-    mLeftResizeGripSvgItem->setVisible(!isLocked && (bShowHorizontalResizers || bShowAllResizers));
-    mRightResizeGripSvgItem->setVisible(!isLocked && (bShowHorizontalResizers || bShowAllResizers));
-    mTopResizeGripSvgItem->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
-    mRotateButton->setVisible(mDelegate->canRotate() && !isLocked);
+    mBottomRightResizeGripSvgItem->setVisible(false);
+    mBottomResizeGripSvgItem->setVisible(false);
+    mLeftResizeGripSvgItem->setVisible(false);
+    mRightResizeGripSvgItem->setVisible(false);
+    mTopResizeGripSvgItem->setVisible(false);
+    mRotateButton->setVisible(false);
 
     mBottomRightResizeGrip->setVisible(!isLocked && bShowAllResizers);
     mBottomResizeGrip->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
