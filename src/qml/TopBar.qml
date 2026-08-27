@@ -48,7 +48,7 @@ Rectangle {
                     model: [
                         { mode: 0, icon: "chalkboard-teacher", label: "Tableau",   enabled: true },
                         { mode: 1, icon: "folders",            label: "Documents", enabled: false },
-                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: false }
+                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: true }
                     ]
 
                     Rectangle {

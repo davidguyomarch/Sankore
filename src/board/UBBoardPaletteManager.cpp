@@ -186,6 +186,9 @@ void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMod
                 // call changeMode only when switch NOT from desktop mode
                 if(!UBApplication::applicationController->isShowingDesktop())
                     changeMode(eUBDockPaletteWidget_BOARD);
+                // Sync QML controller back to Board when returning from Documents mode
+                if (mAppController && mAppController->activeMode() != UBAppController::Board)
+                    mAppController->syncMode(UBAppController::Board);
             }
             break;
 
@@ -211,6 +214,10 @@ void UBBoardPaletteManager::slot_changeDesktopMode(bool isDesktop)
     UBApplicationController::MainMode currMode = UBApplication::applicationController->displayMode();
     if(!isDesktop)
     {
+        // Sync QML controller back to Board when leaving Desktop mode
+        if (mAppController)
+            mAppController->syncMode(UBAppController::Board);
+
         switch( currMode )
         {
             case UBApplicationController::Board:
@@ -1110,17 +1117,24 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         case eUBDockPaletteWidget_DESKTOP:
             {
-                // Hide QML palettes — they are parented to mContainer (board view) which
-                // gets hidden in desktop mode. Calling raise() on them would crash.
+                // Hide all QML V2 palettes — they are parented to mContainer (board view)
+                // which gets hidden in desktop mode. The desktop overlay has its own
+                // UBDesktopPalette for tool control.
                 if (mStylusPaletteQml)
                     mStylusPaletteQml->hide();
+                if (mTopBarQml)
+                    mTopBarQml->hide();
+                if (mPageNavQml)
+                    mPageNavQml->hide();
+                if (mDrawingPropsBarQml)
+                    mDrawingPropsBarQml->hide();
+                if (mShapesPaletteV2Qml)
+                    mShapesPaletteV2Qml->hide();
 
                 mAddItemPalette->setParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 // Dock palettes permanently hidden — QML V2 replaces them
                 mLeftPalette->hide();
                 mRightPalette->hide();
-                mStylusPalette->raise();
-                mDrawingPalette->raise();
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
@@ -1192,6 +1206,18 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         case eUBDockPaletteWidget_DOCUMENT:
             {
+                // Hide QML V2 palettes — document view has its own toolbar
+                if (mStylusPaletteQml)
+                    mStylusPaletteQml->hide();
+                if (mTopBarQml)
+                    mTopBarQml->hide();
+                if (mPageNavQml)
+                    mPageNavQml->hide();
+                if (mDrawingPropsBarQml)
+                    mDrawingPropsBarQml->hide();
+                if (mShapesPaletteV2Qml)
+                    mShapesPaletteV2Qml->hide();
+
                 // Dock palettes permanently hidden — QML V2 replaces them
                 mLeftPalette->hide();
                 mRightPalette->hide();

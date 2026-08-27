@@ -6,6 +6,7 @@
 #include "UBAppController.h"
 
 #include "core/UBApplication.h"
+#include "core/UBApplicationController.h"
 #include "gui/UBMainWindow.h"
 #include "board/UBBoardController.h"
 #include "domain/UBGraphicsScene.h"
@@ -45,12 +46,19 @@ void UBAppController::setActiveMode(int mode)
     if (m_mode == mode)
         return;
 
-    // Documents mode temporarily disabled — it shows the legacy UBDocumentController
-    // which conflicts with QML V2 palettes. Will be reimplemented as a QML view.
-    if (mode == Documents)
-        return;
-
     m_mode = mode;
+
+    // Log mode change for diagnostics
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[MODE CHANGE] mode=" << mode
+                << (mode == Board ? " (Board)" : mode == Desktop ? " (Desktop)" : " (Documents)")
+                << "\n";
+            logFile.close();
+        }
+    }
 
     switch (mode)
     {
@@ -61,10 +69,18 @@ void UBAppController::setActiveMode(int mode)
         UBApplication::app()->showDocument();
         break;
     case Desktop:
-        // Desktop mode handled via applicationController
+        UBApplication::applicationController->showDesktop();
         break;
     }
 
+    emit activeModeChanged();
+}
+
+void UBAppController::syncMode(int mode)
+{
+    if (m_mode == mode)
+        return;
+    m_mode = mode;
     emit activeModeChanged();
 }
 
