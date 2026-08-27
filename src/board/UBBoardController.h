@@ -238,6 +238,7 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 
     public slots:
         void ClearUndoStack();
+        void colorPaletteChanged();
         void stylusToolDoubleClicked(int tool);
 
         void showDocumentsDialog();
@@ -385,7 +386,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         void documentWillBeDeleted(UBDocumentProxy* pProxy);
         void updateBackgroundActionsState(bool isDark, bool isCrossed);
         void updateBackgroundState();
-        void colorPaletteChanged();
         void libraryDialogClosed(int ret);
         void lastWindowClosed();
         void onDownloadModalFinished();
