@@ -1212,9 +1212,12 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
         }
         else if (currentTool == UBStylusTool::Pointer)
         {
-            // Pointer tool shows a laser dot — do NOT send inputDevicePress
-            // which would trigger drawing strokes and crash.
+            // Forward to scene — it has a red laser pointer circle (mPointer)
             viewport()->setCursor(UBResources::resources()->pointerCursor);
+            if (scene() && !mTabletStylusIsPressed)
+            {
+                scene()->inputDevicePress(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())));
+            }
             event->accept();
         }
         else if (currentTool == UBStylusTool::ChangeFill)
@@ -1354,7 +1357,11 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
     }
   else if (currentTool == UBStylusTool::Pointer)
     {
-      // Pointer tool — do NOT send inputDeviceMove (no drawing)
+      // Forward to scene — it moves the red laser pointer circle
+      if (!mTabletStylusIsPressed && scene())
+      {
+          scene()->inputDeviceMove(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())), mMouseButtonIsPressed);
+      }
       event->accept ();
     }
   else
