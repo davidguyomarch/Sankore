@@ -159,8 +159,7 @@ void UBAppController::openPreferences()
 
 void UBAppController::quit()
 {
-    if (UBApplication::mainWindow && UBApplication::mainWindow->actionQuit)
-        UBApplication::mainWindow->actionQuit->trigger();
+    UBApplication::app()->closing();
 }
 
 // --- Private slots ---
