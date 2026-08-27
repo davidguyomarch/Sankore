@@ -58,7 +58,15 @@ jobs:
                 libgl1-mesa-dev libssl-dev zlib1g-dev \
                 libx11-dev libomp-dev pkg-config \
                 libpulse-dev libzinnia-dev \
-                gdb
+                gdb \
+                qml6-module-qtquick \
+                qml6-module-qtquick-controls \
+                qml6-module-qtquick-layouts \
+                qml6-module-qtquick-templates \
+                qml6-module-qtquick-window \
+                qml6-module-qt5compat-graphicaleffects \
+                qml6-module-qtqml-workerscript \
+                xvfb
 
               echo "=== Building QuaZip ==="
               git clone --depth 1 --branch v1.4 https://github.com/stachenov/quazip.git /tmp/quazip-src
