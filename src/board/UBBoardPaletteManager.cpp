@@ -396,7 +396,7 @@ void UBBoardPaletteManager::setupPalettes()
 
     // --- QML Drawing Props Bar (Issue #121 Step 5) ---
     mDrawingPropsBarQml = new QQuickWidget(mContainer);
-    mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeViewToRootObject);
     mDrawingPropsBarQml->setClearColor(Qt::transparent);
     mDrawingPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
     mDrawingPropsBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
@@ -406,13 +406,25 @@ void UBBoardPaletteManager::setupPalettes()
     if (mDrawingPropsBarQml->status() == QQuickWidget::Error)
         for (const auto& e : mDrawingPropsBarQml->errors())
             qWarning() << "DrawingPropsBar QML error:" << e.toString();
-    mDrawingPropsBarQml->setFixedSize(280, 48);
-    // Positioned above the bottom bar, centered
-    int propsX = (mContainer->width() - 280) / 2;
+    // No setFixedSize — widget auto-sizes from QML implicitWidth/implicitHeight via SizeViewToRootObject
+    // Initial positioning (will update on tool change and container resize)
+    int propsX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
     int propsY = mContainer->height() - 52 - 70; // above bottom bar
     mDrawingPropsBarQml->move(propsX, propsY);
     mDrawingPropsBarQml->show();
     mDrawingPropsBarQml->raise();
+
+    // Re-center the props bar when tool changes (eraser is narrower than pen)
+    connect(mToolController, &UBToolController::activeToolChanged, this, [this]() {
+        if (mDrawingPropsBarQml && mContainer) {
+            // Defer to let QML update its implicit size first
+            QTimer::singleShot(0, this, [this]() {
+                int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
+                int posY = mStylusPaletteQml->y() - mDrawingPropsBarQml->height() - 8;
+                mDrawingPropsBarQml->move(posX, posY);
+            });
+        }
+    });
 
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
     mShapesPaletteV2Qml = new QQuickWidget(mContainer);

@@ -76,6 +76,7 @@
 #include "board/UBDrawingController.h"
 #include "board/UBBoardView.h"
 #include "board/UBBoardPaletteManager.h"
+#include "controllers/UBToolController.h"
 #include "web/UBWebController.h"
 
 #include "document/UBDocumentController.h"
@@ -492,7 +493,12 @@ int UBApplication::exec(const QString& pFileToImport)
 
     // Force Pen tool selection after all init is complete (deferred to ensure QML is ready)
     QTimer::singleShot(0, this, [this]() {
-        UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+        if (boardController && boardController->paletteManager()
+            && boardController->paletteManager()->toolController()) {
+            boardController->paletteManager()->toolController()->setActiveTool(UBStylusTool::Pen);
+        } else {
+            UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+        }
     });
 
     onScreenCountChanged(1);

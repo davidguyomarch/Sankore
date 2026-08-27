@@ -11,6 +11,7 @@
 #include "board/UBBoardController.h"
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBShapeFactory.h"
+#include "domain/UBAlignObjectManager.h"
 
 UBToolController::UBToolController(QObject* parent)
     : QObject(parent)
@@ -75,7 +76,7 @@ int UBToolController::penColorIndex() const
 
 void UBToolController::setPenColorIndex(int index)
 {
-    UBDrawingController::drawingController()->setColorIndex(index);
+    UBSettings::settings()->setPenColorIndex(index);
     emit penColorChanged();
 }
 
@@ -86,7 +87,7 @@ int UBToolController::penWidthIndex() const
 
 void UBToolController::setPenWidthIndex(int index)
 {
-    UBDrawingController::drawingController()->setLineWidthIndex(index);
+    UBSettings::settings()->setPenWidthIndex(index);
     emit penWidthChanged();
 }
 
@@ -113,7 +114,7 @@ int UBToolController::markerColorIndex() const
 
 void UBToolController::setMarkerColorIndex(int index)
 {
-    UBDrawingController::drawingController()->setColorIndex(index);
+    UBSettings::settings()->setMarkerColorIndex(index);
     emit markerColorChanged();
 }
 
@@ -124,7 +125,7 @@ int UBToolController::markerWidthIndex() const
 
 void UBToolController::setMarkerWidthIndex(int index)
 {
-    UBDrawingController::drawingController()->setLineWidthIndex(index);
+    UBSettings::settings()->setMarkerWidthIndex(index);
     emit markerWidthChanged();
 }
 
@@ -193,7 +194,7 @@ int UBToolController::eraserWidthIndex() const
 
 void UBToolController::setEraserWidthIndex(int index)
 {
-    UBDrawingController::drawingController()->setEraserWidthIndex(index);
+    UBSettings::settings()->setEraserWidthIndex(index);
     emit eraserWidthChanged();
 }
 
@@ -254,6 +255,29 @@ void UBToolController::createShape(const QString& shape)
     m_activeTool = Drawing;
     UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Drawing);
     emit activeToolChanged();
+}
+
+// --- Shape property actions ---
+
+void UBToolController::activateFillTool()
+{
+    // Switch to ChangeFill tool (paint bucket) — user clicks on a shape to fill it
+    setActiveTool(ChangeFill);
+}
+
+void UBToolController::applyStrokeToSelection()
+{
+    // Apply current pen color as stroke to selected shapes
+    auto& factory = UBApplication::boardController->shapeFactory();
+    QColor color = UBDrawingController::drawingController()->currentToolColor();
+    factory.setStrokeColor(color);
+    factory.updateFillingPropertyOnSelectedItems();
+}
+
+void UBToolController::alignSelection()
+{
+    UBAlignObjectManager mgr;
+    mgr.horizontalAlign();
 }
 
 // --- Actions ---

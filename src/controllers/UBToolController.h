@@ -109,6 +109,11 @@ public:
     // Shape creation — called from QML ShapesPaletteV2
     Q_INVOKABLE void createShape(const QString& shape);
 
+    // Shape property actions — called from QML ShapesPaletteV2 property buttons
+    Q_INVOKABLE void activateFillTool();
+    Q_INVOKABLE void applyStrokeToSelection();
+    Q_INVOKABLE void alignSelection();
+
 public slots:
     void toggleShapes();
     void undo();

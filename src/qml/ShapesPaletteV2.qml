@@ -106,9 +106,9 @@ Rectangle {
 
             Repeater {
                 model: [
-                    { icon: "paint-bucket",             tooltip: "Remplissage" },
-                    { icon: "pencil-line",              tooltip: "Contour" },
-                    { icon: "align-center-horizontal",  tooltip: "Aligner" }
+                    { icon: "paint-bucket",             tooltip: "Remplissage",  action: "fill" },
+                    { icon: "pencil-line",              tooltip: "Contour",      action: "stroke" },
+                    { icon: "align-center-horizontal",  tooltip: "Aligner",      action: "align" }
                 ]
 
                 Rectangle {
@@ -134,7 +134,14 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: { /* TODO: open property sub-palette */ }
+                        onClicked: {
+                            if (modelData.action === "fill")
+                                toolController.activateFillTool()
+                            else if (modelData.action === "stroke")
+                                toolController.applyStrokeToSelection()
+                            else if (modelData.action === "align")
+                                toolController.alignSelection()
+                        }
                     }
                     ToolTip {
                         visible: propMouse.containsMouse
