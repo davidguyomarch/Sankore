@@ -152,6 +152,12 @@ void UBAppController::openPreferences()
         UBApplication::mainWindow->actionPreferences->trigger();
 }
 
+void UBAppController::quit()
+{
+    if (UBApplication::mainWindow && UBApplication::mainWindow->actionQuit)
+        UBApplication::mainWindow->actionQuit->trigger();
+}
+
 // --- Private slots ---
 
 void UBAppController::onActiveSceneChanged()

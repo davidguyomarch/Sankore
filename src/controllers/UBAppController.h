@@ -48,6 +48,7 @@ public slots:
     void redo();
 
     void openPreferences();
+    void quit();
 
     void setBackgroundLight();
     void setBackgroundDark();

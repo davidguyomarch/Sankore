@@ -134,6 +134,7 @@ Rectangle {
 
         // === Right Actions ===
         ToolbarButton { icon: "gear"; tooltip: "Préférences"; onClicked: appController.openPreferences() }
+        ToolbarButton { icon: "sign-out"; tooltip: "Quitter"; onClicked: appController.quit() }
     }
 
     // === Reusable ToolbarButton ===
