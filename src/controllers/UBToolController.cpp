@@ -13,10 +13,6 @@
 #include "domain/UBShapeFactory.h"
 #include "domain/UBAlignObjectManager.h"
 
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
-
 UBToolController::UBToolController(QObject* parent)
     : QObject(parent)
     , m_activeTool(Pen)
@@ -47,40 +43,16 @@ void UBToolController::setActiveTool(int tool)
     if (m_activeTool == tool)
         return;
 
-    // Diagnostic: log tool change
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
-            QTextStream out(&logFile);
-            out << "\n[TOOL CHANGE] from=" << m_activeTool << " to=" << tool
-                << " drawingCtrl_before=" << UBDrawingController::drawingController()->stylusTool()
-                << "\n";
-            logFile.close();
-        }
-    }
-
     m_activeTool = tool;
 
     // Push to the legacy system
     if (tool == Drawing)
     {
-        // For Drawing tool, activate via ShapeFactory
         UBApplication::boardController->shapeFactory().createEllipse(true);
     }
     else
     {
         UBDrawingController::drawingController()->setStylusTool(tool);
-    }
-
-    // Diagnostic: log after
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
-            QTextStream out(&logFile);
-            out << "[TOOL CHANGE] after: drawingCtrl=" << UBDrawingController::drawingController()->stylusTool()
-                << " m_activeTool=" << m_activeTool << "\n";
-            logFile.close();
-        }
     }
 
     emit activeToolChanged();
@@ -189,40 +161,14 @@ int UBToolController::currentColorIndex() const
 
 void UBToolController::setCurrentColorIndex(int index)
 {
-    // Diagnostic: log color change to startup.log
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
-            QTextStream out(&logFile);
-            out << "\n[COLOR CHANGE] index=" << index
-                << " activeTool=" << m_activeTool
-                << " before_penIdx=" << UBSettings::settings()->penColorIndex()
-                << "\n";
-            logFile.close();
-        }
-    }
-
     if (m_activeTool == Marker)
         setMarkerColorIndex(index);
     else
         setPenColorIndex(index);
 
-    // Also notify the legacy drawing controller so the scene uses the new color
     emit penColorChanged();
     emit currentColorIndexChanged();
-    emit currentColorsChanged(); // force QML to rebind color list (highlight update)
-
-    // Diagnostic: log after change
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
-            QTextStream out(&logFile);
-            out << "[COLOR CHANGE] after: penIdx=" << UBSettings::settings()->penColorIndex()
-                << " currentToolColor=" << UBDrawingController::drawingController()->currentToolColor().name()
-                << "\n";
-            logFile.close();
-        }
-    }
+    emit currentColorsChanged();
 }
 
 int UBToolController::currentWidthIndex() const

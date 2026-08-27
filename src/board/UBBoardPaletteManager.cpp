@@ -61,9 +61,6 @@
 #include <QFile>
 #include <QTextStream>
 #include "qml/UBThemeManager.h"
-#include "qml/UBStylusController.h"
-#include "qml/UBDrawingPropertiesController.h"
-#include "qml/UBShapesController.h"
 
 
 #include "network/UBNetworkAccessManager.h"
@@ -94,7 +91,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mBoardControler(pBoardController)
     , mStylusPalette(0)
     , mStylusPaletteQml(nullptr)
-    , mStylusController(nullptr)
     , mToolController(nullptr)
     , mPageController(nullptr)
     , mAppController(nullptr)
@@ -102,13 +98,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPageNavQml(nullptr)
     , mDrawingPropsBarQml(nullptr)
     , mShapesPaletteV2Qml(nullptr)
-    , mDrawingPropsQml(nullptr)
-    , mDrawingPropsController(nullptr)
-    , mShapesPaletteQml(nullptr)
-    , mShapesController(nullptr)
     , mDrawingPalette(nullptr)
     , mZoomPalette(0)
-    , mTipPalette(0)
     , mLinkPalette(0)
     , mLeftPalette(nullptr)
     , mRightPalette(nullptr)
@@ -123,10 +114,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPendingZoomButtonPressed(false)
     , mPendingPanButtonPressed(false)
     , mPendingEraseButtonPressed(false)
-    , mpPageNavigWidget(nullptr)
-    , mpCachePropWidget(nullptr)
-    , mpDownloadWidget(nullptr)
-    , mpTeacherGuideWidget(nullptr)
     , mDownloadInProgress(false)
 {
     mSettings = UBSettings::settings();
@@ -139,14 +126,16 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
 UBBoardPaletteManager::~UBBoardPaletteManager()
 {
     // Destroy QML widgets BEFORE their controllers are deleted.
-    // The QQuickWidgets hold context property references to controllers;
-    // if controllers die first, QML may try to access dangling pointers.
-    delete mShapesPaletteQml;
-    mShapesPaletteQml = nullptr;
-    delete mDrawingPropsQml;
-    mDrawingPropsQml = nullptr;
+    delete mShapesPaletteV2Qml;
+    mShapesPaletteV2Qml = nullptr;
+    delete mDrawingPropsBarQml;
+    mDrawingPropsBarQml = nullptr;
     delete mStylusPaletteQml;
     mStylusPaletteQml = nullptr;
+    delete mTopBarQml;
+    mTopBarQml = nullptr;
+    delete mPageNavQml;
+    mPageNavQml = nullptr;
 
 // mAddedItemPalette is delete automatically because of is parent
 // that changes depending on the mode
@@ -171,33 +160,19 @@ void UBBoardPaletteManager::setupLayout()
  */
 void UBBoardPaletteManager::setupDockPaletteWidgets()
 {
-
-    //------------------------------------------------//
-    // Create the widgets for the dock palettes
-
-    mpCachePropWidget = new UBCachePropertiesWidget();
-    mpDownloadWidget = new UBDockDownloadWidget();
-
-
-    // Add the dock palettes (kept for legacy code references, but fully hidden — QML V2 replaces them)
+    // Dock palettes are permanently hidden (QML V2 replaces them).
+    // We still create the palette shells and mpFeaturesWidget (used by addItemToLibrary).
     mLeftPalette = new UBLeftPalette(mContainer);
-
-    // LEFT palette widgets — create but do NOT register (prevents switchMode from re-adding tabs)
-    mpPageNavigWidget = new UBPageNavigationWidget();
-    mTeacherResources = new UBDockResourcesWidget;
-
     mLeftPalette->hide();
     mLeftPalette->setMaximumSize(0, 0);
 
+    mTeacherResources = new UBDockResourcesWidget;
 
     mRightPalette = new UBRightPalette(mContainer);
-
-    // RIGHT palette widgets — create but do NOT register
-    mpFeaturesWidget = new UBFeaturesWidget();
-
     mRightPalette->hide();
     mRightPalette->setMaximumSize(0, 0);
 
+    mpFeaturesWidget = new UBFeaturesWidget();
 }
 
 void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMode mainMode)
@@ -278,17 +253,8 @@ void UBBoardPaletteManager::setupPalettes()
     mZoomPalette = new UBZoomPalette(mContainer);
     mDrawingPalette->stackUnder(mZoomPalette);
 
-    // --- QML Stylus Palette (Issue #110 Step 2) ---
+    // --- QML V2 Stylus Palette ---
     bool isVertical = mSettings->appToolBarOrientationVertical->get().toBool();
-
-    mStylusController = new UBStylusController(this);
-    mStylusController->setVertical(isVertical);
-
-    // Note: UBStylusController is kept for backward compatibility but we no longer
-    // register tool actions or finalize() it. The QActionGroup it created was
-    // intercepting tool changes from UBDrawingController::setStylusTool() and
-    // causing an off-by-one lag (each action toggle re-triggered the previous tool).
-    // The QML V2 UI uses UBToolController directly — no QActions involved.
 
     // Create the QQuickWidget for the stylus palette
     mStylusPaletteQml = new QQuickWidget(mContainer);
@@ -297,7 +263,6 @@ void UBBoardPaletteManager::setupPalettes()
     mStylusPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
     mStylusPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mStylusPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
-    mStylusPaletteQml->rootContext()->setContextProperty("stylusController", mStylusController);
 
     // New V2 controller — direct binding, no QAction
     mToolController = new UBToolController(this);
@@ -431,19 +396,6 @@ void UBBoardPaletteManager::setupPalettes()
     mShapesPaletteV2Qml->hide(); // starts hidden, controlled by toolController.shapesVisible
     // Show/hide based on controller
     connect(mToolController, &UBToolController::shapesVisibleChanged, this, [this]() {
-        // Log to startup.log
-        {
-            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-            if (logFile.open(QIODevice::Append | QIODevice::Text)) {
-                QTextStream out(&logFile);
-                out << "\n[SHAPES TOGGLE] visible=" << mToolController->shapesVisible()
-                    << " container=" << mContainer->width() << "x" << mContainer->height()
-                    << " stylusY=" << mStylusPaletteQml->y()
-                    << " shapesSize=" << mShapesPaletteV2Qml->width() << "x" << mShapesPaletteV2Qml->height()
-                    << "\n";
-                logFile.close();
-            }
-        }
         if (mToolController->shapesVisible())
         {
             // Position above bottom bar, to the right of sidebar
@@ -505,75 +457,10 @@ void UBBoardPaletteManager::setupPalettes()
         }
     }
 
-    // --- QML Drawing Properties Panel (Issue #110 Step 3) ---
-    mDrawingPropsController = new UBDrawingPropertiesController(this);
-
-    mDrawingPropsQml = new QQuickWidget(mContainer);
-    mDrawingPropsQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mDrawingPropsQml->setClearColor(Qt::transparent);
-    mDrawingPropsQml->setAttribute(Qt::WA_TranslucentBackground);
-    mDrawingPropsQml->setAttribute(Qt::WA_AlwaysStackOnTop);
-    mDrawingPropsQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
-    mDrawingPropsQml->rootContext()->setContextProperty("drawingProps", mDrawingPropsController);
-    mDrawingPropsQml->setSource(QUrl("qrc:/qml/DrawingProperties.qml"));
-
-    // Max size for the widget (7 buttons + separator: 4 colors + sep + 3 widths)
-    int dpBtnSize = 36;
-    int dpSpacing = 6;
-    int dpPadding = 8;
-    int dpMaxButtons = 7; // 4 colors + 3 widths
-    int dpWidth = dpMaxButtons * dpBtnSize + (dpMaxButtons - 1) * dpSpacing
-                  + dpSpacing + 1 + dpSpacing // separator
-                  + dpPadding * 2;
-    int dpHeight = dpBtnSize + dpPadding * 2;
-    mDrawingPropsQml->setFixedSize(dpWidth, dpHeight);
-
-    // Position just above/below the stylus palette
-    if (isVertical) {
-        int posX = mStylusPaletteQml->x() - dpWidth - 10;
-        int posY = mStylusPaletteQml->y();
-        mDrawingPropsQml->move(posX, posY);
-    } else {
-        int posX = (mContainer->width() - dpWidth) / 2;
-        int posY = mStylusPaletteQml->y() - dpHeight - 10;
-        mDrawingPropsQml->move(posX, posY);
-    }
-
-    mDrawingPropsQml->show();
-    mDrawingPropsQml->raise();
-
-    // --- QML Shapes Palette (Issue #110 Step 5) ---
-    mShapesController = new UBShapesController(this);
-
-    mShapesPaletteQml = new QQuickWidget(mContainer);
-    mShapesPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mShapesPaletteQml->setClearColor(Qt::transparent);
-    mShapesPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
-    mShapesPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
-    mShapesPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
-    mShapesPaletteQml->rootContext()->setContextProperty("shapesController", mShapesController);
-    mShapesPaletteQml->setSource(QUrl("qrc:/qml/ShapesPalette.qml"));
-    mShapesPaletteQml->setFixedSize(160, 380);
-
-    // Position: to the left of the stylus palette
-    if (isVertical) {
-        mShapesPaletteQml->move(mStylusPaletteQml->x() - 170, mStylusPaletteQml->y());
-    } else {
-        mShapesPaletteQml->move(mStylusPaletteQml->x(), mStylusPaletteQml->y() - 390);
-    }
-    mShapesPaletteQml->hide(); // starts hidden, toggled by Drawing button
-
-    // Connect the Drawing action to toggle the shapes palette
-    connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, mShapesController, [this](bool checked) {
-        mShapesController->setVisible(checked);
-        mShapesPaletteQml->setVisible(checked);
-        if (checked)
-            mShapesPaletteQml->raise();
-    });
+    // Old DrawingProperties and ShapesPalette V1 removed — superseded by
+    // DrawingPropsBar.qml and ShapesPaletteV2.qml (controlled by UBToolController)
 
     // UBStartupHintsPalette disabled - contains QWebEngineView that crashes on paint
-    // mTipPalette = new UBStartupHintsPalette(mContainer);
-    mTipPalette = nullptr;
 
     QList<QAction*> backgroundsActions;
 
@@ -871,7 +758,7 @@ void UBBoardPaletteManager::containerResized()
     // Reposition QML stylus palette on resize
     if (mStylusPaletteQml)
     {
-        bool isVertical = mStylusController->vertical();
+        bool isVertical = mSettings->appToolBarOrientationVertical->get().toBool();
         int w = mStylusPaletteQml->width();
         int h = mStylusPaletteQml->height();
 
@@ -885,19 +772,6 @@ void UBBoardPaletteManager::containerResized()
             mStylusPaletteQml->move(posX, posY);
         }
 
-        // Reposition drawing properties panel relative to stylus palette
-        if (mDrawingPropsQml)
-        {
-            int dpW = mDrawingPropsQml->width();
-            int dpH = mDrawingPropsQml->height();
-            if (isVertical) {
-                mDrawingPropsQml->move(mStylusPaletteQml->x() - dpW - 10,
-                                       mStylusPaletteQml->y());
-            } else {
-                int posX = (mContainer->width() - dpW) / 2;
-                mDrawingPropsQml->move(posX, mStylusPaletteQml->y() - dpH - 10);
-            }
-        }
     }
 
     // Reposition QML V2 widgets on container resize
@@ -933,7 +807,6 @@ void UBBoardPaletteManager::containerResized()
     // Hide old palettes (replaced by QML V2)
     if (mLeftPalette) mLeftPalette->hide();
     if (mRightPalette) mRightPalette->hide();
-    if (mDrawingPropsQml) mDrawingPropsQml->hide();
 
     // Log final positions once container is big enough
     static bool loggedResize = false;
@@ -1020,11 +893,6 @@ void UBBoardPaletteManager::activeSceneChanged()
 
     if (mStylusPalette)
         connect(mStylusPalette, &UBFloatingPalette::mouseEntered, activeScene, &UBGraphicsScene::hideEraser);
-
-    if (mpPageNavigWidget)
-    {
-        mpPageNavigWidget->setPageNumber(UBDocumentContainer::pageFromSceneIndex(pageIndex), activeScene->document()->pageCount());
-    }
 
     //issue 1682 - NNE - 20140113
     // Disabled: QML V2 PageNavigator replaces the dock palette tabs.
@@ -1196,10 +1064,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 // Restore QML palettes when returning from desktop/document mode
                 if (mStylusPaletteQml)
                     mStylusPaletteQml->show();
-                if (mDrawingPropsQml)
-                    mDrawingPropsQml->show();
-                if (mShapesPaletteQml)
-                    mShapesPaletteQml->show();
                 if (mTopBarQml)
                     mTopBarQml->show();
                 if (mPageNavQml)
@@ -1253,10 +1117,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 // gets hidden in desktop mode. Calling raise() on them would crash.
                 if (mStylusPaletteQml)
                     mStylusPaletteQml->hide();
-                if (mDrawingPropsQml)
-                    mDrawingPropsQml->hide();
-                if (mShapesPaletteQml)
-                    mShapesPaletteQml->hide();
 
                 mAddItemPalette->setParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 // Dock palettes permanently hidden — QML V2 replaces them
@@ -1524,16 +1384,14 @@ void UBBoardPaletteManager::changeStylusPaletteOrientation(QVariant var)
     mDrawingPalette->initPosition(); // move de drawing Palette
 
     // Update QML palette orientation
-    if (mStylusController)
     {
-        mStylusController->setVertical(bVertical);
-
-        // Resize the QML widget
-        int toolCount = mStylusController->tools().size();
-        int btnSize = 44;
+        int btnSize = 40;
+        int numTools = 14;
+        int numSeps = 2;
+        int sepWidth = 1 + 12;
         int spacing = 2;
         int padding = 6;
-        int contentLen = toolCount * btnSize + (toolCount - 1) * spacing + padding * 2;
+        int contentLen = numTools * btnSize + (numTools - 1) * spacing + numSeps * sepWidth + padding * 2;
         int thickness = btnSize + padding * 2;
 
         if (mStylusPaletteQml)
@@ -1573,22 +1431,13 @@ void UBBoardPaletteManager::refreshPalettes()
 
 void UBBoardPaletteManager::startDownloads()
 {
-    if(!mDownloadInProgress)
-    {
-        mDownloadInProgress = true;
-        mpDownloadWidget->setVisibleState(true);
-        mRightPalette->addTab(mpDownloadWidget);
-    }
+    // Download widget removed — dock palettes are permanently hidden (QML V2)
+    mDownloadInProgress = true;
 }
 
 void UBBoardPaletteManager::stopDownloads()
 {
-    if(mDownloadInProgress)
-    {
-        mDownloadInProgress = false;
-        mpDownloadWidget->setVisibleState(false);
-        mRightPalette->removeTab(mpDownloadWidget);
-    }
+    mDownloadInProgress = false;
 }
 
 

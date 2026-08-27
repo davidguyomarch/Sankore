@@ -60,6 +60,7 @@
 #include "gui/UBMessageWindow.h"
 #include "gui/UBMainWindow.h"
 #include "gui/UBDocumentToolsPalette.h"
+#include "gui/UBDocumentNavigator.h"
 
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsSvgItem.h"

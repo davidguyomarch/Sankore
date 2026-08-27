@@ -63,10 +63,7 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            console.log("[QML COLOR CLICK] index=" + index + " color=" + modelData + " currentIdx=" + toolController.currentColorIndex)
-                            toolController.currentColorIndex = index
-                        }
+                        onClicked: toolController.currentColorIndex = index
                     }
                 }
             }

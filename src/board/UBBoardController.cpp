@@ -64,6 +64,7 @@
 #include "gui/UBDockPaletteWidget.h"
 #include "gui/UBDockTeacherGuideWidget.h"
 #include "gui/UBTeacherGuideWidget.h"
+#include "gui/UBDocumentNavigator.h"
 
 #include "domain/UBGraphicsPixmapItem.h"
 #include "domain/UBGraphicsItemUndoCommand.h"

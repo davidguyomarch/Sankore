@@ -1,12 +1,9 @@
 <RCC>
     <qresource prefix="/qml">
-        <file>StylusPalette.qml</file>
         <file>StylusPaletteV2.qml</file>
         <file>TopBar.qml</file>
         <file>PageNavigator.qml</file>
         <file>DrawingPropsBar.qml</file>
         <file>ShapesPaletteV2.qml</file>
-        <file>DrawingProperties.qml</file>
-        <file>ShapesPalette.qml</file>
     </qresource>
 </RCC>
