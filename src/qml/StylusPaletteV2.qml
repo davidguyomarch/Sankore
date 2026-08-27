@@ -47,9 +47,9 @@ Rectangle {
         { id: 8,   icon: "crosshair",              tooltip: "Pointeur" },
         { id: -3,  icon: "",                        tooltip: "",                isSeparator: true },
         { id: 9,   icon: "line-segment",            tooltip: "Ligne" },
-        { id: 10,  icon: "text-t",                  tooltip: "Texte" },
+        { id: 10,  icon: "text-aa",                  tooltip: "Texte" },
         { id: 11,  icon: "selection",               tooltip: "Capture" },
-        { id: 15,  icon: "text-aa",                 tooltip: "OCR" }
+        { id: 15,  icon: "magic-wand",              tooltip: "OCR" }
     ]
 
     Row {

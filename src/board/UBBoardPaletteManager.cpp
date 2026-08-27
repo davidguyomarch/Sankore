@@ -284,25 +284,11 @@ void UBBoardPaletteManager::setupPalettes()
     mStylusController = new UBStylusController(this);
     mStylusController->setVertical(isVertical);
 
-    // Register tool buttons (same order as old UBStylusPalette)
-    UBMainWindow* mw = UBApplication::mainWindow;
-    mStylusController->addTool(tr("Drawing Palette"), "qrc:/images/stylusPalette/svg/drawing.svg", mw->actionDrawing, true);
-    mStylusController->addTool(tr("Pen"), "qrc:/images/stylusPalette/svg/pen.svg", mw->actionPen);
-    mStylusController->addTool(tr("Eraser"), "qrc:/images/stylusPalette/svg/eraser.svg", mw->actionEraser);
-    mStylusController->addTool(tr("Marker"), "qrc:/images/stylusPalette/svg/marker.svg", mw->actionMarker);
-    mStylusController->addTool(tr("Selector"), "qrc:/images/stylusPalette/svg/selector.svg", mw->actionSelector);
-    mStylusController->addTool(tr("Play"), "qrc:/images/stylusPalette/svg/play.svg", mw->actionPlay);
-    mStylusController->addTool(tr("Hand"), "qrc:/images/stylusPalette/svg/hand.svg", mw->actionHand);
-    mStylusController->addTool(tr("Zoom In"), "qrc:/images/stylusPalette/svg/zoomIn.svg", mw->actionZoomIn);
-    mStylusController->addTool(tr("Zoom Out"), "qrc:/images/stylusPalette/svg/zoomOut.svg", mw->actionZoomOut);
-    mStylusController->addTool(tr("Pointer"), "qrc:/images/stylusPalette/svg/pointer.svg", mw->actionPointer);
-    mStylusController->addTool(tr("Line"), "qrc:/images/stylusPalette/svg/line.svg", mw->actionLine);
-    mStylusController->addTool(tr("Text"), "qrc:/images/stylusPalette/svg/text.svg", mw->actionText);
-    mStylusController->addTool(tr("Capture"), "qrc:/images/stylusPalette/svg/capture.svg", mw->actionCapture);
-    mStylusController->addTool(tr("OCR"), "qrc:/images/stylusPalette/svg/ocr.svg", mw->actionOcr);
-    if (mw->actionAutoOcr)
-        mStylusController->addTool(tr("Auto OCR"), "qrc:/images/stylusPalette/svg/ocr-auto-off.svg", mw->actionAutoOcr, true);
-    mStylusController->finalize();
+    // Note: UBStylusController is kept for backward compatibility but we no longer
+    // register tool actions or finalize() it. The QActionGroup it created was
+    // intercepting tool changes from UBDrawingController::setStylusTool() and
+    // causing an off-by-one lag (each action toggle re-triggered the previous tool).
+    // The QML V2 UI uses UBToolController directly — no QActions involved.
 
     // Create the QQuickWidget for the stylus palette
     mStylusPaletteQml = new QQuickWidget(mContainer);

@@ -11,6 +11,9 @@
 #include "domain/UBGraphicsScene.h"
 
 #include <QUndoStack>
+#include <QFile>
+#include <QTextStream>
+#include <QApplication>
 
 UBAppController::UBAppController(QObject* parent)
     : QObject(parent)
@@ -159,7 +162,18 @@ void UBAppController::openPreferences()
 
 void UBAppController::quit()
 {
-    UBApplication::app()->closing();
+    // Log the quit attempt
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[QUIT] quit() called, invoking QApplication::quit()\n";
+            logFile.close();
+        }
+    }
+    // Call quit directly — UBApplication::closing() has a static guard that may
+    // block if it was called previously (e.g., during startup close event).
+    QApplication::quit();
 }
 
 // --- Private slots ---

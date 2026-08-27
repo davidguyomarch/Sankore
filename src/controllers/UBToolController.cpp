@@ -47,6 +47,18 @@ void UBToolController::setActiveTool(int tool)
     if (m_activeTool == tool)
         return;
 
+    // Diagnostic: log tool change
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[TOOL CHANGE] from=" << m_activeTool << " to=" << tool
+                << " drawingCtrl_before=" << UBDrawingController::drawingController()->stylusTool()
+                << "\n";
+            logFile.close();
+        }
+    }
+
     m_activeTool = tool;
 
     // Push to the legacy system
@@ -58,6 +70,17 @@ void UBToolController::setActiveTool(int tool)
     else
     {
         UBDrawingController::drawingController()->setStylusTool(tool);
+    }
+
+    // Diagnostic: log after
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[TOOL CHANGE] after: drawingCtrl=" << UBDrawingController::drawingController()->stylusTool()
+                << " m_activeTool=" << m_activeTool << "\n";
+            logFile.close();
+        }
     }
 
     emit activeToolChanged();

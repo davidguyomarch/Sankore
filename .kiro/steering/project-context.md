@@ -155,3 +155,47 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.p
 ## Testing Workflow
 
 Voir `.kiro/steering/dev-workflow.md` pour le workflow complet (Docker → CI → VM → startup.log).
+
+
+## Icons — Phosphor Icons
+
+The QML V2 UI uses **Phosphor Icons** (regular weight) for all toolbar and palette buttons.
+
+### Location
+
+- SVG files: `resources/icons/phosphor/*.svg`
+- QRC file: `resources/icons/phosphor/phosphor.qrc`
+- QRC prefix: `/icons/phosphor/`
+- QML usage: `source: "qrc:/icons/phosphor/" + iconName + ".svg"`
+
+### Rules for Kiro
+
+1. **Always use icons from the existing set** in `resources/icons/phosphor/` first. List available icons before choosing.
+2. **If an icon is missing**, download it from the official Phosphor Icons repository: `https://raw.githubusercontent.com/phosphor-icons/core/main/assets/regular/<name>.svg`
+3. **Never hand-craft SVG icons** — always use official Phosphor SVGs for visual consistency.
+4. **Add new icons to `phosphor.qrc`** in alphabetical order after adding the SVG file.
+5. **Icon naming**: use the Phosphor icon name as-is (e.g., `magic-wand.svg`, `sign-out.svg`).
+6. **Icon rendering**: icons are rendered via `Image` + `ColorOverlay` in QML to support theming (light/dark).
+
+### Current icon mapping
+
+| Tool / Action | Phosphor Icon | File |
+|--------------|---------------|------|
+| Pen | pen | pen.svg |
+| Eraser | eraser | eraser.svg |
+| Marker | highlighter-circle | highlighter-circle.svg |
+| Selector | cursor | cursor.svg |
+| Play | play | play.svg |
+| Hand | hand | hand.svg |
+| Zoom In | magnifying-glass-plus | magnifying-glass-plus.svg |
+| Zoom Out | magnifying-glass-minus | magnifying-glass-minus.svg |
+| Pointer | crosshair | crosshair.svg |
+| Line | line-segment | line-segment.svg |
+| Text | text-aa | text-aa.svg |
+| Capture | selection | selection.svg |
+| OCR | magic-wand | magic-wand.svg |
+| Shapes toggle | shapes | shapes.svg |
+| Preferences | gear | gear.svg |
+| Quit | sign-out | sign-out.svg |
+| Undo | arrow-counter-clockwise | arrow-counter-clockwise.svg |
+| Redo | arrow-clockwise | arrow-clockwise.svg |
