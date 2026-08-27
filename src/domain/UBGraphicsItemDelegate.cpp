@@ -88,6 +88,11 @@ DelegateButton::~DelegateButton()
     // NOOP
 }
 
+QRectF DelegateButton::boundingRect() const
+{
+    return QRectF(0, 0, kButtonSize, kButtonSize);
+}
+
 void DelegateButton::setFileName(const QString & fileName)
 {
     QGraphicsSvgItem::setSharedRenderer(new QSvgRenderer (fileName, this));
@@ -130,7 +135,13 @@ void DelegateButton::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QGraphicsSvgItem::paint(painter, option, widget);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    // Render the SVG scaled into our fixed-size button rect
+    if (renderer() && renderer()->isValid()) {
+        renderer()->render(painter, boundingRect());
+    }
 
     if (mIsPressed && mShowProgressIndicator) {
         QPen pen;
@@ -140,8 +151,9 @@ void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
         painter->setPen(pen);
 
+        QRectF arcRect = boundingRect().adjusted(pen.width(), pen.width(), -pen.width(), -pen.width());
         int spanAngle = qMin(mPressProgres, UBSettings::longClickInterval) * 360 / UBSettings::longClickInterval;
-        painter->drawArc(option->rect.adjusted(pen.width(), pen.width(), -pen.width(), -pen.width()), 16 * 90, -16 * spanAngle);
+        painter->drawArc(arcRect, 16 * 90, -16 * spanAngle);
 
         painter->restore();
     }
@@ -208,25 +220,25 @@ void UBGraphicsItemDelegate::init()
     mFrame->hide();
     mFrame->setFlag(QGraphicsItem::ItemIsSelectable, true);
 
-    mDeleteButton = new DelegateButton(":/images/close.svg", mDelegated, mFrame, Qt::TopLeftSection);
+    mDeleteButton = new DelegateButton(":/icons/phosphor/x-circle.svg", mDelegated, mFrame, Qt::TopLeftSection);
     mButtons << mDeleteButton;
     connect(mDeleteButton, &DelegateButton::clicked, this, [this]() { remove(); });
     if (canDuplicate()){
-        mDuplicateButton = new DelegateButton(":/images/duplicate.svg", mDelegated, mFrame, Qt::TopLeftSection);
+        mDuplicateButton = new DelegateButton(":/icons/phosphor/copy.svg", mDelegated, mFrame, Qt::TopLeftSection);
         connect(mDuplicateButton, &DelegateButton::clicked, this, [this]() { duplicate(); });
         mButtons << mDuplicateButton;
     }
-    mMenuButton = new DelegateButton(":/images/menu.svg", mDelegated, mFrame, Qt::TopLeftSection);
+    mMenuButton = new DelegateButton(":/icons/phosphor/dots-three.svg", mDelegated, mFrame, Qt::TopLeftSection);
     connect(mMenuButton, &DelegateButton::clicked, this, [this]() { showMenu(); });
     mButtons << mMenuButton;
 
-    mZOrderUpButton = new DelegateButton(":/images/z_layer_up.svg", mDelegated, mFrame, Qt::BottomLeftSection);
+    mZOrderUpButton = new DelegateButton(":/icons/phosphor/arrow-up.svg", mDelegated, mFrame, Qt::BottomLeftSection);
     mZOrderUpButton->setShowProgressIndicator(true);
     connect(mZOrderUpButton, &DelegateButton::clicked, this, [this]() { increaseZLevelUp(); });
     connect(mZOrderUpButton, &DelegateButton::longClicked, this, &UBGraphicsItemDelegate::increaseZlevelTop);
     mButtons << mZOrderUpButton;
 
-    mZOrderDownButton = new DelegateButton(":/images/z_layer_down.svg", mDelegated, mFrame, Qt::BottomLeftSection);
+    mZOrderDownButton = new DelegateButton(":/icons/phosphor/arrow-down.svg", mDelegated, mFrame, Qt::BottomLeftSection);
     mZOrderDownButton->setShowProgressIndicator(true);
     connect(mZOrderDownButton, &DelegateButton::clicked, this, [this]() { increaseZLevelDown(); });
     connect(mZOrderDownButton, &DelegateButton::longClicked, this, &UBGraphicsItemDelegate::increaseZlevelBottom);
@@ -854,11 +866,11 @@ void UBGraphicsItemDelegate::updateButtons(bool showUpdated)
     mDeleteButton->setParentItem(mFrame);
     mDeleteButton->setTransform(tr);
 
-    qreal topX = mFrame->rect().left() - mDeleteButton->renderer()->viewBox().width() * mAntiScaleRatio / 2;
-    qreal topY = mFrame->rect().top() - mDeleteButton->renderer()->viewBox().height() * mAntiScaleRatio / 2;
+    qreal topX = mFrame->rect().left() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
+    qreal topY = mFrame->rect().top() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
 
-    qreal bottomX = mFrame->rect().left() - mDeleteButton->renderer()->viewBox().width() * mAntiScaleRatio / 2;
-    qreal bottomY = mFrame->rect().bottom() - mDeleteButton->renderer()->viewBox().height() * mAntiScaleRatio / 2;
+    qreal bottomX = mFrame->rect().left() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
+    qreal bottomY = mFrame->rect().bottom() - DelegateButton::kButtonSize * mAntiScaleRatio / 2;
 
     mDeleteButton->setPos(topX, topY);
 

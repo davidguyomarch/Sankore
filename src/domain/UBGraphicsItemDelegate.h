@@ -51,6 +51,7 @@ class DelegateButton: public QGraphicsSvgItem
 
     public:
         static DelegateButton *Spacer;
+        static constexpr int kButtonSize = 26;
 
         DelegateButton(const QString & fileName, QGraphicsItem* pDelegated, QGraphicsItem * parent = 0, Qt::WindowFrameSection section = Qt::TopLeftSection);
 
@@ -71,6 +72,8 @@ class DelegateButton: public QGraphicsSvgItem
 
         void setSection(Qt::WindowFrameSection section) {mButtonAlignmentSection =  section;}
         Qt::WindowFrameSection getSection() const {return mButtonAlignmentSection;}
+
+        QRectF boundingRect() const override;
 
     protected:
 
