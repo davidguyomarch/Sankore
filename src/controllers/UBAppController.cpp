@@ -42,6 +42,11 @@ void UBAppController::setActiveMode(int mode)
     if (m_mode == mode)
         return;
 
+    // Documents mode temporarily disabled — it shows the legacy UBDocumentController
+    // which conflicts with QML V2 palettes. Will be reimplemented as a QML view.
+    if (mode == Documents)
+        return;
+
     m_mode = mode;
 
     switch (mode)

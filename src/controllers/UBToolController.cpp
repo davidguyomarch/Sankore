@@ -82,6 +82,7 @@ void UBToolController::setPenColorIndex(int index)
 {
     UBSettings::settings()->setPenColorIndex(index);
     emit penColorChanged();
+    emit currentColorIndexChanged();
 }
 
 int UBToolController::penWidthIndex() const
@@ -93,6 +94,7 @@ void UBToolController::setPenWidthIndex(int index)
 {
     UBSettings::settings()->setPenWidthIndex(index);
     emit penWidthChanged();
+    emit currentWidthIndexChanged();
 }
 
 QList<QColor> UBToolController::penColors() const
@@ -120,6 +122,7 @@ void UBToolController::setMarkerColorIndex(int index)
 {
     UBSettings::settings()->setMarkerColorIndex(index);
     emit markerColorChanged();
+    emit currentColorIndexChanged();
 }
 
 int UBToolController::markerWidthIndex() const
@@ -131,6 +134,7 @@ void UBToolController::setMarkerWidthIndex(int index)
 {
     UBSettings::settings()->setMarkerWidthIndex(index);
     emit markerWidthChanged();
+    emit currentWidthIndexChanged();
 }
 
 // --- Marker Colors ---
@@ -229,6 +233,7 @@ void UBToolController::setEraserWidthIndex(int index)
 {
     UBSettings::settings()->setEraserWidthIndex(index);
     emit eraserWidthChanged();
+    emit currentWidthIndexChanged();
 }
 
 // --- Drawing Props visibility ---

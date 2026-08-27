@@ -46,9 +46,9 @@ Rectangle {
 
                 Repeater {
                     model: [
-                        { mode: 0, icon: "chalkboard-teacher", label: "Tableau" },
-                        { mode: 1, icon: "folders",            label: "Documents" },
-                        { mode: 2, icon: "desktop",            label: "Bureau" }
+                        { mode: 0, icon: "chalkboard-teacher", label: "Tableau",   enabled: true },
+                        { mode: 1, icon: "folders",            label: "Documents", enabled: false },
+                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: false }
                     ]
 
                     Rectangle {
@@ -56,6 +56,7 @@ Rectangle {
                         height: 30
                         radius: 4
                         color: appController.activeMode === modelData.mode ? themeManager.primary : "transparent"
+                        opacity: modelData.enabled ? 1.0 : 0.4
 
                         Row {
                             id: modeRow
@@ -87,8 +88,8 @@ Rectangle {
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: appController.activeMode = modelData.mode
+                            cursorShape: modelData.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            onClicked: if (modelData.enabled) appController.activeMode = modelData.mode
                         }
                     }
                 }
