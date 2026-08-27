@@ -259,8 +259,7 @@ void UBBoardPaletteManager::setupPalettes()
     // Create the QQuickWidget for the stylus palette
     mStylusPaletteQml = new QQuickWidget(mContainer);
     mStylusPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mStylusPaletteQml->setClearColor(Qt::transparent);
-    mStylusPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
+    mStylusPaletteQml->setClearColor(QColor(30, 30, 30));
     mStylusPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mStylusPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
 
@@ -348,8 +347,7 @@ void UBBoardPaletteManager::setupPalettes()
     // --- QML Drawing Props Bar (Issue #121 Step 5) ---
     mDrawingPropsBarQml = new QQuickWidget(mContainer);
     mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mDrawingPropsBarQml->setClearColor(Qt::transparent);
-    mDrawingPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
+    mDrawingPropsBarQml->setClearColor(QColor(30, 30, 30));  // opaque dark background — no transparent click-through
     mDrawingPropsBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mDrawingPropsBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mDrawingPropsBarQml->rootContext()->setContextProperty("toolController", mToolController);
@@ -384,8 +382,7 @@ void UBBoardPaletteManager::setupPalettes()
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
     mShapesPaletteV2Qml = new QQuickWidget(mContainer);
     mShapesPaletteV2Qml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mShapesPaletteV2Qml->setClearColor(Qt::transparent);
-    mShapesPaletteV2Qml->setAttribute(Qt::WA_TranslucentBackground);
+    mShapesPaletteV2Qml->setClearColor(QColor(30, 30, 30));
     mShapesPaletteV2Qml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mShapesPaletteV2Qml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mShapesPaletteV2Qml->rootContext()->setContextProperty("toolController", mToolController);

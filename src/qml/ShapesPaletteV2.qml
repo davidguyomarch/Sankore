@@ -19,7 +19,7 @@ Rectangle {
 
     implicitWidth: 3 * 42 + 2 * 4 + 20
     implicitHeight: contentCol.implicitHeight + 20
-    radius: 12
+    radius: 0  // No radius — QQuickWidget on Windows needs opaque background for mouse events
     color: themeManager.surface
     border.color: themeManager.border
     border.width: 1
