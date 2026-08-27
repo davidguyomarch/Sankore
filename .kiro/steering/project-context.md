@@ -145,32 +145,57 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.p
 
 ## Important Notes for Development
 
-- **Do NOT compile locally** — use GitHub Actions CI only (no Windows machine available)
+- **Compilation locale** : via Docker Linux uniquement (voir `.kiro/steering/dev-workflow.md`)
 - **Push to master** triggers CI automatically
 - **Web module is stubbed** — UBWebController.cpp is a minimal stub, browser/ excluded from build
 - **QuaZip stubs deleted** — real QuaZip headers come from C:/quazip via INCLUDEPATH prepend
 - **Warnings are non-blocking**: D9025 (/O2 vs /Od) and LNK4217 (UBCFFAdaptor dllimport)
+- **Workflow complet** : Docker Linux → Push → CI Windows → VM test → startup.log (voir `dev-workflow.md`)
 
-## Testing Workflow (Deploy & Run on Windows VM)
+## Testing Workflow
 
-The dev machine is macOS ARM (M4 Pro). Testing happens on a Windows 11 ARM64 VM via UTM.
-The exe is x64 and runs via Windows 11's built-in x64 emulation.
+Voir `.kiro/steering/dev-workflow.md` pour le workflow complet (Docker → CI → VM → startup.log).
 
-### Steps:
 
-1. **Push code** → CI builds automatically (~25 min)
-2. **Deploy on Mac**: `./scripts/deploy-latest.sh`
-   - Downloads latest artifact from GitHub Actions
-   - Places all files in `../sankore-install/` (shared with VM)
-3. **Run on VM**: Execute `Z:\sankore-install\run-test.bat`
-   - Deletes `C:\Sankore` (force fresh copy)
-   - Copies all files to `C:\Sankore` (local disk, required for x64 emulation)
-   - Launches `Open-Sankore.exe`
-   - Displays `startup.log` content after crash/exit
+## Icons — Phosphor Icons
 
-### Important:
-- **Must run from C:\** — the x64 emulator cannot reliably load DLLs from network shares (Z:\)
-- **run-test.bat deletes C:\Sankore first** to avoid stale file cache
-- **startup.log** is written next to the exe using `GetModuleFileNameW` for absolute path
-- The log is also readable from Mac: `cat ../sankore-install/startup.log` (if VirtIO sync works)
-  but prefer reading from VM with `type C:\Sankore\startup.log` for reliability
+The QML V2 UI uses **Phosphor Icons** (regular weight) for all toolbar and palette buttons.
+
+### Location
+
+- SVG files: `resources/icons/phosphor/*.svg`
+- QRC file: `resources/icons/phosphor/phosphor.qrc`
+- QRC prefix: `/icons/phosphor/`
+- QML usage: `source: "qrc:/icons/phosphor/" + iconName + ".svg"`
+
+### Rules for Kiro
+
+1. **Always use icons from the existing set** in `resources/icons/phosphor/` first. List available icons before choosing.
+2. **If an icon is missing**, download it from the official Phosphor Icons repository: `https://raw.githubusercontent.com/phosphor-icons/core/main/assets/regular/<name>.svg`
+3. **Never hand-craft SVG icons** — always use official Phosphor SVGs for visual consistency.
+4. **Add new icons to `phosphor.qrc`** in alphabetical order after adding the SVG file.
+5. **Icon naming**: use the Phosphor icon name as-is (e.g., `magic-wand.svg`, `sign-out.svg`).
+6. **Icon rendering**: icons are rendered via `Image` + `ColorOverlay` in QML to support theming (light/dark).
+
+### Current icon mapping
+
+| Tool / Action | Phosphor Icon | File |
+|--------------|---------------|------|
+| Pen | pen | pen.svg |
+| Eraser | eraser | eraser.svg |
+| Marker | highlighter-circle | highlighter-circle.svg |
+| Selector | cursor | cursor.svg |
+| Play | play | play.svg |
+| Hand | hand | hand.svg |
+| Zoom In | magnifying-glass-plus | magnifying-glass-plus.svg |
+| Zoom Out | magnifying-glass-minus | magnifying-glass-minus.svg |
+| Pointer | crosshair | crosshair.svg |
+| Line | line-segment | line-segment.svg |
+| Text | text-aa | text-aa.svg |
+| Capture | selection | selection.svg |
+| OCR | magic-wand | magic-wand.svg |
+| Shapes toggle | shapes | shapes.svg |
+| Preferences | gear | gear.svg |
+| Quit | sign-out | sign-out.svg |
+| Undo | arrow-counter-clockwise | arrow-counter-clockwise.svg |
+| Redo | arrow-clockwise | arrow-clockwise.svg |

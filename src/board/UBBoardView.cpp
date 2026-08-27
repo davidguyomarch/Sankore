@@ -175,6 +175,10 @@ void UBBoardView::init ()
 
   unsetCursor();
 
+  // Update cursor immediately when tool changes (QML toolbar, keyboard shortcuts, etc.)
+  connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+          this, &UBBoardView::setToolCursor);
+
   movingItem = nullptr;
   mWidgetMoved = false;
 }
@@ -1206,6 +1210,16 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
 
             event->accept ();
         }
+        else if (currentTool == UBStylusTool::Pointer)
+        {
+            // Forward to scene — it has a red laser pointer circle (mPointer)
+            viewport()->setCursor(UBResources::resources()->pointerCursor);
+            if (scene() && !mTabletStylusIsPressed)
+            {
+                scene()->inputDevicePress(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())));
+            }
+            event->accept();
+        }
         else if (currentTool == UBStylusTool::ChangeFill)
         {
             qDebug() << "on est dans le cas du pot de peinture, on va remplir l'objet si possible";
@@ -1340,6 +1354,15 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
         {
           QGraphicsView::mouseMoveEvent (event);
         }
+    }
+  else if (currentTool == UBStylusTool::Pointer)
+    {
+      // Forward to scene — it moves the red laser pointer circle
+      if (!mTabletStylusIsPressed && scene())
+      {
+          scene()->inputDeviceMove(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())), mMouseButtonIsPressed);
+      }
+      event->accept ();
     }
   else
     {

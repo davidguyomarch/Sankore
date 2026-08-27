@@ -29,6 +29,7 @@
 #include <QPushButton>
 #include <QDomDocument>
 #include <QScrollArea>
+#include <QComboBox>
 
 #include "UBTeacherGuideWidget.h"
 

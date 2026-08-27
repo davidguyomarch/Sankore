@@ -35,6 +35,8 @@
 
 #include <QWidget>
 #include <QApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QPainter>
 #include <QFile>
 
@@ -74,6 +76,7 @@
 #include "board/UBDrawingController.h"
 #include "board/UBBoardView.h"
 #include "board/UBBoardPaletteManager.h"
+#include "controllers/UBToolController.h"
 #include "web/UBWebController.h"
 
 #include "document/UBDocumentController.h"
@@ -475,12 +478,29 @@ int UBApplication::exec(const QString& pFileToImport)
 #endif
 
     // Restored: call showBoard() to properly initialize the board view and palettes
+    // In headless/offscreen mode, the window starts tiny (100x30) because there's
+    // no window manager. Force a reasonable size BEFORE showBoard() creates palettes.
+    if (mainWindow->width() < 800 || mainWindow->height() < 600) {
+        QSize fallback(1920, 1080);
+        QScreen* screen = QGuiApplication::primaryScreen();
+        if (screen && screen->availableSize().width() >= 800)
+            fallback = screen->availableSize();
+        mainWindow->resize(fallback);
+        qDebug() << "Headless mode: forced window resize to" << fallback;
+    }
     showBoard();
     mainWindow->showMaximized();
 
     // Force Pen tool selection after all init is complete (deferred to ensure QML is ready)
     QTimer::singleShot(0, this, [this]() {
-        UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+        if (boardController && boardController->paletteManager()
+            && boardController->paletteManager()->toolController()) {
+            auto* tc = boardController->paletteManager()->toolController();
+            tc->setActiveTool(UBStylusTool::Pen);
+            tc->setPenColorIndex(0); // Black — index 0 in the color palette
+        } else {
+            UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+        }
     });
 
     onScreenCountChanged(1);

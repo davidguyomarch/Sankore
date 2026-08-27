@@ -76,6 +76,7 @@ include(src/pdf-merger/pdfMerger.pri)
 include(plugins/plugins.pri)
 include(src/recognition/recognition.pri)
 include(src/qml/qml.pri)
+include(src/controllers/controllers.pri)
 INCLUDEPATH += plugins/cffadaptor/src
 
 
@@ -477,6 +478,7 @@ linux-* {
 }
 
 RESOURCES += resources/sankore.qrc
+RESOURCES += resources/icons/phosphor/phosphor.qrc
 RESOURCES += plugins/cffadaptor/resources/resources.qrc
 
 # When adding a translation here, also add it in the macx part

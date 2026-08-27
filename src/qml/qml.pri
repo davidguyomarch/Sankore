@@ -1,11 +1,5 @@
-HEADERS += src/qml/UBThemeManager.h \
-    src/qml/UBStylusController.h \
-    src/qml/UBDrawingPropertiesController.h \
-    src/qml/UBShapesController.h
+HEADERS += src/qml/UBThemeManager.h
 
-SOURCES += src/qml/UBThemeManager.cpp \
-    src/qml/UBStylusController.cpp \
-    src/qml/UBDrawingPropertiesController.cpp \
-    src/qml/UBShapesController.cpp
+SOURCES += src/qml/UBThemeManager.cpp
 
 RESOURCES += src/qml/qml.qrc

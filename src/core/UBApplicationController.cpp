@@ -350,7 +350,7 @@ void UBApplicationController::showBoard()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
-    mMainWindow->boardToolBar->show();
+    mMainWindow->boardToolBar->hide(); // Hidden: replaced by QML TopBar
 
 //    if (mMainMode == Document)
 //    {
@@ -385,8 +385,9 @@ void UBApplicationController::showBoard()
     emit mainModeChanged(Board);
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
-    if (UBStylusTool::Selector != currentTool)
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+    // Legacy code forced Selector here — disabled for QML V2 UI which sets Pen at startup
+    // if (UBStylusTool::Selector != currentTool)
+    //     UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
 
     UBApplication::boardController->freezeW3CWidgets(false);
     UBApplication::boardController->activeScene()->updateGroupButtonState();
