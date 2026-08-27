@@ -37,6 +37,10 @@ public:
     int activeMode() const;
     void setActiveMode(int mode);
 
+    // Update mode state without triggering actions (used when mode changes
+    // externally, e.g. returning from Desktop via legacy path)
+    void syncMode(int mode);
+
     bool isDarkBackground() const;
     bool isCrossedBackground() const;
 
