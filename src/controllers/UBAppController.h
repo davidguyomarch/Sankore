@@ -47,6 +47,8 @@ public slots:
     void undo();
     void redo();
 
+    void openPreferences();
+
     void setBackgroundLight();
     void setBackgroundDark();
     void setBackgroundCrossedLight();

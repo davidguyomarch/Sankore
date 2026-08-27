@@ -6,6 +6,7 @@
 #include "UBAppController.h"
 
 #include "core/UBApplication.h"
+#include "gui/UBMainWindow.h"
 #include "board/UBBoardController.h"
 #include "domain/UBGraphicsScene.h"
 
@@ -143,6 +144,12 @@ void UBAppController::redo()
 {
     if (UBApplication::undoStack)
         UBApplication::undoStack->redo();
+}
+
+void UBAppController::openPreferences()
+{
+    if (UBApplication::mainWindow && UBApplication::mainWindow->actionPreferences)
+        UBApplication::mainWindow->actionPreferences->trigger();
 }
 
 // --- Private slots ---

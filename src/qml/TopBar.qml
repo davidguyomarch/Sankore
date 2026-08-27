@@ -133,7 +133,7 @@ Rectangle {
         Item { Layout.fillWidth: true }
 
         // === Right Actions ===
-        ToolbarButton { icon: "gear"; tooltip: "Préférences"; onClicked: { /* TODO: open preferences */ } }
+        ToolbarButton { icon: "gear"; tooltip: "Préférences"; onClicked: appController.openPreferences() }
     }
 
     // === Reusable ToolbarButton ===

@@ -396,7 +396,7 @@ void UBBoardPaletteManager::setupPalettes()
 
     // --- QML Drawing Props Bar (Issue #121 Step 5) ---
     mDrawingPropsBarQml = new QQuickWidget(mContainer);
-    mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeViewToRootObject);
+    mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mDrawingPropsBarQml->setClearColor(Qt::transparent);
     mDrawingPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
     mDrawingPropsBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
@@ -406,24 +406,28 @@ void UBBoardPaletteManager::setupPalettes()
     if (mDrawingPropsBarQml->status() == QQuickWidget::Error)
         for (const auto& e : mDrawingPropsBarQml->errors())
             qWarning() << "DrawingPropsBar QML error:" << e.toString();
-    // No setFixedSize — widget auto-sizes from QML implicitWidth/implicitHeight via SizeViewToRootObject
-    // Initial positioning (will update on tool change and container resize)
-    int propsX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
+
+    // Size: 280 for pen/marker (colors + widths), 120 for eraser (widths only)
+    auto updatePropsBarSize = [this]() {
+        if (!mDrawingPropsBarQml || !mContainer || !mStylusPaletteQml)
+            return;
+        bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
+        int barW = isEraser ? 120 : 280;
+        mDrawingPropsBarQml->setFixedSize(barW, 48);
+        int posX = (mContainer->width() - barW) / 2;
+        int posY = mStylusPaletteQml->y() - 48 - 8;
+        mDrawingPropsBarQml->move(posX, posY);
+    };
+    mDrawingPropsBarQml->setFixedSize(280, 48);
+    int propsX = (mContainer->width() - 280) / 2;
     int propsY = mContainer->height() - 52 - 70; // above bottom bar
     mDrawingPropsBarQml->move(propsX, propsY);
     mDrawingPropsBarQml->show();
     mDrawingPropsBarQml->raise();
 
-    // Re-center the props bar when tool changes (eraser is narrower than pen)
-    connect(mToolController, &UBToolController::activeToolChanged, this, [this]() {
-        if (mDrawingPropsBarQml && mContainer) {
-            // Defer to let QML update its implicit size first
-            QTimer::singleShot(0, this, [this]() {
-                int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
-                int posY = mStylusPaletteQml->y() - mDrawingPropsBarQml->height() - 8;
-                mDrawingPropsBarQml->move(posX, posY);
-            });
-        }
+    // Re-size and re-center when tool changes (eraser is narrower than pen)
+    connect(mToolController, &UBToolController::activeToolChanged, this, [updatePropsBarSize]() {
+        QTimer::singleShot(0, updatePropsBarSize);
     });
 
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
@@ -1199,19 +1203,23 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 if(mAddItemPalette){
                     mAddItemPalette->setParent(UBApplication::boardController->controlContainer());
                 }
-                mLeftPalette->assignParent(mContainer);
-                mRightPalette->assignParent(mContainer);
-                // Force dock palettes hidden after re-parenting (assignParent shows mTabPalette)
+                // Dock palettes permanently hidden — QML V2 replaces them
                 mLeftPalette->hide();
                 mRightPalette->hide();
 
-                // Restore QML palettes when returning from desktop mode
+                // Restore QML palettes when returning from desktop/document mode
                 if (mStylusPaletteQml)
                     mStylusPaletteQml->show();
                 if (mDrawingPropsQml)
                     mDrawingPropsQml->show();
                 if (mShapesPaletteQml)
                     mShapesPaletteQml->show();
+                if (mTopBarQml)
+                    mTopBarQml->show();
+                if (mPageNavQml)
+                    mPageNavQml->show();
+                if (mDrawingPropsBarQml)
+                    mDrawingPropsBarQml->show();
 
                 if (mDrawingPalette)
                     mDrawingPalette->stackUnder(mStylusPalette);
@@ -1265,8 +1273,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mShapesPaletteQml->hide();
 
                 mAddItemPalette->setParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
-                mLeftPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
-                mRightPalette->assignParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
+                // Dock palettes permanently hidden — QML V2 replaces them
                 mLeftPalette->hide();
                 mRightPalette->hide();
                 mStylusPalette->raise();
@@ -1320,7 +1327,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 mAddItemPalette->setParent(UBApplication::mainWindow);
 
 #ifdef SANKORE_WEBENGINE
-                mRightPalette->assignParent(UBApplication::webController->GetCurrentWebBrowser());
+                // Dock palettes permanently hidden — QML V2 replaces them
                 mRightPalette->hide();
 #endif
                 // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
@@ -1342,10 +1349,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         case eUBDockPaletteWidget_DOCUMENT:
             {
-                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
-                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
-                mLeftPalette->assignParent(UBApplication::documentController->controlView());
-                mRightPalette->assignParent(UBApplication::documentController->controlView());
+                // Dock palettes permanently hidden — QML V2 replaces them
                 mLeftPalette->hide();
                 mRightPalette->hide();
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
@@ -1367,10 +1371,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         default:
             {
-                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
-                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
-                mLeftPalette->assignParent(0);
-                mRightPalette->assignParent(0);
+                // Dock palettes permanently hidden — QML V2 replaces them
                 mLeftPalette->hide();
                 mRightPalette->hide();
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)

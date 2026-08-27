@@ -495,7 +495,9 @@ int UBApplication::exec(const QString& pFileToImport)
     QTimer::singleShot(0, this, [this]() {
         if (boardController && boardController->paletteManager()
             && boardController->paletteManager()->toolController()) {
-            boardController->paletteManager()->toolController()->setActiveTool(UBStylusTool::Pen);
+            auto* tc = boardController->paletteManager()->toolController();
+            tc->setActiveTool(UBStylusTool::Pen);
+            tc->setPenColorIndex(0); // Black — index 0 in the color palette
         } else {
             UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
         }
