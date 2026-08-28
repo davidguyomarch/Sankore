@@ -28,7 +28,6 @@
 
 #include "domain/UBGraphicsScene.h"
 #include "board/UBBoardController.h"
-#include "board/UBBoardPaletteManager.h"
 #include "domain/UBEditableGraphicsPolygonItem.h"
 
 #include "board/UBBoardView.h"

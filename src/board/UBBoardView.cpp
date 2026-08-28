@@ -45,7 +45,6 @@
 
 #include "network/UBHttpGet.h"
 
-#include "gui/UBStylusPalette.h"
 #include "gui/UBRubberBand.h"
 #include "gui/UBToolWidget.h"
 #include "gui/UBResources.h"

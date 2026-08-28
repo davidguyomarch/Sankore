@@ -33,7 +33,6 @@
 #include "core/UBDisplayManager.h"
 
 #include "gui/UBMainWindow.h"
-#include "gui/UBStylusPalette.h"
 #include "gui/UBKeyboardPalette.h"
 #include "gui/UBToolWidget.h"
 #include "gui/UBWebToolsPalette.h"

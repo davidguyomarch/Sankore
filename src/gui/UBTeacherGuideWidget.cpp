@@ -46,7 +46,6 @@
 #include "board/UBBoardView.h"
 #include "board/UBBoardPaletteManager.h"
 
-#include "gui/UBStylusPalette.h"
 #include "gui/UBActionPalette.h"
 #include "gui/UBMainWindow.h"
 
