@@ -89,7 +89,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mWebToolsCurrentPalette(0)
     , mContainer(container)
     , mBoardControler(pBoardController)
-    , mStylusPalette(0)
     , mStylusPaletteQml(nullptr)
     , mToolController(nullptr)
     , mPageController(nullptr)
@@ -98,7 +97,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPageNavQml(nullptr)
     , mDrawingPropsBarQml(nullptr)
     , mShapesPaletteV2Qml(nullptr)
-    , mDrawingPalette(nullptr)
     , mLinkPalette(0)
     , mLeftPalette(nullptr)
     , mRightPalette(nullptr)
@@ -137,8 +135,7 @@ UBBoardPaletteManager::~UBBoardPaletteManager()
 
 void UBBoardPaletteManager::initPalettesPosAtStartup()
 {
-    mStylusPalette->initPosition();
-    mDrawingPalette->initPosition();
+    // Legacy palettes removed — QML V2 palettes are positioned in containerResized()
 }
 
 void UBBoardPaletteManager::setupLayout()
@@ -238,15 +235,6 @@ void UBBoardPaletteManager::setupPalettes()
     setupDockPaletteWidgets();
 
 
-
-    // Add the other palettes
-    // Keep old C++ stylus palette hidden — it still owns the QActions and button group logic
-    mStylusPalette = new UBStylusPalette(mContainer, mSettings->appToolBarOrientationVertical->get().toBool() ? Qt::Vertical : Qt::Horizontal);
-    connect(mStylusPalette, qOverload<int>(&UBStylusPalette::stylusToolDoubleClicked), UBApplication::boardController, &UBBoardController::stylusToolDoubleClicked);
-    mStylusPalette->hide(); // replaced by QML palette
-
-    mDrawingPalette = new UBDrawingPalette(mContainer, mSettings->appDrawingPaletteOrientationHorizontal->get().toBool() ? Qt::Horizontal : Qt::Vertical);
-    mDrawingPalette->hide();
 
     // --- QML V2 Stylus Palette ---
     bool isVertical = mSettings->appToolBarOrientationVertical->get().toBool();
@@ -542,17 +530,8 @@ void UBBoardPaletteManager::purchaseLinkActivated(const QString& link)
 
 void UBBoardPaletteManager::connectPalettes()
 {
-    connect(UBApplication::mainWindow->actionDrawing, &QAction::toggled, this, &UBBoardPaletteManager::toggleDrawingPalette);
-    connect(UBApplication::mainWindow->actionStylus, &QAction::toggled, this, &UBBoardPaletteManager::toggleStylusPalette);
-
     // Close all popup palettes when any toolbar action is triggered
     connect(UBApplication::mainWindow->boardToolBar, &QToolBar::actionTriggered, this, [this]() { closeAllPopupPalettes(); });
-
-    // Also close popup palettes when stylus palette buttons are clicked
-    if (mStylusPalette)
-        connect(mStylusPalette, &UBActionPalette::buttonGroupClicked, this, [this]() { closeAllPopupPalettes(); });
-    if (mDrawingPalette)
-        connect(mDrawingPalette, &UBActionPalette::buttonGroupClicked, this, [this]() { closeAllPopupPalettes(); });
 
     // Close popup palettes on any stylus tool change
     connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged, this, [this]() { closeAllPopupPalettes(); });
@@ -584,13 +563,6 @@ void UBBoardPaletteManager::containerResized()
     int userWidth = mContainer->width() - (2 * innerMargin);
     int userTop = innerMargin;
     int userHeight = mContainer->height() - (2 * innerMargin);
-
-    if(mStylusPalette)
-    {
-        //mStylusPalette->move(userLeft, userTop);
-        mStylusPalette->adjustSizeAndPosition(true,false);
-        mStylusPalette->initPosition();
-    }
 
     // Reposition QML stylus palette on resize
     if (mStylusPaletteQml)
@@ -680,12 +652,6 @@ void UBBoardPaletteManager::containerResized()
         }
     }
 
-    if (mDrawingPalette)
-    {
-        mDrawingPalette->adjustSizeAndPosition(true,false);
-        mDrawingPalette->initPosition();
-    }
-
     if (isFirstResized && mKeyboardPalette && mKeyboardPalette->parent() == UBApplication::boardController->controlContainer())
     {
         isFirstResized = false;
@@ -726,22 +692,10 @@ void UBBoardPaletteManager::activeSceneChanged()
     UBGraphicsScene *activeScene =  UBApplication::boardController->activeScene();
     int pageIndex = UBApplication::boardController->activeSceneIndex();
 
-    if (mStylusPalette)
-        connect(mStylusPalette, &UBFloatingPalette::mouseEntered, activeScene, &UBGraphicsScene::hideEraser);
-}
-
-
-void UBBoardPaletteManager::toggleStylusPalette(bool checked)
-{
-    mStylusPalette->setVisible(checked);
-    if (mStylusPaletteQml)
-        mStylusPaletteQml->setVisible(checked);
-}
-
-void UBBoardPaletteManager::toggleDrawingPalette(bool checked)
-{
-    // Old C++ palette hidden — replaced by QML ShapesPalette
-    Q_UNUSED(checked);
+    if (activeScene)
+    {
+        // Hide eraser when hovering QML palettes — covered by QML mouse areas
+    }
 }
 
 
@@ -819,9 +773,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mPageNavQml->show();
                 if (mDrawingPropsBarQml && mToolController && mToolController->showDrawingProps())
                     mDrawingPropsBarQml->show();
-
-                if (mDrawingPalette)
-                    mDrawingPalette->stackUnder(mStylusPalette);
 
                 // Dock palettes must be above the board view but below floating palettes
                 // Don't stackUnder — let raise() in setVisible handle z-order
@@ -1085,28 +1036,9 @@ void UBBoardPaletteManager::showVirtualKeyboard(bool show)
 void UBBoardPaletteManager::changeStylusPaletteOrientation(QVariant var)
 {
     bool bVertical = var.toBool();
-    bool bVisible = mStylusPalette->isVisible();
+    bool bVisible = mStylusPaletteQml ? mStylusPaletteQml->isVisible() : true;
 
-    // Clean the old palette
-    if(nullptr != mStylusPalette)
-    {
-        delete mStylusPalette;
-        mStylusPalette = nullptr;
-    }
-
-    // Create the new palette
-    if(bVertical)
-    {
-        mStylusPalette = new UBStylusPalette(mContainer, Qt::Vertical);
-    }
-    else
-    {
-        mStylusPalette = new UBStylusPalette(mContainer, Qt::Horizontal);
-    }
-
-    connect(mStylusPalette, qOverload<int>(&UBStylusPalette::stylusToolDoubleClicked), UBApplication::boardController, &UBBoardController::stylusToolDoubleClicked);
-    mStylusPalette->setVisible(bVisible); // always show stylus palette at startup
-    mDrawingPalette->initPosition(); // move de drawing Palette
+    // Legacy palette removed — only update QML palette orientation
 
     // Update QML palette orientation
     {
@@ -1190,15 +1122,4 @@ void UBBoardPaletteManager::closeAllPopupPalettes()
         mAddItemPalette->close();
     if (mImageBackgroundPalette && mImageBackgroundPalette->isVisible())
         mImageBackgroundPalette->close();
-    if (mDrawingPalette && mDrawingPalette->isVisible())
-    {
-        // Only hide drawing palette if the current tool is NOT the Drawing tool
-        int currentTool = UBDrawingController::drawingController()->stylusTool();
-        if (currentTool != UBStylusTool::Drawing)
-        {
-            mDrawingPalette->hideSubPalettes();
-            mDrawingPalette->hide();
-            UBApplication::mainWindow->actionDrawing->setChecked(false);
-        }
-    }
 }

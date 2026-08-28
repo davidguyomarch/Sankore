@@ -35,14 +35,11 @@
 #include "gui/UBRightPalette.h"
 #include "gui/UBFeaturesWidget.h"
 #include "gui/UBDockResourcesWidget.h"
-#include "gui/UBDrawingPalette.h"
-#include "gui/UBStylusPalette.h"
 #include "core/UBApplicationController.h"
 
 class UBSettings;
 
 class UBWebToolsPalette;
-class UBStylusPalette;
 class UBActionPalette;
 class UBBoardController;
 class UBKeyboardPalette;
@@ -67,8 +64,6 @@ class UBBoardPaletteManager : public QObject
         UBLeftPalette* leftPalette(){return mLeftPalette;}
         UBRightPalette* rightPalette(){return mRightPalette;}
         UBFeaturesWidget *featuresWidget(){return mpFeaturesWidget;}
-        UBStylusPalette* stylusPalette(){return mStylusPalette;}
-        UBDrawingPalette* drawingPalette() { return mDrawingPalette; }
         UBToolController* toolController() { return mToolController; }
         UBActionPalette *addItemPalette() {return mAddItemPalette;}
         void showVirtualKeyboard(bool show = true);
@@ -121,10 +116,6 @@ class UBBoardPaletteManager : public QObject
         QWidget* mContainer;
         UBBoardController *mBoardControler;
 
-        // Old palettes (still referenced by UBBoardController/UBDrawingController)
-        UBDrawingPalette *mDrawingPalette;
-        UBStylusPalette *mStylusPalette;
-
         // QML V2 palettes
         QQuickWidget *mStylusPaletteQml;
         UBToolController *mToolController;
@@ -163,8 +154,6 @@ class UBBoardPaletteManager : public QObject
 
         void changeBackground();
 
-        void toggleStylusPalette(bool checked);
-        void toggleDrawingPalette(bool checked);
         void tooglePodcastPalette(bool checked);
 
         void addItemToCurrentPage();
