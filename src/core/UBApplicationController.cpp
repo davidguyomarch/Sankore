@@ -482,6 +482,18 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
     if (UBApplication::boardController)
         UBApplication::boardController->hide();
 
+    // Disable the board view so that stale mouse events queued before the
+    // transition cannot be delivered to its QGraphicsView::viewportEvent
+    // while the UI is in an inconsistent state.  (#135)
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->setEnabled(false);
+
+    // Emit desktopMode BEFORE hiding the main window and showing the desktop overlay.
+    // This triggers changeMode(DESKTOP) which hides QML palettes, preventing them
+    // from receiving stale mouse events during the transition. (#135)
+    mIsShowingDesktop = true;
+    emit desktopMode(true);
+
     mMainWindow->hide();
     mUninoteController->showWindow();
 
@@ -490,9 +502,6 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
         QRect rect = QGuiApplication::screens().at(desktopWidgetIndex)->geometry();
         mMirror->setSourceRect(rect);
     }
-
-    mIsShowingDesktop = true;
-    emit desktopMode(true);
 
     if (!dontSwitchFrontProcess) {
         UBPlatformUtils::bringPreviousProcessToFront();
@@ -505,6 +514,11 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 
 void UBApplicationController::hideDesktop()
 {
+    // Re-enable the board view that was disabled in showDesktop() to prevent
+    // stale events during the Desktop mode transition.  (#135)
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->setEnabled(true);
+
     if (mMainMode == Board)
     {
         showBoard();

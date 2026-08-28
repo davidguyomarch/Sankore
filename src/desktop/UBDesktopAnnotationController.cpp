@@ -43,6 +43,7 @@
 
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsPolygonItem.h"
+#include "domain/UBSceneContext.h"
 
 #include "UBCustomCaptureWindow.h"
 #include "UBWindowCapture.h"
@@ -90,6 +91,15 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     mTransparentDrawingView->setStyleSheet(backgroundStyle);
 
     mTransparentDrawingScene = new UBGraphicsScene(0, false);
+    // Initialize the scene context with the live drawing controller so that
+    // inputDevicePress / inputDeviceMove / updateGroupButtonState do not
+    // dereference a null drawingController.  (#135)
+    {
+        UBSceneContext ctx;
+        ctx.drawingController = UBDrawingController::drawingController();
+        ctx.boardController = UBApplication::boardController;
+        mTransparentDrawingScene->setSceneContext(ctx);
+    }
     mTransparentDrawingView->setScene(mTransparentDrawingScene);
     mTransparentDrawingScene->setDrawingMode(true);
 
@@ -504,7 +514,8 @@ QPixmap UBDesktopAnnotationController::getScreenPixmap()
         screen = QGuiApplication::primaryScreen();
 
     const QRect screenRect = screen->geometry();
-    QCoreApplication::processEvents();
+    // processEvents() removed: it caused re-entrancy during Desktop mode transition,
+    // dispatching stale mouse events to the board view and crashing in viewportEvent (#135)
     return screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
 
 

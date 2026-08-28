@@ -5,7 +5,7 @@
 ### Flow complet
 
 ```
-Issue → Branche → Commits → Push branche → CI passe → Test Windows VM → PR → Squash merge → Branche supprimée
+Issue → Branche → Commits → Push branche → PR → CI passe → Test Windows VM → Squash merge → Branche supprimée
 ```
 
 **Master est toujours stable.** On ne push jamais directement sur master. Tout passe par une branche + PR.
@@ -24,12 +24,17 @@ Chaque issue a sa branche dédiée, créée depuis master :
 ```
 fix/<issue-id>-<description-courte>     # pour les bugs
 feat/<issue-id>-<description-courte>    # pour les fonctionnalités
+chore/<description-courte>              # pour docs, steering, CI, nettoyage (pas de code app)
 ```
 
 Exemples :
 - `fix/135-desktop-crash`
 - `feat/134-documents-qml-view`
 - `fix/133-capture-cursor`
+- `chore/update-steering`
+- `chore/ci-concurrency`
+
+**Docs/steering/CI** peuvent être inclus dans un commit de feature si c'est lié au même travail. Si ce sont des modifications isolées (pas de code app), utiliser une branche `chore/` dédiée pour éviter de déclencher des builds inutiles sur une branche feature.
 
 Commande de création :
 ```bash
@@ -54,37 +59,34 @@ fix(#135): description courte du changement
 feat(#134): description courte du changement
 ```
 
-### 5. Push et validation
+### 5. Push et PR
 
 Quand le travail est prêt à tester :
 1. Compiler en Docker pour valider la syntaxe
 2. Commiter avec le bon format `fix(#ID)` / `feat(#ID)`
 3. Pousser la branche (jamais master)
-4. Le CI tourne automatiquement sur la branche
+4. Créer la PR immédiatement — **le CI Windows ne tourne que sur les PRs** (pas sur les branches seules)
 5. Le développeur vérifie que le CI passe (Windows + Linux)
 6. Le développeur teste sur la VM Windows si nécessaire
-
-### 6. Pull Request
-
-Quand le CI passe et le test Windows est OK, Kiro crée la PR :
 
 ```bash
 gh pr create \
   --base master \
   --title "fix(#135): description du fix" \
-  --body "## Changements
+  --body "## Changes
 
 - Description des changements
 
 ## Tests
-- [ ] CI Windows passe
-- [ ] CI Linux passe
-- [ ] Testé sur VM Windows
+- [x] Docker Linux build passes
+- [ ] CI Windows passes
+- [ ] CI Linux passes
+- [ ] Tested on VM Windows
 
 Closes #135"
 ```
 
-### 7. Merge — uniquement sur demande explicite du développeur
+### 6. Merge — uniquement sur demande explicite du développeur
 
 Kiro ne merge JAMAIS de sa propre initiative. Quand le développeur valide :
 
@@ -97,7 +99,7 @@ Cela fait automatiquement :
 - Suppression de la branche distante
 - Fermeture de l'issue (grâce à `Closes #ID` dans le body de la PR)
 
-### 8. Nettoyage local après merge
+### 7. Nettoyage local après merge
 
 ```bash
 git checkout master && git pull
@@ -112,11 +114,11 @@ Le développeur travaille sur **macOS ARM (M4 Pro)**. Il n'y a **pas de compilat
 La validation se fait en 4 étapes :
 
 ```
-Code → Docker Linux (2 min) → Push branche → CI Windows (25 min) → VM Windows (test manuel)
-                ↑                                                            |
-                └────────────────── Kiro corrige ← startup.log ←────────────┘
-                                                                    ↓
-                                                              PR → Merge master
+Code → Docker Linux (2 min) → Push + PR → CI Windows (25 min) → VM Windows (test manuel)
+                ↑                                                          |
+                └───────────── Kiro corrige ← startup.log ←───────────────┘
+                                                                  ↓
+                                                            Merge master
 ```
 
 ### Étape 1 : Validation rapide — Docker Linux (~2 min)
@@ -163,24 +165,20 @@ Ce qu'il faut vérifier dans le log :
 - `status=1` pour tous les QML widgets → Pas d'erreur de parsing QML
 - Aucune ligne `ERROR:` → Pas de crash QML
 
-### Étape 2 : Push branche + CI
+### Étape 2 : Push branche + PR + CI
 
-Pousser la branche (pas master) déclenche les builds CI :
+Pousser la branche et créer la PR immédiatement. Le CI Windows ne tourne que sur les PRs :
 
 ```bash
 git push
+gh pr create --base master --title "fix(#ID): description" --body "..."
 ```
 
-Le CI (`build-windows.yml`, `build-linux.yml`) tourne sur la branche. Vérifier que les builds passent avant de demander un test Windows.
-
-Pour déclencher manuellement un build sur la branche :
-```bash
-gh workflow run build-windows.yml --ref fix/135-desktop-crash
-```
+Le CI (`build-windows.yml`, `build-linux.yml`) tourne sur la PR. Vérifier que les builds passent avant de demander un test Windows.
 
 ### Étape 3 : Test sur VM Windows — deploy + run-test.bat
 
-Le développeur déploie l'artefact CI de la branche et le teste :
+Le développeur déploie l'artefact CI de la PR et le teste :
 
 ```bash
 # Trouver le run ID du build de la branche
@@ -202,13 +200,12 @@ Le script `run-test.bat` :
 4. Lance `Open-Sankore.exe`
 5. Affiche le contenu complet de `startup.log` après fermeture/crash
 
-### Étape 4 : PR + Merge
+### Étape 4 : Merge
 
-Quand le test Windows est OK :
-1. Kiro crée la PR (`gh pr create`)
-2. Le développeur valide
-3. Kiro merge (`gh pr merge --squash --delete-branch`)
-4. Nettoyage local (`git checkout master && git pull && git branch -d <branche>`)
+Quand le CI passe et le test Windows est OK :
+1. Le développeur valide
+2. Kiro merge (`gh pr merge --squash --delete-branch`)
+3. Nettoyage local (`git checkout master && git pull && git branch -d <branche>`)
 
 ### Étape 5 : Analyse des logs (si bug)
 
@@ -306,7 +303,8 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 1. Compiler en Docker : `docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'`
 2. Si la compilation échoue, corriger avant de proposer un push
 3. Si la compilation réussit, commiter avec `fix(#ID)` / `feat(#ID)` et pousser la branche
-4. Le développeur vérifie le CI, teste sur VM, puis demande la PR et le merge
+4. Créer la PR immédiatement (le CI ne tourne que sur les PRs)
+5. Le développeur vérifie le CI, teste sur VM, puis demande le merge
 
 ### Quand le développeur envoie un startup.log
 
