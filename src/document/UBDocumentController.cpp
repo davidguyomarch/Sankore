@@ -29,6 +29,9 @@
 #include <QHeaderView>
 #include <QApplication>
 #include <QPainter>
+#include <QVBoxLayout>
+#include <QQuickWidget>
+#include <QQmlContext>
 
 #include "frameworks/UBFileSystemUtils.h"
 #include "frameworks/UBStringUtils.h"
@@ -41,6 +44,8 @@
 #include "core/UBSettings.h"
 #include "core/UBTheme.h"
 #include "core/UBSettingsData.h"
+#include "controllers/UBDocumentActionController.h"
+#include "qml/UBThemeManager.h"
 #include "core/UBSetting.h"
 #include "core/UBMimeData.h"
 #include "core/UBForeignObjectsHandler.h"
@@ -1659,6 +1664,8 @@ UBDocumentController::UBDocumentController(UBMainWindow* mainWindow)
    , mDocumentUI(0)
    , mMainWindow(mainWindow)
    , mDocumentWidget(0)
+   , mDocumentsTopBarQml(nullptr)
+   , mDocActionController(nullptr)
    , mIsClosing(false)
    , mToolsPalette(0)
    , mToolsPalettePositionned(false)
@@ -1926,9 +1933,31 @@ void UBDocumentController::setupViews()
         mDocumentWidget = new QWidget(mMainWindow->centralWidget());
         mMainWindow->addDocumentsWidget(mDocumentWidget);
 
-        mDocumentUI = new Ui::documents();
+        // Main layout: TopBar on top, document UI below
+        QVBoxLayout *mainLayout = new QVBoxLayout(mDocumentWidget);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
+        mainLayout->setSpacing(0);
 
-        mDocumentUI->setupUi(mDocumentWidget);
+        // --- QML Documents TopBar ---
+        mDocActionController = new UBDocumentActionController(this);
+        mDocumentsTopBarQml = new QQuickWidget(mDocumentWidget);
+        mDocumentsTopBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+        mDocumentsTopBarQml->setClearColor(Qt::transparent);
+        mDocumentsTopBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+        mDocumentsTopBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+        mDocumentsTopBarQml->rootContext()->setContextProperty("docActionController", mDocActionController);
+        mDocumentsTopBarQml->setSource(QUrl("qrc:/qml/DocumentsTopBar.qml"));
+        if (mDocumentsTopBarQml->status() == QQuickWidget::Error)
+            for (const auto& e : mDocumentsTopBarQml->errors())
+                qWarning() << "DocumentsTopBar QML error:" << e.toString();
+        mDocumentsTopBarQml->setFixedHeight(48);
+        mainLayout->addWidget(mDocumentsTopBarQml);
+
+        // --- Document content area ---
+        QWidget *contentWidget = new QWidget(mDocumentWidget);
+        mDocumentUI = new Ui::documents();
+        mDocumentUI->setupUi(contentWidget);
+        mainLayout->addWidget(contentWidget, 1); // stretch=1 to fill remaining space
 
         int thumbWidth = mSettings->documentThumbnailWidth->get().toInt();
 

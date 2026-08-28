@@ -2,10 +2,19 @@
 
 ## Mode PROD — Règles de travail
 
+### Flow complet
+
+```
+Issue → Branche → Commits → Push branche → CI passe → Test Windows VM → PR → Squash merge → Branche supprimée
+```
+
+**Master est toujours stable.** On ne push jamais directement sur master. Tout passe par une branche + PR.
+
 ### 1. Tout travail est lié à une issue GitHub
 
 - On ne commence JAMAIS un travail sans issue GitHub associée.
 - Si l'issue n'existe pas, on la crée d'abord avec un titre clair, une description du problème/besoin, et un label (bug/enhancement).
+- **Langue : tout ce qui est sur GitHub est en anglais** — issues, titres de PR, messages de commit, commentaires, labels. Les conversations avec le développeur restent en français.
 - Référence : https://github.com/davidguyomarch/Sankore/issues
 
 ### 2. Nommage des branches
@@ -45,50 +54,69 @@ fix(#135): description courte du changement
 feat(#134): description courte du changement
 ```
 
-Exemples :
-- `fix(#135): guard QML widgets in desktop mode transition`
-- `feat(#134): replace document toolbar with Phosphor icons`
+### 5. Push et validation
 
-### 5. Push et fin de travail
-
-Quand le travail est terminé :
-1. Compiler en Docker pour valider
+Quand le travail est prêt à tester :
+1. Compiler en Docker pour valider la syntaxe
 2. Commiter avec le bon format `fix(#ID)` / `feat(#ID)`
-3. Pousser la branche
-4. Indiquer la commande pour merger quand le développeur est prêt
+3. Pousser la branche (jamais master)
+4. Le CI tourne automatiquement sur la branche
+5. Le développeur vérifie que le CI passe (Windows + Linux)
+6. Le développeur teste sur la VM Windows si nécessaire
 
-### 6. Fermeture d'issue — uniquement sur demande explicite
+### 6. Pull Request
 
-Kiro ne ferme JAMAIS une issue de sa propre initiative. Quand le développeur demande de fermer :
+Quand le CI passe et le test Windows est OK, Kiro crée la PR :
 
 ```bash
-# Squash merge sur master (1 commit propre)
-git checkout master && git pull
-git merge --squash <branche>
-git commit -m "fix(#ID): description complète du fix
+gh pr create \
+  --base master \
+  --title "fix(#135): description du fix" \
+  --body "## Changements
 
-Closes #ID"
+- Description des changements
 
-# Pousser et supprimer la branche distante
-git push
-git push origin --delete <branche>
-git branch -d <branche>
+## Tests
+- [ ] CI Windows passe
+- [ ] CI Linux passe
+- [ ] Testé sur VM Windows
+
+Closes #135"
 ```
 
-Le squash merge produit un seul commit sur master pour chaque issue, avec un historique propre.
-L'indication `Closes #ID` dans le message de commit ferme automatiquement l'issue sur GitHub.
+### 7. Merge — uniquement sur demande explicite du développeur
+
+Kiro ne merge JAMAIS de sa propre initiative. Quand le développeur valide :
+
+```bash
+gh pr merge --squash --delete-branch
+```
+
+Cela fait automatiquement :
+- Squash merge (1 seul commit propre sur master)
+- Suppression de la branche distante
+- Fermeture de l'issue (grâce à `Closes #ID` dans le body de la PR)
+
+### 8. Nettoyage local après merge
+
+```bash
+git checkout master && git pull
+git branch -d <branche-locale>
+```
 
 ---
 
 ## Boucle de développement (Build → Validate → Test → Fix)
 
 Le développeur travaille sur **macOS ARM (M4 Pro)**. Il n'y a **pas de compilation locale Windows**.
-La validation se fait en 3 étapes :
+La validation se fait en 4 étapes :
 
 ```
-Code → Docker Linux (2 min) → Push → CI Windows (25 min) → VM Windows (test manuel)
-                ↑                                                       |
-                └───────────── Kiro corrige ← startup.log ←────────────┘
+Code → Docker Linux (2 min) → Push branche → CI Windows (25 min) → VM Windows (test manuel)
+                ↑                                                            |
+                └────────────────── Kiro corrige ← startup.log ←────────────┘
+                                                                    ↓
+                                                              PR → Merge master
 ```
 
 ### Étape 1 : Validation rapide — Docker Linux (~2 min)
@@ -135,30 +163,30 @@ Ce qu'il faut vérifier dans le log :
 - `status=1` pour tous les QML widgets → Pas d'erreur de parsing QML
 - Aucune ligne `ERROR:` → Pas de crash QML
 
-### Étape 2 : CI Windows — GitHub Actions (~25 min)
+### Étape 2 : Push branche + CI
 
-Pousser le code déclenche le build Windows CI :
+Pousser la branche (pas master) déclenche les builds CI :
 
 ```bash
 git push
 ```
 
-Le CI (`build-windows.yml`) fait : compilation MSVC → unit tests → windeployqt → smoke test → artefact.
+Le CI (`build-windows.yml`, `build-linux.yml`) tourne sur la branche. Vérifier que les builds passent avant de demander un test Windows.
 
-Pour une branche feature (pas master) :
+Pour déclencher manuellement un build sur la branche :
 ```bash
-gh workflow run build-windows.yml --ref ma-branche
+gh workflow run build-windows.yml --ref fix/135-desktop-crash
 ```
 
 ### Étape 3 : Test sur VM Windows — deploy + run-test.bat
 
-Le développeur déploie l'artefact CI et le teste sur une VM Windows 11 ARM64 (UTM) :
+Le développeur déploie l'artefact CI de la branche et le teste :
 
 ```bash
-# Sur Mac — télécharge le dernier artefact CI
-./scripts/deploy-latest.sh
+# Trouver le run ID du build de la branche
+gh run list --workflow=build-windows.yml --branch=fix/135-desktop-crash --status=success --limit=1
 
-# Ou un run spécifique
+# Télécharger l'artefact
 ./scripts/deploy-latest.sh <run-id>
 ```
 
@@ -174,7 +202,15 @@ Le script `run-test.bat` :
 4. Lance `Open-Sankore.exe`
 5. Affiche le contenu complet de `startup.log` après fermeture/crash
 
-### Étape 4 : Analyse des logs
+### Étape 4 : PR + Merge
+
+Quand le test Windows est OK :
+1. Kiro crée la PR (`gh pr create`)
+2. Le développeur valide
+3. Kiro merge (`gh pr merge --squash --delete-branch`)
+4. Nettoyage local (`git checkout master && git pull && git branch -d <branche>`)
+
+### Étape 5 : Analyse des logs (si bug)
 
 Après le test, le développeur copie le contenu de `startup.log` dans la conversation Kiro.
 Kiro utilise ces logs pour diagnostiquer les bugs et proposer des corrections.
@@ -205,8 +241,8 @@ Il sert de canal de communication entre l'app qui tourne sur la VM et Kiro qui a
 
 ```
 === Open-Sankore Startup ===
-Build: 4.0.2.r
-Date: 2026-08-25T14:30:00
+Build: 4.1.0
+Date: 2026-08-28T10:00:00
 Qt: 6.8.3
 OS: Windows 11 (10.0.26100)
 
@@ -263,13 +299,14 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 2. **Toujours lire le fichier avant de le modifier** — ne jamais proposer des changements sur du code pas lu
 3. **Compiler en Docker Linux** après les modifications pour valider la syntaxe
 4. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
+5. **Ne JAMAIS push sur master** — toujours pousser la branche feature/fix
 
 ### Après modifications
 
 1. Compiler en Docker : `docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'`
 2. Si la compilation échoue, corriger avant de proposer un push
-3. Si la compilation réussit, commiter avec `fix(#ID)` / `feat(#ID)` et pousser
-4. Le développeur lance le CI, déploie, teste, et revient avec le startup.log
+3. Si la compilation réussit, commiter avec `fix(#ID)` / `feat(#ID)` et pousser la branche
+4. Le développeur vérifie le CI, teste sur VM, puis demande la PR et le merge
 
 ### Quand le développeur envoie un startup.log
 
@@ -282,5 +319,5 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 
 Si un bug est difficile à comprendre sans plus de contexte runtime :
 1. Ajouter des logs `[TAG]` dans le code C++ aux points clés
-2. Compiler, pousser, et demander au développeur de renvoyer le startup.log
+2. Compiler, pousser la branche, et demander au développeur de renvoyer le startup.log
 3. Une fois le bug corrigé, nettoyer les logs temporaires (garder les logs structurels permanents)

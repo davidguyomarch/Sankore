@@ -434,7 +434,7 @@ void UBApplicationController::showDocument()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->boardToolBar->hide();
-    mMainWindow->documentToolBar->show();
+    mMainWindow->documentToolBar->hide(); // Hidden: replaced by QML DocumentsTopBar
 
     mMainMode = Document;
 
