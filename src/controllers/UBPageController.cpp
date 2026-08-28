@@ -62,7 +62,8 @@ void UBPageController::duplicatePage()
 
 void UBPageController::deletePage()
 {
-    UBApplication::boardController->clearScene();
+    UBApplication::boardController->deleteScene(
+        UBApplication::boardController->activeSceneIndex());
 }
 
 void UBPageController::goToPage(int index)

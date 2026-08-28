@@ -212,6 +212,7 @@ void UBBoardNavigationController::deleteScene(int nIndex)
         mBoardController->setActiveDocumentScene(nIndex - 1);
         mBoardController->deletePages(scIndexes);
         mBoardController->reloadThumbnails();
+        mBoardController->emitPageChanged();
         mBoardController->showMessage(tr("Page %1 deleted").arg(nIndex));
         QApplication::restoreOverrideCursor();
     }
