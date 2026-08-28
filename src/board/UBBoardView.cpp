@@ -1967,7 +1967,7 @@ UBBoardView::setToolCursor (int tool)
       controlViewport->setCursor (UBResources::resources ()->richTextCursor);
       break;
     case UBStylusTool::Capture:
-      controlViewport->setCursor (UBResources::resources ()->penCursor);
+      controlViewport->setCursor (Qt::CrossCursor);
       break;
     case UBStylusTool::Ocr:
       controlViewport->setCursor (UBResources::resources ()->ocrCursor);
