@@ -1,4 +1,8 @@
 /*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
+/*
  * Stub for UBSettings - provides static string constants and a minimal
  * settings() accessor for testing UBDocumentProxy in isolation.
  */

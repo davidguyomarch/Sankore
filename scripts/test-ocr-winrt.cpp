@@ -1,3 +1,11 @@
+/*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 // test-ocr-winrt.cpp — WinRT Ink OCR tester
 // Reads ocr_strokes_dump.txt and tests recognition with various parameters.
 // Results are printed AND copied to clipboard for easy sharing.

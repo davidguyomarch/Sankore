@@ -1,3 +1,11 @@
+/*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 // Wrapper to compile UBSmoothStrokeItem.cpp in the test context.
 // Provides a minimal UBGraphicsScene stub (the real one has too many deps).
 

@@ -1,4 +1,10 @@
 #!/bin/bash
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 # package-linux.sh — Build .deb and .rpm packages from the compiled binary
 # Usage: ./scripts/package-linux.sh [architecture]
 #   architecture: amd64 (default) or arm64

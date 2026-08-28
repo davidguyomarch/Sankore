@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 TARGET = "Open-Sankore"
 TEMPLATE = app
 

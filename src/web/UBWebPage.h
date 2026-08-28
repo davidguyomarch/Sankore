@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #ifndef UBWEBPAGE_H_
 #define UBWEBPAGE_H_
 

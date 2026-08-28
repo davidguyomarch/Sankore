@@ -1,3 +1,11 @@
+/*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 // Shim: include the real UBDocumentProxy.h and provide a test helper
 // to access protected methods
 #ifndef UBDOCUMENTPROXY_TEST_SHIM_H

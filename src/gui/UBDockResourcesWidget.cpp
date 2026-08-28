@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "UBDockResourcesWidget.h"
 #include "globals/UBGlobals.h"
 

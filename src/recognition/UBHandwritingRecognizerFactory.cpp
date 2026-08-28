@@ -1,6 +1,9 @@
 /*
- * Copyright (C) 2024 Open-Sankoré contributors
- * License: GPLv3
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 #include "IHandwritingRecognizer.h"

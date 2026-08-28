@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/core/UB.h \
                 src/core/UBApplication.h \

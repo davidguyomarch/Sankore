@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBFloatingPalette.h \
     src/gui/UBToolbarButtonGroup.h \
