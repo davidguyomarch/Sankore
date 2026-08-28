@@ -366,6 +366,10 @@ QPointF UBGraphicsScene::lastCenter()
 
 void UBGraphicsScene::updateGroupButtonState()
 {
+    // Guard: drawingController may be null on scenes without a live board context
+    // (e.g. the desktop transparent drawing scene before context injection).  (#135)
+    if (!mContext.drawingController)
+        return;
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)mContext.drawingController->stylusTool();
     if (UBStylusTool::Selector != currentTool && UBStylusTool::Play != currentTool)
@@ -404,6 +408,9 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
 
     bool accepted = false;
 
+    // Guard: drawingController may be null on scenes without a live board context.  (#135)
+    if (!mContext.drawingController)
+        return false;
 
     if (mInputDeviceIsPressed)
     {
@@ -534,6 +541,10 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
 bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pressure)
 {
     bool accepted = false;
+
+    // Guard: drawingController may be null on scenes without a live board context.  (#135)
+    if (!mContext.drawingController)
+        return false;
 
     UBDrawingController *dc = mContext.drawingController;
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)dc->stylusTool();
@@ -685,6 +696,10 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
 
 bool UBGraphicsScene::inputDeviceRelease()
 {
+    // Guard: drawingController may be null on scenes without a live board context.  (#135)
+    if (!mContext.drawingController)
+        return false;
+
     /*
     if (mMesure1Ms > 0 ||  mMesure2Ms > 0)
     {
@@ -1248,6 +1263,9 @@ void UBGraphicsScene::initPolygonItem(UBGraphicsPolygonItem* polygonItem)
 {
     QColor colorOnDarkBG;
     QColor colorOnLightBG;
+
+    if (!mContext.drawingController)
+        return;
 
     if (mContext.drawingController->stylusTool() == UBStylusTool::Marker)
     {
