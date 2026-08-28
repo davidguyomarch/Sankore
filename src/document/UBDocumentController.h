@@ -55,6 +55,8 @@ class UBDocumentGroupTreeItem;
 class UBDocumentProxyTreeItem;
 class UBMainWindow;
 class UBDocumentToolsPalette;
+class QQuickWidget;
+class UBDocumentActionController;
 
 
 class UBDocumentReplaceDialog : public QDialog
@@ -482,6 +484,8 @@ protected:
         Ui::documents* mDocumentUI;
         UBMainWindow* mMainWindow;
         QWidget *mDocumentWidget;
+        QQuickWidget *mDocumentsTopBarQml;
+        UBDocumentActionController *mDocActionController;
         QPointer<UBMessageWindow> mMessageWindow;
         QAction* mAddFolderOfImagesAction;
         QAction* mAddFileToDocumentAction;
