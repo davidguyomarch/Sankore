@@ -138,6 +138,11 @@ void UBGraphicsItemUndoCommand::undo()
                 UBGraphicsPolygonItem *polygonItem = qgraphicsitem_cast<UBGraphicsPolygonItem*>(item);
                 if (polygonItem)
                 {
+                    // Reset transform before addToGroup — the item's transform was set to
+                    // the full sceneTransform during eraseLineTo. addToGroup will apply the
+                    // group's own transform adjustment, so we must not start from a scene
+                    // transform or the position/scale gets compounded.
+                    polygonItem->resetTransform();
                     mScene->removeItem(polygonItem);
                     mScene->removeItemFromDeletion(polygonItem);
                     polygonItem->strokesGroup()->addToGroup(polygonItem);
@@ -269,6 +274,7 @@ void UBGraphicsItemUndoCommand::redo()
                 UBGraphicsPolygonItem *polygonItem = qgraphicsitem_cast<UBGraphicsPolygonItem*>(item);
                 if (polygonItem)
                 {
+                    polygonItem->resetTransform();
                     mScene->removeItem(polygonItem);
                     mScene->removeItemFromDeletion(polygonItem);
                     polygonItem->strokesGroup()->addToGroup(polygonItem);

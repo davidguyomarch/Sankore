@@ -1072,7 +1072,8 @@ void UBGraphicsScene::eraseLineTo(const QPointF &pEndPoint, const qreal &pWidth)
             for(int j = 0; j < intersectedPolygons[i].size(); j++)
             {
                 // create small polygon from couple of polygons to replace particular erased polygon
-                UBGraphicsPolygonItem* polygonItem = new UBGraphicsPolygonItem(intersectedPolygons[i][j], intersectedPolygonItem->parentItem());
+                // Pass nullptr as parent — addToGroup will handle parenting and transform adjustment
+                UBGraphicsPolygonItem* polygonItem = new UBGraphicsPolygonItem(intersectedPolygons[i][j], nullptr);
 
                 intersectedPolygonItem->copyItemParameters(polygonItem);
                 polygonItem->setStroke(intersectedPolygonItem->stroke());
@@ -1098,12 +1099,6 @@ void UBGraphicsScene::eraseLineTo(const QPointF &pEndPoint, const qreal &pWidth)
         }
 
         removeItem(intersectedPolygonItem);
-        if (bApplyTransform)
-            intersectedPolygonItem->setTransform(t);
-
-
-        removeItem(intersectedPolygonItem);
-
         if (bApplyTransform)
             intersectedPolygonItem->setTransform(t);
     }
