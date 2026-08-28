@@ -506,7 +506,8 @@ QPixmap UBDesktopAnnotationController::getScreenPixmap()
         screen = QGuiApplication::primaryScreen();
 
     const QRect screenRect = screen->geometry();
-    QCoreApplication::processEvents();
+    // processEvents() removed: it caused re-entrancy during Desktop mode transition,
+    // dispatching stale mouse events to the board view and crashing in viewportEvent (#135)
     return screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
 
 
