@@ -59,7 +59,6 @@ install
 Makefile
 Makefile.Debug
 Makefile.Release
-.qmake.conf
 .qmake.stash
 
 # plugins #
