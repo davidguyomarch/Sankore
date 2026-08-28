@@ -376,9 +376,14 @@ void UBBoardPaletteManager::setupPalettes()
             qWarning() << "DrawingPropsBar QML error:" << e.toString();
 
     // Size: 280 for pen/marker (colors + widths), 120 for eraser (widths only)
+    // Also hides/shows the QQuickWidget at C++ level to avoid ghost black bar (#129)
     auto updatePropsBarSize = [this]() {
         if (!mDrawingPropsBarQml || !mContainer || !mStylusPaletteQml)
             return;
+        if (!mToolController->showDrawingProps()) {
+            mDrawingPropsBarQml->hide();
+            return;
+        }
         bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
         int barW = isEraser ? 120 : 280;
         mDrawingPropsBarQml->setFixedSize(barW, 48);
@@ -389,6 +394,8 @@ void UBBoardPaletteManager::setupPalettes()
         int posX = (mContainer->width() - barW) / 2;
         int posY = mStylusPaletteQml->y() - 48 - 8;
         mDrawingPropsBarQml->move(posX, posY);
+        mDrawingPropsBarQml->show();
+        mDrawingPropsBarQml->raise();
     };
     mDrawingPropsBarQml->setFixedSize(280, 48);
     {
@@ -829,7 +836,10 @@ void UBBoardPaletteManager::containerResized()
         int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
         int posY = mStylusPaletteQml->y() - mDrawingPropsBarQml->height() - 8;
         mDrawingPropsBarQml->move(posX, posY);
-        if (isBoardMode) { mDrawingPropsBarQml->show(); mDrawingPropsBarQml->raise(); }
+        if (isBoardMode && mToolController && mToolController->showDrawingProps()) {
+            mDrawingPropsBarQml->show();
+            mDrawingPropsBarQml->raise();
+        }
     }
     if (mShapesPaletteV2Qml && mToolController && mToolController->shapesVisible())
     {
@@ -1103,7 +1113,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->show();
                 if (mPageNavQml)
                     mPageNavQml->show();
-                if (mDrawingPropsBarQml)
+                if (mDrawingPropsBarQml && mToolController && mToolController->showDrawingProps())
                     mDrawingPropsBarQml->show();
 
                 if (mDrawingPalette)
