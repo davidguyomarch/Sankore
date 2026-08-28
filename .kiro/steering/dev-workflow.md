@@ -1,5 +1,85 @@
 # Open-Sankoré — Workflow de développement
 
+## Mode PROD — Règles de travail
+
+### 1. Tout travail est lié à une issue GitHub
+
+- On ne commence JAMAIS un travail sans issue GitHub associée.
+- Si l'issue n'existe pas, on la crée d'abord avec un titre clair, une description du problème/besoin, et un label (bug/enhancement).
+- Référence : https://github.com/davidguyomarch/Sankore/issues
+
+### 2. Nommage des branches
+
+Chaque issue a sa branche dédiée, créée depuis master :
+
+```
+fix/<issue-id>-<description-courte>     # pour les bugs
+feat/<issue-id>-<description-courte>    # pour les fonctionnalités
+```
+
+Exemples :
+- `fix/135-desktop-crash`
+- `feat/134-documents-qml-view`
+- `fix/133-capture-cursor`
+
+Commande de création :
+```bash
+git checkout master && git pull
+git checkout -b fix/135-desktop-crash
+git push -u origin fix/135-desktop-crash
+```
+
+### 3. Vérification de branche
+
+À chaque reprise de travail, Kiro vérifie qu'il est sur la bonne branche :
+```bash
+git branch --show-current
+```
+Si la branche ne correspond pas à l'issue en cours, switcher avant de faire quoi que ce soit.
+
+### 4. Commits
+
+Chaque commit référence l'issue ID :
+```
+fix(#135): description courte du changement
+feat(#134): description courte du changement
+```
+
+Exemples :
+- `fix(#135): guard QML widgets in desktop mode transition`
+- `feat(#134): replace document toolbar with Phosphor icons`
+
+### 5. Push et fin de travail
+
+Quand le travail est terminé :
+1. Compiler en Docker pour valider
+2. Commiter avec le bon format `fix(#ID)` / `feat(#ID)`
+3. Pousser la branche
+4. Indiquer la commande pour merger quand le développeur est prêt
+
+### 6. Fermeture d'issue — uniquement sur demande explicite
+
+Kiro ne ferme JAMAIS une issue de sa propre initiative. Quand le développeur demande de fermer :
+
+```bash
+# Squash merge sur master (1 commit propre)
+git checkout master && git pull
+git merge --squash <branche>
+git commit -m "fix(#ID): description complète du fix
+
+Closes #ID"
+
+# Pousser et supprimer la branche distante
+git push
+git push origin --delete <branche>
+git branch -d <branche>
+```
+
+Le squash merge produit un seul commit sur master pour chaque issue, avec un historique propre.
+L'indication `Closes #ID` dans le message de commit ferme automatiquement l'issue sur GitHub.
+
+---
+
 ## Boucle de développement (Build → Validate → Test → Fix)
 
 Le développeur travaille sur **macOS ARM (M4 Pro)**. Il n'y a **pas de compilation locale Windows**.
@@ -47,7 +127,6 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c '
 
 - **Ce que ça valide** : démarrage de l'app, chargement des QML (status=1 = OK), positions des widgets, outil actif, visibilité des palettes
 - **Ce que ça NE valide PAS** : rendu visuel, interaction souris, comportement réel des outils
-- **Limitation** : la fenêtre est 100x30 en headless (pas maximisée), donc les widgets ont des positions négatives et l'app segfault après quelques secondes — c'est normal, le `startup.log` est écrit avant le crash
 - **Durée** : ~10 secondes
 
 Ce qu'il faut vérifier dans le log :
@@ -105,6 +184,8 @@ Le log est aussi lisible depuis le Mac (si le partage VirtIO fonctionne) :
 cat ../sankore-install/startup.log
 ```
 Mais préférer la lecture depuis la VM pour fiabilité : `type C:\Sankore\startup.log`
+
+---
 
 ## Système de diagnostic : startup.log
 
@@ -172,19 +253,22 @@ Conventions :
 
 Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a eu lieu avant l'initialisation statique (problème de DLL manquante ou incompatible).
 
+---
+
 ## Règles pour Kiro
 
 ### Avant de modifier du code
 
-1. **Toujours lire le fichier avant de le modifier** — ne jamais proposer des changements sur du code pas lu
-2. **Compiler en Docker Linux** après les modifications pour valider la syntaxe
-3. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
+1. **Vérifier la branche** — `git branch --show-current` doit correspondre à l'issue
+2. **Toujours lire le fichier avant de le modifier** — ne jamais proposer des changements sur du code pas lu
+3. **Compiler en Docker Linux** après les modifications pour valider la syntaxe
+4. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
 
 ### Après modifications
 
 1. Compiler en Docker : `docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'`
 2. Si la compilation échoue, corriger avant de proposer un push
-3. Si la compilation réussit, proposer les commandes git (add, commit, push)
+3. Si la compilation réussit, commiter avec `fix(#ID)` / `feat(#ID)` et pousser
 4. Le développeur lance le CI, déploie, teste, et revient avec le startup.log
 
 ### Quand le développeur envoie un startup.log
