@@ -31,19 +31,14 @@
 #include <QWebEngineView>
 #endif
 
-#include "gui/UBLeftPalette.h"
-#include "gui/UBRightPalette.h"
 #include "gui/UBFeaturesWidget.h"
 #include "gui/UBDockResourcesWidget.h"
-#include "gui/UBDrawingPalette.h"
-#include "gui/UBStylusPalette.h"
+#include "gui/UBDockPalette.h"
 #include "core/UBApplicationController.h"
 
 class UBSettings;
 
 class UBWebToolsPalette;
-class UBStylusPalette;
-class UBZoomPalette;
 class UBActionPalette;
 class UBBoardController;
 class UBKeyboardPalette;
@@ -65,12 +60,8 @@ class UBBoardPaletteManager : public QObject
         virtual ~UBBoardPaletteManager();
 
         void setupLayout();
-        UBLeftPalette* leftPalette(){return mLeftPalette;}
-        UBRightPalette* rightPalette(){return mRightPalette;}
-        UBFeaturesWidget *featuresWidget(){return mpFeaturesWidget;}
-        UBStylusPalette* stylusPalette(){return mStylusPalette;}
-        UBDrawingPalette* drawingPalette() { return mDrawingPalette; }
         UBToolController* toolController() { return mToolController; }
+        UBFeaturesWidget *featuresWidget(){return mpFeaturesWidget;}
         UBActionPalette *addItemPalette() {return mAddItemPalette;}
         void showVirtualKeyboard(bool show = true);
         void initPalettesPosAtStartup();
@@ -108,7 +99,6 @@ class UBBoardPaletteManager : public QObject
         void slot_changeMainMode(UBApplicationController::MainMode);
         void slot_changeDesktopMode(bool);
 
-        void toggleErasePalette(bool ckecked);
         void toggleImageBackgroundPalette(bool ckecked, bool isDefault);
         void closeAllPopupPalettes();
 
@@ -123,10 +113,6 @@ class UBBoardPaletteManager : public QObject
         QWidget* mContainer;
         UBBoardController *mBoardControler;
 
-        // Old palettes (still referenced by UBBoardController/UBDrawingController)
-        UBDrawingPalette *mDrawingPalette;
-        UBStylusPalette *mStylusPalette;
-
         // QML V2 palettes
         QQuickWidget *mStylusPaletteQml;
         UBToolController *mToolController;
@@ -137,43 +123,18 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mDrawingPropsBarQml;
         QQuickWidget *mShapesPaletteV2Qml;
 
-        UBZoomPalette *mZoomPalette;
         UBCreateLinkPalette* mLinkPalette;
-
-        /** The left dock palette */
-        UBLeftPalette* mLeftPalette;
-        /** The right dock palette */
-        UBRightPalette* mRightPalette;
 
         //issue 1682 - NNE - 20131218
         UBDockResourcesWidget *mTeacherResources;
 
-        UBActionPalette *mBackgroundsPalette;
-        UBActionPalette *mToolsPalette;
         UBActionPalette* mAddItemPalette;
-        UBActionPalette* mErasePalette;
-        UBActionPalette* mPagePalette;
         UBActionPalette* mImageBackgroundPalette;
-
-        // EV-7 - CFA - 20140102
-        UBActionPaletteButton* mEllipseActionPaletteButton;
 
         QUrl mItemUrl;
         QPixmap mPixmap;
         QPointF mPos;
         qreal mScaleFactor;
-
-        QTime mPageButtonPressedTime;
-        bool mPendingPageButtonPressed;
-
-        QTime mZoomButtonPressedTime;
-        bool mPendingZoomButtonPressed;
-
-        QTime mPanButtonPressedTime;
-        bool mPendingPanButtonPressed;
-
-        QTime mEraseButtonPressedTime;
-        bool mPendingEraseButtonPressed;
 
         UBFeaturesWidget *mpFeaturesWidget;
 
@@ -185,23 +146,7 @@ class UBBoardPaletteManager : public QObject
 
         void changeBackground();
 
-        void toggleBackgroundPalette(bool checked);
-        void backgroundPaletteClosed();
-
-        void toggleStylusPalette(bool checked);
-        void toggleDrawingPalette(bool checked);
         void tooglePodcastPalette(bool checked);
-
-        void erasePaletteButtonPressed();
-        void erasePaletteButtonReleased();
-
-        void erasePaletteClosed();
-
-        void togglePagePalette(bool ckecked);
-        void pagePaletteClosed();
-
-        void pagePaletteButtonPressed();
-        void pagePaletteButtonReleased();
 
         void addItemToCurrentPage();
         void addItemToNewPage();
@@ -210,11 +155,6 @@ class UBBoardPaletteManager : public QObject
         void purchaseLinkActivated(const QString&);
 
         void linkClicked(const QUrl& url);
-
-        void zoomButtonPressed();
-        void zoomButtonReleased();
-        void panButtonPressed();
-        void panButtonReleased();
 
         void changeStylusPaletteOrientation(QVariant var);
 };

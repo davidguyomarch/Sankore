@@ -29,8 +29,6 @@
 #include <QTime>
 #include <QTimer>
 
-#include "gui/UBRightPalette.h"
-
 class UBSettings;
 
 class UBDesktopPalette;
@@ -40,8 +38,6 @@ class UBDesktopPenPalette;
 class UBDesktopMarkerPalette;
 class UBDesktopEraserPalette;
 class UBActionPalette;
-class UBMainWindow;
-class UBRightPalette;
 
 #define PROPERTY_PALETTE_TIMER      1000
 
@@ -58,7 +54,7 @@ class UBDesktopAnnotationController : public QObject
     Q_OBJECT;
 
     public:
-        UBDesktopAnnotationController(QObject *parent, UBRightPalette* rightPalette);
+        UBDesktopAnnotationController(QObject *parent);
         virtual ~UBDesktopAnnotationController();
         void showWindow();
         void hideWindow();
@@ -136,8 +132,6 @@ class UBDesktopAnnotationController : public QObject
         UBDesktopPenPalette* mDesktopPenPalette;
         UBDesktopMarkerPalette* mDesktopMarkerPalette;
         UBDesktopEraserPalette* mDesktopEraserPalette;
-
-        UBRightPalette* mRightPalette;
 
         QTime mPenHoldTimer;
         QTime mMarkerHoldTimer;

@@ -45,7 +45,6 @@
 
 #include "network/UBHttpGet.h"
 
-#include "gui/UBStylusPalette.h"
 #include "gui/UBRubberBand.h"
 #include "gui/UBToolWidget.h"
 #include "gui/UBResources.h"
@@ -1054,7 +1053,7 @@ void UBBoardView::longPressEvent()
    else
    if (UBStylusTool::Eraser == currentTool)
    {
-       UBApplication::boardController->paletteManager()->toggleErasePalette(true);
+       // Legacy erase palette removed — erase options now in QML
    }
 
 }

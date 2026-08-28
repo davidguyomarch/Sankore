@@ -28,7 +28,6 @@
 
 #include "domain/UBGraphicsScene.h"
 #include "board/UBBoardController.h"
-#include "board/UBBoardPaletteManager.h"
 #include "domain/UBEditableGraphicsPolygonItem.h"
 
 #include "board/UBBoardView.h"
@@ -108,8 +107,7 @@ void UBDrawingController::setStylusTool(int tool)
         {
             UBApplication::boardController->activeScene()->deselectAllItems();
 
-            //Issue retours 2.4RC1 - CFA - 20140217 : hide drawing Palette children on setting stylus tool
-            UBApplication::boardController->paletteManager()->drawingPalette()->hideSubPalettes();
+            // hideSubPalettes disabled — legacy drawing palette removed
         }
         else
         {

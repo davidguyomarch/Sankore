@@ -31,20 +31,19 @@
 #include "gui/UBRightPalette.h"
 
 
-UBDesktopPropertyPalette::UBDesktopPropertyPalette(QWidget *parent, UBRightPalette* _rightPalette)
+UBDesktopPropertyPalette::UBDesktopPropertyPalette(QWidget *parent)
     :UBPropertyPalette(Qt::Horizontal, parent)
-    ,rightPalette(_rightPalette)
 {
     mSettings = UBSettings::settings();}
 
 int UBDesktopPropertyPalette::getParentRightOffset()
 {
-    return rightPalette->width();
+    return 0; // Legacy right palette removed
 }
 
 
-UBDesktopPenPalette::UBDesktopPenPalette(QWidget *parent, UBRightPalette* rightPalette)
-    : UBDesktopPropertyPalette(parent, rightPalette)
+UBDesktopPenPalette::UBDesktopPenPalette(QWidget *parent)
+    : UBDesktopPropertyPalette(parent)
 {
     // Setup color choice widget
     QList<QAction *> colorActions;
@@ -115,8 +114,8 @@ void UBDesktopPenPalette::onParentMaximized()
 }
 
 
-UBDesktopEraserPalette::UBDesktopEraserPalette(QWidget *parent, UBRightPalette* rightPalette)
-    : UBDesktopPropertyPalette(parent, rightPalette)
+UBDesktopEraserPalette::UBDesktopEraserPalette(QWidget *parent)
+    : UBDesktopPropertyPalette(parent)
 {
     // Setup eraser width choice widget
     QList<QAction *> eraserWidthActions;
@@ -139,8 +138,8 @@ UBDesktopEraserPalette::UBDesktopEraserPalette(QWidget *parent, UBRightPalette* 
 }
 
 
-UBDesktopMarkerPalette::UBDesktopMarkerPalette(QWidget *parent, UBRightPalette* rightPalette)
-    : UBDesktopPropertyPalette(parent, rightPalette)
+UBDesktopMarkerPalette::UBDesktopMarkerPalette(QWidget *parent)
+    : UBDesktopPropertyPalette(parent)
 {
     // Setup color choice widget
     QList<QAction *> colorActions;

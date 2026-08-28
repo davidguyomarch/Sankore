@@ -2136,28 +2136,8 @@ void UBBoardController::stylusToolChanged(int tool)
         }
     }
 
-    QButtonGroup * buttonGroup = nullptr;
-    if (tool == UBStylusTool::Drawing || tool == UBStylusTool::ChangeFill)
-    {
-        buttonGroup = paletteManager()->stylusPalette()->buttonGroup();
-    }
-    else
-    {
-        buttonGroup = paletteManager()->drawingPalette()->buttonGroup();
-    }
-
-    if (buttonGroup->checkedButton())
-    {
-        QToolButton * toolButton = dynamic_cast<QToolButton*>(buttonGroup->checkedButton());
-        if (toolButton && toolButton->defaultAction())
-        {
-            buttonGroup->setExclusive(false);
-            //buttonGroup->checkedButton()->setChecked(false);
-            toolButton->defaultAction()->toggle();
-            //buttonGroup->checkedButton()->toggle();
-            buttonGroup->setExclusive(true);
-        }
-    }
+    // Legacy button group toggle removed — QML V2 StylusPaletteV2 binds
+    // directly to toolController.activeTool for visual state.
 
     updateBackgroundState();
 }

@@ -1,7 +1,6 @@
 HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBFloatingPalette.h \
     src/gui/UBToolbarButtonGroup.h \
-    src/gui/UBStylusPalette.h \
     src/gui/UBIconButton.h \
     src/gui/UBThumbnailWidget.h \
     src/gui/UBCircleFrame.h \
@@ -16,7 +15,6 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBMainWindow.h \
     src/gui/UBToolWidget.h \
     src/gui/UBSpinningWheel.h \
-    src/gui/UBZoomPalette.h \
     src/gui/UBRubberBand.h \
     src/gui/UBDocumentToolsPalette.h \
     src/gui/UBWebToolsPalette.h \
@@ -30,8 +28,6 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBPropertyPalette.h \
     src/gui/UBUpdateDlg.h \
     src/gui/UBDockPaletteWidget.h \
-    src/gui/UBLeftPalette.h \
-    src/gui/UBRightPalette.h \
     src/gui/UBPageNavigationWidget.h \
     src/gui/UBMagnifer.h \
     src/gui/UBCachePropertiesWidget.h \
@@ -49,7 +45,6 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBTeacherGuideConstantes.h \
     src/gui/UBTeacherGuideResourcesPresentationWidget.h \
     src/gui/UBAbstractTeacherGuide.h \
-    src/gui/UBDrawingPalette.h \
     src/gui/UBAbstractSubPalette.h \
     src/gui/UBShapesPalette.h \
     src/gui/UBDrawingPolygonPalette.h \
@@ -67,7 +62,6 @@ HEADERS += src/gui/UBThumbnailView.h \
 SOURCES += src/gui/UBThumbnailView.cpp \
     src/gui/UBFloatingPalette.cpp \
     src/gui/UBToolbarButtonGroup.cpp \
-    src/gui/UBStylusPalette.cpp \
     src/gui/UBIconButton.cpp \
     src/gui/UBThumbnailWidget.cpp \
     src/gui/UBCircleFrame.cpp \
@@ -82,7 +76,6 @@ SOURCES += src/gui/UBThumbnailView.cpp \
     src/gui/UBMainWindow.cpp \
     src/gui/UBToolWidget.cpp \
     src/gui/UBSpinningWheel.cpp \
-    src/gui/UBZoomPalette.cpp \
     src/gui/UBRubberBand.cpp \
     src/gui/UBDocumentToolsPalette.cpp \
     src/gui/UBWebToolsPalette.cpp \
@@ -96,8 +89,6 @@ SOURCES += src/gui/UBThumbnailView.cpp \
     src/gui/UBPropertyPalette.cpp \
     src/gui/UBUpdateDlg.cpp \
     src/gui/UBDockPaletteWidget.cpp \
-    src/gui/UBLeftPalette.cpp \
-    src/gui/UBRightPalette.cpp \
     src/gui/UBPageNavigationWidget.cpp \
     src/gui/UBMagnifer.cpp \
     src/gui/UBCachePropertiesWidget.cpp \
@@ -114,7 +105,6 @@ SOURCES += src/gui/UBThumbnailView.cpp \
     src/gui/UBTeacherGuideResourceEditionWidget.cpp \
     src/gui/UBTeacherGuideResourcesPresentationWidget.cpp \
     src/gui/UBAbstractTeacherGuide.cpp \
-    src/gui/UBDrawingPalette.cpp \
     src/gui/UBAbstractSubPalette.cpp \
     src/gui/UBShapesPalette.cpp \
     src/gui/UBDrawingPolygonPalette.cpp \

@@ -8,7 +8,6 @@
 #include <QFocusEvent>
 
 #include "board/UBBoardPaletteManager.h"
-#include "gui/UBStylusPalette.h"
 
 
 UBDrawingPolygonPalette::UBDrawingPolygonPalette(Qt::Orientation orient, QWidget *parent)

@@ -73,8 +73,7 @@
 UBApplicationController::UBApplicationController(UBBoardView *pControlView,
                                                  UBBoardView *pDisplayView,
                                                  UBMainWindow* pMainWindow,
-                                                 QObject* parent,
-                                                 UBRightPalette* rightPalette)
+                                                 QObject* parent)
     : QObject(parent)
     , mMainWindow(pMainWindow)
     , mControlView(pControlView)
@@ -90,7 +89,7 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
     mSettings = UBSettings::settings();
     mDisplayManager = new UBDisplayManager(this);
 
-    mUninoteController = new UBDesktopAnnotationController(this, rightPalette);
+    mUninoteController = new UBDesktopAnnotationController(this);
 
     connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, this, &UBApplicationController::screenLayoutChanged);
     connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, mUninoteController, &UBDesktopAnnotationController::screenLayoutChanged);

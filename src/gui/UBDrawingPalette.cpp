@@ -146,38 +146,8 @@ void UBDrawingPalette::buttonClicked()
 
 void UBDrawingPalette::initPosition()
 {
-    // Rem : positions would be very different if drawingPalette were horizontal...
-
-    int x = 0;
-    int y = 0;
-
-    // The drawingPalette appears near the button that open it.
-    // Find the "Drawing" button :
-    UBStylusPalette * stylusPalette = UBApplication::boardController->paletteManager()->stylusPalette();
-    int indexDrawingButton = stylusPalette->actions().indexOf(UBApplication::mainWindow->actionDrawing);
-    QAction * actionDrawing = stylusPalette->actions().at(indexDrawingButton);
-    QList<QWidget *> buttonsDrawing = actionDrawing->associatedWidgets();
-    if (buttonsDrawing.size()>0)
-    {
-        QWidget* buttonDrawing = buttonsDrawing.first();
-        if (buttonDrawing)
-        {
-            if (stylusPalette->orientation() == Qt::Horizontal)
-            {
-                x = stylusPalette->pos().x() + buttonDrawing->pos().x() + buttonDrawing->width()/2 - this->width()/2;
-                y = stylusPalette->pos().y() - this->height();
-            }
-            else // stylus Palette is vertical :
-            {
-                x = stylusPalette->pos().x() - this->width();
-                y = stylusPalette->pos().y() + buttonDrawing->pos().y() + buttonDrawing->height()/2 - this->width()/2;
-            }
-        }
-    }
-
-    moveInsideParent(QPoint(x, y));
-
-    initSubPalettesPosition(); // place the subPalettes next to the palette.
+    // Legacy drawing palette — no longer instantiated after QML V2 migration.
+    // This method is dead code but must compile.
 }
 
 void UBDrawingPalette::initSubPalettesPosition()
