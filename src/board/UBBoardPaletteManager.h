@@ -43,7 +43,6 @@ class UBSettings;
 
 class UBWebToolsPalette;
 class UBStylusPalette;
-class UBZoomPalette;
 class UBActionPalette;
 class UBBoardController;
 class UBKeyboardPalette;
@@ -108,7 +107,6 @@ class UBBoardPaletteManager : public QObject
         void slot_changeMainMode(UBApplicationController::MainMode);
         void slot_changeDesktopMode(bool);
 
-        void toggleErasePalette(bool ckecked);
         void toggleImageBackgroundPalette(bool ckecked, bool isDefault);
         void closeAllPopupPalettes();
 
@@ -137,7 +135,6 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mDrawingPropsBarQml;
         QQuickWidget *mShapesPaletteV2Qml;
 
-        UBZoomPalette *mZoomPalette;
         UBCreateLinkPalette* mLinkPalette;
 
         /** The left dock palette */
@@ -148,32 +145,13 @@ class UBBoardPaletteManager : public QObject
         //issue 1682 - NNE - 20131218
         UBDockResourcesWidget *mTeacherResources;
 
-        UBActionPalette *mBackgroundsPalette;
-        UBActionPalette *mToolsPalette;
         UBActionPalette* mAddItemPalette;
-        UBActionPalette* mErasePalette;
-        UBActionPalette* mPagePalette;
         UBActionPalette* mImageBackgroundPalette;
-
-        // EV-7 - CFA - 20140102
-        UBActionPaletteButton* mEllipseActionPaletteButton;
 
         QUrl mItemUrl;
         QPixmap mPixmap;
         QPointF mPos;
         qreal mScaleFactor;
-
-        QTime mPageButtonPressedTime;
-        bool mPendingPageButtonPressed;
-
-        QTime mZoomButtonPressedTime;
-        bool mPendingZoomButtonPressed;
-
-        QTime mPanButtonPressedTime;
-        bool mPendingPanButtonPressed;
-
-        QTime mEraseButtonPressedTime;
-        bool mPendingEraseButtonPressed;
 
         UBFeaturesWidget *mpFeaturesWidget;
 
@@ -185,23 +163,9 @@ class UBBoardPaletteManager : public QObject
 
         void changeBackground();
 
-        void toggleBackgroundPalette(bool checked);
-        void backgroundPaletteClosed();
-
         void toggleStylusPalette(bool checked);
         void toggleDrawingPalette(bool checked);
         void tooglePodcastPalette(bool checked);
-
-        void erasePaletteButtonPressed();
-        void erasePaletteButtonReleased();
-
-        void erasePaletteClosed();
-
-        void togglePagePalette(bool ckecked);
-        void pagePaletteClosed();
-
-        void pagePaletteButtonPressed();
-        void pagePaletteButtonReleased();
 
         void addItemToCurrentPage();
         void addItemToNewPage();
@@ -210,11 +174,6 @@ class UBBoardPaletteManager : public QObject
         void purchaseLinkActivated(const QString&);
 
         void linkClicked(const QUrl& url);
-
-        void zoomButtonPressed();
-        void zoomButtonReleased();
-        void panButtonPressed();
-        void panButtonReleased();
 
         void changeStylusPaletteOrientation(QVariant var);
 };

@@ -1054,7 +1054,7 @@ void UBBoardView::longPressEvent()
    else
    if (UBStylusTool::Eraser == currentTool)
    {
-       UBApplication::boardController->paletteManager()->toggleErasePalette(true);
+       // Legacy erase palette removed — erase options now in QML
    }
 
 }
