@@ -49,34 +49,50 @@ Exemples :
 - `fix(#135): guard QML widgets in desktop mode transition`
 - `feat(#134): replace document toolbar with Phosphor icons`
 
-### 5. Push et fin de travail
+### 5. Push, PR et validation
 
 Quand le travail est terminé :
-1. Compiler en Docker pour valider
+1. Compiler en Docker pour valider la syntaxe
 2. Commiter avec le bon format `fix(#ID)` / `feat(#ID)`
 3. Pousser la branche
-4. Indiquer la commande pour merger quand le développeur est prêt
+4. Créer la PR immédiatement — le CI Windows ne tourne que sur les PRs (pas sur les branches)
+5. Le développeur vérifie que le CI passe, teste sur la VM Windows si nécessaire
 
-### 6. Fermeture d'issue — uniquement sur demande explicite
-
-Kiro ne ferme JAMAIS une issue de sa propre initiative. Quand le développeur demande de fermer :
-
+Création de la PR :
 ```bash
-# Squash merge sur master (1 commit propre)
-git checkout master && git pull
-git merge --squash <branche>
-git commit -m "fix(#ID): description complète du fix
+gh pr create \
+  --base master \
+  --title "fix(#ID): description du fix" \
+  --body "## Changes
+- Description des changements
+
+## Tests
+- [x] Docker Linux build passes
+- [ ] CI Windows passes
+- [ ] CI Linux passes
+- [ ] Tested on VM Windows
 
 Closes #ID"
-
-# Pousser et supprimer la branche distante
-git push
-git push origin --delete <branche>
-git branch -d <branche>
 ```
 
-Le squash merge produit un seul commit sur master pour chaque issue, avec un historique propre.
-L'indication `Closes #ID` dans le message de commit ferme automatiquement l'issue sur GitHub.
+### 6. Merge — uniquement sur demande explicite du développeur
+
+Kiro ne merge JAMAIS de sa propre initiative. Quand le développeur valide :
+
+```bash
+gh pr merge --squash --delete-branch
+```
+
+Cela fait automatiquement :
+- Squash merge (1 seul commit propre sur master)
+- Suppression de la branche distante
+- Fermeture de l'issue (grâce à `Closes #ID` dans le body de la PR)
+
+Nettoyage local après merge :
+```bash
+git checkout master && git pull
+git branch -d <branche-locale>
+```
 
 ---
 
@@ -86,9 +102,9 @@ Le développeur travaille sur **macOS ARM (M4 Pro)**. Il n'y a **pas de compilat
 La validation se fait en 3 étapes :
 
 ```
-Code → Docker Linux (2 min) → Push → CI Windows (25 min) → VM Windows (test manuel)
-                ↑                                                       |
-                └───────────── Kiro corrige ← startup.log ←────────────┘
+Code → Docker Linux (2 min) → Push + PR → CI Windows (25 min) → VM Windows (test manuel)
+                ↑                                                          |
+                └───────────── Kiro corrige ← startup.log ←───────────────┘
 ```
 
 ### Étape 1 : Validation rapide — Docker Linux (~2 min)
@@ -137,18 +153,13 @@ Ce qu'il faut vérifier dans le log :
 
 ### Étape 2 : CI Windows — GitHub Actions (~25 min)
 
-Pousser le code déclenche le build Windows CI :
+Le CI Windows ne tourne que sur les PRs (pas sur les branches). C'est pourquoi on crée la PR immédiatement après le push :
 
 ```bash
-git push
+gh pr create --base master --title "fix(#ID): description" --body "..."
 ```
 
 Le CI (`build-windows.yml`) fait : compilation MSVC → unit tests → windeployqt → smoke test → artefact.
-
-Pour une branche feature (pas master) :
-```bash
-gh workflow run build-windows.yml --ref ma-branche
-```
 
 ### Étape 3 : Test sur VM Windows — deploy + run-test.bat
 
