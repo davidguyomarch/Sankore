@@ -997,6 +997,7 @@ UBGraphicsToolBarItem::UBGraphicsToolBarItem(QGraphicsItem * parent) :
     this->setRect(rect);
 
     setPen(Qt::NoPen);
+    setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
     hide();
 
     update();
@@ -1059,7 +1060,9 @@ void UBGraphicsToolBarItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     painter->setPen(QPen(QColor(0, 0, 0, 30), 0.5));
     painter->drawRoundedRect(r, 8, 8);
 
-    // Draw separator lines at Spacer positions
+    // Draw separator lines at Spacer positions — clip to toolbar rect
+    painter->save();
+    painter->setClipRect(r);
     int itemXOffset = kToolbarPaddingH;
     int buttonY = (kToolbarHeight - DelegateButton::kButtonSize - DelegateButton::kButtonPadding * 2) / 2;
 
@@ -1067,17 +1070,19 @@ void UBGraphicsToolBarItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     {
         if (item == DelegateButton::Spacer) {
             itemXOffset += kSeparatorMargin;
-            // Draw a thin vertical separator line
-            qreal lineX = itemXOffset;
-            qreal lineTop = buttonY + 2;
-            qreal lineBottom = kToolbarHeight - buttonY - 2;
-            painter->setPen(QPen(QColor(0, 0, 0, 40), kSeparatorWidth));
-            painter->drawLine(QPointF(lineX, lineTop), QPointF(lineX, lineBottom));
+            if (itemXOffset < r.width()) {
+                qreal lineX = itemXOffset;
+                qreal lineTop = buttonY + 2;
+                qreal lineBottom = kToolbarHeight - buttonY - 2;
+                painter->setPen(QPen(QColor(0, 0, 0, 40), kSeparatorWidth));
+                painter->drawLine(QPointF(lineX, lineTop), QPointF(lineX, lineBottom));
+            }
             itemXOffset += kSeparatorMargin;
         } else {
             itemXOffset += item->boundingRect().width() + mElementsPadding;
         }
     }
+    painter->restore();
 }
 
 MediaTimer::MediaTimer(QGraphicsItem * parent): QGraphicsRectItem(parent)
