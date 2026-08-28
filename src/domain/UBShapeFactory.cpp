@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "UBShapeFactory.h"
 #include "UBGraphicsEllipseItem.h"
 #include "UBGraphicsRectItem.h"

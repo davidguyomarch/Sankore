@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/board/UBBoardController.h \
                 src/board/UBBoardNavigationController.h \

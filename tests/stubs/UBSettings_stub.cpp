@@ -1,4 +1,8 @@
 /*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
+/*
  * Stub implementation for UBSettings - provides minimal singleton
  * and non-string-key members needed by test code.
  *

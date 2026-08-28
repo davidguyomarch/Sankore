@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/adaptors/UBExportAdaptor.h\
                 src/adaptors/UBExportPDF.h \

@@ -119,10 +119,9 @@ Open-Sankore/
 │   ├── linux/              # Ressources Linux
 │   └── sankore.qrc         # Fichier de ressources Qt
 ├── OpenSankore.pro         # Fichier projet principal
-├── buildDebianPackage.sh   # Script de build Linux
-├── release.macx.sh         # Script de build macOS
-├── release.win7.vc9.bat    # Script de build Windows
-├── LICENSE.txt             # Licence GPLv3
+├── buildDebianPackage.sh   # Script de build Linux (legacy)
+├── LICENSE.md              # Licence GPLv3
+├── AUTHORS.md              # Auteurs et contributeurs
 └── docs/                   # Documentation (ce répertoire)
 ```
 
@@ -326,8 +325,8 @@ Les fichiers de traduction (`.ts`) sont dans `resources/i18n/` et compilés en `
 - **Compilateur** : Visual Studio 2008 (VC9), 32-bit et 64-bit
 - **Qt** : 4.8 (répertoire `../Qt-4.8`)
 - **Installeur** : Inno Setup (`Sankore 3.1.iss`)
-- **Script** : `release.win7.vc9.bat`
 - **Spécificités** : QAxContainer (ActiveX), compilation parallèle (`/MP`)
+- **Note** : Le script `release.win7.vc9.bat` a été supprimé — le build Windows passe désormais par GitHub Actions CI
 
 ### macOS
 
@@ -335,8 +334,8 @@ Les fichiers de traduction (`.ts`) sont dans `resources/i18n/` et compilés en `
 - **SDK** : MacOSX 10.6
 - **Déploiement** : OS X 10.5+
 - **Installeur** : DMG via `dmgutil`
-- **Script** : `release.macx.sh`
 - **Spécificités** : Framework Foundation, OpenSSL, Breakpad (crash reporting)
+- **Note** : Le script `release.macx.sh` a été supprimé — le build macOS n'est plus supporté actuellement
 
 ### Linux
 
@@ -374,20 +373,12 @@ make -j$(nproc)
 
 ### Build release par plateforme
 
-**macOS :**
-```bash
-./release.macx.sh
-```
-
-**Linux (paquet .deb) :**
+**Linux (paquet .deb, legacy) :**
 ```bash
 ./buildDebianPackage.sh
 ```
 
-**Windows :**
-```batch
-release.win7.vc9.bat
-```
+> **Note :** Les scripts `release.macx.sh` et `release.win7.vc9.bat` ont été supprimés. Le build passe désormais par GitHub Actions CI (voir `.github/workflows/`).
 
 ### Sortie
 
@@ -413,4 +404,4 @@ with a specific linking exception for the OpenSSL project's
 "OpenSSL" library.
 ```
 
-Le texte complet de la licence est disponible dans `LICENSE.txt` et `COPYING`.
+Le texte complet de la licence est disponible dans `LICENSE.md` et `COPYING`.

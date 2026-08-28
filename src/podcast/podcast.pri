@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/podcast/UBPodcastController.h \
                 src/podcast/UBAbstractVideoEncoder.h \

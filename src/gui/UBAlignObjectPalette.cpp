@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2014 Groupement d'Intrt Public pour l'Education Numrique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankor.
  *

@@ -1,3 +1,11 @@
+/*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 // test-ocr.cpp — Standalone Windows Ink recognition test
 // Compile: cl /EHsc /std:c++17 test-ocr.cpp ole32.lib oleaut32.lib
 // Run: test-ocr.exe

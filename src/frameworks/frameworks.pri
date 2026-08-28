@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/frameworks/UBGeometryUtils.h \
                 src/frameworks/UBPlatformUtils.h \

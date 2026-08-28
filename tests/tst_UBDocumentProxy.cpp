@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "tst_UBDocumentProxy.h"
 #include "core/UBSettingsData.h"
 #include "document/UBDocumentProxy.h"

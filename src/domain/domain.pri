@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 HEADERS += src/domain/UBGraphicsScene.h \
                 src/domain/UBSceneContext.h \
     src/domain/UBGraphicsItemUndoCommand.h \

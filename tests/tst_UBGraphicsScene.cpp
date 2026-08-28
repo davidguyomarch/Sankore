@@ -1,4 +1,12 @@
 /*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/*
  * Unit tests for UBSceneContext — validates the context struct
  * that decouples UBGraphicsScene from singletons.
  *
