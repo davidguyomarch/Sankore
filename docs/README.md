@@ -119,8 +119,8 @@ Open-Sankore/
 │   ├── linux/              # Ressources Linux
 │   └── sankore.qrc         # Fichier de ressources Qt
 ├── OpenSankore.pro         # Fichier projet principal
-├── buildDebianPackage.sh   # Script de build Linux (legacy)
-├── LICENSE.md              # Licence GPLv3
+├── Dockerfile.qt6          # Docker de développement (Ubuntu 24.04, Qt 6)
+├── LICENSE.md              # Licence GPLv3 (texte complet inclus)
 ├── AUTHORS.md              # Auteurs et contributeurs
 └── docs/                   # Documentation (ce répertoire)
 ```
@@ -404,4 +404,4 @@ with a specific linking exception for the OpenSSL project's
 "OpenSSL" library.
 ```
 
-Le texte complet de la licence est disponible dans `LICENSE.md` et `COPYING`.
+Le texte complet de la licence est disponible dans `LICENSE.md`.

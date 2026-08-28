@@ -49,6 +49,7 @@ Thumbs.db
 *.idb
 .project
 .settings
+.qtcreator/
 Makefile.Sankore*
 
 # Build files #
@@ -58,6 +59,8 @@ install
 Makefile
 Makefile.Debug
 Makefile.Release
+.qmake.conf
+.qmake.stash
 
 # plugins #
 ###########
