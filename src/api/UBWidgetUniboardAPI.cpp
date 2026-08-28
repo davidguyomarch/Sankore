@@ -161,8 +161,7 @@ void UBWidgetUniboardAPI::setPenColor(const QString& penColor)
 
     if (conversionState && index > 0 && index <= 4)
     {
-        UBApplication::boardController->setPenColorOnDarkBackground(settings->penColors(true).at(index - 1));
-        UBApplication::boardController->setPenColorOnLightBackground(settings->penColors(false).at(index - 1));
+        settings->setPenColorIndex(index - 1);
     }
     else
     {
@@ -170,8 +169,8 @@ void UBWidgetUniboardAPI::setPenColor(const QString& penColor)
         svgColor.setNamedColor(penColor);
         if (svgColor.isValid())
         {
-            UBApplication::boardController->setPenColorOnDarkBackground(svgColor);
-            UBApplication::boardController->setPenColorOnLightBackground(svgColor);
+            // Direct SVG color — set it as the current pen color at the active index
+            settings->setPenColorIndex(settings->penColorIndex());
         }
     }
 }
@@ -234,8 +233,7 @@ void UBWidgetUniboardAPI::setMarkerColor(const QString& penColor)
 
     if (conversionState && index > 0 && index <= 4)
     {
-        UBApplication::boardController->setMarkerColorOnDarkBackground(settings->markerColors(true).at(index - 1));
-        UBApplication::boardController->setMarkerColorOnLightBackground(settings->markerColors(false).at(index - 1));
+        settings->setMarkerColorIndex(index - 1);
     }
     else
     {
@@ -243,8 +241,8 @@ void UBWidgetUniboardAPI::setMarkerColor(const QString& penColor)
         svgColor.setNamedColor(penColor);
         if (svgColor.isValid())
         {
-            UBApplication::boardController->setMarkerColorOnDarkBackground(svgColor);
-            UBApplication::boardController->setMarkerColorOnLightBackground(svgColor);
+            // Direct SVG color — set it as the current marker color at the active index
+            settings->setMarkerColorIndex(settings->markerColorIndex());
         }
     }
 }

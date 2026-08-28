@@ -117,52 +117,24 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
             return mActiveScene;
         }
 
-        void setPenColorOnDarkBackground(const QColor& pColor)
-        {
-            if (mPenColorOnDarkBackground == pColor)
-                return;
-
-            mPenColorOnDarkBackground = pColor;
-            emit penColorChanged();
-        }
-
-        void setPenColorOnLightBackground(const QColor& pColor)
-        {
-            if (mPenColorOnLightBackground == pColor)
-                return;
-
-            mPenColorOnLightBackground = pColor;
-            emit penColorChanged();
-        }
-
-        void setMarkerColorOnDarkBackground(const QColor& pColor)
-        {
-            mMarkerColorOnDarkBackground = pColor;
-        }
-
-        void setMarkerColorOnLightBackground(const QColor& pColor)
-        {
-            mMarkerColorOnLightBackground = pColor;
-        }
-
         QColor penColorOnDarkBackground()
         {
-            return mPenColorOnDarkBackground;
+            return mSettings->penColor(true);
         }
 
         QColor penColorOnLightBackground()
         {
-            return mPenColorOnLightBackground;
+            return mSettings->penColor(false);
         }
 
         QColor markerColorOnDarkBackground()
         {
-            return mMarkerColorOnDarkBackground;
+            return mSettings->markerColor(true);
         }
 
         QColor markerColorOnLightBackground()
         {
-            return mMarkerColorOnLightBackground;
+            return mSettings->markerColor(false);
         }
 
         qreal systemScaleFactor()
@@ -365,10 +337,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         UBTextDelegateDialogHandler* mTextDelegateDialogHandler;
         qreal mZoomFactor;
         bool mIsClosing;
-        QColor mPenColorOnDarkBackground;
-        QColor mPenColorOnLightBackground;
-        QColor mMarkerColorOnDarkBackground;
-        QColor mMarkerColorOnLightBackground;
         qreal mSystemScaleFactor;
         bool mCleanupDone;
         bool mCacheWidgetIsEnabled;

@@ -453,13 +453,13 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
                 QColor colorOnDarkBG, colorOnLightBG;
                 if (currentTool == UBStylusTool::Marker)
                 {
-                    colorOnDarkBG = mContext.markerColorOnDarkBackground;
-                    colorOnLightBG = mContext.markerColorOnLightBackground;
+                    colorOnDarkBG = mContext.markerColorOnDarkBackground();
+                    colorOnLightBG = mContext.markerColorOnLightBackground();
                 }
                 else
                 {
-                    colorOnDarkBG = mContext.penColorOnDarkBackground;
-                    colorOnLightBG = mContext.penColorOnLightBackground;
+                    colorOnDarkBG = mContext.penColorOnDarkBackground();
+                    colorOnLightBG = mContext.penColorOnLightBackground();
                 }
 
                 mCurrentSmoothStroke->setColorOnDarkBackground(colorOnDarkBG);
@@ -1251,13 +1251,13 @@ void UBGraphicsScene::initPolygonItem(UBGraphicsPolygonItem* polygonItem)
 
     if (mContext.drawingController->stylusTool() == UBStylusTool::Marker)
     {
-        colorOnDarkBG = mContext.markerColorOnDarkBackground;
-        colorOnLightBG = mContext.markerColorOnLightBackground;
+        colorOnDarkBG = mContext.markerColorOnDarkBackground();
+        colorOnLightBG = mContext.markerColorOnLightBackground();
     }
     else // settings->stylusTool() == UBStylusTool::Pen + failsafe
     {
-        colorOnDarkBG = mContext.penColorOnDarkBackground;
-        colorOnLightBG = mContext.penColorOnLightBackground;
+        colorOnDarkBG = mContext.penColorOnDarkBackground();
+        colorOnLightBG = mContext.penColorOnLightBackground();
     }
 
     if (mDarkBackground)

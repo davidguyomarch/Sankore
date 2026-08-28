@@ -143,13 +143,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     mItemFactory = new UBBoardItemFactory(this, this);
     mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
 
-    int penColorIndex = mSettings->penColorIndex();
-    int markerColorIndex = mSettings->markerColorIndex();
-
-    mPenColorOnDarkBackground = mSettings->penColors(true).at(penColorIndex);
-    mPenColorOnLightBackground = mSettings->penColors(false).at(penColorIndex);
-    mMarkerColorOnDarkBackground = mSettings->markerColors(true).at(markerColorIndex);
-    mMarkerColorOnLightBackground = mSettings->markerColors(false).at(markerColorIndex);
+    // Colors are now read live from UBSettings by UBSceneContext — no cache needed
 
     QScreen* desktop = QGuiApplication::primaryScreen();
     int dpiCommon = (desktop->physicalDotsPerInchX() + desktop->physicalDotsPerInchY()) / 2;
@@ -1876,9 +1870,6 @@ void UBBoardController::setColorIndex(int pColorIndex)
             UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Text ||
             UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
     {
-        mPenColorOnDarkBackground = mSettings->penColors(true).at(pColorIndex);
-        mPenColorOnLightBackground = mSettings->penColors(false).at(pColorIndex);
-
         if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
         {
             // If we are in mode board, then do that
@@ -1891,13 +1882,7 @@ void UBBoardController::setColorIndex(int pColorIndex)
 
         emit penColorChanged();
     }
-    else if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
-    {
-        mMarkerColorOnDarkBackground = mSettings->markerColors(true).at(pColorIndex);
-        mMarkerColorOnLightBackground = mSettings->markerColors(false).at(pColorIndex);
-    }
-
-    updateSceneContext();
+    // Colors are now read live from UBSettings — no cache to update
 }
 
 static bool sameRGB(const QColor &lcol, const QColor &rcol)
@@ -1947,11 +1932,9 @@ QColor UBBoardController::inferOpposite(const QColor &candidate, const char tool
 
 void UBBoardController::colorPaletteChanged()
 {
-    mPenColorOnDarkBackground = mSettings->penColor(true);
-    mPenColorOnLightBackground = mSettings->penColor(false);
-    mMarkerColorOnDarkBackground = mSettings->markerColor(true);
-    mMarkerColorOnLightBackground = mSettings->markerColor(false);
-    updateSceneContext();
+    // Colors are now read live from UBSettings by UBSceneContext — no cache to update.
+    // Just emit the signal so any UI (e.g. legacy palette) can refresh.
+    emit penColorChanged();
 }
 
 
@@ -2399,10 +2382,7 @@ void UBBoardController::updateSceneContext()
     ctx.eraserFineWidth = mSettings->eraserFineWidth();
     ctx.eraserMediumWidth = mSettings->eraserMediumWidth();
     ctx.eraserStrongWidth = mSettings->eraserStrongWidth();
-    ctx.penColorOnDarkBackground = penColorOnDarkBackground();
-    ctx.penColorOnLightBackground = penColorOnLightBackground();
-    ctx.markerColorOnDarkBackground = markerColorOnDarkBackground();
-    ctx.markerColorOnLightBackground = markerColorOnLightBackground();
+    // Colors are no longer copied here — UBSceneContext reads them live from UBSettings
 
     mActiveScene->setSceneContext(ctx);
 }

@@ -60,10 +60,10 @@ void TestUBGraphicsScene::testInputDevicePressAndRelease()
 
 void TestUBGraphicsScene::testMultipleSegmentsCreateStroke()
 {
-    // Test color defaults
+    // Test color defaults (test mode — no boardController, uses test defaults)
     UBSceneContext ctx;
-    QVERIFY(ctx.penColorOnDarkBackground.isValid());
-    QVERIFY(ctx.penColorOnLightBackground.isValid());
-    QVERIFY(ctx.markerColorOnDarkBackground.isValid());
-    QVERIFY(ctx.markerColorOnLightBackground.isValid());
+    QVERIFY(ctx.penColorOnDarkBackground().isValid());
+    QVERIFY(ctx.penColorOnLightBackground().isValid());
+    QVERIFY(ctx.markerColorOnDarkBackground().isValid());
+    QVERIFY(ctx.markerColorOnLightBackground().isValid());
 }

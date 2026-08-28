@@ -32,14 +32,22 @@ struct UBSceneContext
     qreal eraserFineWidth = 8.0;
     qreal eraserMediumWidth = 24.0;
     qreal eraserStrongWidth = 48.0;
-    QColor penColorOnDarkBackground = QColor(Qt::white);
-    QColor penColorOnLightBackground = QColor(Qt::blue);
-    QColor markerColorOnDarkBackground = QColor(Qt::yellow);
-    QColor markerColorOnLightBackground = QColor(Qt::green);
 
-    // --- Live accessors (delegates to boardController or uses test values) ---
+    // --- Test-only color defaults (used when boardController is null) ---
+    QColor testPenColorOnDarkBackground = QColor(Qt::white);
+    QColor testPenColorOnLightBackground = QColor(Qt::blue);
+    QColor testMarkerColorOnDarkBackground = QColor(Qt::yellow);
+    QColor testMarkerColorOnLightBackground = QColor(Qt::green);
+
+    // --- Live accessors (delegates to boardController/UBSettings or uses test values) ---
     qreal systemScaleFactor() const;
     qreal currentZoom() const;
+
+    // --- Live color accessors — read directly from UBSettings (no cache) ---
+    QColor penColorOnDarkBackground() const;
+    QColor penColorOnLightBackground() const;
+    QColor markerColorOnDarkBackground() const;
+    QColor markerColorOnLightBackground() const;
 
     // --- Helper: get current eraser width based on current settings ---
     qreal currentEraserWidth() const;
