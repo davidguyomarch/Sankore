@@ -60,6 +60,7 @@
 #include <QToolBar>
 #include <QFile>
 #include <QTextStream>
+#include <QPainterPath>
 #include "qml/UBThemeManager.h"
 
 
@@ -267,7 +268,8 @@ void UBBoardPaletteManager::setupPalettes()
     // Create the QQuickWidget for the stylus palette
     mStylusPaletteQml = new QQuickWidget(mContainer);
     mStylusPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mStylusPaletteQml->setClearColor(QColor(30, 30, 30));
+    mStylusPaletteQml->setClearColor(Qt::transparent);
+    mStylusPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
     mStylusPaletteQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mStylusPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
 
@@ -301,6 +303,14 @@ void UBBoardPaletteManager::setupPalettes()
         mStylusPaletteQml->setFixedSize(thickness, contentLen);
     } else {
         mStylusPaletteQml->setFixedSize(contentLen, thickness);
+    }
+    // Rounded mask: clips corners and lets clicks through outside the rounded shape
+    {
+        int w = mStylusPaletteQml->width();
+        int h = mStylusPaletteQml->height();
+        QPainterPath path;
+        path.addRoundedRect(0, 0, w, h, 12, 12);
+        mStylusPaletteQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
     }
 
     // Position: bottom-center for horizontal, right-center for vertical
@@ -355,7 +365,8 @@ void UBBoardPaletteManager::setupPalettes()
     // --- QML Drawing Props Bar (Issue #121 Step 5) ---
     mDrawingPropsBarQml = new QQuickWidget(mContainer);
     mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mDrawingPropsBarQml->setClearColor(QColor(30, 30, 30));  // opaque dark background — no transparent click-through
+    mDrawingPropsBarQml->setClearColor(Qt::transparent);
+    mDrawingPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
     mDrawingPropsBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mDrawingPropsBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mDrawingPropsBarQml->rootContext()->setContextProperty("toolController", mToolController);
@@ -371,11 +382,20 @@ void UBBoardPaletteManager::setupPalettes()
         bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
         int barW = isEraser ? 120 : 280;
         mDrawingPropsBarQml->setFixedSize(barW, 48);
+        // Apply rounded mask so clicks outside the rounded shape pass through
+        QPainterPath path;
+        path.addRoundedRect(0, 0, barW, 48, 12, 12);
+        mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
         int posX = (mContainer->width() - barW) / 2;
         int posY = mStylusPaletteQml->y() - 48 - 8;
         mDrawingPropsBarQml->move(posX, posY);
     };
     mDrawingPropsBarQml->setFixedSize(280, 48);
+    {
+        QPainterPath path;
+        path.addRoundedRect(0, 0, 280, 48, 12, 12);
+        mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
+    }
     int propsX = (mContainer->width() - 280) / 2;
     int propsY = mContainer->height() - 52 - 70; // above bottom bar
     mDrawingPropsBarQml->move(propsX, propsY);
@@ -390,12 +410,18 @@ void UBBoardPaletteManager::setupPalettes()
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
     mShapesPaletteV2Qml = new QQuickWidget(mContainer);
     mShapesPaletteV2Qml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mShapesPaletteV2Qml->setClearColor(QColor(30, 30, 30));
+    mShapesPaletteV2Qml->setClearColor(Qt::transparent);
+    mShapesPaletteV2Qml->setAttribute(Qt::WA_TranslucentBackground);
     mShapesPaletteV2Qml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mShapesPaletteV2Qml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mShapesPaletteV2Qml->rootContext()->setContextProperty("toolController", mToolController);
     mShapesPaletteV2Qml->setSource(QUrl("qrc:/qml/ShapesPaletteV2.qml"));
     mShapesPaletteV2Qml->setFixedSize(160, 320);
+    {
+        QPainterPath path;
+        path.addRoundedRect(0, 0, 160, 320, 12, 12);
+        mShapesPaletteV2Qml->setMask(QRegion(path.toFillPolygon().toPolygon()));
+    }
     // Positioned to the left of center, above bottom bar
     mShapesPaletteV2Qml->move(sidebarWidth + 20, mContainer->height() - 52 - 330);
     mShapesPaletteV2Qml->hide(); // starts hidden, controlled by toolController.shapesVisible
@@ -1428,6 +1454,15 @@ void UBBoardPaletteManager::changeStylusPaletteOrientation(QVariant var)
                 mStylusPaletteQml->setFixedSize(thickness, contentLen);
             else
                 mStylusPaletteQml->setFixedSize(contentLen, thickness);
+
+            // Update rounded mask after size change
+            {
+                int w = mStylusPaletteQml->width();
+                int h = mStylusPaletteQml->height();
+                QPainterPath maskPath;
+                maskPath.addRoundedRect(0, 0, w, h, 12, 12);
+                mStylusPaletteQml->setMask(QRegion(maskPath.toFillPolygon().toPolygon()));
+            }
 
             // Reposition
             if (bVertical) {

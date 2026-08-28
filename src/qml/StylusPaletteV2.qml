@@ -25,7 +25,7 @@ Rectangle {
 
     width: isVertical ? thickness : contentLength
     height: isVertical ? contentLength : thickness
-    radius: 0  // No radius on root — avoids white corners on Windows QQuickWidget
+    radius: 12
     color: themeManager.surface
     border.color: themeManager.border
     border.width: 1
