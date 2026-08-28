@@ -33,6 +33,7 @@
 
 #include "gui/UBFeaturesWidget.h"
 #include "gui/UBDockResourcesWidget.h"
+#include "gui/UBDockPalette.h"
 #include "core/UBApplicationController.h"
 
 class UBSettings;

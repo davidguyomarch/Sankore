@@ -28,8 +28,6 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBPropertyPalette.h \
     src/gui/UBUpdateDlg.h \
     src/gui/UBDockPaletteWidget.h \
-    src/gui/UBLeftPalette.h \
-    src/gui/UBRightPalette.h \
     src/gui/UBPageNavigationWidget.h \
     src/gui/UBMagnifer.h \
     src/gui/UBCachePropertiesWidget.h \
@@ -91,8 +89,6 @@ SOURCES += src/gui/UBThumbnailView.cpp \
     src/gui/UBPropertyPalette.cpp \
     src/gui/UBUpdateDlg.cpp \
     src/gui/UBDockPaletteWidget.cpp \
-    src/gui/UBLeftPalette.cpp \
-    src/gui/UBRightPalette.cpp \
     src/gui/UBPageNavigationWidget.cpp \
     src/gui/UBMagnifer.cpp \
     src/gui/UBCachePropertiesWidget.cpp \

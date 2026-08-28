@@ -30,8 +30,6 @@
 
 #include "gui/UBPropertyPalette.h"
 
-class UBRightPalette;
-
 class UBSettings;
 
 class UBDesktopPropertyPalette : public UBPropertyPalette
