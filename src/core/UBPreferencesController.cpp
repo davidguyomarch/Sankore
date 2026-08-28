@@ -25,6 +25,7 @@
 #include "UBPreferencesController.h"
 
 #include <QClipboard>
+#include <QFile>
 #include <QRadioButton>
 #include "UBSettings.h"
 #include "UBApplication.h"
@@ -121,6 +122,33 @@ void UBPreferencesController::wire()
     // main tab
     mPreferencesUI->mainTabWidget->setCurrentWidget(mPreferencesUI->displayTab);
     mPreferencesUI->versionLabel->setText(tr("version: ") + UBApplication::applicationVersion());
+
+    // About tab — load LICENSE.md from embedded resources
+    {
+        QFile licenseFile(QStringLiteral(":/LICENSE.md"));
+        if (licenseFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            mPreferencesUI->copyrightTextBrowser->setMarkdown(QString::fromUtf8(licenseFile.readAll()));
+            licenseFile.close();
+        }
+        mPreferencesUI->copyrightTextBrowser->setOpenExternalLinks(true);
+    }
+
+    // Credits tab — load CREDITS.md from embedded resources
+    {
+        QFile creditsFile(QStringLiteral(":/CREDITS.md"));
+        if (creditsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QString credits = QString::fromUtf8(creditsFile.readAll());
+            mPreferencesUI->credentialTextBrowser->setMarkdown(credits);
+            creditsFile.close();
+        }
+        mPreferencesUI->credentialTextBrowser->setOpenExternalLinks(true);
+
+        QFile authorsFile(QStringLiteral(":/AUTHORS.md"));
+        if (authorsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            mPreferencesUI->textBrowser->setMarkdown(QString::fromUtf8(authorsFile.readAll()));
+            authorsFile.close();
+        }
+    }
 
     connect(mPreferencesUI->copyVersionButton, &QPushButton::clicked, this, [this]() {
         QApplication::clipboard()->setText(UBApplication::applicationVersion());
