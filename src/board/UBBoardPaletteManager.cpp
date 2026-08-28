@@ -97,8 +97,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mDrawingPropsBarQml(nullptr)
     , mShapesPaletteV2Qml(nullptr)
     , mLinkPalette(0)
-    , mLeftPalette(nullptr)
-    , mRightPalette(nullptr)
     , mAddItemPalette(0)
     , mImageBackgroundPalette(nullptr)
     , mDownloadInProgress(false)
@@ -147,18 +145,9 @@ void UBBoardPaletteManager::setupLayout()
  */
 void UBBoardPaletteManager::setupDockPaletteWidgets()
 {
-    // Dock palettes are permanently hidden (QML V2 replaces them).
-    // We still create the palette shells and mpFeaturesWidget (used by addItemToLibrary).
-    mLeftPalette = new UBLeftPalette(mContainer);
-    mLeftPalette->hide();
-    mLeftPalette->setMaximumSize(0, 0);
-
+    // Dock palettes removed (QML V2 replaces them).
+    // Only keep mpFeaturesWidget (used by addItemToLibrary).
     mTeacherResources = new UBDockResourcesWidget;
-
-    mRightPalette = new UBRightPalette(mContainer);
-    mRightPalette->hide();
-    mRightPalette->setMaximumSize(0, 0);
-
     mpFeaturesWidget = new UBFeaturesWidget();
 }
 
@@ -458,10 +447,6 @@ void UBBoardPaletteManager::setupPalettes()
             for (const auto& e : mShapesPaletteV2Qml->errors())
                 out << "ShapesPaletteV2 ERROR: " << e.toString() << "\n";
             out << "ShapesPaletteV2: status=" << mShapesPaletteV2Qml->status() << "\n";
-            out << "LeftPalette: visible=" << mLeftPalette->isVisible()
-                << " size=" << mLeftPalette->width() << "x" << mLeftPalette->height() << "\n";
-            out << "RightPalette: visible=" << mRightPalette->isVisible()
-                << " size=" << mRightPalette->width() << "x" << mRightPalette->height() << "\n";
             out << "ToolController activeTool=" << mToolController->activeTool() << "\n";
             out << "===================================\n";
             logFile.close();
@@ -618,8 +603,6 @@ void UBBoardPaletteManager::containerResized()
     }
 
     // Hide old palettes (replaced by QML V2)
-    if (mLeftPalette) mLeftPalette->hide();
-    if (mRightPalette) mRightPalette->hide();
 
     // Log final positions once container is big enough
     static bool loggedResize = false;
@@ -642,10 +625,6 @@ void UBBoardPaletteManager::containerResized()
             out << "PropsBar: " << mDrawingPropsBarQml->x() << "," << mDrawingPropsBarQml->y()
                 << " " << mDrawingPropsBarQml->width() << "x" << mDrawingPropsBarQml->height()
                 << " vis=" << mDrawingPropsBarQml->isVisible() << "\n";
-            out << "LeftPalette: vis=" << mLeftPalette->isVisible()
-                << " " << mLeftPalette->width() << "x" << mLeftPalette->height() << "\n";
-            out << "RightPalette: vis=" << mRightPalette->isVisible()
-                << " " << mRightPalette->width() << "x" << mRightPalette->height() << "\n";
             out << "================================\n";
             logFile.close();
         }
@@ -659,14 +638,10 @@ void UBBoardPaletteManager::containerResized()
         mKeyboardPalette->adjustSizeAndPosition();
     }
 
-    if(mLeftPalette)
     {
-        mLeftPalette->resize(mLeftPalette->width(), mContainer->height());
     }
 
-    if(mRightPalette)
     {
-        mRightPalette->resize(mRightPalette->width(), mContainer->height());
     }
 }
 
@@ -732,8 +707,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
     // Dock palettes are disabled (QML V2 replaces them) — skip switchMode to prevent
     // re-adding tabs and re-showing the tab palette.
-    // bool rightPaletteVisible = mRightPalette->switchMode(newMode);
-    // bool leftPaletteVisible = mLeftPalette->switchMode(newMode);
 
     if (newMode != eUBDockPaletteWidget_BOARD)
     {
@@ -760,8 +733,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mAddItemPalette->setParent(UBApplication::boardController->controlContainer());
                 }
                 // Dock palettes permanently hidden — QML V2 replaces them
-                mLeftPalette->hide();
-                mRightPalette->hide();
 
                 // Restore QML palettes when returning from desktop/document mode
                 if (mStylusPaletteQml)
@@ -789,8 +760,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                         mKeyboardPalette->setParent(UBApplication::boardController->controlContainer());
                 }
 
-                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
-                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 #ifdef Q_OS_WIN
                 // Disabled: dock palettes replaced by QML V2
 #endif
@@ -800,10 +769,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 else
                 {
                     // At startup, ensure palettes are sized to container
-                    if(mLeftPalette)
-                        mLeftPalette->resize(mLeftPalette->width(), mContainer->height());
-                    if(mRightPalette)
-                        mRightPalette->resize(mRightPalette->width(), mContainer->height());
                 }
                 if (mWebToolsCurrentPalette)
                     mWebToolsCurrentPalette->hide();
@@ -828,8 +793,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
                 mAddItemPalette->setParent((QWidget*)UBApplication::applicationController->uninotesController()->drawingView());
                 // Dock palettes permanently hidden — QML V2 replaces them
-                mLeftPalette->hide();
-                mRightPalette->hide();
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
@@ -860,8 +823,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
                 }
 
-                // mLeftPalette->setVisible(leftPaletteVisible); // Disabled: replaced by QML PageNavigator
-                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 #ifdef Q_OS_WIN
                 // Disabled: dock palettes replaced by QML V2
 #endif
@@ -880,9 +841,7 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
 #ifdef SANKORE_WEBENGINE
                 // Dock palettes permanently hidden — QML V2 replaces them
-                mRightPalette->hide();
 #endif
-                // mRightPalette->setVisible(rightPaletteVisible); // Disabled: replaced by QML
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
@@ -914,8 +873,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mShapesPaletteV2Qml->hide();
 
                 // Dock palettes permanently hidden — QML V2 replaces them
-                mLeftPalette->hide();
-                mRightPalette->hide();
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
 
@@ -936,8 +893,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
         default:
             {
                 // Dock palettes permanently hidden — QML V2 replaces them
-                mLeftPalette->hide();
-                mRightPalette->hide();
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
 
@@ -1090,8 +1045,6 @@ void UBBoardPaletteManager::connectToDocumentController()
 
 void UBBoardPaletteManager::refreshPalettes()
 {
-    mRightPalette->update();
-    mLeftPalette->update();
 }
 
 void UBBoardPaletteManager::startDownloads()

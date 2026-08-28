@@ -31,8 +31,6 @@
 #include <QWebEngineView>
 #endif
 
-#include "gui/UBLeftPalette.h"
-#include "gui/UBRightPalette.h"
 #include "gui/UBFeaturesWidget.h"
 #include "gui/UBDockResourcesWidget.h"
 #include "core/UBApplicationController.h"
@@ -61,10 +59,8 @@ class UBBoardPaletteManager : public QObject
         virtual ~UBBoardPaletteManager();
 
         void setupLayout();
-        UBLeftPalette* leftPalette(){return mLeftPalette;}
-        UBRightPalette* rightPalette(){return mRightPalette;}
-        UBFeaturesWidget *featuresWidget(){return mpFeaturesWidget;}
         UBToolController* toolController() { return mToolController; }
+        UBFeaturesWidget *featuresWidget(){return mpFeaturesWidget;}
         UBActionPalette *addItemPalette() {return mAddItemPalette;}
         void showVirtualKeyboard(bool show = true);
         void initPalettesPosAtStartup();
@@ -127,11 +123,6 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mShapesPaletteV2Qml;
 
         UBCreateLinkPalette* mLinkPalette;
-
-        /** The left dock palette */
-        UBLeftPalette* mLeftPalette;
-        /** The right dock palette */
-        UBRightPalette* mRightPalette;
 
         //issue 1682 - NNE - 20131218
         UBDockResourcesWidget *mTeacherResources;

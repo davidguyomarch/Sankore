@@ -53,7 +53,7 @@
 #include "gui/UBResources.h"
 
 
-UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UBRightPalette* rightPalette)
+UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
         : QObject(parent)
         , mTransparentDrawingView(0)
         , mTransparentDrawingScene(0)
@@ -61,7 +61,6 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
         , mDesktopPenPalette(nullptr)
         , mDesktopMarkerPalette(nullptr)
         , mDesktopEraserPalette(nullptr)
-        , mRightPalette(rightPalette)
         , mWindowPositionInitialized(false)
         , mIsFullyTransparent(false)
         , mDesktopToolsPalettePositioned(false)
@@ -94,7 +93,7 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
     mTransparentDrawingView->setScene(mTransparentDrawingScene);
     mTransparentDrawingScene->setDrawingMode(true);
 
-    mDesktopPalette = new UBDesktopPalette(mTransparentDrawingView, rightPalette); 
+    mDesktopPalette = new UBDesktopPalette(mTransparentDrawingView); 
     // This was not fix, parent reverted
     // FIX #633: The palette must be 'floating' in order to stay on top of the library palette
 
@@ -125,13 +124,13 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
     connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged, this, &UBDesktopAnnotationController::stylusToolChanged);
 
     // Add the desktop associated palettes
-    mDesktopPenPalette = new UBDesktopPenPalette(mTransparentDrawingView, rightPalette); 
+    mDesktopPenPalette = new UBDesktopPenPalette(mTransparentDrawingView);
 
     connect(mDesktopPalette, &UBFloatingPalette::maximized, mDesktopPenPalette, &UBDesktopPenPalette::onParentMaximized);
     connect(mDesktopPalette, &UBFloatingPalette::minimizeStart, mDesktopPenPalette, [this]() { mDesktopPenPalette->onParentMinimized(); });
 
-    mDesktopMarkerPalette = new UBDesktopMarkerPalette(mTransparentDrawingView, rightPalette);
-    mDesktopEraserPalette = new UBDesktopEraserPalette(mTransparentDrawingView, rightPalette);
+    mDesktopMarkerPalette = new UBDesktopMarkerPalette(mTransparentDrawingView);
+    mDesktopEraserPalette = new UBDesktopEraserPalette(mTransparentDrawingView);
 
     mDesktopPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
     mDesktopPenPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
@@ -157,7 +156,6 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
 
 #ifdef Q_OS_LINUX
     connect(mDesktopPalette, &UBFloatingPalette::moving, this, &UBDesktopAnnotationController::refreshMask);
-    connect(UBApplication::boardController->paletteManager()->rightPalette(), &UBRightPalette::resized, this, &UBDesktopAnnotationController::refreshMask);
     connect(UBApplication::boardController->paletteManager()->addItemPalette(), &UBActionPalette::closed, this, &UBDesktopAnnotationController::refreshMask);
 #endif
     onDesktopPaletteMaximized();
@@ -257,7 +255,7 @@ void UBDesktopAnnotationController::setAssociatedPalettePosition(UBActionPalette
     }
 
     // First determine if the palette must be shown on the left or on the right
-    if(desktopPalettePos.x() <= (mTransparentDrawingView->width() - (palette->width() + mDesktopPalette->width() + mRightPalette->width() + 20))) // we take a small margin of 20 pixels
+    if(desktopPalettePos.x() <= (mTransparentDrawingView->width() - (palette->width() + mDesktopPalette->width() + 20))) // we take a small margin of 20 pixels
     {
         // Display it on the right
         desktopPalettePos += QPoint(mDesktopPalette->width(), yPen);
@@ -842,16 +840,7 @@ void UBDesktopAnnotationController::TransparentWidgetResized()
  */
 void UBDesktopAnnotationController::onTransparentWidgetResized()
 {
-    int rW = UBApplication::boardController->paletteManager()->rightPalette()->width();
-    int lW = UBApplication::boardController->paletteManager()->leftPalette()->width();
-
-    int rH = mTransparentDrawingView->height();
-
-    UBApplication::boardController->paletteManager()->rightPalette()->resize(rW+1, rH);
-    UBApplication::boardController->paletteManager()->rightPalette()->resize(rW, rH);
-
-    UBApplication::boardController->paletteManager()->leftPalette()->resize(lW+1, rH);
-    UBApplication::boardController->paletteManager()->leftPalette()->resize(lW, rH);
+    // Legacy dock palettes removed — nothing to resize
 }
 
 void UBDesktopAnnotationController::updateMask(bool bTransparent)
@@ -881,31 +870,7 @@ void UBDesktopAnnotationController::updateMask(bool bTransparent)
                        UBApplication::boardController->paletteManager()->mKeyboardPalette->width(), UBApplication::boardController->paletteManager()->mKeyboardPalette->height());
         }
 
-        if(UBApplication::boardController->paletteManager()->leftPalette()->isVisible())
-        {
-            QRect leftPalette(UBApplication::boardController->paletteManager()->leftPalette()->geometry().x(),
-                        UBApplication::boardController->paletteManager()->leftPalette()->geometry().y(),
-                        UBApplication::boardController->paletteManager()->leftPalette()->width(),
-                        UBApplication::boardController->paletteManager()->leftPalette()->height());
-
-            QRect tabsPalette(UBApplication::boardController->paletteManager()->leftPalette()->getTabPaletteRect());
-
-            p.drawRect(leftPalette);
-            p.drawRect(tabsPalette);
-        }
-
-        if(UBApplication::boardController->paletteManager()->rightPalette()->isVisible())
-        {
-            QRect rightPalette(UBApplication::boardController->paletteManager()->rightPalette()->geometry().x(),
-                        UBApplication::boardController->paletteManager()->rightPalette()->geometry().y(),
-                        UBApplication::boardController->paletteManager()->rightPalette()->width(),
-                        UBApplication::boardController->paletteManager()->rightPalette()->height());
-
-            QRect tabsPalette(UBApplication::boardController->paletteManager()->rightPalette()->getTabPaletteRect());
-
-            p.drawRect(rightPalette);
-            p.drawRect(tabsPalette);
-        }
+        // Legacy dock palettes removed — no mask contribution
 
 #ifdef Q_OS_LINUX
         //Rquiered only for compiz wm

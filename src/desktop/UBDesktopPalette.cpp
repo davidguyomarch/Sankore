@@ -39,11 +39,10 @@
 #include "gui/UBMainWindow.h"
 
 
-UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalette)
+UBDesktopPalette::UBDesktopPalette(QWidget *parent)
     : UBActionPalette(Qt::TopLeftCorner, parent)
     , mShowHideAction(nullptr)
     , mDisplaySelectAction(nullptr)
-    , rightPalette(_rightPalette)
 {
     QList<QAction*> actions;
 
@@ -92,7 +91,6 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     connect(this, &UBFloatingPalette::minimizeStart, this, &UBDesktopPalette::minimizeMe);
     setMinimizePermission(true);
 
-    connect(rightPalette, &UBRightPalette::resized, this, &UBDesktopPalette::parentResized);
 }
 
 
@@ -229,7 +227,7 @@ QPoint UBDesktopPalette::buttonPos(QAction *action)
 
 int UBDesktopPalette::getParentRightOffset()
 {
-    return rightPalette->width();
+    return 0; // Legacy right palette removed
 }
 
 void UBDesktopPalette::parentResized()

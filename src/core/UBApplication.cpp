@@ -382,8 +382,7 @@ int UBApplication::exec(const QString& pFileToImport)
     applicationController = new UBApplicationController(boardController->controlView(),
                                                         boardController->displayView(),
                                                         mainWindow,
-                                                        staticMemoryCleaner,
-                                                        boardController->paletteManager()->rightPalette());
+                                                        staticMemoryCleaner);
 
 
 
@@ -424,11 +423,7 @@ int UBApplication::exec(const QString& pFileToImport)
         // before UBSettings::paletteColor was finalized for the active theme)
         if (boardController && boardController->paletteManager())
         {
-            UBBoardPaletteManager* pm = boardController->paletteManager();
-            if (pm->leftPalette())
-                pm->leftPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
-            if (pm->rightPalette())
-                pm->rightPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
+            // Legacy dock palettes removed — QML V2 uses themeManager
         }
     });
 
@@ -628,11 +623,7 @@ void UBApplication::themeChanged(QAction* action)
     if (boardController && boardController->paletteManager())
     {
         UBBoardPaletteManager* pm = boardController->paletteManager();
-        if (pm->leftPalette())
-            pm->leftPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
-        if (pm->rightPalette())
-            pm->rightPalette()->setBackgroundBrush(QBrush(UBSettings::paletteColor));
-        // Legacy stylusPalette/drawingPalette removed — QML V2 uses themeManager
+        // Legacy dock palettes and stylus/drawing palettes removed — QML V2 uses themeManager
     }
 
     // Reload toolbar icons from theme directory

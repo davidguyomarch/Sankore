@@ -41,7 +41,6 @@ class UBSoftwareUpdate;
 class QNetworkAccessManager;
 class QNetworkReply;
 // class QHttp; -- removed in Qt6
-class UBRightPalette;
 class UBSettings;
 
 
@@ -51,7 +50,7 @@ class UBApplicationController : public QObject
 
     public:
 
-        UBApplicationController(UBBoardView *pControlView, UBBoardView *pDisplayView, UBMainWindow *pMainWindow, QObject* parent, UBRightPalette* rightPalette);
+        UBApplicationController(UBBoardView *pControlView, UBBoardView *pDisplayView, UBMainWindow *pMainWindow, QObject* parent);
         virtual ~UBApplicationController();
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
