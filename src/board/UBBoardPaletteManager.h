@@ -91,6 +91,7 @@ class UBBoardPaletteManager : public QObject
 
         void processPalettersWidget(UBDockPalette *paletter, eUBDockPaletteWidgetMode mode);
         void changeMode(eUBDockPaletteWidgetMode newMode, bool isInit = false);
+        eUBDockPaletteWidgetMode currentMode() const { return mPaletteMode; }
         void startDownloads();
         void stopDownloads();
 
@@ -175,6 +176,8 @@ class UBBoardPaletteManager : public QObject
         bool mPendingEraseButtonPressed;
 
         UBFeaturesWidget *mpFeaturesWidget;
+
+        eUBDockPaletteWidgetMode mPaletteMode;
 
         bool mDownloadInProgress;
 

@@ -115,6 +115,7 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPendingPanButtonPressed(false)
     , mPendingEraseButtonPressed(false)
     , mDownloadInProgress(false)
+    , mPaletteMode(eUBDockPaletteWidget_BOARD)
 {
     mSettings = UBSettings::settings();
     mTeacherResources = nullptr;
@@ -778,34 +779,36 @@ void UBBoardPaletteManager::containerResized()
 
     }
 
+    // Only show/raise QML palettes in Board mode — in Desktop/Document mode they must
+    // stay hidden. Showing QQuickWidgets on a hidden parent container causes access
+    // violations in QGraphicsView::viewportEvent.
+    bool isBoardMode = (mPaletteMode == eUBDockPaletteWidget_BOARD);
+
     // Reposition QML V2 widgets on container resize
     if (mTopBarQml)
     {
         mTopBarQml->setFixedSize(mContainer->width(), 48);
         mTopBarQml->move(0, 0);
-        mTopBarQml->show();
-        mTopBarQml->raise();
+        if (isBoardMode) { mTopBarQml->show(); mTopBarQml->raise(); }
     }
     if (mPageNavQml)
     {
         int sidebarHeight = mContainer->height() - 48 - 52; // between top bar and bottom bar
         mPageNavQml->setFixedSize(180, qMax(100, sidebarHeight));
         mPageNavQml->move(0, 48);
-        mPageNavQml->show();
-        mPageNavQml->raise();
+        if (isBoardMode) { mPageNavQml->show(); mPageNavQml->raise(); }
     }
     if (mDrawingPropsBarQml)
     {
         int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
         int posY = mStylusPaletteQml->y() - mDrawingPropsBarQml->height() - 8;
         mDrawingPropsBarQml->move(posX, posY);
-        mDrawingPropsBarQml->show();
-        mDrawingPropsBarQml->raise();
+        if (isBoardMode) { mDrawingPropsBarQml->show(); mDrawingPropsBarQml->raise(); }
     }
     if (mShapesPaletteV2Qml && mToolController && mToolController->shapesVisible())
     {
         mShapesPaletteV2Qml->move(190, mContainer->height() - 52 - 330);
-        mShapesPaletteV2Qml->raise();
+        if (isBoardMode) mShapesPaletteV2Qml->raise();
     }
 
     // Hide old palettes (replaced by QML V2)
@@ -1016,6 +1019,8 @@ void UBBoardPaletteManager::addItem(const QUrl& pUrl)
 
 void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool isInit)
 {
+    mPaletteMode = newMode;
+
     // Dock palettes are disabled (QML V2 replaces them) — skip switchMode to prevent
     // re-adding tabs and re-showing the tab palette.
     // bool rightPaletteVisible = mRightPalette->switchMode(newMode);

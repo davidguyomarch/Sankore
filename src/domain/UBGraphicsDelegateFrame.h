@@ -30,6 +30,7 @@
 #include "core/UB.h"
 
 class QGraphicsSceneMouseEvent;
+class QGraphicsSceneHoverEvent;
 class UBGraphicsItemDelegate;
 class QGraphicsSvgItem;
 
@@ -54,6 +55,7 @@ class UBGraphicsDelegateFrame: public QGraphicsRectItem, public QObject
         QSizeF resizeDelegate(qreal moveX, qreal moveY);
         virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
         virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+        void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
         void positionHandles();
         void setVisible(bool visible);

@@ -23,6 +23,7 @@
 
 #include "UBGraphicsDelegateFrame.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QMenu>
 
 #include <QWidget>
@@ -73,7 +74,7 @@ UBGraphicsDelegateFrame::UBGraphicsDelegateFrame(UBGraphicsItemDelegate* pDelega
     setAcceptedMouseButtons(Qt::LeftButton);
     setRect(pRect.adjusted(mFrameWidth, mFrameWidth, mFrameWidth * -1, mFrameWidth * -1));
 
-    setBrush(QBrush(UBSettings::paletteColor));
+    setBrush(Qt::NoBrush);
     setPen(Qt::NoPen);
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Control));
 
@@ -757,23 +758,59 @@ void UBGraphicsDelegateFrame::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 }
 
 
+void UBGraphicsDelegateFrame::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+    QWidget *controlViewport = UBApplication::boardController->controlView()->viewport();
+    if (!controlViewport)
+        return;
+
+    FrameTool tool = toolFromPos(event->pos());
+    switch (tool)
+    {
+    case Move:
+        controlViewport->setCursor(Qt::SizeAllCursor);
+        break;
+    case Rotate:
+        controlViewport->setCursor(UBResources::resources()->rotateCursor);
+        break;
+    case ResizeLeft:
+    case ResizeRight:
+        controlViewport->setCursor(Qt::SizeHorCursor);
+        break;
+    case ResizeTop:
+    case ResizeBottom:
+        controlViewport->setCursor(Qt::SizeVerCursor);
+        break;
+    case ResizeBottomRight:
+        controlViewport->setCursor(Qt::SizeFDiagCursor);
+        break;
+    default:
+        controlViewport->setCursor(Qt::ArrowCursor);
+        break;
+    }
+}
+
+
 void UBGraphicsDelegateFrame::updateResizeCursors()
 {
     QPixmap pix(":/images/cursors/resize.png");
     QTransform tr;
 
     tr.rotate(-mAngle);
-    QCursor resizeCursor  = QCursor(pix.transformed(tr, Qt::SmoothTransformation), pix.width() / 2,  pix.height() / 2);
+    QPixmap transformed = pix.transformed(tr, Qt::SmoothTransformation);
+    QCursor resizeCursor  = QCursor(transformed, transformed.width() / 2,  transformed.height() / 2);
     mLeftResizeGrip->setCursor(resizeCursor);
     mRightResizeGrip->setCursor(resizeCursor);
 
     tr.rotate(-90);
-    resizeCursor  = QCursor(pix.transformed(tr, Qt::SmoothTransformation), pix.width() / 2,  pix.height() / 2);
+    transformed = pix.transformed(tr, Qt::SmoothTransformation);
+    resizeCursor  = QCursor(transformed, transformed.width() / 2,  transformed.height() / 2);
     mBottomResizeGrip->setCursor(resizeCursor);
     mTopResizeGrip->setCursor(resizeCursor);
 
     tr.rotate(-45);
-    resizeCursor  = QCursor(pix.transformed(tr, Qt::SmoothTransformation), pix.width() / 2,  pix.height() / 2);
+    transformed = pix.transformed(tr, Qt::SmoothTransformation);
+    resizeCursor  = QCursor(transformed, transformed.width() / 2,  transformed.height() / 2);
     mBottomRightResizeGrip->setCursor(resizeCursor);
 }
 
@@ -781,10 +818,8 @@ void UBGraphicsDelegateFrame::updateResizeCursors()
 void UBGraphicsDelegateFrame::setVisible(bool visible)
 {
     mVisible = visible;
-    if (mVisible)
-       setBrush(QBrush(UBSettings::paletteColor));
-    else
-       setBrush(Qt::NoBrush);
+    // Always NoBrush — the custom paint() draws only a thin border line
+    setBrush(Qt::NoBrush);
 }
 
 
@@ -974,25 +1009,25 @@ QRectF UBGraphicsDelegateFrame::bottomRightResizeGripRect() const
 
 QRectF UBGraphicsDelegateFrame::bottomResizeGripRect() const
 {
-    return QRectF(rect().center().x() - mFrameWidth / 2, rect().bottom() - mFrameWidth, mFrameWidth, mFrameWidth);
+    return QRectF(rect().left() + mFrameWidth, rect().bottom() - mFrameWidth, rect().width() - 2 * mFrameWidth, mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::leftResizeGripRect() const
 {
-    return QRectF(rect().left(), rect().center().y() - mFrameWidth / 2, mFrameWidth, mFrameWidth);
+    return QRectF(rect().left(), rect().top() + mFrameWidth, mFrameWidth, rect().height() - 2 * mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::rightResizeGripRect() const
 {
-    return QRectF(rect().right() - mFrameWidth, rect().center().y() - mFrameWidth / 2, mFrameWidth, mFrameWidth);
+    return QRectF(rect().right() - mFrameWidth, rect().top() + mFrameWidth, mFrameWidth, rect().height() - 2 * mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::topResizeGripRect() const
 {
-    return QRectF(rect().center().x() - mFrameWidth / 2, rect().top(), mFrameWidth, mFrameWidth);
+    return QRectF(rect().left() + mFrameWidth, rect().top(), rect().width() - 2 * mFrameWidth, mFrameWidth);
 }
 
 
