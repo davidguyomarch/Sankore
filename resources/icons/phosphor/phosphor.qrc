@@ -4,6 +4,7 @@
         <file>arrow-clockwise.svg</file>
         <file>arrow-counter-clockwise.svg</file>
         <file>arrow-down.svg</file>
+        <file>arrow-square-out.svg</file>
         <file>arrow-up.svg</file>
         <file>books.svg</file>
         <file>caret-left.svg</file>
@@ -21,7 +22,10 @@
         <file>desktop.svg</file>
         <file>diamond.svg</file>
         <file>dots-three.svg</file>
+        <file>download-simple.svg</file>
         <file>eraser.svg</file>
+        <file>file-plus.svg</file>
+        <file>folder-plus.svg</file>
         <file>folders.svg</file>
         <file>gear.svg</file>
         <file>grid-four.svg</file>
@@ -44,6 +48,7 @@
         <file>palette.svg</file>
         <file>pen.svg</file>
         <file>pencil-line.svg</file>
+        <file>pencil-simple.svg</file>
         <file>play.svg</file>
         <file>plus-circle.svg</file>
         <file>plus.svg</file>
