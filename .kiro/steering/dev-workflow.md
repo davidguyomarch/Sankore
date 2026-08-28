@@ -14,6 +14,7 @@ Issue → Branche → Commits → Push branche → CI passe → Test Windows VM 
 
 - On ne commence JAMAIS un travail sans issue GitHub associée.
 - Si l'issue n'existe pas, on la crée d'abord avec un titre clair, une description du problème/besoin, et un label (bug/enhancement).
+- **Langue : tout ce qui est sur GitHub est en anglais** — issues, titres de PR, messages de commit, commentaires, labels. Les conversations avec le développeur restent en français.
 - Référence : https://github.com/davidguyomarch/Sankore/issues
 
 ### 2. Nommage des branches
