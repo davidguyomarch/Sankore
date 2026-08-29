@@ -12,6 +12,7 @@
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
 #include "board/UBBoardController.h"
+#include "gui/UBMainWindow.h"
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBShapeFactory.h"
 #include "domain/UBAlignObjectManager.h"
@@ -32,6 +33,28 @@ UBToolController::UBToolController(QObject* parent)
             this, &UBToolController::onExternalColorChanged);
     connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged,
             this, &UBToolController::onExternalWidthChanged);
+
+    // Connect keyboard shortcuts (QActions) to setActiveTool()
+    // These QActions have shortcuts defined in mainWindow.ui (Ctrl+I=Pen, Ctrl+E=Eraser, etc.)
+    auto connectTool = [this](QAction* action, int tool) {
+        connect(action, &QAction::triggered, this, [this, tool](bool checked) {
+            if (checked) setActiveTool(tool);
+        });
+    };
+    auto* mw = UBApplication::mainWindow;
+    connectTool(mw->actionPen,      Pen);
+    connectTool(mw->actionEraser,   Eraser);
+    connectTool(mw->actionMarker,   Marker);
+    connectTool(mw->actionSelector, Selector);
+    connectTool(mw->actionPlay,     Play);
+    connectTool(mw->actionHand,     Hand);
+    connectTool(mw->actionZoomIn,   ZoomIn);
+    connectTool(mw->actionZoomOut,  ZoomOut);
+    connectTool(mw->actionPointer,  Pointer);
+    connectTool(mw->actionLine,     Line);
+    connectTool(mw->actionText,     Text);
+    connectTool(mw->actionCapture,  Capture);
+    connectTool(mw->actionOcr,      Ocr);
 
     // Init from current state — default to Pen
     int currentTool = UBDrawingController::drawingController()->stylusTool();
@@ -83,9 +106,6 @@ int UBToolController::penColorIndex() const
 void UBToolController::setPenColorIndex(int index)
 {
     UBSettings::settings()->setPenColorIndex(index);
-    // Notify UBBoardController to update its cached pen colors (used by UBSceneContext for drawing)
-    if (UBApplication::boardController)
-        UBApplication::boardController->colorPaletteChanged();
     emit penColorChanged();
     emit currentColorIndexChanged();
 }
@@ -126,8 +146,6 @@ int UBToolController::markerColorIndex() const
 void UBToolController::setMarkerColorIndex(int index)
 {
     UBSettings::settings()->setMarkerColorIndex(index);
-    if (UBApplication::boardController)
-        UBApplication::boardController->colorPaletteChanged();
     emit markerColorChanged();
     emit currentColorIndexChanged();
 }

@@ -97,23 +97,6 @@ class UBDrawingController : public QObject
         bool mIsDesktopMode;
 
         static UBDrawingController* sDrawingController;
-
-    private slots:
-
-        void penToolSelected(bool checked);
-        void eraserToolSelected(bool checked);
-        void markerToolSelected(bool checked);
-        void selectorToolSelected(bool checked);
-        void playToolSelected(bool checked);
-        void handToolSelected(bool checked);
-        void zoomInToolSelected(bool checked);
-        void zoomOutToolSelected(bool checked);
-        void pointerToolSelected(bool checked);
-        void lineToolSelected(bool checked);
-        void textToolSelected(bool checked);
-        void richTextToolSelected(bool checked);
-        void captureToolSelected(bool checked);
-        void ocrToolSelected(bool checked);
 };
 
 #endif /* UBDRAWINGCONTROLLER_H_ */

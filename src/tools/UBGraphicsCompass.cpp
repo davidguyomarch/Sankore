@@ -170,9 +170,9 @@ void UBGraphicsCompass::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     painter->drawPath(pencilArmShape());
 
     if (scene()->isDarkBackground())
-        painter->fillPath(pencilShape(), UBApplication::boardController->penColorOnDarkBackground());
+        painter->fillPath(pencilShape(), UBSettings::settings()->penColor(true));
     else
-        painter->fillPath(pencilShape(), UBApplication::boardController->penColorOnLightBackground());
+        painter->fillPath(pencilShape(), UBSettings::settings()->penColor(false));
 
     painter->fillPath(pencilBaseShape(), middleFillColor());
     painter->drawPath(pencilBaseShape());
