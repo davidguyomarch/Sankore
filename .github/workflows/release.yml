@@ -16,32 +16,66 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
+      actions: write
 
     steps:
       - name: Checkout (for gh CLI context)
         uses: actions/checkout@v4
 
-      - name: Find workflow run for this commit
+      - name: Find or trigger builds
         id: find-runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           COMMIT_SHA="${{ github.sha }}"
-          echo "Looking for build artifacts on commit $COMMIT_SHA"
+          TAG_REF="${{ github.ref_name }}"
+          echo "Looking for build artifacts on commit $COMMIT_SHA (tag $TAG_REF)"
 
-          # Find the latest successful run of each build workflow for this commit
-          WIN_RUN=$(gh run list --workflow=build-windows.yml --commit "$COMMIT_SHA" --status success --limit 1 --json databaseId -q '.[0].databaseId')
-          LINUX_RUN=$(gh run list --workflow=build-linux.yml --commit "$COMMIT_SHA" --status success --limit 1 --json databaseId -q '.[0].databaseId')
-          ARM64_RUN=$(gh run list --workflow=build-linux-arm64.yml --commit "$COMMIT_SHA" --status success --limit 1 --json databaseId -q '.[0].databaseId')
+          find_or_trigger() {
+            local workflow="$1"
+            local var_name="$2"
 
-          echo "Windows run: $WIN_RUN"
-          echo "Linux run: $LINUX_RUN"
-          echo "ARM64 run: $ARM64_RUN"
+            # Look for existing successful run on this commit
+            local run_id
+            run_id=$(gh run list --workflow="$workflow" --commit "$COMMIT_SHA" --status success --limit 1 --json databaseId -q '.[0].databaseId')
 
-          echo "win_run=$WIN_RUN" >> $GITHUB_OUTPUT
-          echo "linux_run=$LINUX_RUN" >> $GITHUB_OUTPUT
-          echo "arm64_run=$ARM64_RUN" >> $GITHUB_OUTPUT
+            if [ -n "$run_id" ]; then
+              echo "$workflow: found existing run $run_id"
+              echo "${var_name}=$run_id" >> $GITHUB_OUTPUT
+              return
+            fi
+
+            # No existing run — trigger one and wait
+            echo "$workflow: no existing build found, triggering on $TAG_REF..."
+            gh workflow run "$workflow" --ref "$TAG_REF"
+
+            # Wait for the run to appear (up to 60s)
+            for i in $(seq 1 12); do
+              sleep 5
+              run_id=$(gh run list --workflow="$workflow" --branch "$TAG_REF" --limit 1 --json databaseId,status -q '.[0].databaseId')
+              if [ -n "$run_id" ]; then
+                echo "$workflow: triggered run $run_id, waiting for completion..."
+                gh run watch "$run_id" --exit-status || true
+                # Re-fetch to confirm success
+                local status
+                status=$(gh run view "$run_id" --json conclusion -q '.conclusion')
+                if [ "$status" = "success" ]; then
+                  echo "${var_name}=$run_id" >> $GITHUB_OUTPUT
+                else
+                  echo "$workflow: run $run_id finished with status=$status"
+                  echo "${var_name}=" >> $GITHUB_OUTPUT
+                fi
+                return
+              fi
+            done
+
+            echo "$workflow: could not find triggered run"
+            echo "${var_name}=" >> $GITHUB_OUTPUT
+          }
+
+          find_or_trigger "build-windows.yml" "win_run"
+          find_or_trigger "build-linux.yml" "linux_run"
+          find_or_trigger "build-linux-arm64.yml" "arm64_run"
 
       - name: Download Windows artifacts
         if: steps.find-runs.outputs.win_run != ''
@@ -95,7 +129,7 @@ jobs:
         run: |
           echo "=== Release assets ==="
           find . -maxdepth 1 -name "Open-Sankore-*" -type f
-          find artifacts -type f -name "*.deb" -o -name "*.rpm" -o -name "*.exe" | sort
+          find artifacts -type f -name "*.deb" -o -name "*.rpm" -o -name "*.exe" 2>/dev/null | sort
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
