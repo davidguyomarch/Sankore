@@ -63,19 +63,8 @@ UBDrawingController::UBDrawingController(QObject * parent)
     mSettings = UBSettings::settings();
     connect(mSettings, &UBSettings::colorContextChanged, this, &UBDrawingController::colorPaletteChanged);
 
-    connect(UBApplication::mainWindow->actionPen, &QAction::triggered, this, &UBDrawingController::penToolSelected);
-    connect(UBApplication::mainWindow->actionEraser, &QAction::triggered, this, &UBDrawingController::eraserToolSelected);
-    connect(UBApplication::mainWindow->actionMarker, &QAction::triggered, this, &UBDrawingController::markerToolSelected);
-    connect(UBApplication::mainWindow->actionSelector, &QAction::triggered, this, &UBDrawingController::selectorToolSelected);
-    connect(UBApplication::mainWindow->actionPlay, &QAction::triggered, this, &UBDrawingController::playToolSelected);
-    connect(UBApplication::mainWindow->actionHand, &QAction::triggered, this, &UBDrawingController::handToolSelected);
-    connect(UBApplication::mainWindow->actionZoomIn, &QAction::triggered, this, &UBDrawingController::zoomInToolSelected);
-    connect(UBApplication::mainWindow->actionZoomOut, &QAction::triggered, this, &UBDrawingController::zoomOutToolSelected);
-    connect(UBApplication::mainWindow->actionPointer, &QAction::triggered, this, &UBDrawingController::pointerToolSelected);
-    connect(UBApplication::mainWindow->actionLine, &QAction::triggered, this, &UBDrawingController::lineToolSelected);
-    connect(UBApplication::mainWindow->actionText, &QAction::triggered, this, &UBDrawingController::textToolSelected);
-    connect(UBApplication::mainWindow->actionCapture, &QAction::triggered, this, &UBDrawingController::captureToolSelected);
-    connect(UBApplication::mainWindow->actionOcr, &QAction::triggered, this, &UBDrawingController::ocrToolSelected);
+    // QAction connections moved to UBToolController (issue #128)
+    // UBToolController::setActiveTool() calls setStylusTool() to keep UBDrawingController in sync.
 
     connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBDrawingController::onActiveSceneChanged);
 }
