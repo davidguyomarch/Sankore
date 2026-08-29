@@ -172,7 +172,7 @@ jobs:
           ulimit -c unlimited
           echo "core" | sudo tee /proc/sys/kernel/core_pattern || true
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
-          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
+          timeout 60 build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
             EXIT_CODE=$?
             echo "=== APP CRASHED (exit code $EXIT_CODE) ==="
             # Try to get backtrace from core file
