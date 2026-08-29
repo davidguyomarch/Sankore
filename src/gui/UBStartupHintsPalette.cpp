@@ -52,12 +52,10 @@ UBStartupHintsPalette::UBStartupHintsPalette(QWidget *parent) :
         QString url = mSettings->applicationStartupHintsDirectory() + "/index.html";
 #ifdef SANKORE_WEBENGINE
         mpWebView = new QWebEngineView(this);
-        mpSankoreAPI = new UBWidgetUniboardAPI(0);
         mpWebView->setUrl(QUrl::fromLocalFile(url));
         mpWebView->setAcceptDrops(false);
 #else
         mpWebView = nullptr;
-        mpSankoreAPI = nullptr;
 #endif
         mLayout->addWidget(mpWebView);
         mButtonLayout = new QHBoxLayout();
@@ -125,5 +123,5 @@ int UBStartupHintsPalette::border()
 
 void UBStartupHintsPalette::javaScriptWindowObjectCleared()
 {
-    // TODO: Use QWebChannel: //"sankore", mpSankoreAPI);
+    // Widget JS APIs removed — WebEngine is stubbed
 }

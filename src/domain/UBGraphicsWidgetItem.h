@@ -46,10 +46,7 @@
 #include "UBItem.h"
 #include "UBResizableGraphicsItem.h"
 
-class UBWidgetUniboardAPI;
 class UBGraphicsScene;
-class UBW3CWidgetAPI;
-class UBW3CWidgetWebStorageAPI;
 class UBGraphiscItem;
 class UBGraphiscItemDelegate;
 
@@ -208,7 +205,6 @@ class UBGraphicsWidgetItem : public QGraphicsWebView, public UBItem, public UBRe
         bool mIsFrozen;
         bool mIsTakingSnapshot;
         bool mShouldMoveWidget;
-        UBWidgetUniboardAPI* mUniboardAPI;
         QPixmap mSnapshot;
         QPointF mLastMousePos;
         QUrl ownFolder;
@@ -353,7 +349,6 @@ protected:
         static void loadNPAPIWrappersTemplates();
         static QString textForSubElementByLocale(QDomElement rootElement, QString subTagName, QLocale locale);
 
-        UBW3CWidgetAPI* mW3CWidgetAPI;
         QMap<QString, PreferenceValue> mPreferences;
 
         static bool sTemplateLoaded;

@@ -46,7 +46,6 @@
 #include "core/UBSettings.h"
 #include "board/UBFeaturesController.h"
 #include "domain/UBDragableThumbnail.h"
-#include "api/UBWidgetUniboardAPI.h"
 #include "UBFeaturesActionBar.h"
 #include "UBRubberBand.h"
 #ifdef SANKORE_WEBENGINE
@@ -86,6 +85,7 @@ class UBFeaturesMimeData;
 class UBFeaturesCentralWidget;
 class UBFeaturesNewFolderDialog;
 class UBFeaturesProgressBar;
+class UBDownloadHttpFile;
 
 class UBFeaturesWidget : public UBDockPaletteWidget
 {
@@ -396,7 +396,6 @@ private:
     void* mpWebSettings;
 #endif
     QVBoxLayout* mpLayout;
-    UBWidgetUniboardAPI* mpSankoreAPI;
 };
 
 class UBFeatureProperties : public QWidget

@@ -29,6 +29,7 @@
 #include <QDrag>
 #include <QMenu>
 #include <QComboBox>
+#include <QGraphicsSceneMouseEvent>
 
 #include "UBGraphicsItemDelegate.h"
 #include "UBGraphicsMediaItemDelegate.h"

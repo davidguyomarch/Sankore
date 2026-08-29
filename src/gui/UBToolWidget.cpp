@@ -26,8 +26,6 @@
 #include <QApplication>
 #include <QPainter>
 #include "UBToolWidget.h"
-#include "api/UBWidgetUniboardAPI.h"
-#include "api/UBW3CWidgetAPI.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardView.h"
 #include "core/UBApplication.h"
@@ -210,17 +208,7 @@ void UBToolWidget::paintEvent(QPaintEvent *event)
 
 void UBToolWidget::javaScriptWindowObjectCleared()
 {
-#ifdef SANKORE_WEBENGINE
-    UBWidgetUniboardAPI *uniboardAPI = new UBWidgetUniboardAPI(UBApplication::boardController->activeScene(), mToolWidget);
-
-    mWebView->page()->runJavaScript(QString("window.sankore = {};"));
-
-    UBGraphicsW3CWidgetItem *graphicsW3cWidgetItem = dynamic_cast<UBGraphicsW3CWidgetItem*>(mToolWidget);
-    if (graphicsW3cWidgetItem)
-    {
-        mWebView->page()->runJavaScript(QString("window.widget = {};"));
-    }
-#endif
+    // Widget JS APIs removed (UBWidgetUniboardAPI, UBW3CWidgetAPI) — WebEngine is stubbed
 }
 
 void UBToolWidget::reactOnBoardChanged()
