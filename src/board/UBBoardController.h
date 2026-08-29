@@ -216,7 +216,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 
         void showDocumentsDialog();
         void showKeyboard(bool show);
-        void togglePodcast(bool checked);
         void blackout();
         void addScene();
         void addScene(UBDocumentProxy* proxy, int sceneIndex, bool replaceActiveIfEmpty = false);

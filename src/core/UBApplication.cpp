@@ -671,9 +671,6 @@ void UBApplication::reloadThemeIcons(const QString& theme)
         {"actionWebWindowCapture", "captureWindow.svg"},
         {"actionWebShowHideOnDisplay", "eyeClosed.svg"},
         {"actionWebTrapContent", "addToolToLibrary.svg"},
-        {"actionPodcast", "record.svg"},
-        {"actionPodcastPause", "pause.svg"},
-        {"actionPodcastConfig", "settings.svg"},
         {"actionLineSmall", "smallPen.svg"},
         {"actionLineMedium", "mediumPen.svg"},
         {"actionLineLarge", "largePen.svg"},
@@ -872,11 +869,6 @@ void UBApplication::decorateActionMenu(QAction* action)
             menu->addAction(mainWindow->actionMultiScreen);
 
             menu->addSeparator();
-
-#ifndef Q_OS_LINUX // No Podcast on Linux yet
-            menu->addAction(mainWindow->actionPodcast);
-            mainWindow->actionPodcast->setText(tr("Podcast"));
-#endif
 
             // Auto-OCR also available in menu (mirrors the palette toggle button)
             if (mRecognitionController && mRecognitionController->isAvailable() && mainWindow->actionAutoOcr)

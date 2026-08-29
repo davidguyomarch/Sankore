@@ -94,8 +94,6 @@
 #include "board/UBDrawingController.h"
 #include "board/UBBoardView.h"
 
-#include "podcast/UBPodcastController.h"
-
 #include "adaptors/UBMetadataDcSubsetAdaptor.h"
 #include "adaptors/UBSvgSubsetAdaptor.h"
 #include "adaptors/UBThumbnailAdaptor.h"
@@ -2210,12 +2208,6 @@ void UBBoardController::paste()
 void UBBoardController::processMimeData(const QMimeData* pMimeData, const QPointF& pPos, eItemActionType actionType)
 {
     mItemFactory->processMimeData(pMimeData, pPos, actionType);
-}
-
-void UBBoardController::togglePodcast(bool checked)
-{
-    if (UBPodcastController::instance())
-        UBPodcastController::instance()->toggleRecordingPalette(checked);
 }
 
 void UBBoardController::moveGraphicsWidgetToControlView(UBGraphicsWidgetItem* graphicsWidget)
