@@ -45,7 +45,6 @@ class WBBrowserWindow;
 class UBApplication;
 class UBTrapWebPageContentController;
 class UBMainWindow;
-class UBWebToolsPalette;
 class WBWebView;
 class UBServerXMLHttpRequest;
 
@@ -136,9 +135,6 @@ class UBWebController : public QObject
 
         QWidget* mBrowserWidget;
         UBTrapWebPageContentController* mTrapContentController;
-        UBWebToolsPalette** mToolsCurrentPalette;
-        UBWebToolsPalette* mToolsPaletteList[TotalNumberOfWebInstances];
-
         bool mToolsPalettePositionned;
         bool mToolsPalettePositionnedList[TotalNumberOfWebInstances];
 

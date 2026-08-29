@@ -39,14 +39,12 @@ UBWebController::UBWebController(UBMainWindow* mainWindow)
     , mCurrentWebBrowser(0)
     , mBrowserWidget(0)
     , mTrapContentController(0)
-    , mToolsCurrentPalette(0)
     , mToolsPalettePositionned(false)
     , mDownloadViewIsVisible(false)
 {
     mStackedWidget = nullptr;
     for (int i = 0; i < TotalNumberOfWebInstances; i++) {
         mWebBrowserList[i] = 0;
-        mToolsPaletteList[i] = 0;
         mToolsPalettePositionnedList[i] = false;
     }
 }

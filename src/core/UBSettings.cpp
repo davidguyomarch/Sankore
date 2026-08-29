@@ -244,8 +244,6 @@ void UBSettings::init()
     appEnableSoftwareUpdates = new UBSetting(this, "App", "EnableSoftwareUpdates", true);
     appToolBarOrientationVertical = new UBSetting(this, "App", "ToolBarOrientationVertical", false);    
 
-    appDrawingPaletteOrientationHorizontal = new UBSetting(this, "App", "DrawingPaletteOrientationHorizontal", false);
-
     rightLibPaletteBoardModeWidth = new UBSetting(this, "Board", "RightLibPaletteBoardModeWidth", 270);
     rightLibPaletteBoardModeIsCollapsed = new UBSetting(this,"Board", "RightLibPaletteBoardModeIsCollapsed",false);
     rightLibPaletteDesktopModeWidth = new UBSetting(this, "Board", "RightLibPaletteDesktopModeWidth", 270);

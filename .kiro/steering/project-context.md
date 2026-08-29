@@ -79,7 +79,7 @@ resources/            # UI forms, icons (Phosphor), translations
 ### Code legacy encore actif
 
 Voir issue #131 pour l'inventaire complet. Points clés :
-- `UBStylusPalette` / `UBDrawingPalette` : cachés mais `buttonGroup()` encore appelé
+- `UBStylusPalette` / `UBDrawingPalette` / `UBNavigatorPalette` / `UBWebToolsPalette` : supprimés (#154)
 - `UBDrawingController` : coexiste avec `UBToolController` (issue #128)
 - Floating palettes (backgrounds, erase, page) : fonctionnelles, pas encore QML
 - `UBDocumentController` : vue Documents avec ancien design (issue #134)

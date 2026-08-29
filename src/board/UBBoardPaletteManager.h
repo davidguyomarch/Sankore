@@ -39,7 +39,6 @@
 
 class UBSettings;
 
-class UBWebToolsPalette;
 class UBActionPalette;
 class UBBoardController;
 class UBKeyboardPalette;
@@ -72,9 +71,6 @@ class UBBoardPaletteManager : public QObject
         UBKeyboardPalette *mKeyboardPalette;
 
         UBCreateLinkPalette* linkPalette();
-
-        void setCurrentWebToolsPalette(UBWebToolsPalette *palette) {mWebToolsCurrentPalette = palette;}
-        UBWebToolsPalette* mWebToolsCurrentPalette;
 
         UBDockTeacherGuideWidget* teacherGuideDockWidget() { return nullptr; }
 
