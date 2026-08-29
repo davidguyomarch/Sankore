@@ -29,9 +29,11 @@
 #include <QListView>
 #include <QGraphicsView>
 #include <QAbstractListModel>
+#include <QSortFilterProxyModel>
 #include <QPixmap>
 #include <QVBoxLayout>
 #include <QSlider>
+#include <QTimer>
 #include <QUrl>
 #include <QStyledItemDelegate>
 #include <QLocale>

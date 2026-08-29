@@ -26,13 +26,18 @@
 
 #include <QWidget>
 #include <QApplication>
+#include <QDir>
+#include <QFileInfo>
+#include <QRegularExpression>
 #include <QPainter>
 
+#include "frameworks/UBFileSystemUtils.h"
+
+// X11 headers must come AFTER all Qt headers to avoid macro collisions
+// (X11 defines None, Unsorted, etc. that clash with Qt enums)
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
-
-#include "frameworks/UBFileSystemUtils.h"
 
 
 void UBPlatformUtils::init()

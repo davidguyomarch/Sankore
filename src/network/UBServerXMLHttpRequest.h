@@ -24,8 +24,18 @@
 #ifndef UBSERVERXMLHTTPREQUEST_H_
 #define UBSERVERXMLHTTPREQUEST_H_
 
-#include <QtCore>
-#include <QtNetwork>
+#include <QByteArray>
+#include <QMap>
+#include <QNetworkReply>
+#include <QObject>
+#include <QString>
+#include <QUrl>
+#include <QByteArray>
+#include <QMap>
+#include <QNetworkReply>
+#include <QObject>
+#include <QString>
+#include <QUrl>
 
 class UBNetworkAccessManager;
 

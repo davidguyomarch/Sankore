@@ -5,7 +5,8 @@
 #ifndef UBWEBPAGE_H_
 #define UBWEBPAGE_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 #ifdef SANKORE_WEBENGINE
 #include <QWebEnginePage>
 

@@ -26,7 +26,7 @@
 #include <QMenu>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QtGlobal>
 
 #include "UBGraphicsWidgetItemDelegate.h"
 #include "UBGraphicsScene.h"

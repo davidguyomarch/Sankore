@@ -3,6 +3,8 @@
  */
 
 #include "UBTeacherGuideResourcesPresentationWidget.h"
+
+#include <QDesktopServices>
 #include <QHeaderView>
 
 #include "core/UBApplication.h"

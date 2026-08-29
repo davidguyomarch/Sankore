@@ -25,7 +25,23 @@
 #include "UBPersistenceManager.h"
 #include "gui/UBMainWindow.h"
 
-#include <QtXml>
+#include <QByteArray>
+#include <QDateTime>
+#include <QDir>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QFile>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QList>
+#include <QMap>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QUrl>
+#include <QUuid>
+#include <QVariant>
+#include <QXmlStreamWriter>
 #include <QVariant>
 #include <QDomDocument>
 #include <QXmlStreamWriter>

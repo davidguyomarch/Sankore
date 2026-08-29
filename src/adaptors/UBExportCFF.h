@@ -24,7 +24,8 @@
 #ifndef UBExportCFF_H_
 #define UBExportCFF_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 
 #include "UBExportAdaptor.h"
 

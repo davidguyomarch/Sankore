@@ -25,13 +25,23 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QList>
+#include <QObject>
+#include <QPointF>
+#include <QRectF>
+#include <QString>
+#include <QVariant>
+#include <QVector>
 #include <QComboBox>
 #include <QMenu>
 
 #include "core/UBApplication.h"
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItemDelegate.h"
+
+#include <QTextBlock>
+#include <QTextList>
+#include <QTextTable>
 #include "UBGraphicsScene.h"
 #include "gui/UBMainWindow.h"
 

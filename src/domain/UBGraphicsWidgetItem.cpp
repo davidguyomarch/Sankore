@@ -22,10 +22,56 @@
 
 
 
-#include <QtNetwork>
-#include <QtXml>
+#include <QByteArray>
+#include <QDir>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
+#include <QFile>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QLocale>
+#include <QMap>
+#include <QMimeData>
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
+#include <QSize>
+#include <QSizeF>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
+#include <QUrl>
+#include <QUuid>
+#include <QVariant>
+#include <QByteArray>
+#include <QDir>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
+#include <QFile>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QLocale>
+#include <QMap>
+#include <QMimeData>
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
+#include <QSize>
+#include <QSizeF>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
+#include <QUrl>
+#include <QUuid>
+#include <QVariant>
 
 #include "UBGraphicsWidgetItem.h"
+
+#include <QClipboard>
 #include "UBGraphicsScene.h"
 #include "UBGraphicsItemDelegate.h"
 #include "UBGraphicsWidgetItemDelegate.h"

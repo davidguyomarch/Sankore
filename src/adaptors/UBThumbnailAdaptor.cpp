@@ -22,7 +22,12 @@
 
 #include "UBThumbnailAdaptor.h"
 
-#include <QtCore>
+#include <QFile>
+#include <QList>
+#include <QPoint>
+#include <QRectF>
+#include <QString>
+#include <QUrl>
 
 #include "frameworks/UBFileSystemUtils.h"
 

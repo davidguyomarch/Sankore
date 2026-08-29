@@ -24,6 +24,9 @@
 
 #include "UBBoardController.h"
 
+#include <QBuffer>
+#include <QTemporaryFile>
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QApplication>

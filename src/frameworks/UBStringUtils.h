@@ -24,7 +24,10 @@
 #ifndef UBSTRINGUTILS_H
 #define UBSTRINGUTILS_H
 
-#include <QtCore>
+#include <QDateTime>
+#include <QString>
+#include <QStringList>
+#include <QUuid>
 
 
 class UBStringUtils

@@ -23,6 +23,7 @@
 
 #include "UBExportWeb.h"
 
+#include <QDesktopServices>
 #include "frameworks/UBPlatformUtils.h"
 #include "frameworks/UBFileSystemUtils.h"
 

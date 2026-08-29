@@ -28,7 +28,12 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QGraphicsSvgItem>
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
+#include <QString>
 #include <QGraphicsPolygonItem>
 
 #include "core/UB.h"

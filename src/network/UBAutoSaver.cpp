@@ -64,7 +64,10 @@
 
 #include "UBAutoSaver.h"
 
-#include <QtCore>
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QObject>
+#include <QTimerEvent>
 
 
 #define AUTOSAVE_IN  1000 * 3  // seconds

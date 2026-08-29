@@ -30,7 +30,16 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QGraphicsSvgItem>
+#include <QLineF>
+#include <QList>
+#include <QObject>
+#include <QPointF>
+#include <QRectF>
+#include <QSize>
+#include <QSizeF>
+#include <QString>
+#include <QVariant>
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"

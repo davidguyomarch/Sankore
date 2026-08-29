@@ -24,7 +24,18 @@
 #ifndef UBCFFSUBSETADAPTOR_H
 #define UBCFFSUBSETADAPTOR_H
 
-#include <QtXml>
+#include <QDir>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
+#include <QFile>
+#include <QHash>
+#include <QMap>
+#include <QPointF>
+#include <QRectF>
+#include <QSize>
+#include <QString>
+#include <QSvgGenerator>
 #include <QString>
 #include <QStack>
 #include <QDomDocument>

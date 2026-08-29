@@ -23,6 +23,8 @@
 
 #include "UBSvgSubsetRasterizer.h"
 
+#include <QFile>
+
 #include "domain/UBGraphicsScene.h"
 #include "adaptors/UBSvgSubsetAdaptor.h"
 

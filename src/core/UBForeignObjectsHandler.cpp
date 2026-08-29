@@ -26,7 +26,21 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtXml>
+#include <QDir>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QFile>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QList>
+#include <QMap>
+#include <QRegularExpression>
+#include <QString>
+#include <QStringList>
+#include <QTextStream>
+#include <QUrl>
+#include <QUuid>
+#include <QVector>
 #include "UBSettings.h"
 
 // Use extracted utility functions from UBForeignObjectsUtils namespace

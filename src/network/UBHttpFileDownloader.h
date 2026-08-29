@@ -24,8 +24,16 @@
 #ifndef UBHTTPFILEDOWNLOADER_H_
 #define UBHTTPFILEDOWNLOADER_H_
 
-#include <QtCore>
-#include <QtNetwork>
+#include <QFile>
+#include <QList>
+#include <QNetworkReply>
+#include <QObject>
+#include <QUrl>
+#include <QFile>
+#include <QList>
+#include <QNetworkReply>
+#include <QObject>
+#include <QUrl>
 
 class UBHttpFileDownloader : public QObject
 {

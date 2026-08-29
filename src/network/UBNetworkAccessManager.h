@@ -25,7 +25,16 @@
 #ifndef UBNETWORKACCESSMANAGER_H
 #define UBNETWORKACCESSMANAGER_H
 
-#include <QtNetwork>
+#include <QAuthenticator>
+#include <QIODevice>
+#include <QList>
+#include <QNetworkAccessManager>
+#include <QNetworkProxy>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QSslError>
+#include <QString>
 
 class UBSettings;
 

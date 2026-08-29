@@ -24,6 +24,8 @@
 
 #include "UBGraphicsSvgItem.h"
 
+#include <QSvgRenderer>
+
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>

@@ -23,7 +23,8 @@
 #ifndef UBEXPORTDOCUMENTSETADAPTOR_H
 #define UBEXPORTDOCUMENTSETADAPTOR_H
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 #include "UBExportAdaptor.h"
 #include "frameworks/UBFileSystemUtils.h"
 #include "globals/UBGlobals.h"

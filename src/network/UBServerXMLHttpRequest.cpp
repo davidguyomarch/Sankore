@@ -24,8 +24,20 @@
 
 #include "UBServerXMLHttpRequest.h"
 
-#include <QtCore>
-#include <QtNetwork>
+#include <QByteArray>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QString>
+#include <QUrl>
+#include <QByteArray>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QString>
+#include <QUrl>
 
 #include "network/UBNetworkAccessManager.h"
 

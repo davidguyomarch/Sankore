@@ -34,6 +34,8 @@
 
 #include "UBTeacherGuideWidget.h"
 
+#include <QDesktopServices>
+
 #include "adaptors/UBSvgSubsetAdaptor.h"
 
 #include "core/UBApplication.h"

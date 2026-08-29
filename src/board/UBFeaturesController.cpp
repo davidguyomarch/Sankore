@@ -34,6 +34,8 @@
 #include "board/UBBoardController.h"
 #include "board/UBBoardView.h"
 #include "UBFeaturesController.h"
+
+#include <QXmlStreamWriter>
 #include "core/UBSettings.h"
 #include "core/UBSettingsData.h"
 #include "tools/UBToolsManager.h"

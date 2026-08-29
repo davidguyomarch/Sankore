@@ -28,7 +28,11 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QGraphicsSvgItem>
+#include <QPointF>
+#include <QRectF>
+#include <QSizeF>
+#include <QVariant>
 
 #include "core/UB.h"
 #include "tools/UBAbstractDrawRuler.h"

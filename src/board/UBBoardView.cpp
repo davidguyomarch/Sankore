@@ -27,7 +27,18 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtXml>
+#include <QGraphicsSvgItem>
+#include <QList>
+#include <QObject>
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
+#include <QSize>
+#include <QString>
+#include <QTimer>
+#include <QUrl>
+#include <QVariant>
 #include <QListView>
 
 #include "UBDrawingController.h"

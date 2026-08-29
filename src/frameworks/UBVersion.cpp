@@ -23,7 +23,8 @@
 
 #include "UBVersion.h"
 
-#include <QtCore>
+#include <QString>
+#include <QStringList>
 #include <QStringList>
 
 

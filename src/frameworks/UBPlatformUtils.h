@@ -25,7 +25,9 @@
 #ifndef UBPLATFORMUTILS_H_
 #define UBPLATFORMUTILS_H_
 
-#include <QtCore>
+#include <QCoreApplication>
+#include <QString>
+#include <QStringList>
 #include <QIcon>
 
 class QMainWindow;

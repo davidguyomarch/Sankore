@@ -65,6 +65,11 @@
 
 #include "UBCookieJar.h"
 
+#include <QDir>
+#include <QFile>
+#include <QMetaEnum>
+#include <QNetworkCookie>
+
 #include "UBAutoSaver.h"
 
 #include "core/UBSettings.h"

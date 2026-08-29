@@ -23,7 +23,21 @@
 
 #include "UBDocumentController.h"
 
-#include <QtCore>
+#include <QDateTime>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QList>
+#include <QMimeData>
+#include <QObject>
+#include <QPair>
+#include <QPoint>
+#include <QRect>
+#include <QRegularExpression>
+#include <QString>
+#include <QStringList>
+#include <QUrl>
+#include <QVariant>
 #include <QWidget>
 #include <QMenu>
 #include <QScrollBar>

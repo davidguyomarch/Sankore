@@ -24,7 +24,8 @@
 #ifndef UBCRYPTOUTILS_H_
 #define UBCRYPTOUTILS_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 #include <openssl/evp.h>
 
 
