@@ -102,6 +102,7 @@ FORMS += resources/forms/mainWindow.ui \
    resources/forms/documents.ui \
    resources/forms/blackoutWidget.ui \
    # resources/forms/trapFlash.ui # excluded \
+   resources/forms/webPublishing.ui
 
 UB_ETC.files = resources/etc
 UB_I18N.files = resources/i18n/*.qm
