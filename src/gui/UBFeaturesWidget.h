@@ -43,6 +43,8 @@
 #include <QProgressBar>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <QMimeData>
+#include <QTime>
 
 #include "UBDockPaletteWidget.h"
 #include "core/UBSettings.h"
