@@ -41,8 +41,6 @@
 #include <QPainter>
 #include <QFile>
 
-#include "transition/UniboardSankoreTransition.h"
-
 #ifdef SANKORE_WEBENGINE
 #include <QWebEngineView>
 #include <QWebEngineProfile>
@@ -101,8 +99,6 @@ UBApplicationController* UBApplication::applicationController = 0;
 UBBoardController* UBApplication::boardController = 0;
 UBWebController* UBApplication::webController = 0;
 UBDocumentController* UBApplication::documentController = 0;
-UniboardSankoreTransition* UBApplication::mUniboardSankoreTransition = 0;
-
 UBMainWindow* UBApplication::mainWindow = 0;
 
 const QString UBApplication::mimeTypeUniboardDocument = QString("application/vnd.mnemis-uniboard-document");
@@ -229,9 +225,6 @@ UBApplication::~UBApplication()
 
     delete mainWindow;
     mainWindow = 0;
-
-    delete mUniboardSankoreTransition;
-    mUniboardSankoreTransition = 0;
 
     UBPersistenceManager::destroy();
 
@@ -508,12 +501,6 @@ void UBApplication::onScreenCountChanged(int newCount)
     Q_UNUSED(newCount);
     UBDisplayManager displayManager;
     mainWindow->actionMultiScreen->setEnabled(displayManager.numScreens() > 1);
-}
-
-void UBApplication::importUniboardFiles()
-{
-    mUniboardSankoreTransition = new UniboardSankoreTransition();
-    mUniboardSankoreTransition->documentTransition();
 }
 
 #ifdef Q_OS_MACOS
@@ -996,14 +983,11 @@ void UBApplication::cleanup()
     if (boardController) delete boardController;
     if (webController) delete webController;
     if (documentController) delete documentController;
-    if (mUniboardSankoreTransition) delete mUniboardSankoreTransition;
-
 
     applicationController = nullptr;
     boardController = nullptr;
     webController = nullptr;
     documentController = nullptr;
-    mUniboardSankoreTransition = nullptr;
 }
 
 void UBStyle::drawItemText(QPainter *painter, const QRect &rect, int alignment, const QPalette &pal,

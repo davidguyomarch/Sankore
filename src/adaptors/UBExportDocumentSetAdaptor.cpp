@@ -42,8 +42,6 @@ THIRD_PARTY_WARNINGS_DISABLE
 #include "quazipfile.h"
 THIRD_PARTY_WARNINGS_ENABLE
 
-#include "transition/UniboardSankoreTransition.h"
-
 
 UBExportDocumentSetAdaptor::UBExportDocumentSetAdaptor(QObject *parent)
     : UBExportAdaptor(parent)
@@ -165,13 +163,9 @@ bool UBExportDocumentSetAdaptor::addDocumentToZip(const QModelIndex &pIndex, UBD
 //        UBForeighnObjectsHandler cleaner;
 //        cleaner.cure(pDocumentProxy->persistencePath());
 
-        UniboardSankoreTransition document;
-        QString documentPath(pDocumentProxy->persistencePath());
-        document.checkDocumentDirectory(documentPath);
-
         QDir documentDir = QDir(pDocumentProxy->persistencePath());
         QuaZipFile zipFile(&zip);
-        UBFileSystemUtils::compressDirInZip(documentDir, QFileInfo(documentPath).fileName() + "/", &zipFile, false);
+        UBFileSystemUtils::compressDirInZip(documentDir, QFileInfo(pDocumentProxy->persistencePath()).fileName() + "/", &zipFile, false);
 
         if(zip.getZipError() != 0)
         {

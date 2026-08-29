@@ -28,8 +28,6 @@
 
 #include "adaptors/publishing/UBDocumentPublisher.h"
 
-#include "transition/UniboardSankoreTransition.h"
-
 
 UBWebPublisher::UBWebPublisher(QObject *parent)
     : UBExportAdaptor(parent)
@@ -54,10 +52,6 @@ void UBWebPublisher::persist(UBDocumentProxy* pDocumentProxy)
 {
     if (!pDocumentProxy)
         return;
-
-    UniboardSankoreTransition document;
-    QString documentPath(pDocumentProxy->persistencePath());
-    document.checkDocumentDirectory(documentPath);
 
     UBDocumentPublisher* publisher = new UBDocumentPublisher(pDocumentProxy, this); // the publisher will self delete when publication finishes
     publisher->publish();
