@@ -36,7 +36,6 @@ class QHBoxLayout;
 #endif
 
 #include "UBFloatingPalette.h"
-#include "api/UBWidgetUniboardAPI.h"
 
 class UBStartupHintsPalette : public UBFloatingPalette
 {
@@ -62,7 +61,6 @@ private:
     QCheckBox* mShowNextTime;
     QVBoxLayout* mLayout;
     QHBoxLayout* mButtonLayout;
-    UBWidgetUniboardAPI *mpSankoreAPI;
 #ifdef SANKORE_WEBENGINE
     QWebEngineView * mpWebView;
 #else

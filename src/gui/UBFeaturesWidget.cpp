@@ -941,7 +941,6 @@ UBFeaturesWebView::UBFeaturesWebView(QWidget* parent, const char* name):QWidget(
     , mpView(nullptr)
     , mpWebSettings(nullptr)
     , mpLayout(nullptr)
-    , mpSankoreAPI(nullptr)
 {
     setObjectName(name);
 
@@ -952,13 +951,11 @@ UBFeaturesWebView::UBFeaturesWebView(QWidget* parent, const char* name):QWidget(
 
 #ifdef SANKORE_WEBENGINE
     mpView = new QWebEngineView(this);
-    mpSankoreAPI = nullptr;
     mpWebSettings = mpView->page()->settings();
     mpLayout->addWidget(mpView);
     connect(mpView, SIGNAL(loadFinished(bool)), this, SLOT(onLoadFinished(bool)));
 #else
     mpView = nullptr;
-    mpSankoreAPI = nullptr;
     mpWebSettings = nullptr;
 #endif
     mpLayout->setContentsMargins(0,0,0,0);
@@ -966,11 +963,6 @@ UBFeaturesWebView::UBFeaturesWebView(QWidget* parent, const char* name):QWidget(
 
 UBFeaturesWebView::~UBFeaturesWebView()
 {
-    if( nullptr != mpSankoreAPI )
-    {
-        delete mpSankoreAPI;
-        mpSankoreAPI = nullptr;
-    }
     if( nullptr != mpView )
     {
         delete mpView;
@@ -985,7 +977,7 @@ UBFeaturesWebView::~UBFeaturesWebView()
 
 void UBFeaturesWebView::javaScriptWindowObjectCleared()
 {
-    // TODO: Use QWebChannel for JS object injection: mpView->page()->runJavaScript("sankore", mpSankoreAPI);
+    // Widget JS APIs removed — WebEngine is stubbed
 }
 
 void UBFeaturesWebView::showElement(const UBFeature &elem)
@@ -1026,8 +1018,8 @@ void UBFeaturesWebView::showElement(const UBFeature &elem)
 
 void UBFeaturesWebView::onLoadFinished(bool ok)
 {
-    if(ok && nullptr != mpSankoreAPI){
-        // TODO: Use QWebChannel for JS object injection: mpView->page()->runJavaScript("sankore", mpSankoreAPI);
+    if(ok){
+        // Widget JS APIs removed — WebEngine is stubbed
     }
 }
 

@@ -31,8 +31,7 @@
 #include "UBGraphicsWidgetItemDelegate.h"
 #include "UBGraphicsDelegateFrame.h"
 
-#include "api/UBWidgetUniboardAPI.h"
-#include "api/UBW3CWidgetAPI.h"
+#include <QGraphicsSceneMouseEvent>
 
 #include "board/UBBoardController.h"
 #include "board/UBBoardPaletteManager.h"
@@ -71,7 +70,6 @@ UBGraphicsWidgetItem::UBGraphicsWidgetItem(const QUrl &pWidgetUrl, QGraphicsItem
     , mIsFrozen(false)
     , mIsTakingSnapshot(false)
     , mShouldMoveWidget(false)
-    , mUniboardAPI(0)
     , mProxyLoadingMessage(0)
 {
     mSettings = UBSettings::settings();
@@ -326,11 +324,13 @@ void UBGraphicsWidgetItem::removeScript()
 
 void UBGraphicsWidgetItem::processDropEvent(QGraphicsSceneDragDropEvent *event)
 {
-    mUniboardAPI->ProcessDropEvent(event);
+    Q_UNUSED(event);
+    // Widget JS APIs removed — web widgets are stubbed
 }
 bool UBGraphicsWidgetItem::isDropableData(const QMimeData *data) const
 {
-    return mUniboardAPI->isDropableData(data);
+    Q_UNUSED(data);
+    return false;
 }
 
 QUrl UBGraphicsWidgetItem::getOwnFolder() const {
@@ -661,12 +661,7 @@ void UBGraphicsWidgetItem::geometryChangeRequested(const QRect& geom)
 void UBGraphicsWidgetItem::javaScriptWindowObjectCleared()
 {
     injectInlineJavaScript();
-
-    if(!mUniboardAPI)
-        mUniboardAPI = new UBWidgetUniboardAPI(scene(), this);
-
-    mainFrame()->addToJavaScriptWindowObject("sankore", mUniboardAPI);
-
+    // Widget JS APIs removed (UBWidgetUniboardAPI) — WebEngine is stubbed
 }
 
 void UBGraphicsWidgetItem::mainFrameLoadFinished (bool ok)
@@ -831,7 +826,6 @@ QMap<QString, QString> UBGraphicsW3CWidgetItem::sNPAPIWrapperTemplates;
 
 UBGraphicsW3CWidgetItem::UBGraphicsW3CWidgetItem(const QUrl& pWidgetUrl, QGraphicsItem *parent)
     : UBGraphicsWidgetItem(pWidgetUrl, parent)
-    , mW3CWidgetAPI(0)
 {
     QString path = pWidgetUrl.toLocalFile();
     QDir potentialDir(path);
@@ -1266,12 +1260,7 @@ bool UBGraphicsW3CWidgetItem::hasNPAPIWrapper(const QString& pMimeType)
 void UBGraphicsW3CWidgetItem::javaScriptWindowObjectCleared()
 {
     UBGraphicsWidgetItem::javaScriptWindowObjectCleared();
-
-    if(!mW3CWidgetAPI)
-        mW3CWidgetAPI = new UBW3CWidgetAPI(this);
-
-    mainFrame()->addToJavaScriptWindowObject("widget", mW3CWidgetAPI);
-
+    // Widget JS APIs removed (UBW3CWidgetAPI) — WebEngine is stubbed
 }
 
 void UBGraphicsW3CWidgetItem::loadNPAPIWrappersTemplates()
