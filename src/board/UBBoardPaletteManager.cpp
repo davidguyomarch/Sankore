@@ -36,7 +36,6 @@
 #include "gui/UBMainWindow.h"
 #include "gui/UBKeyboardPalette.h"
 #include "gui/UBToolWidget.h"
-#include "gui/UBWebToolsPalette.h"
 #include "gui/UBActionPalette.h"
 #include "gui/UBFavoriteToolPalette.h"
 #include "gui/UBDockTeacherGuideWidget.h"
@@ -86,7 +85,6 @@
 UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardController* pBoardController)
     : QObject(container)
     , mKeyboardPalette(0)
-    , mWebToolsCurrentPalette(0)
     , mContainer(container)
     , mBoardControler(pBoardController)
     , mStylusPaletteQml(nullptr)
@@ -771,8 +769,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 {
                     // At startup, ensure palettes are sized to container
                 }
-                if (mWebToolsCurrentPalette)
-                    mWebToolsCurrentPalette->hide();
             }
             break;
 
@@ -831,8 +827,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 if(!isInit)
                     UBApplication::applicationController->uninotesController()->TransparentWidgetResized();
 
-                if (mWebToolsCurrentPalette)
-                    mWebToolsCurrentPalette->hide();
             }
             break;
 
@@ -886,8 +880,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     else
                         mKeyboardPalette->setParent(UBApplication::documentController->controlView());
                 }
-                if (mWebToolsCurrentPalette)
-                    mWebToolsCurrentPalette->hide();
             }
             break;
 
