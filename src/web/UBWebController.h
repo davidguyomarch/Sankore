@@ -41,11 +41,8 @@
 
 #include "UBOEmbedParser.h"
 
-class WBBrowserWindow;
 class UBApplication;
-class UBTrapWebPageContentController;
 class UBMainWindow;
-class WBWebView;
 class UBServerXMLHttpRequest;
 
 
@@ -79,12 +76,6 @@ class UBWebController : public QObject
         };
 
         void show(WebInstance type = UBWebController::WebBrowser);
-
-        WBBrowserWindow* GetCurrentWebBrowser()
-        {
-            if( mCurrentWebBrowser != nullptr ) return *mCurrentWebBrowser;
-            else return nullptr;
-        };
 
 
     protected:
@@ -130,11 +121,8 @@ class UBWebController : public QObject
 
         UBMainWindow *mMainWindow;
 
-        WBBrowserWindow* mWebBrowserList[TotalNumberOfWebInstances];
-        WBBrowserWindow** mCurrentWebBrowser;
-
         QWidget* mBrowserWidget;
-        UBTrapWebPageContentController* mTrapContentController;
+
         bool mToolsPalettePositionned;
         bool mToolsPalettePositionnedList[TotalNumberOfWebInstances];
 
@@ -164,8 +152,6 @@ class UBWebController : public QObject
          * @param pCapturedPixmap QPixmap corresponding to the capture.
          */
         void imageCaptured(const QPixmap& pCapturedPixmap, bool pageMode, const QUrl& source);
-
-        void activeWebPageChanged(WBWebView* pWebView);
 
 };
 

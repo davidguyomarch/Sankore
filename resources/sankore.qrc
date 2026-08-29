@@ -97,9 +97,6 @@
         <file>images/addItemToCurrentPage.svg</file>
         <file>images/addItemToNewPage.svg</file>
         <file>images/addItemToLibrary.svg</file>
-        <file>webbrowser/loading.gif</file>
-        <file>webbrowser/notfound.html</file>
-        <file>webbrowser/object-wrapper.html</file>
         <file alias="PowerPointImport.applescript">macx/PowerPointImport.applescript</file>
         <file>macx/upgrade.sh</file>
         <file>www/uniboard-web-player.html</file>

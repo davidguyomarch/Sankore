@@ -1,7 +1,5 @@
 # Copyright (C) 2026 David Guyomarch
 
-INCLUDEPATH  += src/web/browser
-
 HEADERS      += src/web/UBWebController.h \
                 src/web/UBWebPage.h \
                 src/web/UBWebPluginWidget.h \

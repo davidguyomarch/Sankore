@@ -50,7 +50,6 @@
 #include "network/UBNetworkAccessManager.h"
 
 #include "web/UBWebPage.h"
-#include "web/UBWebKitUtils.h"
 #include "web/UBWebController.h"
 
 #include <QTextStream>
