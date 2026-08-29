@@ -147,8 +147,6 @@ class UBBoardPaletteManager : public QObject
 
         void changeBackground();
 
-        void tooglePodcastPalette(bool checked);
-
         void addItemToCurrentPage();
         void addItemToNewPage();
         void addItemToLibrary();

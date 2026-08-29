@@ -60,7 +60,6 @@
 
 #include "domain/UBGraphicsPixmapItem.h"
 
-#include "podcast/UBPodcastController.h"
 
 #include "network/UBNetworkAccessManager.h"
 

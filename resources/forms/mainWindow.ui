@@ -1029,36 +1029,6 @@
     <string>Grid Dark Background</string>
    </property>
   </action>
-  <action name="actionPodcast">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/record.svg</normaloff>:/images/toolbar/svg/record.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Podcast</string>
-   </property>
-   <property name="toolTip">
-    <string>Record Presentation to Video</string>
-   </property>
-  </action>
-  <action name="actionPodcastRecord">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/record.svg</normaloff>:/images/toolbar/svg/record.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Record</string>
-   </property>
-   <property name="toolTip">
-    <string>Start Screen Recording</string>
-   </property>
-  </action>
   <action name="actionEraseItems">
    <property name="icon">
     <iconset resource="../sankore.qrc">
@@ -1405,36 +1375,6 @@
    </property>
    <property name="toolTip">
     <string>Import an External Page</string>
-   </property>
-  </action>
-  <action name="actionPodcastPause">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/pause.svg</normaloff>:/images/toolbar/svg/pause.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Pause</string>
-   </property>
-   <property name="toolTip">
-    <string>Pause Podcast Recording</string>
-   </property>
-  </action>
-  <action name="actionPodcastConfig">
-   <property name="icon">
-    <iconset resource="../sankore.qrc">
-     <normaloff>:/images/toolbar/svg/settings.svg</normaloff>:/images/toolbar/svg/settings.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Podcast Config</string>
-   </property>
-   <property name="toolTip">
-    <string>Configure Podcast Recording</string>
    </property>
   </action>
   <action name="actionWebTrap">

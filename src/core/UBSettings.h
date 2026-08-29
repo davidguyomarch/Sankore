@@ -140,9 +140,7 @@ class UBSettings : public QObject
         static QString userWidgetPath();
         static QString userRelativeWidgetPath();
         static QString userInteractiveFavoritesDirectory();
-        static QString userPodcastRecordingDirectory();
-
-        QString userGipLibraryDirectory();
+        static QString userGipLibraryDirectory();
 
         //application directory
         QString applicationShapeLibraryDirectory();
@@ -341,23 +339,9 @@ class UBSettings : public QObject
         UBSetting* pdfPageFormat;
         UBSetting* pdfResolution;
 
-        UBSetting* podcastFramesPerSecond;
-        UBSetting* podcastVideoSize;
-        UBSetting* podcastWindowsMediaBitsPerSecond;
-        UBSetting* podcastAudioRecordingDevice;
-        UBSetting* podcastQuickTimeQuality;
-
-        UBSetting* podcastPublishToYoutube;
-        UBSetting* youTubeUserEMail;
-        UBSetting* youTubeCredentialsPersistence;
-
         UBSetting* uniboardWebEMail;
         UBSetting* uniboardWebAuthor;
         UBSetting* uniboardWebGoogleMapApiKey;
-
-        UBSetting* podcastPublishToIntranet;
-        UBSetting* intranetPodcastPublishingUrl;
-        UBSetting* intranetPodcastAuthor;
 
         UBSetting* favoritesNativeToolUris;
 

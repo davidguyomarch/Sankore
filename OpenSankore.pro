@@ -60,7 +60,6 @@ include(src/frameworks/frameworks.pri)
 include(src/gui/gui.pri)
 include(src/network/network.pri)
 include(src/pdf/pdf.pri)
-include(src/podcast/podcast.pri)
 include(src/tools/tools.pri)
 include(src/desktop/desktop.pri)
 include(src/web/web.pri)
@@ -103,10 +102,6 @@ FORMS += resources/forms/mainWindow.ui \
    resources/forms/documents.ui \
    resources/forms/blackoutWidget.ui \
    # resources/forms/trapFlash.ui # excluded \
-   resources/forms/youTubePublishingDialog.ui \
-   resources/forms/webPublishing.ui \
-   resources/forms/capturePublishing.ui \
-   resources/forms/intranetPodcastPublishingDialog.ui
 
 UB_ETC.files = resources/etc
 UB_I18N.files = resources/i18n/*.qm

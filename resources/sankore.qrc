@@ -76,8 +76,6 @@
         <file>images/backgroundPalette/background3On.svg</file>
         <file>images/backgroundPalette/background4.svg</file>
         <file>images/backgroundPalette/background4On.svg</file>
-        <file>images/toolPalette/podcast.svg</file>
-        <file>images/toolPalette/podcastOn.svg</file>
         <file>images/erasePalette/eraseAll.svg</file>
         <file>images/erasePalette/eraseItem.svg</file>
         <file>images/erasePalette/eraseAnnotation.svg</file>
@@ -104,7 +102,6 @@
         <file>webbrowser/object-wrapper.html</file>
         <file alias="PowerPointImport.applescript">macx/PowerPointImport.applescript</file>
         <file>macx/upgrade.sh</file>
-        <file>podcast/uniboard.prx</file>
         <file>www/uniboard-web-player.html</file>
         <file>images/edit-mode.svg</file>
         <file>images/save.svg</file>

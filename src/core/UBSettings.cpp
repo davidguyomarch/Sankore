@@ -412,17 +412,6 @@ void UBSettings::init()
     pdfPageFormat = new UBSetting(this, "PDF", "PageFormat", "A4");
     pdfResolution = new UBSetting(this, "PDF", "Resolution", "300");
 
-    podcastFramesPerSecond = new UBSetting(this, "Podcast", "FramesPerSecond", 10);
-    podcastVideoSize = new UBSetting(this, "Podcast", "VideoSize", "Medium");
-    podcastAudioRecordingDevice = new UBSetting(this, "Podcast", "AudioRecordingDevice", "Default");
-
-    podcastWindowsMediaBitsPerSecond = new UBSetting(this, "Podcast", "WindowsMediaBitsPerSecond", 1700000);
-    podcastQuickTimeQuality = new UBSetting(this, "Podcast", "QuickTimeQuality", "High");
-
-    podcastPublishToYoutube = new UBSetting(this, "Podcast", "PublishToYouTube", false);
-    youTubeUserEMail = new UBSetting(this, "YouTube", "UserEMail", "");
-    youTubeCredentialsPersistence = new UBSetting(this,"YouTube", "CredentialsPersistence",false);
-
     uniboardWebEMail = new UBSetting(this, "UniboardWeb", "EMail", "");
     uniboardWebAuthor = new UBSetting(this, "UniboardWeb", "Author", "");
     uniboardWebGoogleMapApiKey = new UBSetting(this, "UniboardWeb", "GoogleMapAPIKey", "ABQIAAAAsWU4bIbaeCLinpZ30N_erRQEk562OPinwQkG9J-ZXUNAqYhJ5RT_z2EmpfVXiUg8c41BcsD_XM6P5g");
@@ -434,9 +423,6 @@ void UBSettings::init()
     QStringList uris = UBToolsManager::manager()->allToolIDs();
 
     favoritesNativeToolUris = new UBSetting(this, "App", "FavoriteToolURIs", uris);
-
-    // removed in version 4.4.b.2
-    mUserSettings->remove("Podcast/RecordMicrophone");
 
     replyWWSerialPort = new UBSetting(this, "Voting", "ReplyWWSerialPort", 3);
 
@@ -451,10 +437,6 @@ void UBSettings::init()
     shapeThumbnailWidth = new UBSetting(this, "Library", "ShapeThumbnailWidth", UBSettings::defaultShapeWidth);
     gipThumbnailWidth = new UBSetting(this, "Library", "ImageThumbnailWidth", UBSettings::defaultGipWidth);
     soundThumbnailWidth = new UBSetting(this, "Library", "SoundThumbnailWidth", UBSettings::defaultSoundWidth);;
-
-    podcastPublishToIntranet = new UBSetting(this, "IntranetPodcast", "PublishToIntranet", false);
-    intranetPodcastPublishingUrl = new UBSetting(this, "IntranetPodcast", "PublishingUrl", "");
-    intranetPodcastAuthor = new UBSetting(this, "IntranetPodcast", "Author", "");
 
     KeyboardLocale = new UBSetting(this, "Board", "StartupKeyboardLocale", 0);
     swapControlAndDisplayScreens = new UBSetting(this, "App", "SwapControlAndDisplayScreens", false);
@@ -924,27 +906,6 @@ QString UBSettings::userAudioDirectory()
 }
 
 
-QString UBSettings::userPodcastRecordingDirectory()
-{
-    static QString dirPath = "";
-    if(dirPath.isEmpty()){
-        if (sAppSettings && getAppSettings()->contains("Podcast/RecordingDirectory"))
-        {
-            dirPath = getAppSettings()->value("Podcast/RecordingDirectory").toString();
-            dirPath = replaceWildcard(dirPath);
-            if(checkDirectory(dirPath))
-                return dirPath;
-            else
-                qCritical() << "failed to create dir " << dirPath;
-
-        }
-        dirPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
-        checkDirectory(dirPath);
-    }
-    return dirPath;
-}
-
-
 QString UBSettings::userDocumentDirectory()
 {
     static QString documentDirectory = "";
@@ -1369,14 +1330,5 @@ void UBSettings::cleanNonPersistentSettings()
     if(!communityCredentialsPersistence->get().toBool()){
         communityPsw->set(QVariant(""));
         communityUser->set(QVariant(""));
-    }
-
-    if(!youTubeCredentialsPersistence->get().toBool())
-    {
-        if ( ! youTubeUserEMail->get().toString().isEmpty()) // ALTI/AOU - 20140204 : remove only the Youtube credentials if existing, and not the whole "Vault" section.
-        {
-            removePassword(youTubeUserEMail->get().toString());
-        }
-        youTubeUserEMail->set(QVariant(""));
     }
 }

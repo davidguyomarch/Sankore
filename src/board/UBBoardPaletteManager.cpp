@@ -70,7 +70,6 @@
 #include "domain/UBGraphicsPixmapItem.h"
 
 #include "document/UBDocumentProxy.h"
-#include "podcast/UBPodcastController.h"
 #include "board/UBDrawingController.h"
 
 #include "tools/UBToolsManager.h"
@@ -525,8 +524,6 @@ void UBBoardPaletteManager::connectPalettes()
     connect(UBApplication::mainWindow->actionCrossedLightBackground, &QAction::triggered, this, [this]() { changeBackground(); });
     connect(UBApplication::mainWindow->actionPlainDarkBackground, &QAction::triggered, this, [this]() { changeBackground(); });
     connect(UBApplication::mainWindow->actionCrossedDarkBackground, &QAction::triggered, this, [this]() { changeBackground(); });
-    connect(UBApplication::mainWindow->actionPodcast, &QAction::triggered, this, &UBBoardPaletteManager::tooglePodcastPalette);
-
     connect(UBApplication::mainWindow->actionAddItemToCurrentPage, &QAction::triggered, this, [this]() { addItemToCurrentPage(); });
     connect(UBApplication::mainWindow->actionAddItemToNewPage, &QAction::triggered, this, [this]() { addItemToNewPage(); });
     connect(UBApplication::mainWindow->actionAddItemToLibrary, &QAction::triggered, this, [this]() { addItemToLibrary(); });
@@ -683,11 +680,6 @@ void UBBoardPaletteManager::toggleImageBackgroundPalette(bool checked, bool isDe
     {
         mImageBackgroundPalette->adjustSizeAndPosition();
     }
-}
-
-void UBBoardPaletteManager::tooglePodcastPalette(bool checked)
-{
-    UBPodcastController::instance()->toggleRecordingPalette(checked);
 }
 
 

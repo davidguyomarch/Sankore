@@ -39,7 +39,6 @@
 
 #include "board/UBBoardController.h"
 #include "board/UBDrawingController.h"
-#include "podcast/UBPodcastController.h"
 
 #include "ui_preferences.h"
 
