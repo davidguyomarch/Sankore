@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -44,16 +45,16 @@ UBZoomPalette::UBZoomPalette(QWidget* parent)
     mCurrentZoomButton = new QPushButton(parent);
     mCurrentZoomButton->setStyleSheet(QString("QPushButton { color: white; background-color: transparent; border: none; font-family: Arial; font-weight: bold; font-size: 20px }"));
     mCurrentZoomButton->setFocusPolicy(Qt::NoFocus);
-    connect(mCurrentZoomButton, SIGNAL(clicked(bool)), this, SLOT(showHideExtraButton()));
-    connect(mBoardController, SIGNAL(zoomChanged(qreal)), this, SLOT(refreshPalette()));
-    connect(mBoardController, SIGNAL(activeSceneChanged()), this, SLOT(refreshPalette()));
+    connect(mCurrentZoomButton, &QPushButton::clicked, this, [this]() { showHideExtraButton(); });
+    connect(mBoardController, &UBBoardController::zoomChanged, this, [this]() { refreshPalette(); });
+    connect(mBoardController, &UBBoardController::activeSceneChanged, this, &UBZoomPalette::refreshPalette);
 
     mHundredButton = new QPushButton(parent);
     mHundredButton->setStyleSheet(QString("QPushButton { color: white; background-color: transparent; border: none; font-family: Arial; font-weight: bold; font-size: 20px }"));
     mHundredButton->setFocusPolicy(Qt::NoFocus);
-    mHundredButton->setIcon(QIcon(":/images/stylusPalette/restoreZoom.png"));
+    mHundredButton->setIcon(QIcon(":/images/stylusPalette/svg/restoreZoom.svg"));
     mHundredButton->setIconSize(QSize(42,42));
-    connect(mHundredButton, SIGNAL(clicked(bool)), this, SLOT(goHundred()));
+    connect(mHundredButton, &QPushButton::clicked, this, [this]() { goHundred(); });
 
     layout->setContentsMargins(radius() + 15, 4, radius() + 15, 4);
     layout->addWidget(mHundredButton);
@@ -114,7 +115,7 @@ void UBZoomPalette::refreshPalette()
     adjustSizeAndPosition(true,false);
     if (showAsNoZoom)
     {
-        QTimer::singleShot(500, this, SLOT(hide()));
+        QTimer::singleShot(500, this, [this]() { hide(); });
     }
     else
     {

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #ifndef UBDOCKRESOURCESWIDGET_H
 #define UBDOCKRESOURCESWIDGET_H
 
@@ -6,7 +10,6 @@
 
 #include "board/UBBoardController.h"
 #include "core/UBApplication.h"
-#include "gui/UBLeftPalette.h"
 
 #include <QVBoxLayout>
 
@@ -31,7 +34,6 @@ public:
 
 private:
     UBTeacherResources *mTeacherResourceWidget;
-    UBLeftPalette *mLeftPalette;
 };
 
 #endif // UBDOCKRESOURCESWIDGET_H

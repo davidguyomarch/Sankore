@@ -30,7 +30,8 @@
 ######################
 .DS_Store?
 ehthumbs.db
-Icon?
+# macOS Icon file (has trailing \r character)
+Icon[^a-zA-Z]
 Thumbs.db
 *~
 
@@ -48,6 +49,7 @@ Thumbs.db
 *.idb
 .project
 .settings
+.qtcreator/
 Makefile.Sankore*
 
 # Build files #
@@ -57,6 +59,7 @@ install
 Makefile
 Makefile.Debug
 Makefile.Release
+.qmake.stash
 
 # plugins #
 ###########

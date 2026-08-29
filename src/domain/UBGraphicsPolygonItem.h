@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -62,6 +63,8 @@ class UBGraphicsPolygonItem : public QGraphicsPolygonItem, public UBItem
 
         inline void subtract(UBGraphicsPolygonItem *pi)
         {
+            if (polygon().isEmpty() || pi->polygon().isEmpty())
+                return;
             if (boundingRect().intersects(pi->boundingRect()))
             {
                 QPolygonF subtractedPolygon = polygon().subtracted(pi->polygon());

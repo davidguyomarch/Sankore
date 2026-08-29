@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -112,9 +113,14 @@ class UBApplication : public QtSingleApplication
         void showDocument();
         void startScript();
         void stopScript();
+        void closing();
 
         void toolBarPositionChanged(QVariant topOrBottom);
         void toolBarDisplayTextChanged(QVariant display);
+        void themeChanged(QAction* action);
+        void reloadThemeIcons(const QString& theme);
+        void onAutoOcrToggled(bool enabled);
+        void updateAutoOcrIcon(bool enabled);
 
         void closeEvent(QCloseEvent *event);
 
@@ -126,7 +132,6 @@ class UBApplication : public QtSingleApplication
 
     private slots:
 
-        void closing();
 #ifdef Q_OS_MACOS
         void showMinimized();
 #endif
@@ -148,6 +153,7 @@ class UBApplication : public QtSingleApplication
 #endif
 
         UBPreferencesController* mPreferencesController;
+        class UBRecognitionController* mRecognitionController;
         QTranslator* mApplicationTranslator;
         QTranslator* mQtGuiTranslator;
 

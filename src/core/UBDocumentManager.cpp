@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -47,6 +48,7 @@
 
 #include "UBApplication.h"
 #include "UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "UBPersistenceManager.h"
 
 #include "../adaptors/UBExportWeb.h"
@@ -324,8 +326,8 @@ UBDocumentProxy* UBDocumentManager::importDir(const QDir& pDir, const QString& p
 
     if (result > 0)
     {
-        doc->setMetaData(UBSettings::documentGroupName, pGroup);
-        doc->setMetaData(UBSettings::documentName, pDir.dirName());
+        doc->setMetaData(UBSettingsData::documentGroupName, pGroup);
+        doc->setMetaData(UBSettingsData::documentName, pDir.dirName());
 
         UBPersistenceManager::persistenceManager()->persistDocumentMetadata(doc);
 

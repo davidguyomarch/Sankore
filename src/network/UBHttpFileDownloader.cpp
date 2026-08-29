@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -67,13 +68,13 @@ void UBHttpFileDownloader::downloadNext()
                 QNetworkRequest request(url);
             mReply = nam->get(request); // UB 4.2 TODO who owns and delete the reply ?
 
-            connect(mReply, SIGNAL(finished ()), this, SLOT(finished ()));
-                connect(mReply, SIGNAL(error ( QNetworkReply::NetworkError )),
-                                this, SLOT(error ( QNetworkReply::NetworkError)));
-                connect(mReply, SIGNAL(downloadProgress ( qint64 , qint64  )),
-                                this, SLOT(downloadProgress(qint64 , qint64)));
+            connect(mReply, &QNetworkReply::finished, this, [this]() { finished(); });
+                connect(mReply, &QNetworkReply::errorOccurred,
+                                this, &UBHttpFileDownloader::error);
+                connect(mReply, &QNetworkReply::downloadProgress,
+                                this, &UBHttpFileDownloader::downloadProgress);
 
-                connect(mReply, SIGNAL(readyRead ()), this, SLOT( readyRead()));
+                connect(mReply, &QNetworkReply::readyRead, this, &UBHttpFileDownloader::readyRead);
 
         }
         else

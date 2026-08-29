@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -22,52 +23,14 @@
 
 
 #include "UBStringUtils.h"
+#include "UBPureFunctions.h"
 
 #include <QRegularExpression>
 #include <algorithm>
 
 QStringList UBStringUtils::sortByLastDigit(const QStringList& sourceList)
 {
-    // we look for a set of digit after non digits and before a .
-    QRegularExpression rx("\\D(\\d+)\\.");
-
-    QMultiMap<int, QString> elements;
-
-    for (const QString& source : sourceList)
-    {
-        QRegularExpressionMatch match;
-        QRegularExpressionMatchIterator it = rx.globalMatch(source);
-        while (it.hasNext()) {
-            match = it.next();
-        }
-
-        int digit = -1;
-
-        if (match.hasMatch())
-        {
-            digit = match.captured(1).toInt();
-        }
-
-        elements.insert(digit, source);
-    }
-
-    QStringList result;
-
-    QList<int> keys = elements.keys();
-    std::sort(keys.begin(), keys.end());
-
-    for (int key : keys)
-    {
-        QList<QString> values = elements.values(key);
-        std::sort(values.begin(), values.end());
-        for (const QString& val : values)
-        {
-            if (!result.contains(val))
-                result << val;
-        }
-    }
-
-    return result;
+    return UBPure::sortByLastDigit(sourceList);
 }
 
 
@@ -106,30 +69,17 @@ QString UBStringUtils::netxDigitizedName(const QString& source)
 
 QString UBStringUtils::toCanonicalUuid(const QUuid& uuid)
 {
-    QString s = uuid.toString();
-
-    if(s.startsWith("{"))
-            s = s.right(s.length() - 1);
-
-    if(s.endsWith("}"))
-            s = s.left(s.length() - 1);
-
-
-    return s;
+    return UBPure::toCanonicalUuid(uuid);
 }
 
 QString UBStringUtils::toUtcIsoDateTime(const QDateTime& dateTime)
 {
-    QString isoStr = dateTime.toUTC().toString(Qt::ISODate);
-    // In Qt 6, toString(ISODate) for UTC already appends 'Z'
-    if (!isoStr.endsWith('Z'))
-        isoStr += "Z";
-    return isoStr;
+    return UBPure::toUtcIsoDateTime(dateTime);
 }
 
 QDateTime UBStringUtils::fromUtcIsoDate(const QString& dateString)
 {
-    return QDateTime::fromString(dateString,Qt::ISODate).toLocalTime();
+    return UBPure::fromUtcIsoDate(dateString);
 }
 
 

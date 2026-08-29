@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 
 #include "UBCreateHyperLinkPalette.h"
 #include <QPainter>
@@ -31,7 +35,7 @@ UBCreateHyperLinkPalette::UBCreateHyperLinkPalette(QWidget *parent) :
 
     setBackgroundBrush(QColor(183, 183, 183));
 
-    connect(mValidateButton, SIGNAL(clicked()), this, SIGNAL(validationRequired()));
+    connect(mValidateButton, &QPushButton::clicked, this, [this]() { emit validationRequired(); });
 }
 
 void UBCreateHyperLinkPalette::setPos(QPoint pos)

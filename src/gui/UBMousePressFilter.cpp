@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -65,7 +66,7 @@ bool UBMousePressFilter::eventFilter(QObject *obj, QEvent *event)
 
             mObject = obj;
 
-            QTimer::singleShot(1000, this, SLOT(mouseDownElapsed()));
+            QTimer::singleShot(1000, this, &UBMousePressFilter::mouseDownElapsed);
         }
     }
     else if (isMouseRelease || isMouseMove)

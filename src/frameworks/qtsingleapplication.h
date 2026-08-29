@@ -1,3 +1,11 @@
+/*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /**
  * @file qtsingleapplication.h
  * @brief Minimal stub replacing the ThirdParty QtSingleApplication.

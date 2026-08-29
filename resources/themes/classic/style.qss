@@ -1,0 +1,363 @@
+/* Open-Sankoré — Classic light theme (legacy look)
+ *
+ * This reproduces the original pre-v4 light toolbar style with
+ * rounded corners and gradient backgrounds.
+ */
+
+/* === Main Window & Toolbars === */
+
+QMainWindow
+{
+    background-color: #E8E8E8;
+}
+
+QToolBar
+{
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #F8F8F8, stop:1 #D8D8D8);
+    border-bottom: 1px solid #B0B0B0;
+    spacing: 6px;
+    padding: 4px 8px;
+}
+
+QToolBar::separator
+{
+    background: #B0B0B0;
+    width: 1px;
+    margin: 6px 4px;
+}
+
+QToolButton
+{
+    color: #333333;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px;
+    min-width: 48px;
+    min-height: 48px;
+}
+
+QToolButton:hover
+{
+    background: rgba(0, 0, 0, 30);
+}
+
+QToolButton:pressed,
+QToolButton:checked
+{
+    background: #4A90D9;
+    color: white;
+}
+
+/* === Menu bar === */
+
+QMenuBar
+{
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #F8F8F8, stop:1 #E0E0E0);
+    color: #333333;
+}
+
+QMenuBar::item:selected
+{
+    background: #4A90D9;
+    color: white;
+}
+
+QMenu
+{
+    background-color: #FFFFFF;
+    color: #333333;
+    border: 1px solid #C0C0C0;
+}
+
+QMenu::item:selected
+{
+    background: #4A90D9;
+    color: white;
+}
+
+QMenu::separator
+{
+    background: #D0D0D0;
+    height: 1px;
+    margin: 4px 8px;
+}
+
+QWidget#DockPaletteWidgetBox,
+QWidget#documentNavigator,
+QWidget#UBLibPathViewer,
+QWidget#UBLibNavigatorWidget,
+QWidget#UBLibItemProperties,
+QWidget#UBDownloadWidget,
+QWidget#UBTeacherGuideWidget,
+QWidget#UBFeaturesNavigatorWidget,
+QWidget#PathList,
+QWidget#UBFeaturesCentralWidget,
+QWidget#UBTeacherResources
+{
+    background: #F5F5F5;
+    border-radius: 6px;
+    border: 1px solid #C0C0C0;
+}
+
+QTextEdit,
+QLineEdit,
+QComboBox#DockPaletteWidgetComboBox QAbstractItemView
+{
+    selection-background-color: #4A90D9;
+    selection-color: white;
+}
+
+QWidget#mAdditionalDataContainer
+{
+    border-radius: 6px;
+    border: 1px solid #C0C0C0;
+}
+
+QWidget#UBMediaVideoContainer
+{
+    background: #000000;
+    border-radius: 6px;
+    border: 1px solid #C0C0C0;
+}
+
+QWidget#UBLibWebView
+{
+    background: #FFFFFF;
+    border-radius: 6px;
+    border: 1px solid #C0C0C0;
+}
+
+QListView
+{
+    border: 0px;
+}
+
+QWidget#UBFeatureProperties
+{
+    border: 1px solid #C0C0C0;
+}
+
+QColorDialog
+{
+    background: #F5F5F5;
+}
+
+QLabel#DockPaletteWidgetTitle
+{
+    color: #333333;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+QLineEdit#UBTGLineEdit,
+QLabel#UBTGMediaDropMeLabel
+{
+    background: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 6px;
+    padding: 4px;
+    color: #333333;
+}
+
+QPushButton#UBTGPushButton
+{
+    border: 1px solid #C0C0C0;
+    border-radius: 6px;
+    width: 50px;
+    height: 18px;
+    padding: 2px;
+    color: #333333;
+    background: #F0F0F0;
+}
+
+QPushButton#UBTGPushButton:hover
+{
+    background: #E0E0E0;
+}
+
+QComboBox#DockPaletteWidgetComboBox
+{
+    background: #FFFFFF;
+    border-radius: 6px;
+    padding: 4px;
+    color: #333333;
+    border: 1px solid #C0C0C0;
+}
+
+QComboBox#DockPaletteWidgetComboBox:drop-down
+{
+    background: #F0F0F0;
+    width: 20px;
+    border: none;
+}
+
+QComboBox#DockPaletteWidgetComboBox::down-arrow
+{
+    image: none;
+    border: none;
+}
+
+QComboBox#CacheModeSelectionComboBox
+{
+    background: #FFFFFF;
+    color: #333333;
+}
+
+QPushButton#DockPaletteWidgetButton
+{
+    background-color: #F0F0F0;
+    color: #333333;
+    border-radius: 6px;
+    padding: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    border: 1px solid #C0C0C0;
+}
+
+QPushButton#DockPaletteWidgetButton:hover
+{
+    background-color: #E0E0E0;
+}
+
+QPushButton#DockPaletteWidgetButton::checked
+{
+    background-color: #4A90D9;
+    color: white;
+}
+
+QTextEdit#TeacherStudentBox
+{
+    background: #FFFFFF;
+    border: 1px solid #C0C0C0;
+    border-radius: 6px;
+    color: #333333;
+}
+
+/* Minimal scrollbars */
+
+QScrollBar::vertical
+{
+    background: #F0F0F0;
+    width: 8px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical
+{
+    background: rgba(0, 0, 0, 80);
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover
+{
+    background: rgba(0, 0, 0, 120);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical
+{
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+{
+    background: transparent;
+}
+
+QScrollBar::horizontal
+{
+    background: #F0F0F0;
+    height: 8px;
+    margin: 2px;
+}
+
+QScrollBar::handle:horizontal
+{
+    background: rgba(0, 0, 0, 80);
+    border-radius: 4px;
+    min-width: 30px;
+}
+
+QScrollBar::handle:horizontal:hover
+{
+    background: rgba(0, 0, 0, 120);
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal
+{
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal
+{
+    background: transparent;
+}
+
+/* Sliders */
+
+QSlider::handle::horizontal
+{
+    background-color: #666666;
+    margin-top: -4px;
+    margin-bottom: -4px;
+    height: 16px;
+    width: 16px;
+    border-radius: 8px;
+    border: none;
+}
+
+QSlider::handle::horizontal:hover
+{
+    background-color: #333333;
+}
+
+QSlider::groove::horizontal
+{
+    background-color: rgba(0, 0, 0, 60);
+    height: 4px;
+    border-radius: 2px;
+    border: none;
+}
+
+/* Teacher guide labels */
+
+QLabel#UBTGEditionDocumentTitle
+{
+    color: #333333;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QLabel#UBTGPresentationDocumentTitle
+{
+    color: #333333;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+QLabel#UBTGPageNumberLabel
+{
+    color: #333333;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+UBTGAdaptableText#UBTGEditionPageTitle,
+UBTGAdaptableText#UBTGEditionComment
+{
+    color: #333333;
+    font-size: 12px;
+}
+
+UBTGAdaptableText#UBTGPresentationPageTitle
+{
+    color: #333333;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+}

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -64,7 +65,7 @@ UBResources* UBResources::resources()
 void UBResources::init()
 {
     // Cursors
-    penCursor       = QCursor(Qt::CrossCursor);
+    penCursor       = QCursor(QPixmap(":/images/cursors/pen.svg"), 4, 28);
     eraserCursor    = QCursor(QPixmap(":/images/cursors/eraser.png"), 21, 21);
     markerCursor    = QCursor(QPixmap(":/images/cursors/marker.png"), 3, 30);
     pointerCursor   = QCursor(QPixmap(":/images/cursors/laser.png"), 2, 1);
@@ -77,6 +78,7 @@ void UBResources::init()
     richTextCursor  = QCursor(Qt::ArrowCursor);
     rotateCursor    = QCursor(QPixmap(":/images/cursors/rotate.png"), 16, 16);
     drawLineRulerCursor = QCursor(QPixmap(":/images/cursors/drawRulerLine.png"), 3, 12);
+    ocrCursor           = QCursor(QPixmap(":/images/cursors/ocr.svg").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation), 4, 28);
 }
 
 void UBResources::buildFontList()

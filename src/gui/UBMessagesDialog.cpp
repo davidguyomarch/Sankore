@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -54,7 +55,7 @@ void UBMessagesDialog::setMessages(const QList<QString> messages)
             messagesLayout->addWidget(messageBox);
         }
         QPushButton *closeButton = new QPushButton(tr("Close"), this);
-        connect(closeButton, SIGNAL(clicked(bool)), this, SLOT(dispose()));
+        connect(closeButton, &QPushButton::clicked, this, [this]() { dispose(); });
 
         messagesLayout->addWidget(closeButton);
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -43,7 +44,7 @@ UBDocumentThumbnailWidget::UBDocumentThumbnailWidget(QWidget* parent)
 {
 	bCanDrag = false;
     mScrollTimer = new QTimer(this);
-	connect(mScrollTimer, SIGNAL(timeout()), this, SLOT(autoScroll()));
+	connect(mScrollTimer, &QTimer::timeout, this, &UBDocumentThumbnailWidget::autoScroll);
 }
 
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -30,8 +31,6 @@
 
 #include "gui/UBPropertyPalette.h"
 
-class UBRightPalette;
-
 class UBSettings;
 
 class UBDesktopPropertyPalette : public UBPropertyPalette
@@ -39,10 +38,9 @@ class UBDesktopPropertyPalette : public UBPropertyPalette
     Q_OBJECT
 
     public:
-        UBDesktopPropertyPalette(QWidget *parent, UBRightPalette* _rightPalette);
+        UBDesktopPropertyPalette(QWidget *parent);
     private:
     UBSettings* mSettings;
-        UBRightPalette* rightPalette;
     protected:
         virtual int getParentRightOffset();
 };
@@ -51,7 +49,7 @@ class UBDesktopPenPalette : public UBDesktopPropertyPalette
 {
     Q_OBJECT
     public:
-        UBDesktopPenPalette(QWidget *parent, UBRightPalette* rightPalette);
+        UBDesktopPenPalette(QWidget *parent);
         virtual ~UBDesktopPenPalette(){}
     public slots:
         void onParentMinimized();
@@ -65,14 +63,14 @@ class UBDesktopPenPalette : public UBDesktopPropertyPalette
 class UBDesktopEraserPalette : public UBDesktopPropertyPalette
 {
     public:
-        UBDesktopEraserPalette(QWidget *parent, UBRightPalette* rightPalette);
+        UBDesktopEraserPalette(QWidget *parent);
         virtual ~UBDesktopEraserPalette(){}
 };
 
 class UBDesktopMarkerPalette : public UBDesktopPropertyPalette
 {
     public:
-        UBDesktopMarkerPalette(QWidget *parent, UBRightPalette* rightPalette);
+        UBDesktopMarkerPalette(QWidget *parent);
         virtual ~UBDesktopMarkerPalette(){}
 };
 

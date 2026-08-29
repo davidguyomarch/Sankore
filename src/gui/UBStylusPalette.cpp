@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -71,23 +72,39 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     if(UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;
 
+    // OCR tool — included in button group (rubber-band zone selection)
+    actions << UBApplication::mainWindow->actionOcr;
+
+    // Auto-OCR toggle — small button next to OCR, excluded from button group
+    if (UBApplication::mainWindow->actionAutoOcr)
+        actions << UBApplication::mainWindow->actionAutoOcr;
+
     setActions(actions);
-    setButtonIconSize(QSize(39, 39));
+    setButtonIconSize(QSize(44, 44));
+
+    // Determine how many buttons to exclude from the group at the end
+    // (Auto-OCR toggle is excluded if present)
+    bool hasAutoOcr = (UBApplication::mainWindow->actionAutoOcr != nullptr);
+    int groupEnd = hasAutoOcr ? mButtons.size() - 1 : mButtons.size();
 
     if(!UBPlatformUtils::hasVirtualKeyboard())
     {
-            groupActions();
-    }
-    else
-    {
-            // VirtualKeyboard and Drawing actions are not in group
-            // So, groupping all buttons, except first and last
+            // Group all buttons except first (Drawing) and optionally last (Auto-OCR)
             mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size()-1; i++)
+            for(int i=1; i < groupEnd; i++)
             {
                     mButtonGroup->addButton(mButtons[i], i);
             }
-        connect(mButtonGroup, SIGNAL(idClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
+        connect(mButtonGroup, &QButtonGroup::idClicked, this, &UBStylusPalette::buttonGroupClicked);
+    }
+    else
+    {
+            mButtonGroup = new QButtonGroup(this);
+            for(int i=1; i < groupEnd; i++)
+            {
+                    mButtonGroup->addButton(mButtons[i], i);
+            }
+        connect(mButtonGroup, &QButtonGroup::idClicked, this, &UBStylusPalette::buttonGroupClicked);
     }
 
     adjustSizeAndPosition();
@@ -96,7 +113,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 
     for (UBActionPaletteButton* button : mButtons)
     {
-        connect(button, SIGNAL(doubleClicked()), this, SLOT(stylusToolDoubleClicked()));
+        connect(button, &UBActionPaletteButton::doubleClicked, this, [this]() { stylusToolDoubleClicked(); });
     }
 
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -27,7 +28,6 @@
 #include <QtSvg>
 #include <QDrag>
 #include <QMenu>
-#include <QColorDialog>
 #include <QComboBox>
 
 #include "UBGraphicsItemDelegate.h"
@@ -45,6 +45,8 @@
 #include "core/UBApplicationController.h"
 #include "core/UBDisplayManager.h"
 #include "core/UBSettings.h"
+#include "core/UBTheme.h"
+#include "core/UBSettingsData.h"
 #include "core/UBPersistenceManager.h"
 
 #include "document/UBDocumentProxy.h"
@@ -65,8 +67,6 @@
 #include "customWidgets/UBGraphicsItemAction.h"
 
 
-class UBGraphicsParaschoolEditorWidgetItem;
-
 DelegateButton *DelegateButton::Spacer = 0;
 
 DelegateButton::DelegateButton(const QString & fileName, QGraphicsItem* pDelegated, QGraphicsItem * parent, Qt::WindowFrameSection section)
@@ -74,19 +74,35 @@ DelegateButton::DelegateButton(const QString & fileName, QGraphicsItem* pDelegat
     , mDelegated(pDelegated)
     , mIsTransparentToMouseEvent(false)
     , mIsPressed(false)
+    , mIsHovered(false)
     , mProgressTimerId(-1)
     , mPressProgres(0)
     , mShowProgressIndicator(false)
     , mButtonAlignmentSection(section)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
+    setAcceptHoverEvents(true);
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Control));
-    setCacheMode(QGraphicsItem::NoCache); /* because of SANKORE-1017: this allows pixmap to be refreshed when grabbing window, thus teacher screen is synchronized with main screen. */
+    setCacheMode(QGraphicsItem::NoCache);
 }
 
 DelegateButton::~DelegateButton()
 {
     // NOOP
+}
+
+QRectF DelegateButton::boundingRect() const
+{
+    int s = effectiveSize();
+    return QRectF(0, 0, s, s);
+}
+
+int DelegateButton::effectiveSize() const
+{
+    // Frame buttons (TopLeft/BottomLeft) are smaller than toolbar buttons
+    if (mButtonAlignmentSection == Qt::TitleBarArea || mButtonAlignmentSection == Qt::NoSection)
+        return kButtonSize + kButtonPadding * 2;
+    return kFrameButtonSize + kButtonPadding * 2;
 }
 
 void DelegateButton::setFileName(const QString & fileName)
@@ -97,7 +113,7 @@ void DelegateButton::setFileName(const QString & fileName)
 void DelegateButton::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (mShowProgressIndicator) {
-        QTimer::singleShot(300, this, SLOT(startShowProgress()));
+        QTimer::singleShot(300, this, &DelegateButton::startShowProgress);
     }
 
     mIsPressed = true;
@@ -131,21 +147,59 @@ void DelegateButton::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QGraphicsSvgItem::paint(painter, option, widget);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
 
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    QRectF br = boundingRect();
+
+    // Draw hover/press background for toolbar buttons
+    if (mButtonAlignmentSection == Qt::TitleBarArea || mButtonAlignmentSection == Qt::NoSection) {
+        if (mIsPressed) {
+            painter->setBrush(QColor(0, 0, 0, 30));
+            painter->setPen(Qt::NoPen);
+            painter->drawRoundedRect(br, 4, 4);
+        } else if (mIsHovered) {
+            painter->setBrush(QColor(0, 0, 0, 15));
+            painter->setPen(Qt::NoPen);
+            painter->drawRoundedRect(br, 4, 4);
+        }
+    }
+
+    // Render the SVG icon with padding, centered in the bounding rect
+    if (renderer() && renderer()->isValid()) {
+        QRectF iconRect = br.adjusted(kButtonPadding, kButtonPadding, -kButtonPadding, -kButtonPadding);
+        renderer()->render(painter, iconRect);
+    }
+
+    // Progress indicator for long-press (z-order buttons)
     if (mIsPressed && mShowProgressIndicator) {
         QPen pen;
-        pen.setBrush(Qt::white);
-        pen.setWidth(3);
+        pen.setBrush(QColor(74, 144, 217)); // primary blue
+        pen.setWidth(2);
         painter->save();
-
         painter->setPen(pen);
-
+        QRectF arcRect = br.adjusted(2, 2, -2, -2);
         int spanAngle = qMin(mPressProgres, UBSettings::longClickInterval) * 360 / UBSettings::longClickInterval;
-        painter->drawArc(option->rect.adjusted(pen.width(), pen.width(), -pen.width(), -pen.width()), 16 * 90, -16 * spanAngle);
-
+        painter->drawArc(arcRect, 16 * 90, -16 * spanAngle);
         painter->restore();
     }
+}
+
+void DelegateButton::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    Q_UNUSED(event);
+    mIsHovered = true;
+    update();
+}
+
+void DelegateButton::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    Q_UNUSED(event);
+    mIsHovered = false;
+    update();
 }
 
 void DelegateButton::timerEvent(QTimerEvent *event)
@@ -197,7 +251,7 @@ UBGraphicsItemDelegate::UBGraphicsItemDelegate(QGraphicsItem* pDelegated, QObjec
     , mMoved(false)
 {
     mSettings = UBSettings::settings();
-    connect(UBApplication::boardController, SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged()));
+    connect(UBApplication::boardController, &UBBoardController::zoomChanged, this, [this]() { onZoomChanged(); });
 }
 
 void UBGraphicsItemDelegate::init()
@@ -209,28 +263,28 @@ void UBGraphicsItemDelegate::init()
     mFrame->hide();
     mFrame->setFlag(QGraphicsItem::ItemIsSelectable, true);
 
-    mDeleteButton = new DelegateButton(":/images/close.svg", mDelegated, mFrame, Qt::TopLeftSection);
+    mDeleteButton = new DelegateButton(":/icons/phosphor/x-circle.svg", mDelegated, mFrame, Qt::TopLeftSection);
     mButtons << mDeleteButton;
-    connect(mDeleteButton, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(mDeleteButton, &DelegateButton::clicked, this, [this]() { remove(); });
     if (canDuplicate()){
-        mDuplicateButton = new DelegateButton(":/images/duplicate.svg", mDelegated, mFrame, Qt::TopLeftSection);
-        connect(mDuplicateButton, SIGNAL(clicked(bool)), this, SLOT(duplicate()));
+        mDuplicateButton = new DelegateButton(":/icons/phosphor/copy.svg", mDelegated, mFrame, Qt::TopLeftSection);
+        connect(mDuplicateButton, &DelegateButton::clicked, this, [this]() { duplicate(); });
         mButtons << mDuplicateButton;
     }
-    mMenuButton = new DelegateButton(":/images/menu.svg", mDelegated, mFrame, Qt::TopLeftSection);
-    connect(mMenuButton, SIGNAL(clicked()), this, SLOT(showMenu()));
+    mMenuButton = new DelegateButton(":/icons/phosphor/dots-three.svg", mDelegated, mFrame, Qt::TopLeftSection);
+    connect(mMenuButton, &DelegateButton::clicked, this, [this]() { showMenu(); });
     mButtons << mMenuButton;
 
-    mZOrderUpButton = new DelegateButton(":/images/z_layer_up.svg", mDelegated, mFrame, Qt::BottomLeftSection);
+    mZOrderUpButton = new DelegateButton(":/icons/phosphor/arrow-up.svg", mDelegated, mFrame, Qt::BottomLeftSection);
     mZOrderUpButton->setShowProgressIndicator(true);
-    connect(mZOrderUpButton, SIGNAL(clicked()), this, SLOT(increaseZLevelUp()));
-    connect(mZOrderUpButton, SIGNAL(longClicked()), this, SLOT(increaseZlevelTop()));
+    connect(mZOrderUpButton, &DelegateButton::clicked, this, [this]() { increaseZLevelUp(); });
+    connect(mZOrderUpButton, &DelegateButton::longClicked, this, &UBGraphicsItemDelegate::increaseZlevelTop);
     mButtons << mZOrderUpButton;
 
-    mZOrderDownButton = new DelegateButton(":/images/z_layer_down.svg", mDelegated, mFrame, Qt::BottomLeftSection);
+    mZOrderDownButton = new DelegateButton(":/icons/phosphor/arrow-down.svg", mDelegated, mFrame, Qt::BottomLeftSection);
     mZOrderDownButton->setShowProgressIndicator(true);
-    connect(mZOrderDownButton, SIGNAL(clicked()), this, SLOT(increaseZLevelDown()));
-    connect(mZOrderDownButton, SIGNAL(longClicked()), this, SLOT(increaseZlevelBottom()));
+    connect(mZOrderDownButton, &DelegateButton::clicked, this, [this]() { increaseZLevelDown(); });
+    connect(mZOrderDownButton, &DelegateButton::longClicked, this, &UBGraphicsItemDelegate::increaseZlevelBottom);
     mButtons << mZOrderDownButton;
 
     buildButtons();
@@ -257,7 +311,7 @@ void UBGraphicsItemDelegate::init()
 UBGraphicsItemDelegate::~UBGraphicsItemDelegate()
 {
     if (UBApplication::boardController)
-        disconnect(UBApplication::boardController, SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged()));
+        disconnect(UBApplication::boardController, &UBBoardController::zoomChanged, this, nullptr);
         // do not release mMimeData.
         // the mMimeData is owned by QDrag since the setMimeData call as specified in the documentation
 
@@ -647,14 +701,14 @@ void UBGraphicsItemDelegate::buildButtons()
 
 void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 {
-    mLockAction = menu->addAction(tr("Locked"), this, SLOT(lock(bool)));
+    mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsItemDelegate::lock);
     QIcon lockIcon;
     lockIcon.addPixmap(QPixmap(":/images/locked.svg"), QIcon::Normal, QIcon::On);
     lockIcon.addPixmap(QPixmap(":/images/unlocked.svg"), QIcon::Normal, QIcon::Off);
     mLockAction->setIcon(lockIcon);
     mLockAction->setCheckable(true);
 
-    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, SLOT(showHide(bool)));
+    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsItemDelegate::showHide);
     mShowOnDisplayAction->setCheckable(true);
 
     QIcon showIcon;
@@ -664,7 +718,7 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 
     if (mShowGoContentButton)
     {
-        mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, SLOT(gotoContentSource()));
+        mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, [this]() { gotoContentSource(); });
 
         QIcon sourceIcon;
         sourceIcon.addPixmap(QPixmap(":/images/toolbar/internet.png"), QIcon::Normal, QIcon::On);
@@ -672,17 +726,17 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
     }
 
     if(mCanTrigAnAction)
-        mShowPanelToAddAnAction = menu->addAction(tr("Add an action"),this,SLOT(onAddActionClicked()));
+        mShowPanelToAddAnAction = menu->addAction(tr("Add an action"), this, [this]() { onAddActionClicked(); });
 
     if (mCanReturnInCreationMode)
-        menu->addAction(tr("Return to creation mode"), this, SLOT(onReturnToCreationModeClicked()));
+        menu->addAction(tr("Return to creation mode"), this, [this]() { onReturnToCreationModeClicked(); });
 
     //N/C - NNE - 20140505 : add vertical and horizontal flip
     if(mHorizontalMirror)
-        menu->addAction(tr("Flip on horizontal axis"), this, SLOT(flipHorizontally()));
+        menu->addAction(tr("Flip on horizontal axis"), this, [this]() { flipHorizontally(); });
 
     if(mVerticalMirror)
-        menu->addAction(tr("Flip on vertical axis"), this, SLOT(flipVertically()));
+        menu->addAction(tr("Flip on vertical axis"), this, [this]() { flipVertically(); });
     //N/C - NNE - 20140505 : END
 
 }
@@ -711,7 +765,7 @@ void UBGraphicsItemDelegate::onAddActionClicked()
 {
     UBCreateLinkPalette* linkPalette = UBApplication::boardController->paletteManager()->linkPalette();
     linkPalette->show();
-    connect(linkPalette,SIGNAL(definedAction(UBGraphicsItemAction*)),this,SLOT(saveAction(UBGraphicsItemAction*)));
+    connect(linkPalette, &UBCreateLinkPalette::definedAction, this, &UBGraphicsItemDelegate::saveAction);
 }
 
 void UBGraphicsItemDelegate::onReturnToCreationModeClicked()
@@ -728,7 +782,7 @@ void UBGraphicsItemDelegate::saveAction(UBGraphicsItemAction* action)
     case eLinkToAudio:{
         actionLabel= tr("Remove link to audio");
         UBGraphicsItemPlayAudioAction* audioAction = dynamic_cast<UBGraphicsItemPlayAudioAction*>(action);
-        connect(mDeleteButton,SIGNAL(clicked()),audioAction,SLOT(onSourceHide()));
+        connect(mDeleteButton, &DelegateButton::clicked, audioAction, [audioAction]() { audioAction->onSourceHide(); });
         break;
     }
     case eLinkToPage:
@@ -740,7 +794,7 @@ void UBGraphicsItemDelegate::saveAction(UBGraphicsItemAction* action)
         break;
     }
 
-    mRemoveAnAction = mMenu->addAction(actionLabel,this,SLOT(onRemoveActionClicked()));
+    mRemoveAnAction = mMenu->addAction(actionLabel, this, [this]() { onRemoveActionClicked(); });
     mMenu->addAction(mRemoveAnAction);
 }
 
@@ -852,14 +906,16 @@ void UBGraphicsItemDelegate::updateButtons(bool showUpdated)
     QTransform tr;
     tr.scale(mAntiScaleRatio, mAntiScaleRatio);
 
+    int frameButtonSize = DelegateButton::kFrameButtonSize + DelegateButton::kButtonPadding * 2;
+
     mDeleteButton->setParentItem(mFrame);
     mDeleteButton->setTransform(tr);
 
-    qreal topX = mFrame->rect().left() - mDeleteButton->renderer()->viewBox().width() * mAntiScaleRatio / 2;
-    qreal topY = mFrame->rect().top() - mDeleteButton->renderer()->viewBox().height() * mAntiScaleRatio / 2;
+    qreal topX = mFrame->rect().left() - frameButtonSize * mAntiScaleRatio / 2;
+    qreal topY = mFrame->rect().top() - frameButtonSize * mAntiScaleRatio / 2;
 
-    qreal bottomX = mFrame->rect().left() - mDeleteButton->renderer()->viewBox().width() * mAntiScaleRatio / 2;
-    qreal bottomY = mFrame->rect().bottom() - mDeleteButton->renderer()->viewBox().height() * mAntiScaleRatio / 2;
+    qreal bottomX = mFrame->rect().left() - frameButtonSize * mAntiScaleRatio / 2;
+    qreal bottomY = mFrame->rect().bottom() - frameButtonSize * mAntiScaleRatio / 2;
 
     mDeleteButton->setPos(topX, topY);
 
@@ -876,16 +932,17 @@ void UBGraphicsItemDelegate::updateButtons(bool showUpdated)
         mDeleteButton->hide();
 
     int i = 1, j = 0, k = 0;
+    qreal buttonSpacing = 1.6 * mFrameWidth * mAntiScaleRatio;
     while ((i + j + k) < mButtons.size())  {
         DelegateButton* button = mButtons[i + j];
 
         if (button->getSection() == Qt::TopLeftSection) {
             button->setParentItem(mFrame);
-            button->setPos(topX + (i++ * 1.6 * mFrameWidth * mAntiScaleRatio), topY);
+            button->setPos(topX + (i++ * buttonSpacing), topY);
             button->setTransform(tr);
         } else if (button->getSection() == Qt::BottomLeftSection) {
             button->setParentItem(mFrame);
-            button->setPos(bottomX + (++j * 1.6 * mFrameWidth * mAntiScaleRatio), bottomY);
+            button->setPos(bottomX + (++j * buttonSpacing), bottomY);
             button->setTransform(tr);
         } else if (button->getSection() == Qt::TitleBarArea || button->getSection() == Qt::NoSection){
             ++k;
@@ -932,8 +989,8 @@ UBGraphicsToolBarItem::UBGraphicsToolBarItem(QGraphicsItem * parent) :
     mShifting(true),
     mVisible(false),
     mMinWidth(200),
-    mInitialHeight(26),
-    mElementsPadding(0)
+    mInitialHeight(kToolbarHeight),
+    mElementsPadding(2)
 {
     QRectF rect = this->rect();
     rect.setHeight(mInitialHeight);
@@ -941,6 +998,7 @@ UBGraphicsToolBarItem::UBGraphicsToolBarItem(QGraphicsItem * parent) :
     this->setRect(rect);
 
     setPen(Qt::NoPen);
+    setFlag(QGraphicsItem::ItemClipsChildrenToShape, true);
     hide();
 
     update();
@@ -949,17 +1007,22 @@ UBGraphicsToolBarItem::UBGraphicsToolBarItem(QGraphicsItem * parent) :
 
 void UBGraphicsToolBarItem::positionHandles()
 {
-    int itemXOffset = 0;
+    int itemXOffset = kToolbarPaddingH;
+    int buttonY = (kToolbarHeight - DelegateButton::kButtonSize - DelegateButton::kButtonPadding * 2) / 2;
+
     for (QGraphicsItem* item : mItemsOnToolBar)
     {
-        if(item == DelegateButton::Spacer){
-            itemXOffset += 10;
-        }else{
-            item->setPos(itemXOffset, 0);
+        if (item == DelegateButton::Spacer) {
+            // Spacer renders as a separator line — just advance by margin + line + margin
+            itemXOffset += kSeparatorMargin;
+            // The separator is drawn in paint(), we just track position
+            itemXOffset += kSeparatorMargin;
+        } else {
+            item->setPos(itemXOffset, buttonY);
 
             itemXOffset += item->boundingRect().width();
 
-            if(itemXOffset < rect().width())
+            if (itemXOffset < rect().width())
                 item->show();
             else
                 item->hide();
@@ -979,12 +1042,48 @@ void UBGraphicsToolBarItem::paint(QPainter *painter, const QStyleOptionGraphicsI
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    QPainterPath path;
-    path.addRoundedRect(rect(), 10, 10);
+    painter->setRenderHint(QPainter::Antialiasing, true);
 
-    setBrush(QBrush(UBSettings::paletteColor));
+    // White background with subtle shadow
+    QRectF r = rect();
 
-    painter->fillPath(path, brush());
+    // Drop shadow (slight offset, soft)
+    QPainterPath shadowPath;
+    shadowPath.addRoundedRect(r.adjusted(0, 1, 0, 1), 8, 8);
+    painter->fillPath(shadowPath, QColor(0, 0, 0, 25));
+
+    // Main background — white, slightly translucent
+    QPainterPath bgPath;
+    bgPath.addRoundedRect(r, 8, 8);
+    painter->fillPath(bgPath, QColor(255, 255, 255, 240));
+
+    // Subtle border
+    painter->setPen(QPen(QColor(0, 0, 0, 30), 0.5));
+    painter->drawRoundedRect(r, 8, 8);
+
+    // Draw separator lines at Spacer positions — clip to toolbar rect
+    painter->save();
+    painter->setClipRect(r);
+    int itemXOffset = kToolbarPaddingH;
+    int buttonY = (kToolbarHeight - DelegateButton::kButtonSize - DelegateButton::kButtonPadding * 2) / 2;
+
+    for (QGraphicsItem* item : mItemsOnToolBar)
+    {
+        if (item == DelegateButton::Spacer) {
+            itemXOffset += kSeparatorMargin;
+            if (itemXOffset < r.width()) {
+                qreal lineX = itemXOffset;
+                qreal lineTop = buttonY + 2;
+                qreal lineBottom = kToolbarHeight - buttonY - 2;
+                painter->setPen(QPen(QColor(0, 0, 0, 40), kSeparatorWidth));
+                painter->drawLine(QPointF(lineX, lineTop), QPointF(lineX, lineBottom));
+            }
+            itemXOffset += kSeparatorMargin;
+        } else {
+            itemXOffset += item->boundingRect().width() + mElementsPadding;
+        }
+    }
+    painter->restore();
 }
 
 MediaTimer::MediaTimer(QGraphicsItem * parent): QGraphicsRectItem(parent)
@@ -1419,7 +1518,7 @@ void DelegateMediaControl::paint(QPainter *painter,
     int radius = frameWidth-clearance;
     QRectF r(position - radius, clearance+mSeecAreaBorderHeight, radius * 2, radius * 2);
 
-    painter->setBrush(UBSettings::documentViewLightColor);
+    painter->setBrush(UBTheme::documentViewLight());
     painter->drawEllipse(r);
 }
 

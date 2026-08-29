@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -64,8 +65,8 @@ UBVideoPlayer::UBVideoPlayer(QWidget* pParent)
     mSeekSlider->setRange(0, 0);
     transportLayout->addWidget(mSeekSlider);
 
-    connect(mPlayPause, SIGNAL(clicked()),
-            this, SLOT(tooglePlayPause()));
+    connect(mPlayPause, &QPushButton::clicked,
+            this, [this]() { tooglePlayPause(); });
 
     connect(mMediaPlayer, &QMediaPlayer::playbackStateChanged,
             this, &UBVideoPlayer::mediaStateChanged);

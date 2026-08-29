@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -193,6 +194,8 @@ void UBGraphicsPolygonItem::copyItemParameters(UBItem *copy) const
 
 void UBGraphicsPolygonItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
     if(mHasAlpha && scene() && scene()->isLightBackground())
     {
         painter->setCompositionMode(QPainter::CompositionMode_Darken);

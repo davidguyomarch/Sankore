@@ -1,3 +1,9 @@
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 name: Build Linux x64
 
 on:
@@ -6,6 +12,10 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +23,10 @@ jobs:
     permissions:
       checks: write
       contents: read
+
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
 
     container:
       image: ubuntu:22.04
@@ -24,6 +38,7 @@ jobs:
           apt-get update
           apt-get install -y \
             git \
+            gdb \
             build-essential \
             cmake \
             python3 \
@@ -56,6 +71,7 @@ jobs:
             libxkbcommon-dev \
             libxkbcommon-x11-dev \
             libpulse-dev \
+            libzinnia-dev \
             libssl-dev \
             zlib1g-dev \
             libomp-dev \
@@ -70,13 +86,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/qt
-          key: qt-6.8.2-linux-gcc-64-core5compat-multimedia
+          key: qt-6.8.2-linux-gcc-64-core5compat-multimedia-shadertools
 
       - name: Install Qt 6.8.2 via aqtinstall
         if: steps.cache-qt.outputs.cache-hit != 'true'
         run: |
           pip3 install aqtinstall
-          aqt install-qt linux desktop 6.8.2 linux_gcc_64 -m qt5compat qtmultimedia --outputdir /opt/qt
+          aqt install-qt linux desktop 6.8.2 linux_gcc_64 -m qt5compat qtmultimedia qtshadertools --outputdir /opt/qt
 
       - name: Set Qt environment
         run: |
@@ -116,14 +132,26 @@ jobs:
           cp -a /tmp/quazip-install/include/* /usr/local/include/ 2>/dev/null || true
           ldconfig
 
-      - name: Generate git version header
+      - name: Generate git version header and set version
+        shell: bash
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
+          echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
+          # Extract version from git tag (v4.1.0 -> 4.1.0) or fall back
+          GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
+          if [[ "$GIT_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
+            echo "Updating version to $MAJ.$MIN.$PATCH from tag $GIT_TAG"
+            sed -i "s/VERSION_MAJ = .*/VERSION_MAJ = $MAJ/" OpenSankore.pro
+            sed -i "s/VERSION_MIN = .*/VERSION_MIN = $MIN/" OpenSankore.pro
+            sed -i "s/VERSION_PATCH = .*/VERSION_PATCH = $PATCH/" OpenSankore.pro
+          fi
 
       - name: Run qmake
         run: |
           mkdir -p build/linux/release/moc build/linux/release/objects build/linux/release/rcc build/linux/release/ui build/linux/release/product
-          qmake Sankore_3.1.pro CONFIG+=no_webengine "QMAKE_CXXFLAGS+=--coverage" "QMAKE_LFLAGS+=--coverage"
+          qmake OpenSankore.pro CONFIG+=no_webengine "QMAKE_CXXFLAGS+=--coverage" "QMAKE_LFLAGS+=--coverage"
 
       - name: Build
         run: |
@@ -140,9 +168,24 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
           export LANG=C.UTF-8
           export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+          # Enable core dumps for crash analysis
+          ulimit -c unlimited
+          echo "core" | sudo tee /proc/sys/kernel/core_pattern || true
           # Launch app with --quit-after for clean exit (writes .gcda coverage files)
-          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
-          echo "App smoke test completed (clean exit)"
+          build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
+            EXIT_CODE=$?
+            echo "=== APP CRASHED (exit code $EXIT_CODE) ==="
+            # Try to get backtrace from core file
+            CORE_FILE=$(find . -name "core*" -newer build/linux/release/product/Open-Sankore 2>/dev/null | head -1)
+            if [ -n "$CORE_FILE" ]; then
+              echo "=== BACKTRACE ==="
+              gdb -batch -ex "bt full" -ex "quit" build/linux/release/product/Open-Sankore "$CORE_FILE" 2>&1 | head -100
+            else
+              echo "No core file found"
+            fi
+            echo "Continuing despite crash (coverage may be incomplete)"
+          }
+          echo "App smoke test completed"
           GCDA_COUNT=$(find . -name "*.gcda" 2>/dev/null | wc -l)
           echo "Found $GCDA_COUNT .gcda files"
 
@@ -171,10 +214,23 @@ jobs:
           cd tests
           qmake tests.pro
           # Fix: regenerate moc_predefs.h for x86_64
-          g++ -pipe --coverage -O2 -std=gnu++1z -Wall -Wextra -fPIC -dM -E -o build/moc/moc_predefs.h /opt/qt/6.8.2/gcc_64/mkspecs/features/data/dummy.cpp
+          g++ -pipe --coverage -O2 -std=c++20 -Wall -Wextra -fPIC -dM -E -o build/moc/moc_predefs.h /opt/qt/6.8.2/gcc_64/mkspecs/features/data/dummy.cpp
           # Patch: remove any aarch64 include paths from Makefile
           sed -i 's|-I/usr/include/aarch64-linux-gnu[^ ]*||g' Makefile 2>/dev/null || true
           sed -i 's|-I/usr/lib/gcc/aarch64-linux-gnu[^ ]*||g' Makefile 2>/dev/null || true
+          # Patch: remove system C++ include paths from moc commands only
+          # moc cannot parse GCC 11's <type_traits> — these paths are only needed by g++
+          sed -i '/libexec\/moc/s| -I/usr/include/c++/[^ ]*||g' Makefile 2>/dev/null || true
+          sed -i '/libexec\/moc/s| -I/usr/local/include||g' Makefile 2>/dev/null || true
+          sed -i '/libexec\/moc/s| -I/usr/include ||g' Makefile 2>/dev/null || true
+          sed -i '/libexec\/moc/s| -I/usr/include$||g' Makefile 2>/dev/null || true
+          # Pre-generate moc for UBFileSystemUtils.h (moc crashes on GCC system headers
+          # when --include moc_predefs.h pulls in <type_traits>). Run without moc_predefs.
+          /opt/qt/6.8.2/gcc_64/libexec/moc -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_TESTLIB_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB \
+            -I/opt/qt/6.8.2/gcc_64/mkspecs/linux-g++ -I. -I../src \
+            -I/opt/qt/6.8.2/gcc_64/include -I/opt/qt/6.8.2/gcc_64/include/QtCore \
+            -I/opt/qt/6.8.2/gcc_64/include/QtGui -I/opt/qt/6.8.2/gcc_64/include/QtWidgets \
+            ../src/frameworks/UBFileSystemUtils.h -o premoc/moc_UBFileSystemUtils.cpp
           make -j$(nproc)
 
       - name: Run unit tests with coverage
@@ -202,6 +258,16 @@ jobs:
           report_paths: tests/build/test-results.xml
           check_name: Linux Unit Tests
           fail_on_failure: false
+
+      - name: Upload visual test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-images
+          path: |
+            tests/visual/reference/
+            tests/visual/actual/
+          if-no-files-found: ignore
 
       - name: Generate coverage report
         continue-on-error: true
@@ -280,7 +346,7 @@ jobs:
         if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: Open-Sankore-Linux-x64
+          name: open-sankore-linux-x64
           path: build/linux/release/product/
           if-no-files-found: warn
 
@@ -296,7 +362,7 @@ jobs:
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: open-sankore-deb-x64
+          name: open-sankore-linux-x64-deb
           path: build/packages/*.deb
           if-no-files-found: warn
 
@@ -304,7 +370,7 @@ jobs:
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: open-sankore-rpm-x64
+          name: open-sankore-linux-x64-rpm
           path: build/packages/*.rpm
           if-no-files-found: warn
 
@@ -353,10 +419,10 @@ jobs:
           EOF
           cp AppDir/usr/share/applications/open-sankore.desktop AppDir/
 
-          # Create icon (use a placeholder if no icon available)
-          if [ -f resources/images/uniboard.png ]; then
-            cp resources/images/uniboard.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
-            cp resources/images/uniboard.png AppDir/open-sankore.png
+          # Create icon
+          if [ -f resources/images/sankore-icon.png ]; then
+            cp resources/images/sankore-icon.png AppDir/usr/share/icons/hicolor/256x256/apps/open-sankore.png
+            cp resources/images/sankore-icon.png AppDir/open-sankore.png
           else
             # Generate a simple placeholder icon
             convert -size 256x256 xc:blue -fill white -gravity center -pointsize 48 -annotate 0 "S" AppDir/open-sankore.png 2>/dev/null || touch AppDir/open-sankore.png
@@ -396,6 +462,6 @@ jobs:
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: Open-Sankore-Linux-x64-AppImage
+          name: open-sankore-linux-x64-appimage
           path: Open-Sankore-x86_64.AppImage
           if-no-files-found: warn

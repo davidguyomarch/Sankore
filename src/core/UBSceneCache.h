@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -24,7 +25,8 @@
 #ifndef UBSCENECACHE_H
 #define UBSCENECACHE_H
 
-#include <QtCore>
+#include <QHash>
+#include <QQueue>
 
 #include "domain/UBGraphicsScene.h"
 

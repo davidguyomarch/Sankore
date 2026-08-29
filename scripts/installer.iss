@@ -1,10 +1,16 @@
+; Open-Sankoré Community Edition
+;
+; Copyright (C) 2026 David Guyomarch
+;
+; SPDX-License-Identifier: GPL-3.0-only
+
 ; Open-Sankoré Inno Setup Script (Qt6)
 ; Builds the Windows installer from the windeployqt output
 
 #define MyAppName "Open-Sankoré"
-#define MyAppVersion "2.5.1"
+#define MyAppVersion "4.0.2"
 #define MyAppPublisher "Open-Sankoré Project"
-#define MyAppURL "https://github.com/davidguyomarch/Sankore-3.1"
+#define MyAppURL "https://github.com/davidguyomarch/Sankore"
 #define MyAppExeName "Open-Sankore.exe"
 
 [Setup]
@@ -19,7 +25,7 @@ AppUpdatesURL={#MyAppURL}/releases
 DefaultDirName={autopf}\Open-Sankore
 DefaultGroupName={#MyAppName}
 OutputDir=..\build\installer
-OutputBaseFilename=Open-Sankore-{#MyAppVersion}-setup
+OutputBaseFilename=Open-Sankore-{#MyAppVersion}-installer
 SetupIconFile=..\resources\win\uniboard.ico
 Compression=lzma2
 SolidCompression=yes

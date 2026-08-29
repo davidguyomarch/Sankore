@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -99,7 +100,8 @@ void UBScreenMirror::grabPixmap()
         mLastPixmap = QGuiApplication::screens().at(mScreenIndex)->grabWindow(0, mRect.x(), mRect.y(), mRect.width(), mRect.height());
     }
 
-    mLastPixmap = mLastPixmap.scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (!mLastPixmap.isNull())
+        mLastPixmap = mLastPixmap.scaled(width(), height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 

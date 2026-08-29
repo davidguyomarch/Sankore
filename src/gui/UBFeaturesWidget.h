@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -126,8 +127,8 @@ public:
     int scrollbarHorisontalPadding() const { return 10;}
     int scrollbarVerticalIndent() const { return 0;}
 
-    QPixmap iconToLeft() const {return QPixmap(":images/library_open.png");}
-    QPixmap iconToRight() const {return QPixmap(":images/library_close.png");}
+    QPixmap iconToLeft() const {return QPixmap(":images/svg/library_open.svg");}
+    QPixmap iconToRight() const {return QPixmap(":images/svg/library_open.svg");}
 
 signals:
     void sendFileNameList(const QStringList lst);

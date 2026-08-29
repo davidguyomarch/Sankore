@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -22,6 +23,7 @@
 
 
 #include "UBMetadataDcSubsetAdaptor.h"
+#include "UBMetadataLoader.h"
 
 #include <QWidget>
 #include <QApplication>
@@ -31,6 +33,7 @@
 #include <QGuiApplication>
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 
@@ -106,15 +109,15 @@ void UBMetadataDcSubsetAdaptor::persist(UBDocumentProxy* proxy)
     xmlWriter.writeStartElement("RDF");
 
     xmlWriter.writeStartElement("Description");
-    xmlWriter.writeAttribute("about", proxy->metaData(UBSettings::documentIdentifer).toString());
+    xmlWriter.writeAttribute("about", proxy->metaData(UBSettingsData::documentIdentifer).toString());
 
-    xmlWriter.writeTextElement(nsDc, "title", proxy->metaData(UBSettings::documentName).toString());
-    xmlWriter.writeTextElement(nsDc, "type", proxy->metaData(UBSettings::documentGroupName).toString());
-    xmlWriter.writeTextElement(nsDc, "date", proxy->metaData(UBSettings::documentDate).toString());
+    xmlWriter.writeTextElement(nsDc, "title", proxy->metaData(UBSettingsData::documentName).toString());
+    xmlWriter.writeTextElement(nsDc, "type", proxy->metaData(UBSettingsData::documentGroupName).toString());
+    xmlWriter.writeTextElement(nsDc, "date", proxy->metaData(UBSettingsData::documentDate).toString());
     xmlWriter.writeTextElement(nsDc, "format", "image/svg+xml");
 
     // introduced in UB 4.2
-    xmlWriter.writeTextElement(nsDc, "identifier", proxy->metaData(UBSettings::documentIdentifer).toString());
+    xmlWriter.writeTextElement(nsDc, "identifier", proxy->metaData(UBSettingsData::documentIdentifer).toString());
     xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, "version", UBSettings::currentFileVersion);
     QString width = QString::number(proxy->defaultDocumentSize().width());
     QString height = QString::number(proxy->defaultDocumentSize().height());
@@ -123,22 +126,22 @@ void UBMetadataDcSubsetAdaptor::persist(UBDocumentProxy* proxy)
     // introduced in UB 4.4
     xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, "updated-at", UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTimeUtc()));
     // introduced in OpenSankore 1.40.00
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionTitle,proxy->metaData(UBSettings::sessionTitle).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionAuthors,proxy->metaData(UBSettings::sessionAuthors).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionObjectives,proxy->metaData(UBSettings::sessionObjectives).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionKeywords,proxy->metaData(UBSettings::sessionKeywords).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionGradeLevel,proxy->metaData(UBSettings::sessionGradeLevel).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionSubjects,proxy->metaData(UBSettings::sessionSubjects).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionType,proxy->metaData(UBSettings::sessionType).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::sessionLicence,proxy->metaData(UBSettings::sessionLicence).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionTitle,proxy->metaData(UBSettingsData::sessionTitle).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionAuthors,proxy->metaData(UBSettingsData::sessionAuthors).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionObjectives,proxy->metaData(UBSettingsData::sessionObjectives).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionKeywords,proxy->metaData(UBSettingsData::sessionKeywords).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionGradeLevel,proxy->metaData(UBSettingsData::sessionGradeLevel).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionSubjects,proxy->metaData(UBSettingsData::sessionSubjects).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionType,proxy->metaData(UBSettingsData::sessionType).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::sessionLicence,proxy->metaData(UBSettingsData::sessionLicence).toString());
     // Issue 1684 - ALTI/AOU - 20131210
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::documentDefaultBackgroundImage, proxy->metaData(UBSettings::documentDefaultBackgroundImage).toString());
-    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettings::documentDefaultBackgroundImageDisposition, proxy->metaData(UBSettings::documentDefaultBackgroundImageDisposition).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::documentDefaultBackgroundImage, proxy->metaData(UBSettingsData::documentDefaultBackgroundImage).toString());
+    xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri,UBSettingsData::documentDefaultBackgroundImageDisposition, proxy->metaData(UBSettingsData::documentDefaultBackgroundImageDisposition).toString());
     // Fin Issue 1684 - ALTI/AOU - 20131210
 
     //Issue N/C - NNE - 20140526
-    if(proxy->metaData(UBSettings::documentTagVersion).toString().isEmpty() == false)
-        xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, UBSettings::documentTagVersion, proxy->metaData(UBSettings::documentTagVersion).toString());
+    if(proxy->metaData(UBSettingsData::documentTagVersion).toString().isEmpty() == false)
+        xmlWriter.writeTextElement(UBSettings::uniboardDocumentNamespaceUri, UBSettingsData::documentTagVersion, proxy->metaData(UBSettingsData::documentTagVersion).toString());
     //Issue N/C - NNE - 20140526 : END
 
     xmlWriter.writeEndElement(); //dc:Description
@@ -153,190 +156,6 @@ void UBMetadataDcSubsetAdaptor::persist(UBDocumentProxy* proxy)
 
 QMap<QString, QVariant> UBMetadataDcSubsetAdaptor::load(QString pPath, UBSettings* settings)
 {
-    if (!settings)
-        settings = UBSettings::settings();
-
-    QMap<QString, QVariant> metadata;
-
-    QString fileName = pPath + "/" + metadataFilename;
-
-    qDebug() << "loading metadata from file : " << fileName;
-
-
-    QFile file(fileName);
-
-    bool sizeFound = false;
-    bool updatedAtFound = false;
-    QString date;
-
-    if (file.exists())
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
-            qWarning() << "Cannot open file " << fileName << " for reading ...";
-            return metadata;
-        }
-
-        QString docVersion = "4.1"; // untagged doc version 4.1
-        metadata.insert(UBSettings::documentVersion, docVersion);
-
-        QXmlStreamReader xml(&file);
-
-        while (!xml.atEnd())
-        {
-            xml.readNext();
-
-            if (xml.isStartElement())
-            {
-
-                if (xml.name() == QLatin1String("title"))
-                {
-                    metadata.insert(UBSettings::documentName, xml.readElementText());
-                }
-                else if (xml.name() == QLatin1String("type"))
-                {
-                    metadata.insert(UBSettings::documentGroupName, xml.readElementText());
-                }
-                else if (xml.name() == QLatin1String("date"))
-                {
-                    date = xml.readElementText();
-                }
-                else if (xml.name() == QLatin1String("identifier")) // introduced in UB 4.2
-                {
-                        metadata.insert(UBSettings::documentIdentifer, xml.readElementText());
-                }
-                else if (xml.name() == QLatin1String("version") // introduced in UB 4.2
-                        && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                        docVersion = xml.readElementText();
-                        metadata.insert(UBSettings::documentVersion, docVersion);
-                }
-                else if (xml.name() == QLatin1String("size") // introduced in UB 4.2
-                        && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    QString size = xml.readElementText();
-                    QStringList sizeParts = size.split("x");
-                    bool ok = false;
-                    int width, height;
-                    if (sizeParts.count() >= 2)
-                    {
-                        bool widthOK, heightOK;
-                        width = sizeParts.at(0).toInt(&widthOK);
-                        height = sizeParts.at(1).toInt(&heightOK);
-                        ok = widthOK && heightOK;
-
-                        QSize docSize(width, height);
-
-                        if (width == 1024 && height == 768) // move from 1024/768 to 1280/960
-                        {
-                            docSize = settings->pageSize->get().toSize();
-                        }
-
-                        metadata.insert(UBSettings::documentSize, QVariant(docSize));
-                    }
-                    if (!ok)
-                    {
-                        qWarning() << "Invalid document size:" << size;
-                    }
-
-                    sizeFound = true;
-
-                }
-                else if (xml.name() == QLatin1String("updated-at") // introduced in UB 4.4
-                        && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::documentUpdatedAt, xml.readElementText());
-                    updatedAtFound = true;
-                }
-                else if (xml.name() == UBSettings::sessionTitle // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionTitle, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionAuthors // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionAuthors, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionObjectives // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionObjectives, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionKeywords // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionKeywords, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionGradeLevel // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionGradeLevel, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionSubjects // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionSubjects, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionType // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionType, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::sessionLicence // introduced in OpenSankore 1.40.00
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::sessionLicence, xml.readElementText());
-                }
-                // Issue 1684 - ALTI/AOU - 20131210
-                else if (xml.name() == UBSettings::documentDefaultBackgroundImage
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::documentDefaultBackgroundImage, xml.readElementText());
-                }
-                else if (xml.name() == UBSettings::documentDefaultBackgroundImageDisposition
-                         && xml.namespaceUri() == UBSettings::uniboardDocumentNamespaceUri)
-                {
-                    metadata.insert(UBSettings::documentDefaultBackgroundImageDisposition, xml.readElementText());
-                }
-                // Fin Issue 1684 - ALTI/AOU - 20131210
-            }
-
-            if (xml.hasError())
-            {
-                qWarning() << "error parsing sankore metadata.rdf file " << xml.errorString();
-            }
-        }
-
-        file.close();
-    }
-
-    if (!sizeFound)
-    {
-        QScreen* primaryScreen = QGuiApplication::primaryScreen();
-
-        QSize docSize = primaryScreen->geometry().size();
-        docSize.setHeight(docSize.height() - 70); // 70 = toolbar height
-
-        qWarning() << "Document size not found, using default view size" << docSize;
-
-        metadata.insert(UBSettings::documentSize, QVariant(docSize));
-    }
-
-    // this is necessary to update the old files date
-    QString dateString = metadata.value(UBSettings::documentDate).toString();
-    if(dateString.length() < 10){
-        metadata.remove(UBSettings::documentDate);
-        metadata.insert(UBSettings::documentDate,dateString+"T00:00:00Z");
-    }
-
-    if (!updatedAtFound) {
-        metadata.insert(UBSettings::documentUpdatedAt, dateString);
-    }
-
-    metadata.insert(UBSettings::documentDate, QVariant(date));
-
-
-    return metadata;
+    return UBMetadataLoader::load(pPath, settings);
 }
 

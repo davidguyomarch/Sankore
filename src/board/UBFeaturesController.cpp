@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -26,12 +27,15 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QTimer>
+#include <QSortFilterProxyModel>
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardView.h"
 #include "UBFeaturesController.h"
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "tools/UBToolsManager.h"
 #include "frameworks/UBFileSystemUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -425,17 +429,17 @@ UBFeaturesController::UBFeaturesController(QWidget *pParentWidget) :
     featuresPathModel->setPath(rootData.categoryFeature().getFullVirtualPath());
     featuresPathModel->setSourceModel(featuresModel);
 
-    connect(featuresModel, SIGNAL(dataRestructured()), featuresProxyModel, SLOT(invalidate()));
-    connect(&mCThread, SIGNAL(sendFeature(UBFeature)), featuresModel, SLOT(addItem(UBFeature)));
-    connect(&mCThread, SIGNAL(featureSent()), this, SIGNAL(featureAddedFromThread()));
-    connect(&mCThread, SIGNAL(scanStarted()), this, SIGNAL(scanStarted()));
-    connect(&mCThread, SIGNAL(scanFinished()), this, SIGNAL(scanFinished()));
-    connect(&mCThread, SIGNAL(maxFilesCountEvaluated(int)), this, SIGNAL(maxFilesCountEvaluated(int)));
-    connect(&mCThread, SIGNAL(scanCategory(QString)), this, SIGNAL(scanCategory(QString)));
-    connect(&mCThread, SIGNAL(scanPath(QString)), this, SIGNAL(scanPath(QString)));
-    connect(UBApplication::boardController, SIGNAL(npapiWidgetCreated(QString)), this, SLOT(createNpApiFeature(QString)));
+    connect(featuresModel, &UBFeaturesModel::dataRestructured, featuresProxyModel, &QSortFilterProxyModel::invalidate);
+    connect(&mCThread, &UBFeaturesComputingThread::sendFeature, featuresModel, &UBFeaturesModel::addItem);
+    connect(&mCThread, &UBFeaturesComputingThread::featureSent, this, &UBFeaturesController::featureAddedFromThread);
+    connect(&mCThread, &UBFeaturesComputingThread::scanStarted, this, &UBFeaturesController::scanStarted);
+    connect(&mCThread, &UBFeaturesComputingThread::scanFinished, this, &UBFeaturesController::scanFinished);
+    connect(&mCThread, &UBFeaturesComputingThread::maxFilesCountEvaluated, this, &UBFeaturesController::maxFilesCountEvaluated);
+    connect(&mCThread, &UBFeaturesComputingThread::scanCategory, this, &UBFeaturesController::scanCategory);
+    connect(&mCThread, &UBFeaturesComputingThread::scanPath, this, &UBFeaturesController::scanPath);
+    connect(UBApplication::boardController, &UBBoardController::npapiWidgetCreated, this, &UBFeaturesController::createNpApiFeature);
 
-    QTimer::singleShot(0, this, SLOT(scanFS()));
+    QTimer::singleShot(0, this, &UBFeaturesController::scanFS);
 
     //issue 1474 - NNE - 201310
     mTrashRegistery.synchronizeWith(UBSettings::userTrashDirPath());
@@ -1215,7 +1219,7 @@ void UBFeaturesController::addItemAsDefaultBackground(UBFeature &item, bool isFr
 
     // Issue 1684 - ALTI/AOU - 20131210
     // Si metaData "background" deja existante, avant de l'écraser, supprimer le fichier dans /doc/images/
-    QString metaDataBackgroundImage = UBApplication::boardController->selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
+    QString metaDataBackgroundImage = UBApplication::boardController->selectedDocument()->metaData(UBSettingsData::documentDefaultBackgroundImage).toString();
     if ( ! metaDataBackgroundImage.isEmpty() )
     {
         QFile fichier(UBApplication::boardController->selectedDocument()->persistencePath() + "/" + UBPersistenceManager::imageDirectory + "/" + metaDataBackgroundImage);
@@ -1226,10 +1230,10 @@ void UBFeaturesController::addItemAsDefaultBackground(UBFeature &item, bool isFr
     }
 
     if (QFileInfo(item.getFullPath().toString()).suffix() == "svg")
-        UBApplication::boardController->selectedDocument()->setMetaData(UBSettings::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".svg");
+        UBApplication::boardController->selectedDocument()->setMetaData(UBSettingsData::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".svg");
     else
-        UBApplication::boardController->selectedDocument()->setMetaData(UBSettings::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".png");
-    UBApplication::boardController->selectedDocument()->setMetaData(UBSettings::documentDefaultBackgroundImageDisposition, item.backgroundDisposition());
+        UBApplication::boardController->selectedDocument()->setMetaData(UBSettingsData::documentDefaultBackgroundImage, QUuid::createUuid().toString() + ".png");
+    UBApplication::boardController->selectedDocument()->setMetaData(UBSettingsData::documentDefaultBackgroundImageDisposition, item.backgroundDisposition());
     // Fin Issue 1684 - ALTI/AOU - 20131210
 
     int currentPageIndex = UBApplication::boardController->activeSceneIndex();

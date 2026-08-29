@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -23,6 +24,7 @@
 
 #include "UBGraphicsDelegateFrame.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QMenu>
 
 #include <QWidget>
@@ -73,7 +75,7 @@ UBGraphicsDelegateFrame::UBGraphicsDelegateFrame(UBGraphicsItemDelegate* pDelega
     setAcceptedMouseButtons(Qt::LeftButton);
     setRect(pRect.adjusted(mFrameWidth, mFrameWidth, mFrameWidth * -1, mFrameWidth * -1));
 
-    setBrush(QBrush(UBSettings::paletteColor));
+    setBrush(Qt::NoBrush);
     setPen(Qt::NoPen);
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Control));
 
@@ -134,17 +136,25 @@ void UBGraphicsDelegateFrame::paint(QPainter *painter, const QStyleOptionGraphic
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    QPainterPath path;
-    path.addRoundedRect(rect(), mFrameWidth / 2, mFrameWidth / 2);
+    if (rect().width() <= 1 || rect().height() <= 1)
+        return;
 
-    if (rect().width() > 1 && rect().height() > 1)
-    {
-        QPainterPath extruded;
-        extruded.addRect(rect().adjusted(mFrameWidth, mFrameWidth, (mFrameWidth * -1), (mFrameWidth * -1)));
-        path = path.subtracted(extruded);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    // Draw a thin, subtle border instead of a thick filled frame
+    QRectF innerRect = rect().adjusted(mFrameWidth, mFrameWidth, -mFrameWidth, -mFrameWidth);
+
+    QColor borderColor(0, 0, 0, 60); // subtle dark border
+    QVariant vLocked = delegated()->data(UBGraphicsItemData::ItemLocked);
+    if (vLocked.isValid() && vLocked.toBool()) {
+        borderColor.setAlpha(25);
     }
 
-    painter->fillPath(path, brush());
+    QPen borderPen(borderColor, 1.5);
+    borderPen.setStyle(Qt::SolidLine);
+    painter->setPen(borderPen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRoundedRect(innerRect, 3, 3);
 }
 
 
@@ -749,23 +759,59 @@ void UBGraphicsDelegateFrame::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 }
 
 
+void UBGraphicsDelegateFrame::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+    QWidget *controlViewport = UBApplication::boardController->controlView()->viewport();
+    if (!controlViewport)
+        return;
+
+    FrameTool tool = toolFromPos(event->pos());
+    switch (tool)
+    {
+    case Move:
+        controlViewport->setCursor(Qt::SizeAllCursor);
+        break;
+    case Rotate:
+        controlViewport->setCursor(UBResources::resources()->rotateCursor);
+        break;
+    case ResizeLeft:
+    case ResizeRight:
+        controlViewport->setCursor(Qt::SizeHorCursor);
+        break;
+    case ResizeTop:
+    case ResizeBottom:
+        controlViewport->setCursor(Qt::SizeVerCursor);
+        break;
+    case ResizeBottomRight:
+        controlViewport->setCursor(Qt::SizeFDiagCursor);
+        break;
+    default:
+        controlViewport->setCursor(Qt::ArrowCursor);
+        break;
+    }
+}
+
+
 void UBGraphicsDelegateFrame::updateResizeCursors()
 {
     QPixmap pix(":/images/cursors/resize.png");
     QTransform tr;
 
     tr.rotate(-mAngle);
-    QCursor resizeCursor  = QCursor(pix.transformed(tr, Qt::SmoothTransformation), pix.width() / 2,  pix.height() / 2);
+    QPixmap transformed = pix.transformed(tr, Qt::SmoothTransformation);
+    QCursor resizeCursor  = QCursor(transformed, transformed.width() / 2,  transformed.height() / 2);
     mLeftResizeGrip->setCursor(resizeCursor);
     mRightResizeGrip->setCursor(resizeCursor);
 
     tr.rotate(-90);
-    resizeCursor  = QCursor(pix.transformed(tr, Qt::SmoothTransformation), pix.width() / 2,  pix.height() / 2);
+    transformed = pix.transformed(tr, Qt::SmoothTransformation);
+    resizeCursor  = QCursor(transformed, transformed.width() / 2,  transformed.height() / 2);
     mBottomResizeGrip->setCursor(resizeCursor);
     mTopResizeGrip->setCursor(resizeCursor);
 
     tr.rotate(-45);
-    resizeCursor  = QCursor(pix.transformed(tr, Qt::SmoothTransformation), pix.width() / 2,  pix.height() / 2);
+    transformed = pix.transformed(tr, Qt::SmoothTransformation);
+    resizeCursor  = QCursor(transformed, transformed.width() / 2,  transformed.height() / 2);
     mBottomRightResizeGrip->setCursor(resizeCursor);
 }
 
@@ -773,10 +819,8 @@ void UBGraphicsDelegateFrame::updateResizeCursors()
 void UBGraphicsDelegateFrame::setVisible(bool visible)
 {
     mVisible = visible;
-    if (mVisible)
-       setBrush(QBrush(UBSettings::paletteColor));
-    else
-       setBrush(Qt::NoBrush);
+    // Always NoBrush — the custom paint() draws only a thin border line
+    setBrush(Qt::NoBrush);
 }
 
 
@@ -881,12 +925,12 @@ void UBGraphicsDelegateFrame::positionHandles()
     bool bShowVerticalResizers   = ResizingHorizontally != mOperationMode && mOperationMode != NoResizing; // EV-7 - ALTI/AOU - 20131231 : new NoResizing possibility
     bool bShowAllResizers        = Resizing == mOperationMode || Scaling == mOperationMode ;
 
-    mBottomRightResizeGripSvgItem->setVisible(!isLocked && bShowAllResizers);
-    mBottomResizeGripSvgItem->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
-    mLeftResizeGripSvgItem->setVisible(!isLocked && (bShowHorizontalResizers || bShowAllResizers));
-    mRightResizeGripSvgItem->setVisible(!isLocked && (bShowHorizontalResizers || bShowAllResizers));
-    mTopResizeGripSvgItem->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
-    mRotateButton->setVisible(mDelegate->canRotate() && !isLocked);
+    mBottomRightResizeGripSvgItem->setVisible(false);
+    mBottomResizeGripSvgItem->setVisible(false);
+    mLeftResizeGripSvgItem->setVisible(false);
+    mRightResizeGripSvgItem->setVisible(false);
+    mTopResizeGripSvgItem->setVisible(false);
+    mRotateButton->setVisible(false);
 
     mBottomRightResizeGrip->setVisible(!isLocked && bShowAllResizers);
     mBottomResizeGrip->setVisible(!isLocked && (bShowVerticalResizers || bShowAllResizers));
@@ -896,13 +940,12 @@ void UBGraphicsDelegateFrame::positionHandles()
 
     if (isLocked)
     {
-        QColor baseColor = UBSettings::paletteColor;
-        baseColor.setAlphaF(baseColor.alphaF() / 3);
-        setBrush(QBrush(baseColor));
+        // Locked state is handled in paint() with reduced border opacity
+        setBrush(Qt::NoBrush);
     }
     else
     {
-        setBrush(QBrush(UBSettings::paletteColor));
+        setBrush(Qt::NoBrush);
     }
 
     //make frame interact like delegated item when selected. Maybe should be deleted if selection logic will change
@@ -967,25 +1010,25 @@ QRectF UBGraphicsDelegateFrame::bottomRightResizeGripRect() const
 
 QRectF UBGraphicsDelegateFrame::bottomResizeGripRect() const
 {
-    return QRectF(rect().center().x() - mFrameWidth / 2, rect().bottom() - mFrameWidth, mFrameWidth, mFrameWidth);
+    return QRectF(rect().left() + mFrameWidth, rect().bottom() - mFrameWidth, rect().width() - 2 * mFrameWidth, mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::leftResizeGripRect() const
 {
-    return QRectF(rect().left(), rect().center().y() - mFrameWidth / 2, mFrameWidth, mFrameWidth);
+    return QRectF(rect().left(), rect().top() + mFrameWidth, mFrameWidth, rect().height() - 2 * mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::rightResizeGripRect() const
 {
-    return QRectF(rect().right() - mFrameWidth, rect().center().y() - mFrameWidth / 2, mFrameWidth, mFrameWidth);
+    return QRectF(rect().right() - mFrameWidth, rect().top() + mFrameWidth, mFrameWidth, rect().height() - 2 * mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::topResizeGripRect() const
 {
-    return QRectF(rect().center().x() - mFrameWidth / 2, rect().top(), mFrameWidth, mFrameWidth);
+    return QRectF(rect().left() + mFrameWidth, rect().top(), rect().width() - 2 * mFrameWidth, mFrameWidth);
 }
 
 

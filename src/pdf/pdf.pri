@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/pdf/GraphicsPDFItem.h \
                 src/pdf/PDFRenderer.h \

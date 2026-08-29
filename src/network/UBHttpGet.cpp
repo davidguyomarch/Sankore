@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -66,9 +67,9 @@ QNetworkReply* UBHttpGet::get(QUrl pUrl, QPointF pPos, QSize pSize, bool isBackg
 
     mDownloadedBytes.clear();
 
-    connect(mReply, SIGNAL(finished()), this, SLOT(requestFinished()));
-    connect(mReply, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    connect(mReply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgressed(qint64, qint64)));
+    connect(mReply, &QNetworkReply::finished, this, &UBHttpGet::requestFinished);
+    connect(mReply, &QNetworkReply::readyRead, this, &UBHttpGet::readyRead);
+    connect(mReply, &QNetworkReply::downloadProgress, this, &UBHttpGet::downloadProgressed);
 
     return mReply;
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -84,7 +85,7 @@ UBMagnifier::UBMagnifier(QWidget *parent, bool isInteractive)
 #endif
     }
 
-    connect(&mRefreshTimer, SIGNAL(timeout()), this, SLOT(slot_refresh()));
+    connect(&mRefreshTimer, &QTimer::timeout, this, &UBMagnifier::slot_refresh);
 }
 
 UBMagnifier::~UBMagnifier()

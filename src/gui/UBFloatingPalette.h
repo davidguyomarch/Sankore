@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -81,8 +82,8 @@ class UBFloatingPalette : public QWidget
 
         QBrush mBackgroundBrush;
         bool mbGrip;
-        static const int sLayoutContentMargin = 12;
-        static const int sLayoutSpacing = 15;
+        static const int sLayoutContentMargin = 10;
+        static const int sLayoutSpacing = 6;
         void moveInsideParent(const QPoint &position);
         bool mCustomPosition;
         bool mIsMoving;

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "tst_UBCryptoUtils.h"
 #include "stubs/UBCryptoUtils_stub.h"
 

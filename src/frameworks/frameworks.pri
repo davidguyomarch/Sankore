@@ -1,3 +1,4 @@
+# Copyright (C) 2026 David Guyomarch
 
 HEADERS      += src/frameworks/UBGeometryUtils.h \
                 src/frameworks/UBPlatformUtils.h \
@@ -14,7 +15,8 @@ HEADERS      += src/frameworks/UBGeometryUtils.h \
 
 SOURCES      += src/frameworks/UBGeometryUtils.cpp \
                 src/frameworks/UBPlatformUtils.cpp \
-                src/frameworks/UBFileSystemUtils.cpp \
+                src/frameworks/UBFileSystemUtilsCore.cpp \
+                src/frameworks/UBFileSystemUtilsZip.cpp \
                 src/frameworks/UBStringUtils.cpp \
                 src/frameworks/UBVersion.cpp \
                 src/frameworks/UBCoreGraphicsScene.cpp \

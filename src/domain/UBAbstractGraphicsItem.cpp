@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "UBAbstractGraphicsItem.h"
 #include "UBGraphicsItemDelegate.h"
 #include "UBGraphicsDelegateFrame.h"

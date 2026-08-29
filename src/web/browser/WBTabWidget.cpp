@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -234,7 +235,7 @@ WBTabWidget::WBTabWidget(QWidget *parent)
     , mTabBar(new WBTabBar(this))
 {
     setObjectName("ubWebBrowserTabWidget");
-    mAddTabIcon = QPixmap(":/images/toolbar/plusBlack.png");
+    mAddTabIcon = QPixmap(":/images/toolbar/svg/plusBlack.svg");
 
     setElideMode(Qt::ElideRight);
 

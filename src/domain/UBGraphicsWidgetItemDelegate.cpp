@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -72,7 +73,7 @@ void UBGraphicsWidgetItemDelegate::decorateMenu(QMenu* menu)
 {
     UBGraphicsItemDelegate::decorateMenu(menu);
 
-    freezeAction = menu->addAction(tr("Frozen"), this, SLOT(freeze(bool)));
+    freezeAction = menu->addAction(tr("Frozen"), this, &UBGraphicsWidgetItemDelegate::freeze);
 
     QIcon freezeIcon;
     freezeIcon.addPixmap(QPixmap(":/images/frozen.svg"), QIcon::Normal, QIcon::On);
@@ -83,7 +84,7 @@ void UBGraphicsWidgetItemDelegate::decorateMenu(QMenu* menu)
 
     if (delegated()->canBeTool())
     {
-        setAsToolAction = mMenu->addAction(tr("Transform as Tool "), this, SLOT(pin()));
+        setAsToolAction = mMenu->addAction(tr("Transform as Tool "), this, [this]() { pin(); });
         QIcon pinIcon;
         pinIcon.addPixmap(QPixmap(":/images/unpin.svg"), QIcon::Normal, QIcon::On);
         pinIcon.addPixmap(QPixmap(":/images/pin.svg"), QIcon::Normal, QIcon::Off);

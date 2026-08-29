@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -54,7 +55,6 @@ UBWebToolsPalette::UBWebToolsPalette(QWidget *parent,bool tutorialMode=false)
         actions << UBApplication::mainWindow->actionWebCustomCapture;
         actions << UBApplication::mainWindow->actionWebWindowCapture;
 
-        //actions << UBApplication::mainWindow->actionEduMedia;
 
         actions << UBApplication::mainWindow->actionWebShowHideOnDisplay;
 

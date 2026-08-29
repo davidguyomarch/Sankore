@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -67,7 +68,7 @@ QList<UBGraphicsItem*> UBImportPDF::import(const QUuid& uuid, const QString& fil
 
     PDFRenderer *pdfRenderer = PDFRenderer::rendererForUuid(uuid, filePath, true); // renderer is automatically deleted when not used anymore
 
-    if (!pdfRenderer->isValid())
+    if (!pdfRenderer || !pdfRenderer->isValid())
     {
         UBApplication::showMessage(tr("PDF import failed."));
         return result;

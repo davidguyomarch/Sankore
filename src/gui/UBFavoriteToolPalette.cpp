@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -57,7 +58,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
             QAction *action = new QAction(desc.label + " " + desc.version, this);
             action->setData(QUrl(desc.id));
             action->setIcon(desc.icon);
-            connect(action, SIGNAL(triggered()), this, SLOT(addFavorite()));
+            connect(action, &QAction::triggered, this, [this]() { addFavorite(); });
 
             toolsActions << action;
         }
@@ -77,7 +78,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
         QAction *action = new QAction(UBGraphicsWidgetItem::widgetName(QUrl::fromLocalFile(widgetPath)), this);
         action->setData(QUrl::fromLocalFile(widgetPath));
         action->setIcon(QIcon(UBGraphicsWidgetItem::iconFilePath(QUrl::fromLocalFile(widgetPath))));
-        connect(action, SIGNAL(triggered()), this, SLOT(addFavorite()));
+        connect(action, &QAction::triggered, this, [this]() { addFavorite(); });
 
         toolsActions << action;
     }
@@ -99,7 +100,7 @@ UBFavoriteToolPalette::UBFavoriteToolPalette(QWidget* parent)
                 QAction *action = new QAction(desc.label + " " + desc.version, this);
                 action->setData(QUrl(desc.id));
                 action->setIcon(desc.icon);
-                connect(action, SIGNAL(triggered()), this, SLOT(addFavorite()));
+                connect(action, &QAction::triggered, this, [this]() { addFavorite(); });
 
                 toolsActions << action;
             }

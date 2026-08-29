@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -88,7 +89,7 @@ UBToolbarButtonGroup::UBToolbarButtonGroup(QToolBar *toolBar, const QList<QActio
             button->setObjectName("ubButtonGroupCenter");
         }
 
-        connect(button, SIGNAL(triggered(QAction*)), this, SLOT(selected(QAction*)));
+        connect(button, &QToolButton::triggered, this, &UBToolbarButtonGroup::selected);
 
         horizontalLayout->addWidget(button);
         mLabel = action->text();

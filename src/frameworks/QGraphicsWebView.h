@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 /**
  * @file QGraphicsWebView.h
  * @brief QGraphicsWebView for Qt6 — real WebEngine or stub depending on SANKORE_WEBENGINE.

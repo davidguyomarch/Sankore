@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -113,12 +114,14 @@ signals:
     void localeChanged(int);
     void keyboardActivated(bool);
 
+public slots:
+    void onDeactivated();
+
 private slots:
     void syncPosition(const QPoint & pos);
     void syncLocale(int nLocale);
     void keyboardPaletteButtonSizeChanged(QVariant size);
     void onActivated(bool b);
-    void onDeactivated();
     void showKeyboard(bool show);
     void hideKeyboard();
 

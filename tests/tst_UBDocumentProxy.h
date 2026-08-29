@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #ifndef TST_UBDOCUMENTPROXY_H
 #define TST_UBDOCUMENTPROXY_H
 

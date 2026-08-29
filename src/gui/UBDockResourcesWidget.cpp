@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "UBDockResourcesWidget.h"
 #include "globals/UBGlobals.h"
 
@@ -14,7 +18,6 @@ UBDockResourcesWidget::UBDockResourcesWidget(QWidget *parent):
     layout->addWidget(mTeacherResourceWidget);
 
 
-    mLeftPalette = nullptr;
 }
 
 bool UBDockResourcesWidget::hasUserDataInTeacherGuide()

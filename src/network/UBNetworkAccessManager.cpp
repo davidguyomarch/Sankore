@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -58,12 +59,12 @@ UBNetworkAccessManager::UBNetworkAccessManager(QObject *parent)
       , mProxyAuthenticationCount(0)
 {
     mSettings = UBSettings::settings();
-    connect(this, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
-            SLOT(authenticationRequired(QNetworkReply*,QAuthenticator*)));
-    connect(this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)),
-            SLOT(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)));
-    connect(this, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)),
-            SLOT(sslErrors(QNetworkReply*, const QList<QSslError>&)));
+    connect(this, &QNetworkAccessManager::authenticationRequired,
+            this, &UBNetworkAccessManager::authenticationRequired);
+    connect(this, &QNetworkAccessManager::proxyAuthenticationRequired,
+            this, &UBNetworkAccessManager::proxyAuthenticationRequired);
+    connect(this, &QNetworkAccessManager::sslErrors,
+            this, &UBNetworkAccessManager::sslErrors);
 
     QNetworkProxy* proxy = mSettings->httpProxy();
 
@@ -148,8 +149,8 @@ void UBNetworkAccessManager::proxyAuthenticationRequired(const QNetworkProxy &pr
     if (mProxyAuthenticationCount == 3)
     {
         UBApplication::showMessage(tr("Failed to log to Proxy"));
-        disconnect(SIGNAL(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*))
-                , this, SLOT(proxyAuthenticationRequired(const QNetworkProxy&, QAuthenticator*)));
+        disconnect(this, &QNetworkAccessManager::proxyAuthenticationRequired,
+                this, &UBNetworkAccessManager::proxyAuthenticationRequired);
 
     }
 

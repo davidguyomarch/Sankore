@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -40,7 +41,7 @@ class UBDesktopPalette : public UBActionPalette
     Q_OBJECT;
 
     public:
-        UBDesktopPalette(QWidget *parent, UBRightPalette* rightPalette);
+        UBDesktopPalette(QWidget *parent);
         virtual ~UBDesktopPalette();
 
         void disappearForCapture();
@@ -81,8 +82,6 @@ protected:
         QAction *mActionCustomSelect;
         QAction* mActionTest;
 
-
-        UBRightPalette* rightPalette;
 
     signals:
         void stylusToolChanged(int tool);

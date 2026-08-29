@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -65,14 +66,14 @@ UBGraphicsGroupContainerItem *UBGraphicsGroupContainerItemDelegate::delegated()
 
 void UBGraphicsGroupContainerItemDelegate::decorateMenu(QMenu *menu)
 {
-    mLockAction = menu->addAction(tr("Locked"), this, SLOT(lock(bool)));
+    mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsGroupContainerItemDelegate::lock);
     QIcon lockIcon;
     lockIcon.addPixmap(QPixmap(":/images/locked.svg"), QIcon::Normal, QIcon::On);
     lockIcon.addPixmap(QPixmap(":/images/unlocked.svg"), QIcon::Normal, QIcon::Off);
     mLockAction->setIcon(lockIcon);
     mLockAction->setCheckable(true);
 
-    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, SLOT(showHide(bool)));
+    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsGroupContainerItemDelegate::showHide);
     mShowOnDisplayAction->setCheckable(true);
 
     QIcon showIcon;
@@ -80,7 +81,7 @@ void UBGraphicsGroupContainerItemDelegate::decorateMenu(QMenu *menu)
     showIcon.addPixmap(QPixmap(":/images/eyeClosed.svg"), QIcon::Normal, QIcon::Off);
     mShowOnDisplayAction->setIcon(showIcon);
 
-    mShowPanelToAddAnAction = menu->addAction(tr("Add an action"),this,SLOT(onAddActionClicked()));
+    mShowPanelToAddAnAction = menu->addAction(tr("Add an action"), this, [this]() { onAddActionClicked(); });
 }
 
 //TODO claudio
@@ -89,7 +90,7 @@ void UBGraphicsGroupContainerItemDelegate::onAddActionClicked()
 {
     UBCreateLinkPalette* linkPalette = UBApplication::boardController->paletteManager()->linkPalette();
     linkPalette->show();
-    connect(linkPalette,SIGNAL(definedAction(UBGraphicsItemAction*)),this,SLOT(saveAction(UBGraphicsItemAction*)));
+    connect(linkPalette, &UBCreateLinkPalette::definedAction, this, &UBGraphicsGroupContainerItemDelegate::saveAction);
 }
 
 //TODO claudio
@@ -112,7 +113,7 @@ void UBGraphicsGroupContainerItemDelegate::saveAction(UBGraphicsItemAction* acti
         break;
     }
 
-    mRemoveAnAction = mMenu->addAction(actionLabel,this,SLOT(onRemoveActionClicked()));
+    mRemoveAnAction = mMenu->addAction(actionLabel, this, [this]() { onRemoveActionClicked(); });
     mMenu->addAction(mRemoveAnAction);
 }
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -45,7 +46,7 @@ class UBDocumentProxy;
 
 #include "UBDockPaletteWidget.h"
 
-#define TABSIZE	    50       //Height of the tab of the palette
+#define TABSIZE	    44       //Height of the tab of the palette
 #define CLICKTIME   1000000  //Clicktime to expand or collapse palette
 
 /**

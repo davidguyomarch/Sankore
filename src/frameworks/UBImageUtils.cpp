@@ -1,5 +1,7 @@
 /*
+#include "core/UBSettingsData.h"
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -72,9 +74,9 @@ void UBImageUtils::drawGreyRect(QPainter *painter, const qreal& m11, bool darkBa
               QColor docSizeColor;
 
               if (darkBackground)
-                docSizeColor = UBSettings::documentSizeMarkColorDarkBackground;
+                docSizeColor = UBSettingsData::documentSizeMarkColorDarkBackground;
               else
-                docSizeColor = UBSettings::documentSizeMarkColorLightBackground;
+                docSizeColor = UBSettingsData::documentSizeMarkColorLightBackground;
 
               QPen pen (docSizeColor);
               pen.setWidth (penWidth);

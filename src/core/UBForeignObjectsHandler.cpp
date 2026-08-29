@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
 *
 * This file is part of Open-Sankoré.
 *
@@ -20,12 +21,18 @@
 */
 
 #include "UBForeignObjectsHandler.h"
+#include "UBForeignObjectsUtils.h"
 
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
 #include <QtXml>
 #include "UBSettings.h"
+
+// Use extracted utility functions from UBForeignObjectsUtils namespace
+using UBForeignObjectsUtils::strIdFrom;
+using UBForeignObjectsUtils::rm_r;
+using UBForeignObjectsUtils::cp_rf;
 
 const QString tVideo = "video";
 const QString tAudio = "audio";
@@ -51,92 +58,6 @@ const QString thumbSuff = ".png";
 
 const QString scanDirs = "audios,images,videos,teacherGuideObjects,widgets";
 const QStringList trashFilter = QStringList() << "*.swf";
-
-static QString strIdFrom(const QString &filePath)
-{
-    if ((filePath).isEmpty()) {
-        return QString();
-    }
-
-    QRegularExpression rx("\\{.(?!.*\\{).*\\}");
-    QRegularExpressionMatch match = rx.match(filePath);
-    if (!match.hasMatch()) {
-        return QString();
-    }
-
-    return match.captured();
-}
-
-static bool rm_r(const QString &rmPath)
-{
-    QFileInfo fi(rmPath);
-    if (!fi.exists()) {
-        qDebug() << rmPath << "does not exist";
-        return false;
-    } else if (fi.isFile()) {
-        if (!QFile::remove(rmPath)) {
-            qDebug() << "can't remove file" << rmPath;
-            return false;
-        }
-        return true;
-    } else if (fi.isDir()) {
-        QFileInfoList fList = QDir(rmPath).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
-        for (const QFileInfo& sub : fList) {
-            rm_r(sub.absoluteFilePath());
-        }
-        if (!QDir().rmdir(rmPath)) {
-            qDebug() << "can't remove dir" << rmPath;
-            return false;
-        }
-        return true;
-    }
-    return false;
-}
-
-static bool cp_rf(const QString &what, const QString &where)
-{
-    QFileInfo whatFi(what);
-    QFileInfo whereFi = QFileInfo(where);
-
-    if (!whatFi.exists()) {
-        qDebug() << what << "does not exist" << Q_FUNC_INFO;
-        return false;
-    } else if (whatFi.isFile()) {
-        QString whereDir = where.section("/", 0, -2, QString::SectionSkipEmpty | QString::SectionIncludeLeadingSep);
-        QString newFilePath = where;
-        if (!whereFi.exists()) {
-            QDir().mkpath(whereDir);
-        } else if (whereFi.isDir()) {
-            newFilePath = whereDir + "/" + whatFi.fileName();
-        }
-        if (QFile::exists(newFilePath)) {
-            QFile::remove(newFilePath);
-        }
-        if (!QFile::copy(what, newFilePath)) {
-            qDebug() << "can't copy" << what << "to" << where << Q_FUNC_INFO;
-            return false;
-        }
-        return true;
-    } else if (whatFi.isDir()) {
-
-        if (whereFi.isFile() && whereFi.fileName().toLower() == whatFi.fileName().toLower()) {
-            qDebug() << "can't copy dir" << what << "to file" << where << Q_FUNC_INFO;
-            return false;
-        } else if (whereFi.isDir()) {
-            rm_r(where);
-        }
-
-        QDir().mkpath(where);
-
-        QFileInfoList fList = QDir(what).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
-        for (const QFileInfo& sub : fList) {
-            if (!cp_rf(sub.absoluteFilePath(), where + "/" + sub.fileName()))
-            return false;
-        }
-        return true;
-    }
-    return true;
-}
 
 static QString thumbFileNameFrom(const QString &filePath)
 {

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -27,6 +28,7 @@
 
 #include "core/UBDocumentManager.h"
 #include "core/UBApplication.h"
+#include "core/UBSettingsData.h"
 
 #include "document/UBDocumentProxy.h"
 #include "document/UBDocumentController.h"
@@ -80,7 +82,7 @@ void UBExportDocumentSetAdaptor::persist(UBDocumentProxy* pDocumentProxy)
 
         UBDocumentTreeNode* node = treeModel->nodeFromIndex(treeViewParentIndex);
         UBDocumentProxy proxy;
-        proxy.setMetaData(UBSettings::documentName,node->displayName());
+        proxy.setMetaData(UBSettingsData::documentName,node->displayName());
         filename = askForFileName(&proxy, tr("Export as UBX File"));
     }
 

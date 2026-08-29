@@ -2,7 +2,7 @@
 # Downloads the latest Open-Sankore build artifact from GitHub Actions
 # Run this in PowerShell on the Windows VM
 
-$repo = "davidguyomarch/Sankore-3.1"
+$repo = "davidguyomarch/Sankore"
 $artifactName = "Open-Sankore-Windows-x64"
 $destDir = "$env:USERPROFILE\Desktop\Open-Sankore"
 

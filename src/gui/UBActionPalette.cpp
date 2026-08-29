@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -107,8 +108,8 @@ UBActionPaletteButton* UBActionPalette::createPaletteButton(QAction* action, QWi
 
     mMapActionToButton[action] = button;
 
-    connect(button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
-    connect(action, SIGNAL(changed()), this, SLOT(actionChanged()));
+    connect(button, &QAbstractButton::clicked, this, [this]() { buttonClicked(); });
+    connect(action, &QAction::changed, this, &UBActionPalette::actionChanged);
 
     return button;
 }
@@ -163,7 +164,7 @@ void UBActionPalette::groupActions()
         ++i;
     }
 
-    connect(mButtonGroup, SIGNAL(idClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
+    connect(mButtonGroup, &QButtonGroup::idClicked, this, &UBActionPalette::buttonGroupClicked);
 }
 
 
@@ -278,11 +279,34 @@ UBActionPaletteButton::UBActionPaletteButton(QAction* action, QWidget * parent)
 {
     setIconSize(QSize(32, 32));
     setDefaultAction(action);
-    setStyleSheet(QString("QToolButton {color: white; font-weight: bold; font-family: Arial; background-color: transparent; border: none}"));
+    setStyleSheet(QString(
+        "QToolButton {"
+        "  color: white;"
+        "  font-weight: bold;"
+        "  font-family: Arial;"
+        "  background-color: transparent;"
+        "  border: none;"
+        "  border-radius: 8px;"
+        "  padding: 4px;"
+        "}"
+        "QToolButton:hover {"
+        "  background-color: rgba(255, 255, 255, 30);"
+        "}"
+        "QToolButton:pressed {"
+        "  background-color: rgba(255, 255, 255, 50);"
+        "}"
+        "QToolButton:checked {"
+        "  background-color: #4A90D9;"
+        "}"
+    ));
 
     setFocusPolicy(Qt::NoFocus);
 
     setObjectName("ubActionPaletteButton");
+
+    // Ensure tooltip is always set (use action text as fallback)
+    if (toolTip().isEmpty() && action)
+        setToolTip(action->text());
 }
 
 UBActionPaletteButton::~UBActionPaletteButton()

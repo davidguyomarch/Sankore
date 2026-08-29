@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -55,6 +56,8 @@ class UBDocumentGroupTreeItem;
 class UBDocumentProxyTreeItem;
 class UBMainWindow;
 class UBDocumentToolsPalette;
+class QQuickWidget;
+class UBDocumentActionController;
 
 
 class UBDocumentReplaceDialog : public QDialog
@@ -482,6 +485,8 @@ protected:
         Ui::documents* mDocumentUI;
         UBMainWindow* mMainWindow;
         QWidget *mDocumentWidget;
+        QQuickWidget *mDocumentsTopBarQml;
+        UBDocumentActionController *mDocActionController;
         QPointer<UBMessageWindow> mMessageWindow;
         QAction* mAddFolderOfImagesAction;
         QAction* mAddFileToDocumentAction;

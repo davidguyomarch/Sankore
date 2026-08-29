@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -39,16 +40,15 @@
 #include "gui/UBMainWindow.h"
 
 
-UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalette)
+UBDesktopPalette::UBDesktopPalette(QWidget *parent)
     : UBActionPalette(Qt::TopLeftCorner, parent)
     , mShowHideAction(nullptr)
     , mDisplaySelectAction(nullptr)
-    , rightPalette(_rightPalette)
 {
     QList<QAction*> actions;
 
-    mActionUniboard = new QAction(QIcon(":/images/toolbar/board.png"), tr("Show Open-Sankore"), this);
-    connect(mActionUniboard, SIGNAL(triggered()), this, SIGNAL(uniboardClick()));
+    mActionUniboard = new QAction(QIcon(":/images/toolbar/svg/board.svg"), tr("Show Open-Sankore"), this);
+    connect(mActionUniboard, &QAction::triggered, this, [this]() { emit uniboardClick(); });
     actions << mActionUniboard;
 
 
@@ -61,21 +61,21 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     if (UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;
 
-    mActionCustomSelect = new QAction(QIcon(":/images/toolbar/captureArea.png"), tr("Capture Part of the Screen"), this);
-    connect(mActionCustomSelect, SIGNAL(triggered()), this, SIGNAL(customClick()));
+    mActionCustomSelect = new QAction(QIcon(":/images/toolbar/svg/window.svg"), tr("Capture Part of the Screen"), this);
+    connect(mActionCustomSelect, &QAction::triggered, this, [this]() { emit customClick(); });
     actions << mActionCustomSelect;
 
     mDisplaySelectAction = new QAction(QIcon(":/images/toolbar/captureScreen.png"), tr("Capture the Screen"), this);
-    connect(mDisplaySelectAction, SIGNAL(triggered()), this, SIGNAL(screenClick()));
+    connect(mDisplaySelectAction, &QAction::triggered, this, [this]() { emit screenClick(); });
     actions << mDisplaySelectAction;
 
     QIcon showHideIcon;
-    showHideIcon.addPixmap(QPixmap(":/images/toolbar/eyeOpened.png"), QIcon::Normal , QIcon::On);
-    showHideIcon.addPixmap(QPixmap(":/images/toolbar/eyeClosed.png"), QIcon::Normal , QIcon::Off);
+    showHideIcon.addPixmap(QPixmap(":/images/toolbar/svg/eyeOpened.svg"), QIcon::Normal , QIcon::On);
+    showHideIcon.addPixmap(QPixmap(":/images/toolbar/svg/eyeClosed.svg"), QIcon::Normal , QIcon::Off);
     mShowHideAction = new QAction(showHideIcon, "", this);
     mShowHideAction->setCheckable(true);
 
-    connect(mShowHideAction, SIGNAL(triggered(bool)), this, SLOT(showHideClick(bool)));
+    connect(mShowHideAction, &QAction::triggered, this, &UBDesktopPalette::showHideClick);
     actions << mShowHideAction;
 
     setActions(actions);
@@ -87,12 +87,11 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent, UBRightPalette* _rightPalett
     QIcon maximizeIcon;
     maximizeIcon.addPixmap(QPixmap(":/images/toolbar/stylusTab.png"), QIcon::Normal, QIcon::On);
     mMaximizeAction = new QAction(maximizeIcon, tr("Show the stylus palette"), this);
-    connect(mMaximizeAction, SIGNAL(triggered()), this, SLOT(maximizeMe()));
-    connect(this, SIGNAL(maximizeStart()), this, SLOT(maximizeMe()));
-    connect(this, SIGNAL(minimizeStart(eMinimizedLocation)), this, SLOT(minimizeMe(eMinimizedLocation)));
+    connect(mMaximizeAction, &QAction::triggered, this, [this]() { maximizeMe(); });
+    connect(this, &UBFloatingPalette::maximizeStart, this, &UBDesktopPalette::maximizeMe);
+    connect(this, &UBFloatingPalette::minimizeStart, this, &UBDesktopPalette::minimizeMe);
     setMinimizePermission(true);
 
-    connect(rightPalette, SIGNAL(resized()), this, SLOT(parentResized()));
 }
 
 
@@ -200,36 +199,17 @@ void UBDesktopPalette::maximizeMe()
 void UBDesktopPalette::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
-    QIcon penIcon;
-    QIcon markerIcon;
-    QIcon eraserIcon;
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/penArrow.png"), QIcon::Normal, QIcon::Off);
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/penOnArrow.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionPen->setIcon(penIcon);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/markerArrow.png"), QIcon::Normal, QIcon::Off);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/markerOnArrow.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionMarker->setIcon(markerIcon);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraserArrow.png"), QIcon::Normal, QIcon::Off);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraserOnArrow.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionEraser->setIcon(eraserIcon);
-
+    UBApplication::mainWindow->actionPen->setIcon(QIcon(":/images/stylusPalette/svg/pen.svg"));
+    UBApplication::mainWindow->actionMarker->setIcon(QIcon(":/images/stylusPalette/svg/marker.svg"));
+    UBApplication::mainWindow->actionEraser->setIcon(QIcon(":/images/stylusPalette/svg/eraser.svg"));
 }
 
 void UBDesktopPalette::hideEvent(QHideEvent *event)
 {
     Q_UNUSED(event);
-    QIcon penIcon;
-    QIcon markerIcon;
-    QIcon eraserIcon;
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/pen.png"), QIcon::Normal, QIcon::Off);
-    penIcon.addPixmap(QPixmap(":images/stylusPalette/penOn.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionPen->setIcon(penIcon);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/marker.png"), QIcon::Normal, QIcon::Off);
-    markerIcon.addPixmap(QPixmap(":images/stylusPalette/markerOn.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionMarker->setIcon(markerIcon);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraser.png"), QIcon::Normal, QIcon::Off);
-    eraserIcon.addPixmap(QPixmap(":images/stylusPalette/eraserOn.png"), QIcon::Normal, QIcon::On);
-    UBApplication::mainWindow->actionEraser->setIcon(eraserIcon);
+    UBApplication::mainWindow->actionPen->setIcon(QIcon(":/images/stylusPalette/svg/pen.svg"));
+    UBApplication::mainWindow->actionMarker->setIcon(QIcon(":/images/stylusPalette/svg/marker.svg"));
+    UBApplication::mainWindow->actionEraser->setIcon(QIcon(":/images/stylusPalette/svg/eraser.svg"));
 }
 
 QPoint UBDesktopPalette::buttonPos(QAction *action)
@@ -248,7 +228,7 @@ QPoint UBDesktopPalette::buttonPos(QAction *action)
 
 int UBDesktopPalette::getParentRightOffset()
 {
-    return rightPalette->width();
+    return 0; // Legacy right palette removed
 }
 
 void UBDesktopPalette::parentResized()

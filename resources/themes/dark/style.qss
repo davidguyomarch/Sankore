@@ -1,0 +1,374 @@
+/* Open-Sankoré — Modern flat stylesheet
+ *
+ * Color tokens (from src/core/UBTheme.h):
+ *   surface:         #2A2A2ADC  → UBTheme::surface()
+ *   surfaceVariant:  #3A3A3A    → UBTheme::surfaceVariant()
+ *   surfaceHover:    #4A4A4A    → UBTheme::surfaceHover()
+ *   onSurface:       #FFFFFF    → UBTheme::onSurface()
+ *   onSurfaceDim:    #DDDDDD    → UBTheme::onSurfaceDim()
+ *   primary:         #4A90D9    → UBTheme::primary()
+ *   border:          rgba(255,255,255,25) → UBTheme::border()
+ *   scrollHandle:    rgba(255,255,255,80) → UBTheme::scrollHandle()
+ */
+
+/* === Main Window & Toolbars === */
+
+QMainWindow
+{
+    background-color: #2A2A2A;
+}
+
+QToolBar
+{
+    background-color: #2A2A2A;
+    border: none;
+    spacing: 6px;
+    padding: 4px 8px;
+}
+
+QToolBar::separator
+{
+    background: rgba(255, 255, 255, 40);
+    width: 1px;
+    margin: 6px 4px;
+}
+
+QToolButton
+{
+    color: white;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px;
+    min-width: 48px;
+    min-height: 48px;
+}
+
+QToolButton:hover
+{
+    background: #3A3A3A;
+}
+
+QToolButton:pressed,
+QToolButton:checked
+{
+    background: #4A90D9;
+}
+
+/* === Menu bar === */
+
+QMenuBar
+{
+    background-color: #2A2A2A;
+    color: white;
+}
+
+QMenuBar::item:selected
+{
+    background: #3A3A3A;
+}
+
+QMenu
+{
+    background-color: #2A2A2A;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QMenu::item:selected
+{
+    background: #4A90D9;
+}
+
+QMenu::separator
+{
+    background: rgba(255, 255, 255, 25);
+    height: 1px;
+    margin: 4px 8px;
+}
+
+QWidget#DockPaletteWidgetBox,
+QWidget#documentNavigator,
+QWidget#UBLibPathViewer,
+QWidget#UBLibNavigatorWidget,
+QWidget#UBLibItemProperties,
+QWidget#UBDownloadWidget,
+QWidget#UBTeacherGuideWidget,
+QWidget#UBFeaturesNavigatorWidget,
+QWidget#PathList,
+QWidget#UBFeaturesCentralWidget,
+QWidget#UBTeacherResources
+{
+	background: #2A2A2A;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QTextEdit,
+QLineEdit,
+QComboBox#DockPaletteWidgetComboBox QAbstractItemView
+{
+    selection-background-color: #4A90D9;
+    selection-color: white;
+}
+
+QWidget#mAdditionalDataContainer
+{
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QWidget#UBMediaVideoContainer
+{
+	background: #000000;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QWidget#UBLibWebView
+{
+	background: #2A2A2A;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QListView
+{
+	border: 0px;
+	background: #2A2A2A;
+	color: white;
+}
+
+QTreeView
+{
+	border: 0px;
+	background: #2A2A2A;
+	color: white;
+}
+
+QWidget#UBFeatureProperties
+{
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QColorDialog
+{
+	background: #2A2A2A;
+}
+
+QLabel#DockPaletteWidgetTitle
+{
+	color: #FFFFFF;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+QLineEdit#UBTGLineEdit,
+QLabel#UBTGMediaDropMeLabel
+{
+	background: #3A3A3A;
+	border: 1px solid rgba(255, 255, 255, 25);
+	border-radius: 6px;
+	padding: 4px;
+	color: white;
+}
+
+QPushButton#UBTGPushButton
+{
+	border: 1px solid rgba(255, 255, 255, 25);
+	border-radius: 6px;
+	width: 50px;
+	height: 18px;
+	padding: 2px;
+	color: white;
+	background: #3A3A3A;
+}
+
+QPushButton#UBTGPushButton:hover
+{
+	background: #4A4A4A;
+}
+
+QComboBox#DockPaletteWidgetComboBox
+{
+	background: #3A3A3A;
+	border-radius: 6px;
+	padding: 4px;
+	color: white;
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QComboBox#DockPaletteWidgetComboBox:drop-down
+{
+	background: #3A3A3A;
+	width: 20px;
+	border: none;
+}
+
+QComboBox#DockPaletteWidgetComboBox::down-arrow
+{
+	image: none;
+	border: none;
+}
+
+QComboBox#CacheModeSelectionComboBox
+{
+	background: #3A3A3A;
+	color: white;
+}
+
+QPushButton#DockPaletteWidgetButton
+{
+	background-color: #3A3A3A;
+	color: #DDDDDD;
+	border-radius: 6px;
+	padding: 6px;
+	font-weight: bold;
+	font-size: 12px;
+	border: 1px solid rgba(255, 255, 255, 25);
+}
+
+QPushButton#DockPaletteWidgetButton:hover
+{
+	background-color: #4A4A4A;
+}
+
+QPushButton#DockPaletteWidgetButton::checked
+{
+	background-color: #4A90D9;
+	color: white;
+}
+
+QTextEdit#TeacherStudentBox
+{
+	background: #3A3A3A;
+	border: 1px solid rgba(255, 255, 255, 25);
+	border-radius: 6px;
+	color: white;
+}
+
+/* Minimal scrollbars — no arrow buttons */
+
+QScrollBar::vertical
+{
+	background: transparent;
+	width: 8px;
+	margin: 2px;
+}
+
+QScrollBar::handle:vertical
+{
+	background: rgba(255, 255, 255, 80);
+	border-radius: 4px;
+	min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover
+{
+	background: rgba(255, 255, 255, 120);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical
+{
+	height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
+{
+	background: transparent;
+}
+
+QScrollBar::horizontal
+{
+	background: transparent;
+	height: 8px;
+	margin: 2px;
+}
+
+QScrollBar::handle:horizontal
+{
+	background: rgba(255, 255, 255, 80);
+	border-radius: 4px;
+	min-width: 30px;
+}
+
+QScrollBar::handle:horizontal:hover
+{
+	background: rgba(255, 255, 255, 120);
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal
+{
+	width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal
+{
+	background: transparent;
+}
+
+/* Sliders */
+
+QSlider::handle::horizontal
+{
+	background-color: #DDDDDD;
+	margin-top: -4px;
+	margin-bottom: -4px;
+	height: 16px;
+	width: 16px;
+	border-radius: 8px;
+	border: none;
+}
+
+QSlider::handle::horizontal:hover
+{
+	background-color: #FFFFFF;
+}
+
+QSlider::groove::horizontal
+{
+	background-color: rgba(255, 255, 255, 60);
+	height: 4px;
+	border-radius: 2px;
+	border: none;
+}
+
+/* Teacher guide labels */
+
+QLabel#UBTGEditionDocumentTitle
+{
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QLabel#UBTGPresentationDocumentTitle
+{
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+QLabel#UBTGPageNumberLabel
+{
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+UBTGAdaptableText#UBTGEditionPageTitle,
+UBTGAdaptableText#UBTGEditionComment
+{
+    color: white;
+    font-size: 12px;
+}
+
+UBTGAdaptableText#UBTGPresentationPageTitle
+{
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+}

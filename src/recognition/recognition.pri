@@ -1,0 +1,33 @@
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+
+HEADERS += \
+    src/recognition/IHandwritingRecognizer.h \
+    src/recognition/UBStubRecognizer.h \
+    src/recognition/UBStrokeExtractor.h \
+    src/recognition/UBRecognitionController.h \
+    src/recognition/UBSpellCorrector.h
+
+SOURCES += \
+    src/recognition/UBHandwritingRecognizerFactory.cpp \
+    src/recognition/UBStrokeExtractor.cpp \
+    src/recognition/UBRecognitionController.cpp \
+    src/recognition/UBSpellCorrector.cpp
+
+win32 {
+    HEADERS += src/recognition/UBWindowsInkRecognizer.h
+    SOURCES += src/recognition/UBWindowsInkRecognizer.cpp
+    SOURCES += src/recognition/UBWindowsImageOcr.cpp
+    # WinRT C++/WinRT — WindowsApp.lib is linked in OpenSankore.pro
+}
+
+!win32 {
+    HEADERS += src/recognition/UBZinniaRecognizer.h
+    SOURCES += src/recognition/UBZinniaRecognizer.cpp
+    # Zinnia library (install: apt install libzinnia-dev)
+    LIBS += -lzinnia
+}

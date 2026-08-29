@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -43,6 +44,7 @@
 
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsPolygonItem.h"
+#include "domain/UBSceneContext.h"
 
 #include "UBCustomCaptureWindow.h"
 #include "UBWindowCapture.h"
@@ -53,7 +55,7 @@
 #include "gui/UBResources.h"
 
 
-UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UBRightPalette* rightPalette)
+UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
         : QObject(parent)
         , mTransparentDrawingView(0)
         , mTransparentDrawingScene(0)
@@ -61,7 +63,6 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
         , mDesktopPenPalette(nullptr)
         , mDesktopMarkerPalette(nullptr)
         , mDesktopEraserPalette(nullptr)
-        , mRightPalette(rightPalette)
         , mWindowPositionInitialized(false)
         , mIsFullyTransparent(false)
         , mDesktopToolsPalettePositioned(false)
@@ -91,47 +92,56 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
     mTransparentDrawingView->setStyleSheet(backgroundStyle);
 
     mTransparentDrawingScene = new UBGraphicsScene(0, false);
+    // Initialize the scene context with the live drawing controller so that
+    // inputDevicePress / inputDeviceMove / updateGroupButtonState do not
+    // dereference a null drawingController.  (#135)
+    {
+        UBSceneContext ctx;
+        ctx.drawingController = UBDrawingController::drawingController();
+        ctx.boardController = UBApplication::boardController;
+        mTransparentDrawingScene->setSceneContext(ctx);
+    }
     mTransparentDrawingView->setScene(mTransparentDrawingScene);
     mTransparentDrawingScene->setDrawingMode(true);
 
-    mDesktopPalette = new UBDesktopPalette(mTransparentDrawingView, rightPalette); 
+    mDesktopPalette = new UBDesktopPalette(mTransparentDrawingView); 
     // This was not fix, parent reverted
     // FIX #633: The palette must be 'floating' in order to stay on top of the library palette
 
     if (UBPlatformUtils::hasVirtualKeyboard())
     {
-        connect( UBApplication::boardController->paletteManager()->mKeyboardPalette, SIGNAL(keyboardActivated(bool)), 
-                 mTransparentDrawingView, SLOT(virtualKeyboardActivated(bool)));
+        connect( UBApplication::boardController->paletteManager()->mKeyboardPalette, &UBKeyboardPalette::keyboardActivated, 
+                 mTransparentDrawingView, &UBBoardView::virtualKeyboardActivated);
 
 #ifdef Q_OS_LINUX
-        connect(UBApplication::boardController->paletteManager()->mKeyboardPalette, SIGNAL(moved(QPoint)), this, SLOT(refreshMask()));
-        connect(UBApplication::mainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(refreshMask()));
-        connect(mDesktopPalette,SIGNAL(refreshMask()), this, SLOT(refreshMask()));
+        connect(UBApplication::boardController->paletteManager()->mKeyboardPalette, &UBKeyboardPalette::moved, this, [this]() { refreshMask(); });
+        connect(UBApplication::mainWindow->actionVirtualKeyboard, &QAction::triggered, this, [this]() { refreshMask(); });
+        connect(mDesktopPalette, &UBDesktopPalette::refreshMask, this, &UBDesktopAnnotationController::refreshMask);
 #endif
     }
 
-    connect(mDesktopPalette, SIGNAL(uniboardClick()), this, SLOT(goToUniboard()));
-    connect(mDesktopPalette, SIGNAL(customClick()), this, SLOT(customCapture()));
-    connect(mDesktopPalette, SIGNAL(windowClick()), this, SLOT(windowCapture()));
-    connect(mDesktopPalette, SIGNAL(screenClick()), this, SLOT(screenCapture()));
-    connect(UBApplication::mainWindow->actionPointer, SIGNAL(triggered()), this, SLOT(onToolClicked()));
-    connect(UBApplication::mainWindow->actionSelector, SIGNAL(triggered()), this, SLOT(onToolClicked()));
-    connect(mDesktopPalette, SIGNAL(maximized()), this, SLOT(onDesktopPaletteMaximized()));
-    connect(mDesktopPalette, SIGNAL(minimizeStart(eMinimizedLocation)), this, SLOT(onDesktopPaletteMinimize()));
+    connect(mDesktopPalette, &UBDesktopPalette::uniboardClick, this, &UBDesktopAnnotationController::goToUniboard);
+    connect(mDesktopPalette, &UBDesktopPalette::customClick, this, &UBDesktopAnnotationController::customCapture);
+    connect(mDesktopPalette, &UBDesktopPalette::windowClick, this, &UBDesktopAnnotationController::windowCapture);
+    connect(mDesktopPalette, &UBDesktopPalette::screenClick, this, &UBDesktopAnnotationController::screenCapture);
+    connect(UBApplication::mainWindow->actionPointer, &QAction::triggered, this, [this]() { onToolClicked(); });
+    connect(UBApplication::mainWindow->actionSelector, &QAction::triggered, this, [this]() { onToolClicked(); });
+    connect(mDesktopPalette, &UBFloatingPalette::maximized, this, &UBDesktopAnnotationController::onDesktopPaletteMaximized);
+    connect(mDesktopPalette, &UBFloatingPalette::minimizeStart, this, [this]() { onDesktopPaletteMinimize(); });
 
-    connect(mTransparentDrawingView, SIGNAL(resized(QResizeEvent*)), this, SLOT(onTransparentWidgetResized()));
+    connect(mTransparentDrawingView, &UBBoardView::resized, this, [this]() { onTransparentWidgetResized(); });
 
 
-    connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int)), this, SLOT(stylusToolChanged(int)));
+    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged, this, &UBDesktopAnnotationController::stylusToolChanged);
 
     // Add the desktop associated palettes
-    mDesktopPenPalette = new UBDesktopPenPalette(mTransparentDrawingView, rightPalette); 
+    mDesktopPenPalette = new UBDesktopPenPalette(mTransparentDrawingView);
 
-    connect(mDesktopPalette, SIGNAL(maximized()), mDesktopPenPalette, SLOT(onParentMaximized()));
-    connect(mDesktopPalette, SIGNAL(minimizeStart(eMinimizedLocation)), mDesktopPenPalette, SLOT(onParentMinimized()));
+    connect(mDesktopPalette, &UBFloatingPalette::maximized, mDesktopPenPalette, &UBDesktopPenPalette::onParentMaximized);
+    connect(mDesktopPalette, &UBFloatingPalette::minimizeStart, mDesktopPenPalette, [this]() { mDesktopPenPalette->onParentMinimized(); });
 
-    mDesktopMarkerPalette = new UBDesktopMarkerPalette(mTransparentDrawingView, rightPalette);
-    mDesktopEraserPalette = new UBDesktopEraserPalette(mTransparentDrawingView, rightPalette);
+    mDesktopMarkerPalette = new UBDesktopMarkerPalette(mTransparentDrawingView);
+    mDesktopEraserPalette = new UBDesktopEraserPalette(mTransparentDrawingView);
 
     mDesktopPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
     mDesktopPenPalette->setBackgroundBrush(mSettings->opaquePaletteColor);
@@ -149,16 +159,15 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent, UB
     mDesktopMarkerPalette->setVisible(false);
     mDesktopEraserPalette->setVisible(false);
 
-    connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, SIGNAL(triggered()), this, SLOT(eraseDesktopAnnotations()));
+    connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, &QAction::triggered, this, [this]() { eraseDesktopAnnotations(); });
 
-    connect(&mHoldTimerPen, SIGNAL(timeout()), this, SLOT(penActionReleased()));
-    connect(&mHoldTimerMarker, SIGNAL(timeout()), this, SLOT(markerActionReleased()));
-    connect(&mHoldTimerEraser, SIGNAL(timeout()), this, SLOT(eraserActionReleased()));
+    connect(&mHoldTimerPen, &QTimer::timeout, this, &UBDesktopAnnotationController::penActionReleased);
+    connect(&mHoldTimerMarker, &QTimer::timeout, this, &UBDesktopAnnotationController::markerActionReleased);
+    connect(&mHoldTimerEraser, &QTimer::timeout, this, &UBDesktopAnnotationController::eraserActionReleased);
 
 #ifdef Q_OS_LINUX
-    connect(mDesktopPalette, SIGNAL(moving()), this, SLOT(refreshMask()));
-    connect(UBApplication::boardController->paletteManager()->rightPalette(), SIGNAL(resized()), this, SLOT(refreshMask()));
-    connect(UBApplication::boardController->paletteManager()->addItemPalette(), SIGNAL(closed()), this, SLOT(refreshMask()));
+    connect(mDesktopPalette, &UBFloatingPalette::moving, this, &UBDesktopAnnotationController::refreshMask);
+    connect(UBApplication::boardController->paletteManager()->addItemPalette(), &UBActionPalette::closed, this, &UBDesktopAnnotationController::refreshMask);
 #endif
     onDesktopPaletteMaximized();
 
@@ -257,7 +266,7 @@ void UBDesktopAnnotationController::setAssociatedPalettePosition(UBActionPalette
     }
 
     // First determine if the palette must be shown on the left or on the right
-    if(desktopPalettePos.x() <= (mTransparentDrawingView->width() - (palette->width() + mDesktopPalette->width() + mRightPalette->width() + 20))) // we take a small margin of 20 pixels
+    if(desktopPalettePos.x() <= (mTransparentDrawingView->width() - (palette->width() + mDesktopPalette->width() + 20))) // we take a small margin of 20 pixels
     {
         // Display it on the right
         desktopPalettePos += QPoint(mDesktopPalette->width(), yPen);
@@ -291,8 +300,8 @@ void UBDesktopAnnotationController::showWindow()
 {
     mDesktopPalette->setDisplaySelectButtonVisible(true);
 
-    connect(UBApplication::applicationController, SIGNAL(desktopMode(bool))
-            , mDesktopPalette, SLOT(setDisplaySelectButtonVisible(bool)));
+    connect(UBApplication::applicationController, &UBApplicationController::desktopMode,
+            mDesktopPalette, &UBDesktopPalette::setDisplaySelectButtonVisible);
 
     mDesktopPalette->show();
 
@@ -317,11 +326,24 @@ void UBDesktopAnnotationController::showWindow()
 
     UBDrawingController::drawingController()->setStylusTool(mDesktopStylusTool);
 
-#ifndef Q_OS_LINUX
+#ifdef Q_OS_WIN
+    // On Windows, WA_TranslucentBackground may not work reliably with DWM.
+    // Capture the desktop screenshot and use it as background instead of
+    // relying on window transparency.
+    {
+        QPixmap desktopPixmap = getScreenPixmap();
+        if (!desktopPixmap.isNull())
+        {
+            mTransparentDrawingView->setStyleSheet(QString());
+            mTransparentDrawingScene->setBackgroundBrush(QBrush(desktopPixmap));
+        }
+    }
     mTransparentDrawingView->showFullScreen();
-#else
+#elif defined(Q_OS_LINUX)
     // this is necessary to avoid unity to hide the panels
     mTransparentDrawingView->show();
+#else
+    mTransparentDrawingView->showFullScreen();
 #endif
     UBPlatformUtils::setDesktopMode(true);
 
@@ -485,12 +507,17 @@ void UBDesktopAnnotationController::screenCapture()
 
 QPixmap UBDesktopAnnotationController::getScreenPixmap()
 {
-    // QDesktopWidget removed in Qt6
+    // Capture the screen where the transparent drawing view is displayed
+    QScreen *screen = nullptr;
+    if (mTransparentDrawingView && mTransparentDrawingView->screen())
+        screen = mTransparentDrawingView->screen();
+    if (!screen)
+        screen = QGuiApplication::primaryScreen();
 
-    // we capture the screen in which the mouse is.
-    const QRect primaryScreenRect = QGuiApplication::primaryScreen()->geometry();
-    QCoreApplication::processEvents();
-    return QGuiApplication::primaryScreen()->grabWindow(0, primaryScreenRect.x(), primaryScreenRect.y(), primaryScreenRect.width(), primaryScreenRect.height());
+    const QRect screenRect = screen->geometry();
+    // processEvents() removed: it caused re-entrancy during Desktop mode transition,
+    // dispatching stale mouse events to the board view and crashing in viewportEvent (#135)
+    return screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
 
 
 
@@ -747,40 +774,40 @@ void UBDesktopAnnotationController::onDesktopPaletteMaximized()
     UBActionPaletteButton* pPenButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPen);
     if(nullptr != pPenButton)
     {
-        connect(pPenButton, SIGNAL(pressed()), this, SLOT(penActionPressed()));
-        connect(pPenButton, SIGNAL(released()), this, SLOT(penActionReleased()));
+        connect(pPenButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::penActionPressed);
+        connect(pPenButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::penActionReleased);
     }
 
     // Eraser
     UBActionPaletteButton* pEraserButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionEraser);
     if(nullptr != pEraserButton)
     {
-        connect(pEraserButton, SIGNAL(pressed()), this, SLOT(eraserActionPressed()));
-        connect(pEraserButton, SIGNAL(released()), this, SLOT(eraserActionReleased()));
+        connect(pEraserButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::eraserActionPressed);
+        connect(pEraserButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::eraserActionReleased);
     }
 
     // Marker
     UBActionPaletteButton* pMarkerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionMarker);
     if(nullptr != pMarkerButton)
     {
-        connect(pMarkerButton, SIGNAL(pressed()), this, SLOT(markerActionPressed()));
-        connect(pMarkerButton, SIGNAL(released()), this, SLOT(markerActionReleased()));
+        connect(pMarkerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::markerActionPressed);
+        connect(pMarkerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::markerActionReleased);
     }
 
     // Pointer
     UBActionPaletteButton* pSelectorButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionSelector);
     if(nullptr != pSelectorButton)
     {
-        connect(pSelectorButton, SIGNAL(pressed()), this, SLOT(selectorActionPressed()));
-        connect(pSelectorButton, SIGNAL(released()), this, SLOT(selectorActionReleased()));
+        connect(pSelectorButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::selectorActionPressed);
+        connect(pSelectorButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::selectorActionReleased);
     }
 
     // Pointer
     UBActionPaletteButton* pPointerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPointer);
     if(nullptr != pPointerButton)
     {
-        connect(pPointerButton, SIGNAL(pressed()), this, SLOT(pointerActionPressed()));
-        connect(pPointerButton, SIGNAL(released()), this, SLOT(pointerActionReleased()));
+        connect(pPointerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::pointerActionPressed);
+        connect(pPointerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::pointerActionReleased);
     }
 }
 
@@ -794,24 +821,24 @@ void UBDesktopAnnotationController::onDesktopPaletteMinimize()
     UBActionPaletteButton* pPenButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPen);
     if(nullptr != pPenButton)
     {
-        disconnect(pPenButton, SIGNAL(pressed()), this, SLOT(penActionPressed()));
-        disconnect(pPenButton, SIGNAL(released()), this, SLOT(penActionReleased()));
+        disconnect(pPenButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::penActionPressed);
+        disconnect(pPenButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::penActionReleased);
     }
 
     // Marker
     UBActionPaletteButton* pMarkerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionMarker);
     if(nullptr != pMarkerButton)
     {
-        disconnect(pMarkerButton, SIGNAL(pressed()), this, SLOT(markerActionPressed()));
-        disconnect(pMarkerButton, SIGNAL(released()), this, SLOT(markerActionReleased()));
+        disconnect(pMarkerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::markerActionPressed);
+        disconnect(pMarkerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::markerActionReleased);
     }
 
     // Eraser
     UBActionPaletteButton* pEraserButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionEraser);
     if(nullptr != pEraserButton)
     {
-        disconnect(pEraserButton, SIGNAL(pressed()), this, SLOT(eraserActionPressed()));
-        disconnect(pEraserButton, SIGNAL(released()), this, SLOT(eraserActionReleased()));
+        disconnect(pEraserButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::eraserActionPressed);
+        disconnect(pEraserButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::eraserActionReleased);
     }
 }
 
@@ -825,16 +852,7 @@ void UBDesktopAnnotationController::TransparentWidgetResized()
  */
 void UBDesktopAnnotationController::onTransparentWidgetResized()
 {
-    int rW = UBApplication::boardController->paletteManager()->rightPalette()->width();
-    int lW = UBApplication::boardController->paletteManager()->leftPalette()->width();
-
-    int rH = mTransparentDrawingView->height();
-
-    UBApplication::boardController->paletteManager()->rightPalette()->resize(rW+1, rH);
-    UBApplication::boardController->paletteManager()->rightPalette()->resize(rW, rH);
-
-    UBApplication::boardController->paletteManager()->leftPalette()->resize(lW+1, rH);
-    UBApplication::boardController->paletteManager()->leftPalette()->resize(lW, rH);
+    // Legacy dock palettes removed — nothing to resize
 }
 
 void UBDesktopAnnotationController::updateMask(bool bTransparent)
@@ -864,31 +882,7 @@ void UBDesktopAnnotationController::updateMask(bool bTransparent)
                        UBApplication::boardController->paletteManager()->mKeyboardPalette->width(), UBApplication::boardController->paletteManager()->mKeyboardPalette->height());
         }
 
-        if(UBApplication::boardController->paletteManager()->leftPalette()->isVisible())
-        {
-            QRect leftPalette(UBApplication::boardController->paletteManager()->leftPalette()->geometry().x(),
-                        UBApplication::boardController->paletteManager()->leftPalette()->geometry().y(),
-                        UBApplication::boardController->paletteManager()->leftPalette()->width(),
-                        UBApplication::boardController->paletteManager()->leftPalette()->height());
-
-            QRect tabsPalette(UBApplication::boardController->paletteManager()->leftPalette()->getTabPaletteRect());
-
-            p.drawRect(leftPalette);
-            p.drawRect(tabsPalette);
-        }
-
-        if(UBApplication::boardController->paletteManager()->rightPalette()->isVisible())
-        {
-            QRect rightPalette(UBApplication::boardController->paletteManager()->rightPalette()->geometry().x(),
-                        UBApplication::boardController->paletteManager()->rightPalette()->geometry().y(),
-                        UBApplication::boardController->paletteManager()->rightPalette()->width(),
-                        UBApplication::boardController->paletteManager()->rightPalette()->height());
-
-            QRect tabsPalette(UBApplication::boardController->paletteManager()->rightPalette()->getTabPaletteRect());
-
-            p.drawRect(rightPalette);
-            p.drawRect(tabsPalette);
-        }
+        // Legacy dock palettes removed — no mask contribution
 
 #ifdef Q_OS_LINUX
         //Rquiered only for compiz wm

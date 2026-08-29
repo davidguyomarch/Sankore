@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -80,6 +81,7 @@ class UBBoardView : public QGraphicsView
         void hidden();
         void shown();
         void clickOnBoard();
+        void ocrZoneSelected(const QRectF& sceneRect);
 
         //EV-7 - NNE - 20131231
         void mouseMove(QMouseEvent* event);

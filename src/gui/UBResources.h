@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -65,6 +66,7 @@ class UBResources : public QObject
          QCursor richTextCursor;
          QCursor rotateCursor;
 		 QCursor drawLineRulerCursor;
+         QCursor ocrCursor;
 };
 
 #endif /* UBRESOURCES_H_ */

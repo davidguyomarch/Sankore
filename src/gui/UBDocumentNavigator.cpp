@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -64,10 +65,10 @@ UBDocumentNavigator::UBDocumentNavigator(QWidget *parent, const char *name):QGra
     setFrameShadow(QFrame::Plain);
 
     UBApplication::boardController->setDocumentNavigator(this);
-    connect(UBApplication::boardController, SIGNAL(documentThumbnailsUpdated(UBDocumentContainer*)), this, SLOT(generateThumbnails(UBDocumentContainer*)));
-    connect(UBApplication::boardController, SIGNAL(documentPageUpdated(int)), this, SLOT(updateSpecificThumbnail(int)));
-    connect(UBApplication::boardController, SIGNAL(pageSelectionChanged(int)), this, SLOT(onScrollToSelectedPage(int)));
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(activeSceneChanged())); // Issue 1026 - AOU - 20131018
+    connect(UBApplication::boardController, &UBBoardController::documentThumbnailsUpdated, this, &UBDocumentNavigator::generateThumbnails);
+    connect(UBApplication::boardController, &UBBoardController::documentPageUpdated, this, &UBDocumentNavigator::updateSpecificThumbnail);
+    connect(UBApplication::boardController, &UBBoardController::pageSelectionChanged, this, &UBDocumentNavigator::onScrollToSelectedPage);
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBDocumentNavigator::activeSceneChanged); // Issue 1026 - AOU - 20131018
 }
 
 /**

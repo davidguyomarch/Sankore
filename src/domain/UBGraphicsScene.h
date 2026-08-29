@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -33,6 +34,7 @@
 #include "core/UB.h"
 
 #include "UBItem.h"
+#include "UBSceneContext.h"
 #include "tools/UBGraphicsCurtainItem.h"
 #include "core/UBTypes.h"
 
@@ -56,6 +58,7 @@ class UBDocumentProxy;
 class UBSettings;
 class UBGraphicsCurtainItem;
 class UBGraphicsStroke;
+class UBSmoothStrokeItem;
 class UBMagnifierParams;
 class UBMagnifier;
 class UBGraphicsCache;
@@ -114,6 +117,8 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
     public:
 
     void setSettings(UBSettings* settings) { mSettings = settings; }
+    void setSceneContext(const UBSceneContext& ctx) { mContext = ctx; }
+    const UBSceneContext& sceneContext() const { return mContext; }
 
     enum clearCase {
         clearItemsAndAnnotations = 0
@@ -127,7 +132,7 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         void setURStackEnable(bool enable){mUndoRedoStackEnabled = enable;}
         bool isURStackIsEnabled(){return mUndoRedoStackEnabled;}
 
-        UBGraphicsScene(UBDocumentProxy *parent, bool enableUndoRedoStack = true);
+        UBGraphicsScene(UBDocumentProxy *parent, bool enableUndoRedoStack = true, const UBSceneContext& context = UBSceneContext());
         virtual ~UBGraphicsScene();
 
         virtual UBItem* deepCopy() const;
@@ -385,6 +390,7 @@ public slots:
     signals:
 
        void pageSizeChanged();
+       void textItemAdded(UBGraphicsTextItem* textItem);
 
     protected:
         UBGraphicsPolygonItem* lineToPolygonItem(const QLineF& pLine, const qreal& pWidth);
@@ -415,6 +421,7 @@ public slots:
         QString cleanHtml(const QString& _html);
 
         UBSettings* mSettings;
+        UBSceneContext mContext;
 
         QGraphicsEllipseItem* mEraser;
         QGraphicsEllipseItem* mPointer;
@@ -452,6 +459,7 @@ public slots:
         RenderingContext mRenderingContext;
 
         UBGraphicsStroke* mCurrentStroke;
+        UBSmoothStrokeItem* mCurrentSmoothStroke = nullptr;
 
         bool mShouldUseOMP;
 
@@ -470,6 +478,13 @@ public slots:
         UBGraphicsPolygonItem* mpLastPolygon;
 
         bool mDrawWithCompass;
+
+        // Stroke smoothing (Catmull-Rom interpolation)
+        QVector<QPointF> mSmoothBuffer;   // circular buffer of last 4 points
+        QVector<qreal> mSmoothWidths;     // corresponding widths
+        void drawSmoothedSegment(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3,
+                                 qreal w1, qreal w2, bool bLineStyle);
+        void flushSmoothBuffer(bool bLineStyle);
 
 };
 

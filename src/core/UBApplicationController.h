@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -41,7 +42,6 @@ class UBSoftwareUpdate;
 class QNetworkAccessManager;
 class QNetworkReply;
 // class QHttp; -- removed in Qt6
-class UBRightPalette;
 class UBSettings;
 
 
@@ -51,7 +51,7 @@ class UBApplicationController : public QObject
 
     public:
 
-        UBApplicationController(UBBoardView *pControlView, UBBoardView *pDisplayView, UBMainWindow *pMainWindow, QObject* parent, UBRightPalette* rightPalette);
+        UBApplicationController(UBBoardView *pControlView, UBBoardView *pDisplayView, UBMainWindow *pMainWindow, QObject* parent);
         virtual ~UBApplicationController();
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
@@ -97,7 +97,7 @@ class UBApplicationController : public QObject
 
         enum MainMode
         {
-            Board = 0, Internet, Document, Tutorial, ParaschoolEditor, WebDocument
+            Board = 0, Internet, Document, WebDocument
         };
 
         MainMode displayMode()
@@ -141,14 +141,7 @@ class UBApplicationController : public QObject
         void actionCopy();
         void actionPaste();
 
-        void showTutorial();
-        void showSankoreEditor();
-
-        void checkUpdateRequest();
-        void checkUpdateAtLaunch();
-
     private slots:
-        void updateRequestFinished(int id, bool error);
 
     protected:
 
@@ -181,11 +174,8 @@ class UBApplicationController : public QObject
 
         bool mIsShowingDesktop;
 
-        bool isNoUpdateDisplayed;
-        void checkUpdate ();
         QNetworkAccessManager *networkAccessManager;
 
-        void downloadJsonFinished(QString updateString);
         // QHttp removed in Qt6 - TODO: use QNetworkAccessManager
 };
 

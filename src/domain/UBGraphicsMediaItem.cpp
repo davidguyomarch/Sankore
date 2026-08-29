@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -23,6 +24,8 @@
 
 #include "UBGraphicsGroupContainerItem.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QFileInfo>
+#include <QMimeDatabase>
 #include "UBGraphicsMediaItem.h"
 #include "UBGraphicsMediaItemDelegate.h"
 #include "UBGraphicsScene.h"
@@ -69,6 +72,7 @@ bool UBGraphicsMediaItem::sIsMutedByDefault = false;
 UBGraphicsMediaItem::UBGraphicsMediaItem(const QUrl& pMediaFileUrl, QGraphicsItem *parent)
         : UBAbstractGraphicsProxyWidget(parent)
         , mVideoWidget(nullptr)
+        , mAudioOutput(nullptr)
         , mAudioWidget(nullptr)
         , mMuted(sIsMutedByDefault)
         , mMutedByUserAction(sIsMutedByDefault)
@@ -79,16 +83,12 @@ UBGraphicsMediaItem::UBGraphicsMediaItem(const QUrl& pMediaFileUrl, QGraphicsIte
     update();
 
     mMediaObject = new QMediaPlayer(this);
+    mAudioOutput = new QAudioOutput(this);
 
-    QString mediaPath = pMediaFileUrl.toString();
-    if ("" == mediaPath)
-        mediaPath = pMediaFileUrl.toLocalFile();
+    mMediaType = detectMediaType(pMediaFileUrl);
 
-    if (mediaPath.toLower().contains("videos"))
+    if (mMediaType == mediaType_Video)
     {
-        mMediaType = mediaType_Video;
-
-        mAudioOutput = new QAudioOutput(this);
         mVideoWidget = new QVideoWidget(); // owned and destructed by the scene ...
         mMediaObject->setVideoOutput(mVideoWidget);
 
@@ -101,10 +101,9 @@ UBGraphicsMediaItem::UBGraphicsMediaItem(const QUrl& pMediaFileUrl, QGraphicsIte
         haveLinkedImage = true;
     }
     else
-    if (mediaPath.toLower().contains("audios"))
     {
+        // Default to audio (covers both explicit audio files and unknown types)
         mMediaType = mediaType_Audio;
-        mAudioOutput = new QAudioOutput(this);
 
         mAudioWidget = new UBAudioPresentationWidget();
         int borderSize = 0;
@@ -145,8 +144,8 @@ UBGraphicsMediaItem::UBGraphicsMediaItem(const QUrl& pMediaFileUrl, QGraphicsIte
 
     setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::ObjectItem)); //Necessary to set if we want z value to be assigned correctly
 
-    connect(Delegate(), SIGNAL(showOnDisplayChanged(bool)), this, SLOT(showOnDisplayChanged(bool)));
-    connect(mMediaObject, SIGNAL(hasVideoChanged(bool)), this, SLOT(hasMediaChanged(bool)));
+    connect(Delegate(), &UBGraphicsItemDelegate::showOnDisplayChanged, this, &UBGraphicsMediaItem::showOnDisplayChanged);
+    connect(mMediaObject, &QMediaPlayer::hasVideoChanged, this, &UBGraphicsMediaItem::hasMediaChanged);
 }
 
 
@@ -178,11 +177,22 @@ QVariant UBGraphicsMediaItem::itemChange(GraphicsItemChange change, const QVaria
         {
             QString absoluteMediaFilename;
 
-            if(mMediaFileUrl.toLocalFile().startsWith("audios/") || mMediaFileUrl.toLocalFile().startsWith("videos/")){
-                absoluteMediaFilename = scene()->document()->persistencePath() + "/"  + mMediaFileUrl.toLocalFile();
+            QString localFile = mMediaFileUrl.toLocalFile();
+            if(localFile.startsWith("audios/") || localFile.startsWith("videos/")
+               || localFile.startsWith("audios\\") || localFile.startsWith("videos\\")){
+                absoluteMediaFilename = scene()->document()->persistencePath() + "/"  + localFile;
+            }
+            else if(!QFileInfo(localFile).isAbsolute()){
+                // Relative path without audios/videos prefix — try resolving against document
+                QString subdir = isAudioUrl(mMediaFileUrl) ? "audios" : "videos";
+                QString candidate = scene()->document()->persistencePath() + "/" + subdir + "/" + QFileInfo(localFile).fileName();
+                if (QFile::exists(candidate))
+                    absoluteMediaFilename = candidate;
+                else
+                    absoluteMediaFilename = scene()->document()->persistencePath() + "/" + localFile;
             }
             else{
-                absoluteMediaFilename = mMediaFileUrl.toLocalFile();
+                absoluteMediaFilename = localFile;
             }
 
             if (absoluteMediaFilename.length() > 0)
@@ -300,7 +310,7 @@ void UBGraphicsMediaItem::copyItemParameters(UBItem *copy) const
         cp->setSourceUrl(this->sourceUrl());
         cp->resize(this->size());
 
-        connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), cp, SLOT(activeSceneChanged()));
+        connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, cp, &UBGraphicsMediaItem::activeSceneChanged);
         // TODO UB 4.7 complete all members
     }
 }
@@ -370,3 +380,40 @@ void UBGraphicsMediaItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 }
 
+
+UBGraphicsMediaItem::mediaType UBGraphicsMediaItem::detectMediaType(const QUrl &url)
+{
+    // First try: use QMimeDatabase for reliable detection
+    QString filePath = url.toLocalFile();
+    if (filePath.isEmpty())
+        filePath = url.toString();
+
+    QMimeDatabase db;
+    QMimeType mime = db.mimeTypeForFile(filePath, QMimeDatabase::MatchExtension);
+    QString mimeName = mime.name();
+
+    if (mimeName.startsWith("video/"))
+        return mediaType_Video;
+    if (mimeName.startsWith("audio/"))
+        return mediaType_Audio;
+
+    // Fallback: check well-known extensions
+    QString suffix = QFileInfo(filePath).suffix().toLower();
+    static const QStringList videoExts = {"mp4", "avi", "mkv", "webm", "mov", "wmv", "flv", "ogv", "m4v"};
+    static const QStringList audioExts = {"mp3", "wav", "ogg", "flac", "aac", "wma", "m4a", "opus"};
+
+    if (videoExts.contains(suffix))
+        return mediaType_Video;
+
+    // Legacy fallback: check if path contains "videos" directory name
+    if (filePath.toLower().contains("/videos/") || filePath.toLower().contains("\\videos\\"))
+        return mediaType_Video;
+
+    // Default to audio for all other cases (including unknown)
+    return mediaType_Audio;
+}
+
+bool UBGraphicsMediaItem::isAudioUrl(const QUrl &url)
+{
+    return detectMediaType(url) == mediaType_Audio;
+}

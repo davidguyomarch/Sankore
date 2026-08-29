@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -69,7 +70,8 @@ struct UBStylusTool
         Capture,
         RichText,
         ChangeFill,//EV-7 - CFA - 20140122 : pot de peinture
-        Drawing //EV-7 - NNE - 20140103
+        Drawing, //EV-7 - NNE - 20140103
+        Ocr // Handwriting recognition zone selection
     };
 };
 
@@ -171,6 +173,7 @@ struct UBGraphicsItemType
         GraphicsFreehandItemType,
         GraphicsHandle,
         GraphicsProxyWidget,
+        SmoothStrokeItemType,
         UserTypesCount // this line must be the last line in this enum because it is types counter.
     };
 };

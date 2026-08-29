@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -92,7 +93,7 @@ class UBDocumentProxy : public QObject
 
         // Issue 1684 - CFA - 20131120
         void setHasDefaultImageBackground(const bool hasDefault);
-        const bool hasDefaultImageBackground() const;
+        bool hasDefaultImageBackground() const;
         void setDefaultImageBackground(const UBFeature& item);
         UBFeature& defaultImageBackground();
         const UBFeature& defaultImageBackground() const;
@@ -150,7 +151,7 @@ inline bool operator==(const UBDocumentProxy &proxy1, const UBDocumentProxy &pro
     return proxy1.persistencePath() == proxy2.persistencePath();
 }
 
-inline uint qHash(const UBDocumentProxy &key)
+inline size_t qHash(const UBDocumentProxy &key)
 {
     return qHash(key.persistencePath());
 }

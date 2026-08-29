@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -31,6 +32,7 @@
 #include "UBFeaturesController.h"
 #include "gui/UBActionPalette.h"
 #include "domain/UBShapeFactory.h"
+#include "IUBBoardContext.h"
 
 
 class UBMainWindow;
@@ -51,24 +53,35 @@ class UBGraphicsVideoItem;
 class UBGraphicsAudioItem;
 class UBGraphicsWidgetItem;
 class UBBoardPaletteManager;
+class UBBoardNavigationController;
+class UBBoardToolbarController;
+class UBBoardZoomController;
+class UBBoardItemFactory;
 class UBItem;
 class UBGraphicsItem;
 class UBDocumentNavigator;
+class UBTextDelegateDialogHandler;
+class UBGraphicsTextItem;
 
 
-typedef enum{
-    eItemActionType_Default,
-    eItemActionType_Duplicate,
-    eItemActionType_Paste
-}eItemActionType;
-
-class UBBoardController : public UBDocumentContainer
+class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 {
     Q_OBJECT
 
     public:
         UBBoardController(UBMainWindow *mainWindow);
         virtual ~UBBoardController();
+
+        // IUBBoardContext override to resolve ambiguity with UBDocumentContainer
+        UBDocumentProxy* selectedDocument() override { return UBDocumentContainer::selectedDocument(); }
+        QObject* asQObject() override { return this; }
+        void reloadThumbnails() override { UBDocumentContainer::reloadThumbnails(); }
+        int pageCount() override { return UBDocumentContainer::pageCount(); }
+        void addPage(int index) override { UBDocumentContainer::addPage(index); }
+        void duplicatePages(QList<int>& indexes) override { UBDocumentContainer::duplicatePages(indexes); }
+        void deletePages(QList<int>& indexes) override { UBDocumentContainer::deletePages(indexes); }
+        void movePageToIndex(int source, int target) override { UBDocumentContainer::movePageToIndex(source, target); }
+        void insertThumbPage(int index) override { UBDocumentContainer::insertThumbPage(index); }
 
         void setSettings(UBSettings* settings) { mSettings = settings; }
 
@@ -105,57 +118,39 @@ class UBBoardController : public UBDocumentContainer
             return mActiveScene;
         }
 
-        void setPenColorOnDarkBackground(const QColor& pColor)
-        {
-            if (mPenColorOnDarkBackground == pColor)
-                return;
-
-            mPenColorOnDarkBackground = pColor;
-            emit penColorChanged();
-        }
-
-        void setPenColorOnLightBackground(const QColor& pColor)
-        {
-            if (mPenColorOnLightBackground == pColor)
-                return;
-
-            mPenColorOnLightBackground = pColor;
-            emit penColorChanged();
-        }
-
-        void setMarkerColorOnDarkBackground(const QColor& pColor)
-        {
-            mMarkerColorOnDarkBackground = pColor;
-        }
-
-        void setMarkerColorOnLightBackground(const QColor& pColor)
-        {
-            mMarkerColorOnLightBackground = pColor;
-        }
-
         QColor penColorOnDarkBackground()
         {
-            return mPenColorOnDarkBackground;
+            return mSettings->penColor(true);
         }
 
         QColor penColorOnLightBackground()
         {
-            return mPenColorOnLightBackground;
+            return mSettings->penColor(false);
         }
 
         QColor markerColorOnDarkBackground()
         {
-            return mMarkerColorOnDarkBackground;
+            return mSettings->markerColor(true);
         }
 
         QColor markerColorOnLightBackground()
         {
-            return mMarkerColorOnLightBackground;
+            return mSettings->markerColor(false);
         }
 
         qreal systemScaleFactor()
         {
             return mSystemScaleFactor;
+        }
+
+        void setSystemScaleFactor(qreal factor)
+        {
+            mSystemScaleFactor = factor;
+        }
+
+        qreal zoomFactor()
+        {
+            return mZoomFactor;
         }
 
         //EV-7 - NNE - 20140106
@@ -179,9 +174,23 @@ class UBBoardController : public UBDocumentContainer
             return mPaletteManager;
         }
 
+        UBBoardNavigationController *navigationController()
+        {
+            return mNavigationController;
+        }
+
         void notifyCache(bool visible);
         void notifyPageChanged();
+        void updateActionStates();
         void displayMetaData(QMap<QString, QString> metadatas);
+
+        // IUBBoardContext signal emission
+        void emitPageChanged() override { emit pageChanged(); }
+        void emitActiveSceneChanged() override { emit activeSceneChanged(); }
+        void emitZoomChanged(qreal zoom) override { emit zoomChanged(zoom); }
+        void emitControlViewportChanged() override { emit controlViewportChanged(); }
+        void emitSystemScaleFactorChanged(qreal factor) override { emit systemScaleFactorChanged(factor); }
+        void emitDocumentThumbnailsUpdated(void* sender) override { emit documentThumbnailsUpdated(static_cast<UBDocumentContainer*>(sender)); }
 
         void setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, int pSceneIndex = 0, bool forceReload = false, const bool onImport = false);
         void setActiveDocumentScene(int pSceneIndex);
@@ -202,6 +211,8 @@ class UBBoardController : public UBDocumentContainer
 
     public slots:
         void ClearUndoStack();
+        void colorPaletteChanged();
+        void stylusToolDoubleClicked(int tool);
 
         void showDocumentsDialog();
         void showKeyboard(bool show);
@@ -294,8 +305,8 @@ class UBBoardController : public UBDocumentContainer
         void setupToolbar();
         void connectToolbar();
         void initToolbarTexts();
-        void updateActionStates();
         void updateSystemScaleFactor();
+        void updateSceneContext();
         QString truncate(QString text, int maxWidth);
 
     protected slots:
@@ -314,21 +325,21 @@ class UBBoardController : public UBDocumentContainer
         UBGraphicsScene* mActiveScene;
         int mActiveSceneIndex;
         UBBoardPaletteManager *mPaletteManager;
+        UBBoardNavigationController *mNavigationController;
+        UBBoardToolbarController *mToolbarController;
+        UBBoardZoomController *mZoomController;
+        UBBoardItemFactory *mItemFactory;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
         UBMessageWindow *mMessageWindow;
         UBBoardView *mControlView;
         UBBoardView *mDisplayView;
         QWidget *mControlContainer;
         UBDocumentNavigator *mDocumentNavigator;
+        UBTextDelegateDialogHandler* mTextDelegateDialogHandler;
         qreal mZoomFactor;
         bool mIsClosing;
-        QColor mPenColorOnDarkBackground;
-        QColor mPenColorOnLightBackground;
-        QColor mMarkerColorOnDarkBackground;
-        QColor mMarkerColorOnLightBackground;
         qreal mSystemScaleFactor;
         bool mCleanupDone;
-        QMap<QAction*, QPair<QString, QString> > mActionTexts;
         bool mCacheWidgetIsEnabled;
         QGraphicsItem* mLastCreatedItem;
         int mDeletingSceneIndex;
@@ -340,15 +351,14 @@ class UBBoardController : public UBDocumentContainer
         UBShapeFactory mShapeFactory;        
 
     private slots:
-        void stylusToolDoubleClicked(int tool);
         void boardViewResized(QResizeEvent* event);
         void documentWillBeDeleted(UBDocumentProxy* pProxy);
         void updateBackgroundActionsState(bool isDark, bool isCrossed);
         void updateBackgroundState();
-        void colorPaletteChanged();
         void libraryDialogClosed(int ret);
         void lastWindowClosed();
         void onDownloadModalFinished();
+        void onTextItemAdded(UBGraphicsTextItem* textItem);
 
 };
 

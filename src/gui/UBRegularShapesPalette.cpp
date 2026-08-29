@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -68,7 +69,7 @@ UBRegularShapesPalette::UBRegularShapesPalette(QWidget *parent, Qt::Orientation 
 
     for (UBActionPaletteButton* button : mButtons)
     {
-        connect(button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+        connect(button, &QAbstractButton::clicked, this, [this]() { buttonClicked(); });
     }
 }
 
@@ -101,7 +102,7 @@ UBRegularShapesPalette::UBRegularShapesPalette(Qt::Orientation orient, QWidget *
 
     for (UBActionPaletteButton* button : mButtons)
     {
-        connect(button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+        connect(button, &QAbstractButton::clicked, this, [this]() { buttonClicked(); });
     }
 }
 

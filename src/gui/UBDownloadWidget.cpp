@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -69,11 +70,11 @@ UBDownloadWidget::UBDownloadWidget(QWidget *parent, const char *name):QWidget(pa
     mpBttnLayout->addWidget(mpCancelBttn, 0);
     mpLayout->addLayout(mpBttnLayout);
 
-    connect(UBDownloadManager::downloadManager(), SIGNAL(fileAddedToDownload()), this, SLOT(onFileAddedToDownload()));
-    connect(UBDownloadManager::downloadManager(), SIGNAL(downloadUpdated(int,qint64,qint64)), this, SLOT(onDownloadUpdated(int,qint64,qint64)));
-    connect(UBDownloadManager::downloadManager(), SIGNAL(downloadFinished(int)), this, SLOT(onDownloadFinished(int)));
-    connect(mpCancelBttn, SIGNAL(clicked()), this, SLOT(onCancelClicked()));
-    connect(mpTree, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked(QTreeWidgetItem*,int)));
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::fileAddedToDownload, this, &UBDownloadWidget::onFileAddedToDownload);
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::downloadUpdated, this, &UBDownloadWidget::onDownloadUpdated);
+    connect(UBDownloadManager::downloadManager(), qOverload<int>(&UBDownloadManager::downloadFinished), this, &UBDownloadWidget::onDownloadFinished);
+    connect(mpCancelBttn, &QPushButton::clicked, this, [this]() { onCancelClicked(); });
+    connect(mpTree, &QTreeWidget::itemClicked, this, &UBDownloadWidget::onItemClicked);
 }
 
 /**

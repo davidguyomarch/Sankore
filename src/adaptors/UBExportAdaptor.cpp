@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -28,6 +29,7 @@
 #include "frameworks/UBFileSystemUtils.h"
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
 #include "core/UBSetting.h"
 #include "core/UBApplication.h"
 
@@ -54,7 +56,7 @@ QString UBExportAdaptor::askForFileName(UBDocumentProxy* pDocument, const QStrin
 {
     QString defaultName;
 
-    defaultName += pDocument->metaData(UBSettings::documentName).toString() + exportExtention();
+    defaultName += pDocument->metaData(UBSettingsData::documentName).toString() + exportExtention();
 
     defaultName = UBFileSystemUtils::cleanName(defaultName);
 
@@ -101,12 +103,12 @@ QString UBExportAdaptor::askForDirName(UBDocumentProxy* pDocument, const QString
 
         QString docname;
 
-        if (pDocument->metaData(UBSettings::documentGroupName).toString().length() > 0)
+        if (pDocument->metaData(UBSettingsData::documentGroupName).toString().length() > 0)
         {
-            docname += pDocument->metaData(UBSettings::documentGroupName).toString() + QString(" ");
+            docname += pDocument->metaData(UBSettingsData::documentGroupName).toString() + QString(" ");
         }
 
-        docname += pDocument->metaData(UBSettings::documentName).toString() + exportExtention();
+        docname += pDocument->metaData(UBSettingsData::documentName).toString() + exportExtention();
         docname = UBFileSystemUtils::cleanName(docname);
 
         dirname = container + "/" + docname;

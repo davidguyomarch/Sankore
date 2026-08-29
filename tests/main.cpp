@@ -1,3 +1,11 @@
+/*
+ * Open-Sankoré Community Edition
+ *
+ * Copyright (C) 2026 David Guyomarch
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /**
  * @file main.cpp
  * @brief Point d'entrée des tests unitaires Open-Sankoré.
@@ -6,7 +14,7 @@
  */
 
 #include <QtTest>
-#include <QGuiApplication>
+#include <QApplication>
 
 #include "tst_UBStringUtils.h"
 #include "tst_UBFileSystemUtils.h"
@@ -20,10 +28,16 @@
 #include "tst_UBMetadataDcSubsetAdaptor.h"
 #include "tst_UBOEmbedParser.h"
 #include "tst_UBSvgTransform.h"
+#include "tst_UBForeignObjectsHelper.h"
+#include "tst_UBGraphicsScene.h"
+#include "tst_UBVisualRegression.h"
+#include "tst_UBRecognition.h"
+#include "tst_UBSmoothStrokeItem.h"
+// #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setApplicationName("OpenSankoreTests");
 
     int status = 0;
@@ -87,6 +101,33 @@ int main(int argc, char *argv[])
         TestUBSvgTransform test;
         status |= QTest::qExec(&test, argc, argv);
     }
+
+    {
+        TestUBForeignObjectsHelper test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBGraphicsScene test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBVisualRegression test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBRecognition test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBSmoothStrokeItem test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+
+    // TestUBBoardSubControllers disabled until premoc is fixed
+    // {
+    //     TestUBBoardSubControllers test;
+    //     status |= QTest::qExec(&test, argc, argv);
+    // }
 
     return status;
 }

@@ -1,4 +1,10 @@
 #!/bin/bash
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 # package-linux.sh — Build .deb and .rpm packages from the compiled binary
 # Usage: ./scripts/package-linux.sh [architecture]
 #   architecture: amd64 (default) or arm64
@@ -8,7 +14,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 ARCH="${1:-amd64}"
-VERSION="2.5.1"
+VERSION="4.0.2"
 PRODUCT_DIR="$PROJECT_DIR/build/linux/release/product"
 PKG_DIR="$PROJECT_DIR/build/packages"
 
@@ -84,7 +90,7 @@ Description: Open-Sankoré interactive whiteboard
  Open-Sankoré is an open-source interactive whiteboard application
  for digital teaching. It supports pen drawing, geometric tools,
  document annotation, and multimedia content.
-Homepage: https://github.com/davidguyomarch/Sankore-3.1
+Homepage: https://github.com/davidguyomarch/Sankore
 EOF
 
 # Build .deb
@@ -126,7 +132,7 @@ Version:        $VERSION
 Release:        1%{?dist}
 Summary:        Interactive whiteboard application
 License:        GPLv3
-URL:            https://github.com/davidguyomarch/Sankore-3.1
+URL:            https://github.com/davidguyomarch/Sankore
 Source0:        open-sankore-%{version}.tar.gz
 BuildArch:      $RPM_ARCH
 

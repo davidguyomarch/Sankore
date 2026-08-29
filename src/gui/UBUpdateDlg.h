@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -48,10 +49,12 @@ public slots:
 signals:
     void updateFiles();
 
+public slots:
+    void transitioningFile(QString fileName);
+
 private slots:
     void onBrowse();
     void onUpdate();
-    void transitioningFile(QString fileName);
 
 private:
     QVBoxLayout* mMainLayout;

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -35,6 +36,8 @@
 #include "frameworks/UBPlatformUtils.h"
 
 #include "core/UBSettings.h"
+#include "core/UBSettingsData.h"
+#include "core/UBTheme.h"
 #include "core/UBMimeData.h"
 #include "core/UBApplication.h"
 #include "core/UBSetting.h"
@@ -43,7 +46,6 @@
 
 #include "network/UBHttpGet.h"
 
-#include "gui/UBStylusPalette.h"
 #include "gui/UBRubberBand.h"
 #include "gui/UBToolWidget.h"
 #include "gui/UBResources.h"
@@ -138,14 +140,14 @@ UBBoardView::~UBBoardView () {
 
 void UBBoardView::init ()
 {
-  connect (UBSettings::settings ()->boardPenPressureSensitive, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardPenPressureSensitive, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
-  connect (UBSettings::settings ()->boardMarkerPressureSensitive, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardMarkerPressureSensitive, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
-  connect (UBSettings::settings ()->boardUseHighResTabletEvent, SIGNAL (changed (QVariant)),
-           this, SLOT (settingChanged (QVariant)));
+  connect (UBSettings::settings ()->boardUseHighResTabletEvent, &UBSetting::changed,
+           this, &UBBoardView::settingChanged);
 
   setWindowFlags (Qt::FramelessWindowHint);
   setFrameStyle (QFrame::NoFrame);
@@ -172,6 +174,10 @@ void UBBoardView::init ()
   settingChanged (QVariant ());
 
   unsetCursor();
+
+  // Update cursor immediately when tool changes (QML toolbar, keyboard shortcuts, etc.)
+  connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+          this, &UBBoardView::setToolCursor);
 
   movingItem = nullptr;
   mWidgetMoved = false;
@@ -1034,7 +1040,7 @@ void UBBoardView::longPressEvent()
    UBDrawingController *drawingController = UBDrawingController::drawingController();
    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
 
-   disconnect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+   disconnect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
 
    if (UBStylusTool::Selector == currentTool)
    {
@@ -1048,7 +1054,7 @@ void UBBoardView::longPressEvent()
    else
    if (UBStylusTool::Eraser == currentTool)
    {
-       UBApplication::boardController->paletteManager()->toggleErasePalette(true);
+       // Legacy erase palette removed — erase options now in QML
    }
 
 }
@@ -1121,7 +1127,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             if (scene()->backgroundObject() == movingItem)
                 movingItem = nullptr;
 
-            connect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+            connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
             if (!movingItem && !mController->cacheIsVisible())
                 mLongPressTimer.start();
 
@@ -1191,6 +1197,29 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
 
             event->accept ();
         }
+        else if (currentTool == UBStylusTool::Ocr)
+        {
+            scene ()->deselectAllItems();
+
+            if (!mRubberBand)
+                mRubberBand = new UBRubberBand (QRubberBand::Rectangle, this);
+
+            mRubberBand->setGeometry (QRect (mMouseDownPos, QSize ()));
+            mRubberBand->show ();
+            mIsCreatingSceneGrabZone = true;
+
+            event->accept ();
+        }
+        else if (currentTool == UBStylusTool::Pointer)
+        {
+            // Forward to scene — it has a red laser pointer circle (mPointer)
+            viewport()->setCursor(UBResources::resources()->pointerCursor);
+            if (scene() && !mTabletStylusIsPressed)
+            {
+                scene()->inputDevicePress(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())));
+            }
+            event->accept();
+        }
         else if (currentTool == UBStylusTool::ChangeFill)
         {
             qDebug() << "on est dans le cas du pot de peinture, on va remplir l'objet si possible";
@@ -1208,7 +1237,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             {
                 if (currentTool == UBStylusTool::Eraser)
                 {
-                    connect(&mLongPressTimer, SIGNAL(timeout()), this, SLOT(longPressEvent()));
+                    connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
                     mLongPressTimer.start();
                 }
                 scene ()->inputDevicePress (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())));
@@ -1314,7 +1343,7 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
   {
       QGraphicsView::mouseMoveEvent (event);
   }
-  else if (currentTool == UBStylusTool::Text || currentTool == UBStylusTool::Capture)
+  else if (currentTool == UBStylusTool::Text || currentTool == UBStylusTool::Capture || currentTool == UBStylusTool::Ocr)
     {
       if (mRubberBand && (mIsCreatingTextZone || mIsCreatingSceneGrabZone))
         {
@@ -1325,6 +1354,15 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
         {
           QGraphicsView::mouseMoveEvent (event);
         }
+    }
+  else if (currentTool == UBStylusTool::Pointer)
+    {
+      // Forward to scene — it moves the red laser pointer circle
+      if (!mTabletStylusIsPressed && scene())
+      {
+          scene()->inputDeviceMove(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())), mMouseButtonIsPressed);
+      }
+      event->accept ();
     }
   else
     {
@@ -1507,6 +1545,30 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
           QRectF sceneRect (sceneTopLeft, sceneBottomRight);
 
           mController->grabScene (sceneRect);
+
+          event->accept ();
+        }
+      else
+        {
+          QGraphicsView::mouseReleaseEvent (event);
+        }
+
+      mIsCreatingSceneGrabZone = false;
+    }
+  else if (currentTool == UBStylusTool::Ocr)
+    {
+      if (mRubberBand)
+        mRubberBand->hide ();
+
+      if (scene () && mRubberBand && mIsCreatingSceneGrabZone && mRubberBand->geometry ().width () > 16)
+        {
+          QRect rect = mRubberBand->geometry ();
+          QPointF sceneTopLeft = mapToScene (rect.topLeft ());
+          QPointF sceneBottomRight = mapToScene (rect.bottomRight ());
+          QRectF sceneRect (sceneTopLeft, sceneBottomRight);
+
+          // Find all stroke items in this zone and run OCR
+          emit ocrZoneSelected(sceneRect);
 
           event->accept ();
         }
@@ -1809,9 +1871,9 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
           QColor docSizeColor;
 
           if (darkBackground)
-            docSizeColor = UBSettings::documentSizeMarkColorDarkBackground;
+            docSizeColor = UBTheme::documentSizeMarkDark();
           else
-            docSizeColor = UBSettings::documentSizeMarkColorLightBackground;
+            docSizeColor = UBTheme::documentSizeMarkLight();
 
           QPen pen (docSizeColor);
           pen.setWidth (penWidth);
@@ -1905,7 +1967,13 @@ UBBoardView::setToolCursor (int tool)
       controlViewport->setCursor (UBResources::resources ()->richTextCursor);
       break;
     case UBStylusTool::Capture:
-      controlViewport->setCursor (UBResources::resources ()->penCursor);
+      controlViewport->setCursor (Qt::CrossCursor);
+      break;
+    case UBStylusTool::Ocr:
+      controlViewport->setCursor (UBResources::resources ()->ocrCursor);
+      break;
+    case UBStylusTool::Drawing:
+      controlViewport->setCursor (Qt::CrossCursor);
       break;
     default:
       //Q_ASSERT (false);

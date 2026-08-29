@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -30,25 +31,25 @@ UBAbstractTeacherGuide::UBAbstractTeacherGuide(QWidget *parent):
     QStackedWidget(parent),
     mKeyboardActionFired(false)
 {
-    connect(UBApplication::boardController->controlView(), SIGNAL(clickOnBoard()), this, SLOT(showPresentationMode()));
+    connect(UBApplication::boardController->controlView(), &UBBoardView::clickOnBoard, this, &UBAbstractTeacherGuide::showPresentationMode);
     connectToStylusPalette();
 }
 
 void UBAbstractTeacherGuide::connectToStylusPalette()
 {
-    connect(UBApplication::mainWindow->actionPen, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionEraser, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionMarker, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionPointer, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionPlay, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionZoomIn, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionZoomOut, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionCapture, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionHand, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionLine, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionText, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionSelector, SIGNAL(triggered(bool)), this, SLOT(onTriggeredAction(bool)));
-    connect(UBApplication::mainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(onTriggeredKeyboardAction(bool)));
+    connect(UBApplication::mainWindow->actionPen, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionEraser, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionMarker, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionPointer, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionPlay, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionZoomIn, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionZoomOut, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionCapture, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionHand, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionLine, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionText, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionSelector, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredAction);
+    connect(UBApplication::mainWindow->actionVirtualKeyboard, &QAction::triggered, this, &UBAbstractTeacherGuide::onTriggeredKeyboardAction);
 }
 
 void UBAbstractTeacherGuide::onTriggeredAction(bool checked)

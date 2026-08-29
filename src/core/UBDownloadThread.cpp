@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -68,8 +69,8 @@ void UBDownloadThread::run()
     qDebug() << mpReply->readAll();
     qDebug() << " ---------------------------------------- ";
 
-    connect(mpReply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(onDownloadProgress(qint64,qint64)));
-    connect(mpReply, SIGNAL(finished()), this, SLOT(onDownloadFinished()));
+    connect(mpReply, &QNetworkReply::downloadProgress, this, &UBDownloadThread::onDownloadProgress);
+    connect(mpReply, &QNetworkReply::finished, this, &UBDownloadThread::onDownloadFinished);
 
     while(mbRun)
     {
@@ -77,8 +78,8 @@ void UBDownloadThread::run()
         sleep(100);
     }
 
-    disconnect(mpReply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(onDownloadProgress(qint64,qint64)));
-    disconnect(mpReply, SIGNAL(finished()), this, SLOT(onDownloadFinished()));
+    disconnect(mpReply, &QNetworkReply::downloadProgress, this, &UBDownloadThread::onDownloadProgress);
+    disconnect(mpReply, &QNetworkReply::finished, this, &UBDownloadThread::onDownloadFinished);
     if(nullptr != mpReply)
     {
         delete mpReply;

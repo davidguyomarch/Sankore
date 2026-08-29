@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -60,14 +61,14 @@ UBFeaturesActionBar::UBFeaturesActionBar( UBFeaturesController *controller, QWid
     setMaximumHeight(ACTIONBAR_HEIGHT);
 
     // Create the actions
-    mpFavoriteAction = new QAction(QIcon(":/images/libpalette/miniFavorite.png"), tr("Add to favorites"), this);
-    mpSocialAction = new QAction(QIcon(":/images/libpalette/social.png"), tr("Share"), this);
-    mpSearchAction = new QAction(QIcon(":/images/libpalette/miniSearch.png"), tr("Search"), this);
+    mpFavoriteAction = new QAction(QIcon(":/images/svg/miniFavorite.svg"), tr("Add to favorites"), this);
+    mpSocialAction = new QAction(QIcon(":/images/svg/social.svg"), tr("Share"), this);
+    mpSearchAction = new QAction(QIcon(":/images/svg/miniSearch.svg"), tr("Search"), this);
     mpRescanModelAction = new QAction(QIcon(":/images/cursors/rotate.png"), tr("Rescan file system"), this);
-    mpDeleteAction = new QAction(QIcon(":/images/libpalette/miniTrash.png"), tr("Delete"), this);
+    mpDeleteAction = new QAction(QIcon(":/images/svg/miniTrash.svg"), tr("Delete"), this);
     mpCloseAction = new QAction(QIcon(":/images/close.svg"), tr("Back to folder"), this);
     mpRemoveFavorite = new QAction(QIcon(":/images/libpalette/trash_favorite.svg"), tr("Remove from favorites"), this);
-    mpNewFolderAction = new QAction(QIcon(":/images/libpalette/miniNewFolder.png"), tr("Create new folder"), this);
+    mpNewFolderAction = new QAction(QIcon(":/images/svg/miniNewFolder.svg"), tr("Create new folder"), this);
 
     // Create the buttons
     mpFavoriteBtn = new UBActionButton(this, mpFavoriteAction);
@@ -104,12 +105,12 @@ UBFeaturesActionBar::UBFeaturesActionBar( UBFeaturesController *controller, QWid
     connect(mSearchBar, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
     connect(mpNewFolderAction, SIGNAL(triggered()), this, SLOT(onActionNewFolder()));*/
 
-    connect(mpFavoriteAction,SIGNAL(triggered()), this, SLOT(onActionFavorite()));
-	connect(mSearchBar, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
-	connect(mpNewFolderAction, SIGNAL(triggered()), this, SLOT(onActionNewFolder()));
-    connect(mpRemoveFavorite, SIGNAL(triggered()), this, SLOT(onActionRemoveFavorite()));
-    connect(mpRescanModelAction, SIGNAL(triggered()), this , SLOT(onActionRescanModel()));
-    connect(mpDeleteAction,SIGNAL(triggered()), this, SLOT(onActionTrash()));
+    connect(mpFavoriteAction, &QAction::triggered, this, [this]() { onActionFavorite(); });
+	connect(mSearchBar, &QLineEdit::textChanged, this, &UBFeaturesActionBar::onSearchTextChanged);
+	connect(mpNewFolderAction, &QAction::triggered, this, [this]() { onActionNewFolder(); });
+    connect(mpRemoveFavorite, &QAction::triggered, this, [this]() { onActionRemoveFavorite(); });
+    connect(mpRescanModelAction, &QAction::triggered, this, [this]() { onActionRescanModel(); });
+    connect(mpDeleteAction, &QAction::triggered, this, [this]() { onActionTrash(); });
 
 
     // Build the default toolbar

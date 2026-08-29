@@ -1,4 +1,6 @@
+# Copyright (C) 2026 David Guyomarch
 HEADERS += src/domain/UBGraphicsScene.h \
+                src/domain/UBSceneContext.h \
     src/domain/UBGraphicsItemUndoCommand.h \
     src/domain/UBGraphicsTextItemUndoCommand.h \
     src/domain/UBGraphicsItemTransformUndoCommand.h \
@@ -50,9 +52,11 @@ HEADERS += src/domain/UBGraphicsScene.h \
     src/domain/UBAlignObjectManager.h \
     src/domain/UBDragableThumbnail.h \
     src/domain/UBAbstractGraphicsProxyWidget.h \
-    src/domain/UBGraphicsProxyWidget.h
+    src/domain/UBGraphicsProxyWidget.h \
+    src/domain/UBSmoothStrokeItem.h
     
 SOURCES += src/domain/UBGraphicsScene.cpp \
+                src/domain/UBSceneContext.cpp \
     src/domain/UBGraphicsItemUndoCommand.cpp \
     src/domain/UBGraphicsTextItemUndoCommand.cpp \
     src/domain/UBGraphicsItemTransformUndoCommand.cpp \
@@ -105,4 +109,5 @@ SOURCES += src/domain/UBGraphicsScene.cpp \
     src/domain/UBAlignObjectManager.cpp \
     src/domain/UBDragableThumbnail.cpp \
     src/domain/UBAbstractGraphicsProxyWidget.cpp \
-    src/domain/UBGraphicsProxyWidget.cpp
+    src/domain/UBGraphicsProxyWidget.cpp \
+    src/domain/UBSmoothStrokeItem.cpp

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -352,7 +353,7 @@ void UBFeaturesWidget::onDisplayMetadata( QMap<QString,QString> metadata )
     }
 
     if (!widgetsThumbsUrl.isNull()) {
-        previewImageUrl = ":/images/libpalette/loading.png";
+        previewImageUrl = ":/images/svg/loading.svg";
         if (!imageGatherer)
             imageGatherer = new UBDownloadHttpFile(0, this);
 

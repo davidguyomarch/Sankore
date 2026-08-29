@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 """Update the coverage badge gist with the current coverage percentage."""
 import urllib.request
 import json

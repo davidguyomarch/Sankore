@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>StylusPaletteV2.qml</file>
+        <file>TopBar.qml</file>
+        <file>PageNavigator.qml</file>
+        <file>DrawingPropsBar.qml</file>
+        <file>ShapesPaletteV2.qml</file>
+        <file>DocumentsTopBar.qml</file>
+    </qresource>
+</RCC>

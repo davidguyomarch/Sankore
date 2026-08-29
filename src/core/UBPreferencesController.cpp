@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -23,10 +24,14 @@
 
 #include "UBPreferencesController.h"
 
+#include <QClipboard>
+#include <QFile>
+#include <QRadioButton>
 #include "UBSettings.h"
 #include "UBApplication.h"
 
 #include "gui/UBCircleFrame.h"
+#include "gui/UBColorPicker.h"
 
 #include "core/UBSetting.h"
 #include "core/UBApplicationController.h"
@@ -79,7 +84,7 @@ UBPreferencesController::UBPreferencesController(QWidget *parent)
     adjustScreens(1);
         // screenCountChanged: use QGuiApplication::screens() in Qt6
 
-    connect(mPreferencesUI->languageComboBox,SIGNAL(currentTextChanged(QString)),this,SLOT(onLanguageChanged(QString)));
+    connect(mPreferencesUI->languageComboBox, &QComboBox::currentTextChanged, this, &UBPreferencesController::onLanguageChanged);
 
     wire();
 }
@@ -118,10 +123,41 @@ void UBPreferencesController::wire()
     mPreferencesUI->mainTabWidget->setCurrentWidget(mPreferencesUI->displayTab);
     mPreferencesUI->versionLabel->setText(tr("version: ") + UBApplication::applicationVersion());
 
-    connect(mPreferencesUI->closeButton, SIGNAL(released()), this, SLOT(close()));
-    connect(mPreferencesUI->defaultSettingsButton, SIGNAL(released()), this, SLOT(defaultSettings()));
+    // About tab — load LICENSE.md from embedded resources
+    {
+        QFile licenseFile(QStringLiteral(":/LICENSE.md"));
+        if (licenseFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            mPreferencesUI->copyrightTextBrowser->setMarkdown(QString::fromUtf8(licenseFile.readAll()));
+            licenseFile.close();
+        }
+        mPreferencesUI->copyrightTextBrowser->setOpenExternalLinks(true);
+    }
 
-    connect(mPreferencesUI->startupTipsCheckBox,SIGNAL(clicked(bool)),this,SLOT(onStartupTipsClicked(bool)));
+    // Credits tab — load CREDITS.md from embedded resources
+    {
+        QFile creditsFile(QStringLiteral(":/CREDITS.md"));
+        if (creditsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QString credits = QString::fromUtf8(creditsFile.readAll());
+            mPreferencesUI->credentialTextBrowser->setMarkdown(credits);
+            creditsFile.close();
+        }
+        mPreferencesUI->credentialTextBrowser->setOpenExternalLinks(true);
+
+        QFile authorsFile(QStringLiteral(":/AUTHORS.md"));
+        if (authorsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            mPreferencesUI->textBrowser->setMarkdown(QString::fromUtf8(authorsFile.readAll()));
+            authorsFile.close();
+        }
+    }
+
+    connect(mPreferencesUI->copyVersionButton, &QPushButton::clicked, this, [this]() {
+        QApplication::clipboard()->setText(UBApplication::applicationVersion());
+    });
+
+    connect(mPreferencesUI->closeButton, &QAbstractButton::released, this, &UBPreferencesController::close);
+    connect(mPreferencesUI->defaultSettingsButton, &QAbstractButton::released, this, &UBPreferencesController::defaultSettings);
+
+    connect(mPreferencesUI->startupTipsCheckBox, &QCheckBox::clicked, this, &UBPreferencesController::onStartupTipsClicked);
 
 
     // OSK preferences
@@ -130,20 +166,20 @@ void UBPreferencesController::wire()
         mPreferencesUI->keyboardPaletteKeyButtonSize->addItem(settings->supportedKeyboardSizes->at(i));
 
 
-    connect(mPreferencesUI->keyboardPaletteKeyButtonSize, SIGNAL(currentTextChanged(const QString &)), settings->boardKeyboardPaletteKeyBtnSize, SLOT(setString(const QString &)));
-    connect(mPreferencesUI->startModeComboBox, SIGNAL(currentIndexChanged(int)), settings->appStartMode, SLOT(setInt(int)));
+    connect(mPreferencesUI->keyboardPaletteKeyButtonSize, &QComboBox::currentTextChanged, settings->boardKeyboardPaletteKeyBtnSize, &UBSetting::setString);
+    connect(mPreferencesUI->startModeComboBox, &QComboBox::currentIndexChanged, settings->appStartMode, &UBSetting::setInt);
 
 
-    connect(mPreferencesUI->useExternalBrowserCheckBox, SIGNAL(clicked(bool)), settings->webUseExternalBrowser, SLOT(setBool(bool)));
-    connect(mPreferencesUI->displayBrowserPageCheckBox, SIGNAL(clicked(bool)), settings->webShowPageImmediatelyOnMirroredScreen, SLOT(setBool(bool)));
-    connect(mPreferencesUI->swapControlAndDisplayScreensCheckBox, SIGNAL(clicked(bool)), settings->swapControlAndDisplayScreens, SLOT(setBool(bool)));
-    connect(mPreferencesUI->swapControlAndDisplayScreensCheckBox, SIGNAL(clicked(bool)), UBApplication::applicationController->displayManager(), SLOT(reinitScreens(bool)));
+    connect(mPreferencesUI->useExternalBrowserCheckBox, &QCheckBox::clicked, settings->webUseExternalBrowser, &UBSetting::setBool);
+    connect(mPreferencesUI->displayBrowserPageCheckBox, &QCheckBox::clicked, settings->webShowPageImmediatelyOnMirroredScreen, &UBSetting::setBool);
+    connect(mPreferencesUI->swapControlAndDisplayScreensCheckBox, &QCheckBox::clicked, settings->swapControlAndDisplayScreens, &UBSetting::setBool);
+    connect(mPreferencesUI->swapControlAndDisplayScreensCheckBox, &QCheckBox::clicked, UBApplication::applicationController->displayManager(), &UBDisplayManager::reinitScreens);
 
-    connect(mPreferencesUI->toolbarAtTopRadioButton, SIGNAL(clicked(bool)), this, SLOT(toolbarPositionChanged(bool)));
-    connect(mPreferencesUI->toolbarAtBottomRadioButton, SIGNAL(clicked(bool)), this, SLOT(toolbarPositionChanged(bool)));
-    connect(mPreferencesUI->horizontalChoice, SIGNAL(clicked(bool)), this, SLOT(toolbarOrientationHorizontal(bool)));
-    connect(mPreferencesUI->verticalChoice, SIGNAL(clicked(bool)), this, SLOT(toolbarOrientationVertical(bool)));
-    connect(mPreferencesUI->toolbarDisplayTextCheckBox, SIGNAL(clicked(bool)), settings->appToolBarDisplayText, SLOT(setBool(bool)));
+    connect(mPreferencesUI->toolbarAtTopRadioButton, &QRadioButton::clicked, this, &UBPreferencesController::toolbarPositionChanged);
+    connect(mPreferencesUI->toolbarAtBottomRadioButton, &QRadioButton::clicked, this, &UBPreferencesController::toolbarPositionChanged);
+    connect(mPreferencesUI->horizontalChoice, &QRadioButton::clicked, this, &UBPreferencesController::toolbarOrientationHorizontal);
+    connect(mPreferencesUI->verticalChoice, &QRadioButton::clicked, this, &UBPreferencesController::toolbarOrientationVertical);
+    connect(mPreferencesUI->toolbarDisplayTextCheckBox, &QCheckBox::clicked, settings->appToolBarDisplayText, &UBSetting::setBool);
 
     // pen
     QList<QColor> penLightBackgroundColors = settings->boardPenLightBackgroundColors->colors();
@@ -157,10 +193,10 @@ void UBPreferencesController::wire()
 
     mPenProperties->opacityFrame->hide();
 
-    connect(mPenProperties->fineSlider, SIGNAL(valueChanged(int)), this, SLOT(widthSliderChanged(int)));
-    connect(mPenProperties->mediumSlider, SIGNAL(valueChanged(int)), this, SLOT(widthSliderChanged(int)));
-    connect(mPenProperties->strongSlider, SIGNAL(valueChanged(int)), this, SLOT(widthSliderChanged(int)));
-    connect(mPenProperties->pressureSensitiveCheckBox, SIGNAL(clicked(bool)), settings, SLOT(setPenPressureSensitive(bool)));
+    connect(mPenProperties->fineSlider, &QSlider::valueChanged, this, &UBPreferencesController::widthSliderChanged);
+    connect(mPenProperties->mediumSlider, &QSlider::valueChanged, this, &UBPreferencesController::widthSliderChanged);
+    connect(mPenProperties->strongSlider, &QSlider::valueChanged, this, &UBPreferencesController::widthSliderChanged);
+    connect(mPenProperties->pressureSensitiveCheckBox, &QCheckBox::clicked, settings, &UBSettings::setPenPressureSensitive);
 
     // marker
     QList<QColor> markerLightBackgroundColors = settings->boardMarkerLightBackgroundColors->colors();
@@ -174,20 +210,20 @@ void UBPreferencesController::wire()
 
     mMarkerProperties->pressureSensitiveCheckBox->setText(tr("Marker is pressure sensitive"));
 
-    connect(mMarkerProperties->fineSlider, SIGNAL(valueChanged(int)), this, SLOT(widthSliderChanged(int)));
-    connect(mMarkerProperties->mediumSlider, SIGNAL(valueChanged(int)), this, SLOT(widthSliderChanged(int)));
-    connect(mMarkerProperties->strongSlider, SIGNAL(valueChanged(int)), this, SLOT(widthSliderChanged(int)));
-    connect(mMarkerProperties->pressureSensitiveCheckBox, SIGNAL(clicked(bool)), settings, SLOT(setMarkerPressureSensitive(bool)));
-    connect(mMarkerProperties->opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
+    connect(mMarkerProperties->fineSlider, &QSlider::valueChanged, this, &UBPreferencesController::widthSliderChanged);
+    connect(mMarkerProperties->mediumSlider, &QSlider::valueChanged, this, &UBPreferencesController::widthSliderChanged);
+    connect(mMarkerProperties->strongSlider, &QSlider::valueChanged, this, &UBPreferencesController::widthSliderChanged);
+    connect(mMarkerProperties->pressureSensitiveCheckBox, &QCheckBox::clicked, settings, &UBSettings::setMarkerPressureSensitive);
+    connect(mMarkerProperties->opacitySlider, &QSlider::valueChanged, this, &UBPreferencesController::opacitySliderChanged);
 
 
     //network
-    connect(mPreferencesUI->Username_textBox, SIGNAL(editingFinished()), this, SLOT(onCommunityUsernameChanged()));
-    connect(mPreferencesUI->Password_textEdit, SIGNAL(editingFinished()), this, SLOT(onCommunityPasswordChanged()));
-    connect(mPreferencesUI->PSCredentialsPersistenceCheckBox,SIGNAL(clicked()),this, SLOT(onCommunityPersistenceChanged()));
+    connect(mPreferencesUI->Username_textBox, &QLineEdit::editingFinished, this, &UBPreferencesController::onCommunityUsernameChanged);
+    connect(mPreferencesUI->Password_textEdit, &QLineEdit::editingFinished, this, &UBPreferencesController::onCommunityPasswordChanged);
+    connect(mPreferencesUI->PSCredentialsPersistenceCheckBox, &QCheckBox::clicked, this, [this]() { onCommunityPersistenceChanged(); });
 
     // about tab
-    connect(mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox, SIGNAL(clicked(bool)), settings->appEnableAutomaticSoftwareUpdates, SLOT(setBool(bool)));
+    connect(mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox, &QCheckBox::clicked, settings->appEnableAutomaticSoftwareUpdates, &UBSetting::setBool);
 }
 
 void UBPreferencesController::init()
@@ -304,7 +340,7 @@ void UBPreferencesController::init()
     else
         mPreferencesUI->languageComboBox->setCurrentIndex(list.indexOf("Default"));
 
-    connect(mPreferencesUI->quitOpenSankorePushButton,SIGNAL(clicked()),UBApplication::app(),SLOT(closing()));
+    connect(mPreferencesUI->quitOpenSankorePushButton, &QPushButton::clicked, UBApplication::app(), [](){ UBApplication::app()->closing(); });
     mPreferencesUI->quitOpenSankorePushButton->setDisabled(true);
 
 }
@@ -636,7 +672,7 @@ UBBrushPropertiesFrame::UBBrushPropertiesFrame(QFrame* owner, const QList<QColor
 
         lightBackgroundColorPickers.append(picker);
 
-        QObject::connect(picker, SIGNAL(colorSelected(const QColor&)), controller, SLOT(colorSelected(const QColor&)));
+        QObject::connect(picker, &UBColorPicker::colorSelected, controller, &UBPreferencesController::colorSelected);
 
     }
 
@@ -662,7 +698,7 @@ UBBrushPropertiesFrame::UBBrushPropertiesFrame(QFrame* owner, const QList<QColor
 
         darkBackgroundColorPickers.append(picker);
 
-        QObject::connect(picker, SIGNAL(colorSelected(const QColor&)), controller, SLOT(colorSelected(const QColor&)));
+        QObject::connect(picker, &UBColorPicker::colorSelected, controller, &UBPreferencesController::colorSelected);
 
     }
 }

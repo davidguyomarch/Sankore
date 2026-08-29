@@ -69,7 +69,7 @@
               </property>
               <property name="icon">
                <iconset resource="../sankore.qrc">
-                <normaloff>:/images/collapse-all.png</normaloff>:/images/collapse-all.png</iconset>
+                <normaloff>:/images/svg/collapse-all.svg</normaloff>:/images/svg/collapse-all.svg</iconset>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -92,7 +92,7 @@
               </property>
               <property name="icon">
                <iconset resource="../sankore.qrc">
-                <normaloff>:/images/expand-all.png</normaloff>:/images/expand-all.png</iconset>
+                <normaloff>:/images/svg/expand-all.svg</normaloff>:/images/svg/expand-all.svg</iconset>
               </property>
               <property name="flat">
                <bool>true</bool>

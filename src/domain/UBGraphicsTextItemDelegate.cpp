@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -25,16 +26,13 @@
 #include <QApplication>
 #include <QPainter>
 #include <QtSvg>
-#include <QColorDialog>
 #include <QComboBox>
-#include <QListView>
 #include <QMenu>
 
 #include "core/UBApplication.h"
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItemDelegate.h"
 #include "UBGraphicsScene.h"
-#include "gui/UBResources.h"
 #include "gui/UBMainWindow.h"
 
 #include "domain/UBGraphicsTextItem.h"
@@ -94,9 +92,9 @@ UBGraphicsTextItemDelegate::UBGraphicsTextItemDelegate(UBGraphicsTextItem* pDele
     mLinkPalette->move(delegated()->boundingRect().width()/2.0, 0 );
     mCellPropertiesPalette->move(delegated()->boundingRect().width()/2.0, 0 );
 
-    connect(mTablePalette, SIGNAL(validationRequired()), this, SLOT(insertTable()));
-    connect(mLinkPalette, SIGNAL(validationRequired()), this, SLOT(insertLink()));
-    connect(mCellPropertiesPalette, SIGNAL(validationRequired()), this, SLOT(applyCellProperties()));
+    connect(mTablePalette, &UBCreateTablePalette::validationRequired, this, &UBGraphicsTextItemDelegate::insertTable);
+    connect(mLinkPalette, &UBCreateHyperLinkPalette::validationRequired, this, &UBGraphicsTextItemDelegate::insertLink);
+    connect(mCellPropertiesPalette, &UBCellPropertiesPalette::validationRequired, this, &UBGraphicsTextItemDelegate::applyCellProperties);
 }
 
 UBGraphicsTextItemDelegate::~UBGraphicsTextItemDelegate()
@@ -133,84 +131,110 @@ void UBGraphicsTextItemDelegate::buildButtons()
 {
     UBGraphicsItemDelegate::buildButtons();
 
-    mFontButton = new DelegateButton(":/images/textEditor/font.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mFontBoldButton = new DelegateButton(":/images/textEditor/bold.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mFontItalicButton = new DelegateButton(":/images/textEditor/italic.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mFontUnderlineButton = new DelegateButton(":/images/textEditor/underline.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mColorButton = new DelegateButton(":/images/color.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mDecreaseSizeButton = new DelegateButton(":/images/textEditor/decrease-font-size.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mIncreaseSizeButton = new DelegateButton(":/images/textEditor/increase-font-size.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mBackgroundColorButton = new DelegateButton(":/images/textEditor/bucket.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mLeftAlignmentButton = new DelegateButton(":/images/textEditor/align-left.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mCenterAlignmentButton = new DelegateButton(":/images/textEditor/align-center.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mRightAlignmentButton = new DelegateButton(":/images/textEditor/align-right.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mCodeButton = new DelegateButton(":/images/textEditor/code.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mUnorderedListButton= new DelegateButton(":/images/textEditor/unordered-list.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mOrderedListButton= new DelegateButton(":/images/textEditor/ordered-list.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mAddIndentButton = new DelegateButton(":/images/textEditor/indent.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mRemoveIndentButton = new DelegateButton(":/images/textEditor/unindent.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mHyperLinkButton = new DelegateButton(":/images/textEditor/link.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    mTableButton = new DelegateButton(":/images/textEditor/table.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    // Create all buttons (still needed for overflow menu actions)
+    mFontButton = new DelegateButton(":/icons/phosphor/text-aa.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mFontBoldButton = new DelegateButton(":/icons/phosphor/text-b.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mFontItalicButton = new DelegateButton(":/icons/phosphor/text-italic.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mFontUnderlineButton = new DelegateButton(":/icons/phosphor/text-underline.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mColorButton = new DelegateButton(":/icons/phosphor/palette.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mDecreaseSizeButton = new DelegateButton(":/icons/phosphor/minus.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mIncreaseSizeButton = new DelegateButton(":/icons/phosphor/plus.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mLeftAlignmentButton = new DelegateButton(":/icons/phosphor/text-align-left.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mCenterAlignmentButton = new DelegateButton(":/icons/phosphor/text-align-center.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mRightAlignmentButton = new DelegateButton(":/icons/phosphor/text-align-right.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mHyperLinkButton = new DelegateButton(":/icons/phosphor/link.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mTableButton = new DelegateButton(":/icons/phosphor/table.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mOverflowButton = new DelegateButton(":/icons/phosphor/dots-three.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
 
-    connect(mFontButton, SIGNAL(clicked(bool)), this, SLOT(pickFont()));
-    connect(mFontBoldButton, SIGNAL(clicked()), this, SLOT(setFontBold()));
-    connect(mFontItalicButton, SIGNAL(clicked()), this, SLOT(setFontItalic()));
-    connect(mFontUnderlineButton, SIGNAL(clicked()), this, SLOT(setFontUnderline()));
-    connect(mColorButton, SIGNAL(clicked(bool)), this, SLOT(pickColor()));    
-    connect(mDecreaseSizeButton, SIGNAL(clicked(bool)), this, SLOT(decreaseSize()));
-    connect(mIncreaseSizeButton, SIGNAL(clicked(bool)), this, SLOT(increaseSize()));
-    connect(mBackgroundColorButton, SIGNAL(clicked(bool)), this, SLOT(pickBackgroundColor()));    
-    connect(mLeftAlignmentButton, SIGNAL(clicked(bool)), this, SLOT(setAlignmentToLeft()));
-    connect(mCenterAlignmentButton, SIGNAL(clicked(bool)), this, SLOT(setAlignmentToCenter()));
-    connect(mRightAlignmentButton, SIGNAL(clicked(bool)), this, SLOT(setAlignmentToRight()));
-    connect(mCodeButton, SIGNAL(clicked(bool)), this, SLOT(alternHtmlMode()));
-    connect(mUnorderedListButton, SIGNAL(clicked(bool)), this, SLOT(insertUnorderedList()));
-    connect(mOrderedListButton, SIGNAL(clicked(bool)), this, SLOT(insertOrderedList()));
-    connect(mAddIndentButton, SIGNAL(clicked(bool)), this, SLOT(addIndent()));
-    connect(mRemoveIndentButton, SIGNAL(clicked(bool)), this, SLOT(removeIndent()));
-    connect(mHyperLinkButton, SIGNAL(clicked(bool)), this, SLOT(addLink()));
-    connect(mTableButton, SIGNAL(clicked(bool)), this, SLOT(showMenuTable()));
+    // Hidden buttons — actions available only through overflow menu
+    mBackgroundColorButton = new DelegateButton(":/icons/phosphor/paint-bucket.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mBackgroundColorButton->hide();
+    mCodeButton = new DelegateButton(":/icons/phosphor/code.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mCodeButton->hide();
+    mUnorderedListButton = new DelegateButton(":/icons/phosphor/list-bullets.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mUnorderedListButton->hide();
+    mOrderedListButton = new DelegateButton(":/icons/phosphor/list-numbers.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mOrderedListButton->hide();
+    mAddIndentButton = new DelegateButton(":/icons/phosphor/text-indent.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mAddIndentButton->hide();
+    mRemoveIndentButton = new DelegateButton(":/icons/phosphor/text-outdent.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mRemoveIndentButton->hide();
 
-    // Create actions and subMenus of the "Table" menu :
+    // Connect visible toolbar buttons
+    connect(mFontButton, &DelegateButton::clicked, this, [this]() { pickFont(); });
+    connect(mFontBoldButton, &DelegateButton::clicked, this, [this]() { setFontBold(); });
+    connect(mFontItalicButton, &DelegateButton::clicked, this, [this]() { setFontItalic(); });
+    connect(mFontUnderlineButton, &DelegateButton::clicked, this, [this]() { setFontUnderline(); });
+    connect(mColorButton, &DelegateButton::clicked, this, [this]() { pickColor(); });
+    connect(mDecreaseSizeButton, &DelegateButton::clicked, this, [this]() { decreaseSize(); });
+    connect(mIncreaseSizeButton, &DelegateButton::clicked, this, [this]() { increaseSize(); });
+    connect(mLeftAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToLeft(); });
+    connect(mCenterAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToCenter(); });
+    connect(mRightAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToRight(); });
+    connect(mHyperLinkButton, &DelegateButton::clicked, this, [this]() { addLink(); });
+    connect(mTableButton, &DelegateButton::clicked, this, [this]() { showMenuTable(); });
+    connect(mOverflowButton, &DelegateButton::clicked, this, [this]() { showOverflowMenu(); });
+
+    // Connect hidden buttons (for completeness, though they're triggered via overflow menu)
+    connect(mBackgroundColorButton, &DelegateButton::clicked, this, [this]() { pickBackgroundColor(); });
+    connect(mCodeButton, &DelegateButton::clicked, this, [this]() { alternHtmlMode(); });
+    connect(mUnorderedListButton, &DelegateButton::clicked, this, [this]() { insertUnorderedList(); });
+    connect(mOrderedListButton, &DelegateButton::clicked, this, [this]() { insertOrderedList(); });
+    connect(mAddIndentButton, &DelegateButton::clicked, this, [this]() { addIndent(); });
+    connect(mRemoveIndentButton, &DelegateButton::clicked, this, [this]() { removeIndent(); });
+
+    // --- Table sub-menu ---
     mTableMenu = new QMenu();
 
-    mTableMenu->addAction(QIcon(":/images/textEditor/add-table.png"), tr("Insert table"), this, SLOT(setTableSize()))->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/icons/phosphor/table.svg"), tr("Insert table"), this, [this]() { setTableSize(); })->setIconVisibleInMenu(true);
 
     QMenu *columnMenu = mTableMenu->addMenu(tr("Column"));
-    columnMenu->addAction(QIcon(":/images/textEditor/insert-column-left.png"), tr("Insert column after"), this, SLOT(insertColumnOnRight()))->setIconVisibleInMenu(true);
-    columnMenu->addAction(QIcon(":/images/textEditor/insert-column-right.png"), tr("Insert column before"), this, SLOT(insertColumnOnLeft()))->setIconVisibleInMenu(true);
-    columnMenu->addAction(QIcon(":/images/textEditor/delete-column.png"), tr("Delete column"), this, SLOT(deleteColumn()))->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/icons/phosphor/columns-plus-right.svg"), tr("Insert column after"), this, [this]() { insertColumnOnRight(); })->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/icons/phosphor/columns-plus-left.svg"), tr("Insert column before"), this, [this]() { insertColumnOnLeft(); })->setIconVisibleInMenu(true);
+    columnMenu->addAction(QIcon(":/icons/phosphor/minus-circle.svg"), tr("Delete column"), this, [this]() { deleteColumn(); })->setIconVisibleInMenu(true);
 
     QMenu *rowMenu = mTableMenu->addMenu(tr("Row"));
-    rowMenu->addAction(QIcon(":/images/textEditor/insert-row-top.png"), tr("Insert row after"), this, SLOT(insertRowOnBottom()))->setIconVisibleInMenu(true);
-    rowMenu->addAction(QIcon(":/images/textEditor/insert-row-bottom.png"), tr("Insert row before"), this, SLOT(insertRowOnTop()))->setIconVisibleInMenu(true);
-    rowMenu->addAction(QIcon(":/images/textEditor/delete-row.png"), tr("Delete row"), this, SLOT(deleteRow()))->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/icons/phosphor/rows-plus-bottom.svg"), tr("Insert row after"), this, [this]() { insertRowOnBottom(); })->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/icons/phosphor/rows-plus-top.svg"), tr("Insert row before"), this, [this]() { insertRowOnTop(); })->setIconVisibleInMenu(true);
+    rowMenu->addAction(QIcon(":/icons/phosphor/minus-circle.svg"), tr("Delete row"), this, [this]() { deleteRow(); })->setIconVisibleInMenu(true);
 
-    mTableMenu->addAction(QIcon(":/images/textEditor/cell-properties.png"), tr("Cell properties"), this, SLOT(setCellProperties()))->setIconVisibleInMenu(true);
-    mTableMenu->addAction(QIcon(), tr("Evenly distribute the columns"), this, SLOT(distributeColumn()))->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/icons/phosphor/sliders.svg"), tr("Cell properties"), this, [this]() { setCellProperties(); })->setIconVisibleInMenu(true);
+    mTableMenu->addAction(QIcon(":/icons/phosphor/align-center-horizontal.svg"), tr("Evenly distribute the columns"), this, [this]() { distributeColumn(); })->setIconVisibleInMenu(true);
 
-    //update the position of the menu and the sub menu
     mTableMenu->show();
     mTableMenu->hide();
-
     columnMenu->show();
     columnMenu->hide();
-
     rowMenu->show();
     rowMenu->hide();
 
+    // --- Overflow menu (secondary actions) ---
+    mOverflowMenu = new QMenu();
+    mOverflowMenu->addAction(QIcon(":/icons/phosphor/list-bullets.svg"), tr("Bulleted list"), this, [this]() { insertUnorderedList(); })->setIconVisibleInMenu(true);
+    mOverflowMenu->addAction(QIcon(":/icons/phosphor/list-numbers.svg"), tr("Numbered list"), this, [this]() { insertOrderedList(); })->setIconVisibleInMenu(true);
+    mOverflowMenu->addSeparator();
+    mOverflowMenu->addAction(QIcon(":/icons/phosphor/text-indent.svg"), tr("Increase indent"), this, [this]() { addIndent(); })->setIconVisibleInMenu(true);
+    mOverflowMenu->addAction(QIcon(":/icons/phosphor/text-outdent.svg"), tr("Decrease indent"), this, [this]() { removeIndent(); })->setIconVisibleInMenu(true);
+    mOverflowMenu->addSeparator();
+    mOverflowMenu->addAction(QIcon(":/icons/phosphor/paint-bucket.svg"), tr("Background color"), this, [this]() { pickBackgroundColor(); })->setIconVisibleInMenu(true);
+    mOverflowMenu->addAction(QIcon(":/icons/phosphor/code.svg"), tr("HTML source"), this, [this]() { alternHtmlMode(); })->setIconVisibleInMenu(true);
+
+    // --- Toolbar layout ---
+    // Group 1: B I U          (text style)
+    // Group 2: Aa Color A- A+ (font & size)
+    // Group 3: Left Center Right (alignment)
+    // Group 4: Link Table     (insert)
+    // Group 5: ... (overflow)
     QList<QGraphicsItem*> itemsOnToolBar;
-    itemsOnToolBar << mFontButton << mColorButton
-                   << mFontBoldButton << mFontItalicButton << mFontUnderlineButton
+    itemsOnToolBar << mFontBoldButton << mFontItalicButton << mFontUnderlineButton
                    << DelegateButton::Spacer
-                   << mDecreaseSizeButton << mIncreaseSizeButton
+                   << mFontButton << mColorButton << mDecreaseSizeButton << mIncreaseSizeButton
                    << DelegateButton::Spacer
                    << mLeftAlignmentButton << mCenterAlignmentButton << mRightAlignmentButton
                    << DelegateButton::Spacer
-                   << mUnorderedListButton << mOrderedListButton
-                   << DelegateButton::Spacer << mAddIndentButton << mRemoveIndentButton
+                   << mHyperLinkButton << mTableButton
                    << DelegateButton::Spacer
-                   << mHyperLinkButton << mTableButton << mBackgroundColorButton << mCodeButton;
+                   << mOverflowButton;
 
     mToolBarItem->setItemsOnToolBar(itemsOnToolBar);
     mToolBarItem->setShifting(true);
@@ -233,89 +257,37 @@ void UBGraphicsTextItemDelegate::duplicate()
 
 // This method is used to filter the available fonts. Only the web-compliant fonts
 // will remain in the font list.
-void UBGraphicsTextItemDelegate::customize(QFontDialog &fontDialog)
-{
-    fontDialog.setOption(QFontDialog::DontUseNativeDialog);
-
-    if (mSettings->isDarkBackground()) {
-        fontDialog.setStyleSheet("background-color: white;");
-    }
-
-    QListView *fontNameListView;
-    QList<QListView*> listViews = fontDialog.findChildren<QListView*>();
-    if (listViews.count() > 0)
-    {
-        fontNameListView = listViews.at(0);
-        for (QListView* listView : listViews)
-        {
-            if (listView->pos().x() < fontNameListView->pos().x())
-                fontNameListView = listView;
-        }
-    }
-    if (fontNameListView)
-    {
-        QStringListModel *stringListModel = dynamic_cast<QStringListModel*>(fontNameListView->model());
-        if (stringListModel)
-        {
-            QStringList dialogFontNames = stringListModel->stringList();
-            QStringList safeWebFontNames;
-            safeWebFontNames.append("Arial");
-            safeWebFontNames.append("Arial Black");
-            safeWebFontNames.append("Comic Sans MS");
-            safeWebFontNames.append("Courier New");
-            safeWebFontNames.append("Georgia");
-            safeWebFontNames.append("Impact");
-            safeWebFontNames.append("Times New Roman");
-            safeWebFontNames.append("Trebuchet MS");
-            safeWebFontNames.append("Verdana");
-
-            QStringList customFontList =  UBResources::resources()->customFontList();
-            int index = 0;
-            for (const QString& dialogFontName : dialogFontNames){
-                if (safeWebFontNames.contains(dialogFontName, Qt::CaseInsensitive) || customFontList.contains(dialogFontName, Qt::CaseSensitive))
-                    index++;
-                else
-                    stringListModel->removeRow(index);
-            }
-        }
-    }
-    QList<QComboBox*> comboBoxes = fontDialog.findChildren<QComboBox*>();
-    if (comboBoxes.count() > 0)
-        comboBoxes.at(0)->setEnabled(false);
-}
-
-
 void UBGraphicsTextItemDelegate::pickFont()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
     {
-        QFontDialog fontDialog(delegated()->textCursor().charFormat().font(), mDelegated->scene()->views().at(0));
-        customize(fontDialog);
-
-        if (fontDialog.exec())
-        {
-            QFont selectedFont = fontDialog.selectedFont();
-            mSettings->setFontFamily(selectedFont.family());
-            mSettings->setBoldFont(selectedFont.bold());
-            mSettings->setItalicFont(selectedFont.italic());
-            mSettings->setFontPointSize(selectedFont.pointSize());
-
-            //setting format for selected item
-            QTextCursor curCursor = delegated()->textCursor();
-            QTextCharFormat format;
-            format.setFont(selectedFont);
-            curCursor.mergeCharFormat(format);
-
-            delegated()->setTextCursor(curCursor);
-            delegated()->setFont(selectedFont);
-            delegated()->setSelected(true);
-//          disabled and replaced by the next line because of not optimum result (text splits to two lines when that is not necessary)
-    //          delegated()->adjustSize();
-                delegated()->resize(delegated()->document()->idealWidth(), delegated()->size().height());
-                delegated()->contentsChanged();
-            }
-        }
+        QFont currentFont = delegated()->textCursor().charFormat().font();
+        emit fontChangeRequested(currentFont);
     }
+}
+
+void UBGraphicsTextItemDelegate::applyFont(const QFont& selectedFont)
+{
+    if (!mDelegated)
+        return;
+
+    mSettings->setFontFamily(selectedFont.family());
+    mSettings->setBoldFont(selectedFont.bold());
+    mSettings->setItalicFont(selectedFont.italic());
+    mSettings->setFontPointSize(selectedFont.pointSize());
+
+    //setting format for selected item
+    QTextCursor curCursor = delegated()->textCursor();
+    QTextCharFormat format;
+    format.setFont(selectedFont);
+    curCursor.mergeCharFormat(format);
+
+    delegated()->setTextCursor(curCursor);
+    delegated()->setFont(selectedFont);
+    delegated()->setSelected(true);
+    delegated()->resize(delegated()->document()->idealWidth(), delegated()->size().height());
+    delegated()->contentsChanged();
+}
 
 void UBGraphicsTextItemDelegate::setFontBold()
 {
@@ -411,52 +383,48 @@ void UBGraphicsTextItemDelegate::pickColor()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
     {
-        QColorDialog colorDialog(delegated()->defaultTextColor(), mDelegated->scene()->views().at(0));
-        colorDialog.setWindowTitle(tr("Text Color"));
-        if (mSettings->isDarkBackground())
-        {
-            colorDialog.setStyleSheet("background-color: white;");
-        }
-
-        if (colorDialog.exec())
-        {
-            QColor selectedColor = colorDialog.selectedColor();
-            delegated()->setDefaultTextColor(selectedColor);
-            QTextCursor curCursor = delegated()->textCursor();
-            QTextCharFormat format;
-            format.setForeground(QBrush(selectedColor));
-            curCursor.mergeCharFormat(format);
-            delegated()->setTextCursor(curCursor);
-
-            UBGraphicsTextItem::lastUsedTextColor = selectedColor;
-
-            delegated()->setSelected(true);            
-            delegated()->contentsChanged();
-            delegated()->setFocus();
-        }
+        QColor currentColor = delegated()->defaultTextColor();
+        emit textColorChangeRequested(currentColor);
     }
+}
+
+void UBGraphicsTextItemDelegate::applyTextColor(const QColor& selectedColor)
+{
+    if (!mDelegated)
+        return;
+
+    delegated()->setDefaultTextColor(selectedColor);
+    QTextCursor curCursor = delegated()->textCursor();
+    QTextCharFormat format;
+    format.setForeground(QBrush(selectedColor));
+    curCursor.mergeCharFormat(format);
+    delegated()->setTextCursor(curCursor);
+
+    UBGraphicsTextItem::lastUsedTextColor = selectedColor;
+
+    delegated()->setSelected(true);
+    delegated()->contentsChanged();
+    delegated()->setFocus();
 }
 
 void UBGraphicsTextItemDelegate::pickBackgroundColor()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
     {
-        QColorDialog colorDialog(delegated()->defaultTextColor(), mDelegated->scene()->views().at(0));
-        colorDialog.setWindowTitle(tr("Background Color"));
-        if (mSettings->isDarkBackground())
-        {
-            colorDialog.setStyleSheet("background-color: white;");
-        }
-
-        if (colorDialog.exec())
-        {
-            QColor selectedColor = colorDialog.selectedColor();
-            delegated()->setBackgroundColor(selectedColor);
-            delegated()->setSelected(true);
-            delegated()->contentsChanged();
-            delegated()->setFocus();
-        }
+        QColor currentColor = delegated()->defaultTextColor();
+        emit backgroundColorChangeRequested(currentColor);
     }
+}
+
+void UBGraphicsTextItemDelegate::applyBackgroundColor(const QColor& selectedColor)
+{
+    if (!mDelegated)
+        return;
+
+    delegated()->setBackgroundColor(selectedColor);
+    delegated()->setSelected(true);
+    delegated()->contentsChanged();
+    delegated()->setFocus();
 }
 
 void UBGraphicsTextItemDelegate::insertTable()
@@ -737,6 +705,22 @@ void UBGraphicsTextItemDelegate::showMenuTable()
     mTableMenu->exec(p.toPoint(), mTableMenu->actions().first());
 }
 
+void UBGraphicsTextItemDelegate::showOverflowMenu()
+{
+    QPointF p = delegated()->pos();
+    p = delegated()->transform().map(p);
+    p = UBApplication::boardController->controlView()->mapFromScene(p);
+
+    p.setX(p.x() + mOverflowButton->pos().x() + mOverflowButton->boundingRect().size().width());
+
+    if(mSettings->appToolBarPositionedAtTop->get().toBool())
+    {
+        p.setY(p.y() + UBApplication::app()->toolBarHeight());
+    }
+
+    mOverflowMenu->exec(p.toPoint());
+}
+
 void UBGraphicsTextItemDelegate::applyCellProperties()
 {
     if (mDelegated && mDelegated->scene() && mDelegated->scene()->views().size() > 0)
@@ -912,7 +896,7 @@ void UBGraphicsTextItemDelegate::decorateMenu(QMenu *menu)
 {
     UBGraphicsItemDelegate::decorateMenu(menu);
 
-    mEditableAction = menu->addAction(tr("Editable"), this, SLOT(setEditable(bool)));
+    mEditableAction = menu->addAction(tr("Editable"), this, &UBGraphicsTextItemDelegate::setEditable);
     mEditableAction->setCheckable(true);
     mEditableAction->setChecked(isEditable());
 

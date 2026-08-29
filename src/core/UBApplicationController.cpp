@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -73,8 +74,7 @@
 UBApplicationController::UBApplicationController(UBBoardView *pControlView,
                                                  UBBoardView *pDisplayView,
                                                  UBMainWindow* pMainWindow,
-                                                 QObject* parent,
-                                                 UBRightPalette* rightPalette)
+                                                 QObject* parent)
     : QObject(parent)
     , mMainWindow(pMainWindow)
     , mControlView(pControlView)
@@ -90,14 +90,15 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
     mSettings = UBSettings::settings();
     mDisplayManager = new UBDisplayManager(this);
 
-    mUninoteController = new UBDesktopAnnotationController(this, rightPalette);
+    mUninoteController = new UBDesktopAnnotationController(this);
 
-    connect(mDisplayManager, SIGNAL(screenLayoutChanged()), this, SLOT(screenLayoutChanged()));
-    connect(mDisplayManager, SIGNAL(screenLayoutChanged()), mUninoteController, SLOT(screenLayoutChanged()));
-    connect(mDisplayManager, SIGNAL(screenLayoutChanged()), UBApplication::webController, SLOT(screenLayoutChanged()));
+    connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, this, &UBApplicationController::screenLayoutChanged);
+    connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, mUninoteController, &UBDesktopAnnotationController::screenLayoutChanged);
+    connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, UBApplication::webController, &UBWebController::screenLayoutChanged);
 
-    connect(mUninoteController, SIGNAL(imageCaptured(const QPixmap &, bool)), this, SLOT(addCapturedPixmap(const QPixmap &, bool)));
-    connect(mUninoteController, SIGNAL(restoreUniboard()), this, SLOT(hideDesktop()));
+    connect(mUninoteController, &UBDesktopAnnotationController::imageCaptured, this,
+            [this](const QPixmap &pPixmap, bool pageMode) { addCapturedPixmap(pPixmap, pageMode); });
+    connect(mUninoteController, &UBDesktopAnnotationController::restoreUniboard, this, &UBApplicationController::hideDesktop);
 
     for(int i = 0; i < mDisplayManager->numPreviousViews(); i++)
     {
@@ -114,11 +115,10 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
         mMirror = new UBScreenMirror();
     }
 
-    connect(UBApplication::webController, SIGNAL(imageCaptured(const QPixmap &, bool, const QUrl&))
-            , this, SLOT(addCapturedPixmap(const QPixmap &, bool, const QUrl&)));
+    connect(UBApplication::webController, &UBWebController::imageCaptured,
+            this, &UBApplicationController::addCapturedPixmap);
 
     networkAccessManager = new QNetworkAccessManager (this);
-    QTimer::singleShot (1000, this, SLOT (checkUpdateAtLaunch()));
 
 #ifdef Q_OS_LINUX
     mMainWindow->setStyleSheet("QToolButton { font-size: 11px}");
@@ -199,11 +199,11 @@ void UBApplicationController::adaptToolBar()
 
     if (Document == mMainMode)
     {
-        connect(UBApplication::instance(), SIGNAL(focusChanged(QWidget *, QWidget *)), UBApplication::documentController, SLOT(focusChanged(QWidget *, QWidget *)));
+        connect(qApp, &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
     }
     else
     {
-        disconnect(UBApplication::instance(), SIGNAL(focusChanged(QWidget *, QWidget *)), UBApplication::documentController, SLOT(focusChanged(QWidget *, QWidget *)));
+        disconnect(qApp, &QApplication::focusChanged, UBApplication::documentController, &UBDocumentController::focusChanged);
         if (Board == mMainMode)
             mMainWindow->actionDuplicate->setEnabled(true);
     }
@@ -350,8 +350,7 @@ void UBApplicationController::showBoard()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
-    mMainWindow->tutorialToolBar->hide();
-    mMainWindow->boardToolBar->show();
+    mMainWindow->boardToolBar->hide(); // Hidden: replaced by QML TopBar
 
 //    if (mMainMode == Document)
 //    {
@@ -386,8 +385,9 @@ void UBApplicationController::showBoard()
     emit mainModeChanged(Board);
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
-    if (UBStylusTool::Selector != currentTool)
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+    // Legacy code forced Selector here — disabled for QML V2 UI which sets Pen at startup
+    // if (UBStylusTool::Selector != currentTool)
+    //     UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
 
     UBApplication::boardController->freezeW3CWidgets(false);
     UBApplication::boardController->activeScene()->updateGroupButtonState();
@@ -414,7 +414,6 @@ void UBApplicationController::showInternet()
     {
         mMainWindow->boardToolBar->hide();
         mMainWindow->documentToolBar->hide();
-        mMainWindow->tutorialToolBar->hide();
         mMainWindow->webToolBar->show();
 
         mMainMode = Internet;
@@ -435,8 +434,7 @@ void UBApplicationController::showDocument()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->boardToolBar->hide();
-    mMainWindow->tutorialToolBar->hide();
-    mMainWindow->documentToolBar->show();
+    mMainWindow->documentToolBar->hide(); // Hidden: replaced by QML DocumentsTopBar
 
     mMainMode = Document;
 
@@ -473,10 +471,29 @@ void UBApplicationController::showDocument()
 
 void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 {
-    int desktopWidgetIndex = 0; // In Qt6, use mMainWindow->screen() to find screen index
+    // Use the screen where the main window is currently displayed
+    QScreen *currentScreen = mMainWindow->screen();
+    if (!currentScreen)
+        currentScreen = QGuiApplication::primaryScreen();
+
+    int desktopWidgetIndex = QGuiApplication::screens().indexOf(currentScreen);
+    if (desktopWidgetIndex < 0)
+        desktopWidgetIndex = 0;
 
     if (UBApplication::boardController)
         UBApplication::boardController->hide();
+
+    // Disable the board view so that stale mouse events queued before the
+    // transition cannot be delivered to its QGraphicsView::viewportEvent
+    // while the UI is in an inconsistent state.  (#135)
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->setEnabled(false);
+
+    // Emit desktopMode BEFORE hiding the main window and showing the desktop overlay.
+    // This triggers changeMode(DESKTOP) which hides QML palettes, preventing them
+    // from receiving stale mouse events during the transition. (#135)
+    mIsShowingDesktop = true;
+    emit desktopMode(true);
 
     mMainWindow->hide();
     mUninoteController->showWindow();
@@ -487,9 +504,6 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
         mMirror->setSourceRect(rect);
     }
 
-    mIsShowingDesktop = true;
-    emit desktopMode(true);
-
     if (!dontSwitchFrontProcess) {
         UBPlatformUtils::bringPreviousProcessToFront();
     }
@@ -499,135 +513,13 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 }
 
 
-void UBApplicationController::showTutorial()
-{
-
-    if (UBApplication::boardController)
-    {
-        UBApplication::boardController->persistCurrentScene();
-        UBApplication::boardController->hide();
-    }
-
-    if (mSettings->webUseExternalBrowser->get().toBool())
-    {
-        showDesktop(true);
-        UBApplication::webController->show(UBWebController::Tutorial);
-        UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::NonScreen);
-    }
-    else{
-        mMainWindow->webToolBar->hide();
-        mMainWindow->boardToolBar->hide();
-        mMainWindow->documentToolBar->hide();
-        mMainWindow->tutorialToolBar->show();
-
-
-        mMainMode = Tutorial;
-
-        adaptToolBar();
-
-        mUninoteController->hideWindow();
-
-        UBApplication::webController->show(UBWebController::Tutorial);
-
-        mirroringEnabled(false);
-        emit mainModeChanged(mMainMode);
-    }
-}
-
-
-void UBApplicationController::showSankoreEditor()
-{
-
-    if (UBApplication::boardController)
-    {
-        UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::NonScreen);
-        UBApplication::boardController->persistCurrentScene();
-        UBApplication::boardController->hide();
-    }
-
-// it's needed not to duplicate webbrowser search in web mode. If I've breaked smbd's code let Ivan know
-        UBApplication::webController->show(UBWebController::Paraschool);
-
-    mMainWindow->webToolBar->hide();
-    mMainWindow->boardToolBar->hide();
-    mMainWindow->documentToolBar->hide();
-    mMainWindow->tutorialToolBar->show();
-
-
-    mMainMode = ParaschoolEditor;
-
-    adaptToolBar();
-
-    mUninoteController->hideWindow();
-
-    mirroringEnabled(false);
-    emit mainModeChanged(mMainMode);
-}
-
-void UBApplicationController::checkUpdate()
-{
-    if(false) // QHttp removed        // QHttp removed
-    QUrl url("http://ftp.open-sankore.org/update.json");
-    // TODO: Replace QHttp with QNetworkAccessManager
-    // TODO: Replace QHttp signal connection
-    // TODO: Replace QHttp get
-}
-
-void UBApplicationController::updateRequestFinished(int id, bool error)
-{
-   if (error){
-       qWarning() << "http command id" << id << "return the error: " << QString("HTTP error");
-       
-   }
-   else{
-       QString responseString =  QString();
-       if (!responseString.isEmpty() && responseString.contains("version") && responseString.contains("url")){
-           
-           downloadJsonFinished(responseString);
-       }
-   }
-}
-
-
-
-void UBApplicationController::downloadJsonFinished(QString currentJson)
-{
-    QJSValue scriptValue;
-    QJSEngine scriptEngine;
-    scriptValue = scriptEngine.evaluate ("(" + currentJson + ")");
-
-    UBVersion installedVersion (qApp->applicationVersion().left(4));
-    UBVersion jsonVersion (scriptValue.property("version").toString().left(4));
-
-    if (installedVersion.isValid() &&  jsonVersion.isValid() && jsonVersion > installedVersion) {
-            if (UBApplication::mainWindow->yesNoQuestion(tr("Update available"), tr ("New update available, would you go to the web page ?"))){
-                    QUrl url(scriptValue.property ("url").toString());
-                    QDesktopServices::openUrl (url);
-            }
-    }
-    else {
-        if (isNoUpdateDisplayed) {
-            mMainWindow->information(tr("Update"), tr("No update available"));
-        }
-    }
-}
-
-void UBApplicationController::checkUpdateAtLaunch()
-{
-    if(mSettings->appEnableAutomaticSoftwareUpdates->get().toBool()){
-        isNoUpdateDisplayed = false;
-        checkUpdate ();
-    }
-}
-
-void UBApplicationController::checkUpdateRequest()
-{
-    isNoUpdateDisplayed = true;
-    checkUpdate ();
-}
-
 void UBApplicationController::hideDesktop()
 {
+    // Re-enable the board view that was disabled in showDesktop() to prevent
+    // stale events during the Desktop mode transition.  (#135)
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->setEnabled(true);
+
     if (mMainMode == Board)
     {
         showBoard();
@@ -639,14 +531,6 @@ void UBApplicationController::hideDesktop()
     else if (mMainMode == Document)
     {
         showDocument();
-    }
-    else if (mMainMode == Tutorial)
-    {
-        showTutorial();
-    }
-    else if (mMainMode == ParaschoolEditor)
-    {
-        showSankoreEditor();
     }
 
     mIsShowingDesktop = false;

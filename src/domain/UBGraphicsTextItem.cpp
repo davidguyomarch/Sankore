@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -25,6 +26,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QApplication>
 #include <QPainter>
+#include <QTextDocument>
+#include <QAbstractTextDocumentLayout>
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItem.h"
 #include "UBGraphicsTextItemDelegate.h"
@@ -87,17 +90,17 @@ UBGraphicsTextItem::UBGraphicsTextItem(QGraphicsItem * parent) :
 
     setUuid(QUuid::createUuid());
 
-    connect(document(), SIGNAL(contentsChanged()), Delegate(), SLOT(contentsChanged()));
-    connect(document(), SIGNAL(undoCommandAdded()), this, SLOT(undoCommandAdded()));
-    connect(this, SIGNAL(linkActivated(QString)), this, SLOT(loadUrl(QString)));
+    connect(document(), &QTextDocument::contentsChanged, static_cast<UBGraphicsTextItemDelegate*>(Delegate()), &UBGraphicsTextItemDelegate::contentsChanged);
+    connect(document(), &QTextDocument::undoCommandAdded, this, &UBGraphicsTextItem::undoCommandAdded);
+    connect(this, &QGraphicsTextItem::linkActivated, this, &UBGraphicsTextItem::loadUrl);
 
 
-    connect(document()->documentLayout(), SIGNAL(documentSizeChanged(const QSizeF &)),
-            this, SLOT(documentSizeChanged(const QSizeF &)));
+    connect(document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged,
+            this, &UBGraphicsTextItem::documentSizeChanged);
 
-    connect(UBApplication::boardController->controlView(), SIGNAL(clickOnBoard()), this, SLOT(changeHTMLMode()));
+    connect(UBApplication::boardController->controlView(), &UBBoardView::clickOnBoard, this, &UBGraphicsTextItem::changeHTMLMode);
 
-    connect(this, SIGNAL(linkHovered(QString)), this, SLOT(onLinkHovered(QString))); // ALTI/AOU - 20140602 : make possible to click on Links with Play tool
+    connect(this, &QGraphicsTextItem::linkHovered, this, &UBGraphicsTextItem::onLinkHovered); // ALTI/AOU - 20140602 : make possible to click on Links with Play tool
 }
 
 UBGraphicsTextItem::~UBGraphicsTextItem()
@@ -391,8 +394,6 @@ void UBGraphicsTextItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsTextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    Delegate()->frame()->setZValue(0); // ALTI/AOU - 20140610 : some widgets have to appear on top of the DelegateFrame.
-
     if (mBackgroundColor != Qt::transparent && !mHtmlIsInterpreted)
     {
         painter->setPen(Qt::transparent);

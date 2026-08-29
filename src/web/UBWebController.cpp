@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -98,8 +99,6 @@ void UBWebController::webTrapContent() {}
 void UBWebController::onOEmbedParsed(QVector<sOEmbedContent>) {}
 void UBWebController::onActionBookmark() {}
 void UBWebController::initialiazemOEmbedProviders() {}
-void UBWebController::tutorialWebInstance() {}
 void UBWebController::webBrowserInstance() {}
-void UBWebController::paraschoolWebInstance() {}
 void UBWebController::lookForEmbedContent(QString*, QString, QString, QList<QUrl>*) {}
 void UBWebController::checkForOEmbed(QString*) {}

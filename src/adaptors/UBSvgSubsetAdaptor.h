@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -63,6 +64,7 @@ class UBEditableGraphicsLineItem;
 class UBAbstractGraphicsItem;
 class UB1HEditableGraphicsCircleItem;
 class UB1HEditableGraphicsSquareItem;
+class UBSmoothStrokeItem;
 class UBEditableGraphicsRegularShapeItem;
 
 class UBSvgSubsetAdaptor
@@ -138,6 +140,8 @@ class UBSvgSubsetAdaptor
                 UBGraphicsPolygonItem* polygonItemFromPolygonSvg(const QColor& pDefaultBrushColor);
 
                 QList<UBGraphicsPolygonItem*> polygonItemsFromPolylineSvg(const QColor& pDefaultColor);
+
+                UBSmoothStrokeItem* smoothStrokeItemFromPathSvg(const QColor& pDefaultColor);
 
                 UBGraphicsPixmapItem* pixmapItemFromSvg();
 
@@ -228,6 +232,7 @@ class UBSvgSubsetAdaptor
                 void polygonItemToSvgLine(UBGraphicsPolygonItem* polygonItem, bool groupHoldsInfo);
                 void strokeToSvgPolyline(UBGraphicsStroke* stroke, bool groupHoldsInfo);
                 void strokeToSvgPolygon(UBGraphicsStroke* stroke, bool groupHoldsInfo);
+                void smoothStrokeItemToSvgPath(UBSmoothStrokeItem* item);
                 void writeAction(UBGraphicsItemAction* action);
 
                 inline QString pointsToSvgPointsAttribute(QVector<QPointF> points)

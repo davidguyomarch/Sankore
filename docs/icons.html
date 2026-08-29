@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open-Sankoré Icons Reference</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a1a;
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 2rem;
+}
+h1 { color: #fff; margin-bottom: 0.5rem; font-size: 1.8rem; }
+h2 { color: #aaa; margin-top: 2rem; margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
+.subtitle { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+th { background: #333; color: #ccc; padding: 10px 12px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 8px 12px; border-bottom: 1px solid #2a2a2a; vertical-align: middle; font-size: 0.9rem; }
+tr:hover { background: #222; }
+.icon-cell-dark { background: #2a2a2a; text-align: center; width: 50px; border-radius: 4px; }
+.icon-cell-classic { background: #e8e8e8; text-align: center; width: 50px; border-radius: 4px; }
+.icon-cell-dark img, .icon-cell-classic img { width: 32px; height: 32px; }
+.phosphor { color: #7cb3ff; font-family: monospace; font-size: 0.85rem; }
+.action-name { color: #f0c674; font-family: monospace; }
+.label { color: #b5bd68; }
+.no-icon { color: #555; font-style: italic; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<h1>Open-Sankoré Icons Reference</h1>
+<p class="subtitle">All icons used in the project — toolbar actions, stylus palette, and theme variants</p>
+
+<h2>Toolbar Actions</h2>
+<table>
+<thead>
+<tr><th>Action</th><th>Label</th><th>Dark Icon</th><th>Classic Icon</th><th>Phosphor Name</th></tr>
+</thead>
+<tbody>
+<tr><td class="action-name">actionStylus</td><td class="label">stylus</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/stylus.svg" alt="stylus"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/stylus.png" alt="stylus"></td><td class="phosphor">PencilSimple</td></tr>
+<tr><td class="action-name">actionBackgrounds</td><td class="label">background</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/background.svg" alt="background"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/background.png" alt="background"></td><td class="phosphor">PaintBrushBroad</td></tr>
+<tr><td class="action-name">actionUndo</td><td class="label">undo</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/undo.svg" alt="undo"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/undo.png" alt="undo"></td><td class="phosphor">ArrowCounterClockwise</td></tr>
+<tr><td class="action-name">actionRedo</td><td class="label">redo</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/redo.svg" alt="redo"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/redo.png" alt="redo"></td><td class="phosphor">ArrowClockwise</td></tr>
+<tr><td class="action-name">actionPages</td><td class="label">newDocument</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/newDocument.svg" alt="newDocument"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/newDocument.png" alt="newDocument"></td><td class="phosphor">FilePlus</td></tr>
+<tr><td class="action-name">actionBack</td><td class="label">previousPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/previousPage.svg" alt="previousPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/previousPage.png" alt="previousPage"></td><td class="phosphor">CaretLeft</td></tr>
+<tr><td class="action-name">actionForward</td><td class="label">nextPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/nextPage.svg" alt="nextPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/nextPage.png" alt="nextPage"></td><td class="phosphor">CaretRight</td></tr>
+<tr><td class="action-name">actionErase</td><td class="label">clearPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/clearPage.svg" alt="clearPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/clearPage.png" alt="clearPage"></td><td class="phosphor">Eraser</td></tr>
+<tr><td class="action-name">actionGroupItems</td><td class="label">group</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/group.svg" alt="group"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/group.png" alt="group"></td><td class="phosphor">SelectionAll</td></tr>
+<tr><td class="action-name">actionBoard</td><td class="label">board</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/board.svg" alt="board"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/board.png" alt="board"></td><td class="phosphor">Chalkboard</td></tr>
+<tr><td class="action-name">actionWeb</td><td class="label">web</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/web.svg" alt="web"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/web.png" alt="web"></td><td class="phosphor">Globe</td></tr>
+<tr><td class="action-name">actionDocument</td><td class="label">documents</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/documents.svg" alt="documents"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/documents.png" alt="documents"></td><td class="phosphor">Folders</td></tr>
+<tr><td class="action-name">actionDesktop</td><td class="label">display</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/display.svg" alt="display"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/display.png" alt="display"></td><td class="phosphor">Monitor</td></tr>
+<tr><td class="action-name">actionMenu</td><td class="label">menu</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/menu.svg" alt="menu"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/menu.png" alt="menu"></td><td class="phosphor">List</td></tr>
+</tbody>
+</table>
+
+<h2>Document / File Actions</h2>
+<table>
+<thead>
+<tr><th>Action</th><th>Label</th><th>Dark Icon</th><th>Classic Icon</th><th>Phosphor Name</th></tr>
+</thead>
+<tbody>
+<tr><td class="action-name">actionNewDocument</td><td class="label">newDocument</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/newDocument.svg" alt="newDocument"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/newDocument.png" alt="newDocument"></td><td class="phosphor">FilePlus</td></tr>
+<tr><td class="action-name">actionNewFolder</td><td class="label">newFolder</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/newFolder.svg" alt="newFolder"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/newFolder.png" alt="newFolder"></td><td class="phosphor">FolderPlus</td></tr>
+<tr><td class="action-name">actionImport</td><td class="label">import</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/import.svg" alt="import"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/import.png" alt="import"></td><td class="phosphor">DownloadSimple</td></tr>
+<tr><td class="action-name">actionExport</td><td class="label">export</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/export.svg" alt="export"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/export.png" alt="export"></td><td class="phosphor">UploadSimple</td></tr>
+<tr><td class="action-name">actionRename</td><td class="label">rename</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/rename.svg" alt="rename"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/rename.png" alt="rename"></td><td class="phosphor">PencilLine</td></tr>
+<tr><td class="action-name">actionOpen</td><td class="label">open</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/open.svg" alt="open"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/open.png" alt="open"></td><td class="phosphor">FolderOpen</td></tr>
+<tr><td class="action-name">actionDuplicate</td><td class="label">duplicate</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/duplicate.svg" alt="duplicate"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/duplicate.png" alt="duplicate"></td><td class="phosphor">CopySimple</td></tr>
+<tr><td class="action-name">actionDelete</td><td class="label">remove</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/remove.svg" alt="remove"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/remove.png" alt="remove"></td><td class="phosphor">Trash</td></tr>
+</tbody>
+</table>
+
+<h2>Edit Actions</h2>
+<table>
+<thead>
+<tr><th>Action</th><th>Label</th><th>Dark Icon</th><th>Classic Icon</th><th>Phosphor Name</th></tr>
+</thead>
+<tbody>
+<tr><td class="action-name">actionCut</td><td class="label">cut</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/cut.svg" alt="cut"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/cut.png" alt="cut"></td><td class="phosphor">Scissors</td></tr>
+<tr><td class="action-name">actionCopy</td><td class="label">copy</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/copy.svg" alt="copy"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/copy.png" alt="copy"></td><td class="phosphor">Copy</td></tr>
+<tr><td class="action-name">actionPaste</td><td class="label">paste</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/paste.svg" alt="paste"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/paste.png" alt="paste"></td><td class="phosphor">ClipboardText</td></tr>
+</tbody>
+</table>
+
+<h2>Application Actions</h2>
+<table>
+<thead>
+<tr><th>Action</th><th>Label</th><th>Dark Icon</th><th>Classic Icon</th><th>Phosphor Name</th></tr>
+</thead>
+<tbody>
+<tr><td class="action-name">actionPreferences</td><td class="label">settings</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/settings.svg" alt="settings"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/settings.png" alt="settings"></td><td class="phosphor">Gear</td></tr>
+<tr><td class="action-name">actionQuit</td><td class="label">quit</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/quit.svg" alt="quit"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/quit.png" alt="quit"></td><td class="phosphor">SignOut</td></tr>
+<tr><td class="action-name">actionLibrary</td><td class="label">library</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/library.svg" alt="library"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/library.png" alt="library"></td><td class="phosphor">Books</td></tr>
+<tr><td class="action-name">actionHome</td><td class="label">home</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/home.svg" alt="home"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/home.png" alt="home"></td><td class="phosphor">House</td></tr>
+<tr><td class="action-name">actionBookmarks</td><td class="label">bookmarks</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/bookmarks.svg" alt="bookmarks"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/bookmarks.png" alt="bookmarks"></td><td class="phosphor">BookmarkSimple</td></tr>
+</tbody>
+</table>
+
+<h2>Stylus Palette Icons (Dark only — white SVGs)</h2>
+<table>
+<thead>
+<tr><th>Name</th><th>Icon</th><th>Path</th></tr>
+</thead>
+<tbody>
+<tr><td class="label">capture</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/capture.svg" alt="capture"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/capture.svg</td></tr>
+<tr><td class="label">drawing</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/drawing.svg" alt="drawing"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/drawing.svg</td></tr>
+<tr><td class="label">eraser</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/eraser.svg" alt="eraser"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/eraser.svg</td></tr>
+<tr><td class="label">hand</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/hand.svg" alt="hand"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/hand.svg</td></tr>
+<tr><td class="label">line</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/line.svg" alt="line"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/line.svg</td></tr>
+<tr><td class="label">marker</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/marker.svg" alt="marker"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/marker.svg</td></tr>
+<tr><td class="label">ocr</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/ocr.svg" alt="ocr"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/ocr.svg</td></tr>
+<tr><td class="label">pen</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/pen.svg" alt="pen"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/pen.svg</td></tr>
+<tr><td class="label">play</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/play.svg" alt="play"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/play.svg</td></tr>
+<tr><td class="label">pointer</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/pointer.svg" alt="pointer"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/pointer.svg</td></tr>
+<tr><td class="label">restoreZoom</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/restoreZoom.svg" alt="restoreZoom"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/restoreZoom.svg</td></tr>
+<tr><td class="label">richText</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/richText.svg" alt="richText"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/richText.svg</td></tr>
+<tr><td class="label">selector</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/selector.svg" alt="selector"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/selector.svg</td></tr>
+<tr><td class="label">text</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/text.svg" alt="text"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/text.svg</td></tr>
+<tr><td class="label">zoomIn</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/zoomIn.svg" alt="zoomIn"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/zoomIn.svg</td></tr>
+<tr><td class="label">zoomOut</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/images/stylusPalette/svg/zoomOut.svg" alt="zoomOut"></td><td style="color:#666;font-size:0.8rem">resources/images/stylusPalette/svg/zoomOut.svg</td></tr>
+</tbody>
+</table>
+
+<h2>All Dark Theme Icons (62 SVGs)</h2>
+<table>
+<thead>
+<tr><th>Name</th><th>Dark Icon</th><th>Classic Icon</th></tr>
+</thead>
+<tbody>
+<tr><td class="label">addBookmark</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/addBookmark.svg" alt="addBookmark"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/addBookmark.png" alt="addBookmark"></td></tr>
+<tr><td class="label">addToPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/addToPage.svg" alt="addToPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/addToPage.png" alt="addToPage"></td></tr>
+<tr><td class="label">addToWorkingDoc</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/addToWorkingDoc.svg" alt="addToWorkingDoc"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/addToWorkingDoc.png" alt="addToWorkingDoc"></td></tr>
+<tr><td class="label">addToolToLibrary</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/addToolToLibrary.svg" alt="addToolToLibrary"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/addToolToLibrary.png" alt="addToolToLibrary"></td></tr>
+<tr><td class="label">background</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/background.svg" alt="background"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/background.png" alt="background"></td></tr>
+<tr><td class="label">board</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/board.svg" alt="board"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/board.png" alt="board"></td></tr>
+<tr><td class="label">bookmark</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/bookmark.svg" alt="bookmark"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/bookmark.png" alt="bookmark"></td></tr>
+<tr><td class="label">bookmarks</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/bookmarks.svg" alt="bookmarks"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/bookmarks.png" alt="bookmarks"></td></tr>
+<tr><td class="label">captureArea</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/captureArea.svg" alt="captureArea"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/captureArea.png" alt="captureArea"></td></tr>
+<tr><td class="label">captureWindow</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/captureWindow.svg" alt="captureWindow"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/captureWindow.png" alt="captureWindow"></td></tr>
+<tr><td class="label">clearPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/clearPage.svg" alt="clearPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/clearPage.png" alt="clearPage"></td></tr>
+<tr><td class="label">color</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/color.svg" alt="color"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/color.png" alt="color"></td></tr>
+<tr><td class="label">copy</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/copy.svg" alt="copy"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/copy.png" alt="copy"></td></tr>
+<tr><td class="label">cut</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/cut.svg" alt="cut"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/cut.png" alt="cut"></td></tr>
+<tr><td class="label">display</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/display.svg" alt="display"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/display.png" alt="display"></td></tr>
+<tr><td class="label">documents</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/documents.svg" alt="documents"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/documents.png" alt="documents"></td></tr>
+<tr><td class="label">duplicate</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/duplicate.svg" alt="duplicate"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/duplicate.png" alt="duplicate"></td></tr>
+<tr><td class="label">eraserTool</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/eraserTool.svg" alt="eraserTool"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">export</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/export.svg" alt="export"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/export.png" alt="export"></td></tr>
+<tr><td class="label">eyeClosed</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/eyeClosed.svg" alt="eyeClosed"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/eyeClosed.png" alt="eyeClosed"></td></tr>
+<tr><td class="label">eyeOpened</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/eyeOpened.svg" alt="eyeOpened"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+</tbody>
+</table>
+
+<h2>All Dark Theme Icons (continued)</h2>
+<table>
+<thead>
+<tr><th>Name</th><th>Dark Icon</th><th>Classic Icon</th></tr>
+</thead>
+<tbody>
+<tr><td class="label">group</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/group.svg" alt="group"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/group.png" alt="group"></td></tr>
+<tr><td class="label">hide</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/hide.svg" alt="hide"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/hide.png" alt="hide"></td></tr>
+<tr><td class="label">home</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/home.svg" alt="home"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/home.png" alt="home"></td></tr>
+<tr><td class="label">import</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/import.svg" alt="import"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/import.png" alt="import"></td></tr>
+<tr><td class="label">largeEraser</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/largeEraser.svg" alt="largeEraser"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/largeEraser.png" alt="largeEraser"></td></tr>
+<tr><td class="label">largePen</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/largePen.svg" alt="largePen"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/largePen.png" alt="largePen"></td></tr>
+<tr><td class="label">library</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/library.svg" alt="library"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/library.png" alt="library"></td></tr>
+<tr><td class="label">lineTool</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/lineTool.svg" alt="lineTool"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">mediumEraser</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/mediumEraser.svg" alt="mediumEraser"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/mediumEraser.png" alt="mediumEraser"></td></tr>
+<tr><td class="label">mediumPen</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/mediumPen.svg" alt="mediumPen"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/mediumPen.png" alt="mediumPen"></td></tr>
+<tr><td class="label">menu</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/menu.svg" alt="menu"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/menu.png" alt="menu"></td></tr>
+<tr><td class="label">mic</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/mic.svg" alt="mic"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">micOff</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/micOff.svg" alt="micOff"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">newDocument</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/newDocument.svg" alt="newDocument"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/newDocument.png" alt="newDocument"></td></tr>
+<tr><td class="label">newFolder</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/newFolder.svg" alt="newFolder"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/newFolder.png" alt="newFolder"></td></tr>
+<tr><td class="label">newPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/newPage.svg" alt="newPage"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">nextPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/nextPage.svg" alt="nextPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/nextPage.png" alt="nextPage"></td></tr>
+<tr><td class="label">open</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/open.svg" alt="open"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/open.png" alt="open"></td></tr>
+<tr><td class="label">paste</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/paste.svg" alt="paste"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/paste.png" alt="paste"></td></tr>
+<tr><td class="label">pause</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/pause.svg" alt="pause"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/pause.png" alt="pause"></td></tr>
+<tr><td class="label">pdf</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/pdf.svg" alt="pdf"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">plusBlack</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/plusBlack.svg" alt="plusBlack"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">previousPage</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/previousPage.svg" alt="previousPage"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/previousPage.png" alt="previousPage"></td></tr>
+<tr><td class="label">print</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/print.svg" alt="print"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+</tbody>
+</table>
+
+<h2>All Dark Theme Icons (final)</h2>
+<table>
+<thead>
+<tr><th>Name</th><th>Dark Icon</th><th>Classic Icon</th></tr>
+</thead>
+<tbody>
+<tr><td class="label">quit</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/quit.svg" alt="quit"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/quit.png" alt="quit"></td></tr>
+<tr><td class="label">record</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/record.svg" alt="record"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/record.png" alt="record"></td></tr>
+<tr><td class="label">redo</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/redo.svg" alt="redo"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/redo.png" alt="redo"></td></tr>
+<tr><td class="label">reload</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/reload.svg" alt="reload"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/reload.png" alt="reload"></td></tr>
+<tr><td class="label">remove</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/remove.svg" alt="remove"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/remove.png" alt="remove"></td></tr>
+<tr><td class="label">rename</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/rename.svg" alt="rename"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/rename.png" alt="rename"></td></tr>
+<tr><td class="label">settings</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/settings.svg" alt="settings"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/settings.png" alt="settings"></td></tr>
+<tr><td class="label">smallEraser</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/smallEraser.svg" alt="smallEraser"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/smallEraser.png" alt="smallEraser"></td></tr>
+<tr><td class="label">smallPen</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/smallPen.svg" alt="smallPen"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/smallPen.png" alt="smallPen"></td></tr>
+<tr><td class="label">stop</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/stop.svg" alt="stop"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">stylus</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/stylus.svg" alt="stylus"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/stylus.png" alt="stylus"></td></tr>
+<tr><td class="label">tools</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/tools.svg" alt="tools"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/tools.png" alt="tools"></td></tr>
+<tr><td class="label">tutorial</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/tutorial.svg" alt="tutorial"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">undo</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/undo.svg" alt="undo"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/undo.png" alt="undo"></td></tr>
+<tr><td class="label">updates</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/updates.svg" alt="updates"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+<tr><td class="label">web</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/web.svg" alt="web"></td><td class="icon-cell-classic"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/classic/icons/web.png" alt="web"></td></tr>
+<tr><td class="label">window</td><td class="icon-cell-dark"><img src="https://raw.githubusercontent.com/davidguyomarch/Sankore/master/resources/themes/dark/icons/window.svg" alt="window"></td><td class="icon-cell-classic"><span class="no-icon">—</span></td></tr>
+</tbody>
+</table>
+
+</body>
+</html>

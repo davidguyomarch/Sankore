@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -35,9 +36,10 @@ UBLibraryAPI::UBLibraryAPI(QWidget *pWebView)
     : QObject(pWebView)
     , mWebView(pWebView)
 {
-    connect(this, SIGNAL(downloadTriggered(const QUrl&, const QPointF&, const QSize&, bool)),
-            UBApplication::boardController, SLOT(downloadURL(const QUrl&, const QPointF&, const QSize&, bool)),
-            Qt::QueuedConnection);
+    connect(this, &UBLibraryAPI::downloadTriggered,
+            UBApplication::boardController, [](const QUrl& url, const QPointF& pos, const QSize& size, bool bg) {
+                UBApplication::boardController->downloadURL(url, QString(), pos, size, bg);
+            }, Qt::QueuedConnection);
 
 }
 

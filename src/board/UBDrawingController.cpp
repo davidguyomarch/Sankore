@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -28,7 +29,6 @@
 
 #include "domain/UBGraphicsScene.h"
 #include "board/UBBoardController.h"
-#include "board/UBBoardPaletteManager.h"
 #include "domain/UBEditableGraphicsPolygonItem.h"
 
 #include "board/UBBoardView.h"
@@ -61,24 +61,23 @@ UBDrawingController::UBDrawingController(QObject * parent)
 	, mIsDesktopMode(false)
 {
     mSettings = UBSettings::settings();
-    connect(mSettings, SIGNAL(colorContextChanged()), this, SIGNAL(colorPaletteChanged()));
+    connect(mSettings, &UBSettings::colorContextChanged, this, &UBDrawingController::colorPaletteChanged);
 
-    connect(UBApplication::mainWindow->actionPen, SIGNAL(triggered(bool)), this, SLOT(penToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionEraser, SIGNAL(triggered(bool)), this, SLOT(eraserToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionMarker, SIGNAL(triggered(bool)), this, SLOT(markerToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionSelector, SIGNAL(triggered(bool)), this, SLOT(selectorToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionPlay, SIGNAL(triggered(bool)), this, SLOT(playToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionHand, SIGNAL(triggered(bool)), this, SLOT(handToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionZoomIn, SIGNAL(triggered(bool)), this, SLOT(zoomInToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionZoomOut, SIGNAL(triggered(bool)), this, SLOT(zoomOutToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionPointer, SIGNAL(triggered(bool)), this, SLOT(pointerToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionLine, SIGNAL(triggered(bool)), this, SLOT(lineToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionText, SIGNAL(triggered(bool)), this, SLOT(textToolSelected(bool)));
-    //connect(UBApplication::mainWindow->actionRichTextEditor, SIGNAL(triggered(bool)), this, SLOT(richTextToolSelected(bool))); ALTI/AOU - 20140606 : RichTextEditor tool isn't available anymore.
-    connect(UBApplication::mainWindow->actionCapture, SIGNAL(triggered(bool)), this, SLOT(captureToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionPen, &QAction::triggered, this, &UBDrawingController::penToolSelected);
+    connect(UBApplication::mainWindow->actionEraser, &QAction::triggered, this, &UBDrawingController::eraserToolSelected);
+    connect(UBApplication::mainWindow->actionMarker, &QAction::triggered, this, &UBDrawingController::markerToolSelected);
+    connect(UBApplication::mainWindow->actionSelector, &QAction::triggered, this, &UBDrawingController::selectorToolSelected);
+    connect(UBApplication::mainWindow->actionPlay, &QAction::triggered, this, &UBDrawingController::playToolSelected);
+    connect(UBApplication::mainWindow->actionHand, &QAction::triggered, this, &UBDrawingController::handToolSelected);
+    connect(UBApplication::mainWindow->actionZoomIn, &QAction::triggered, this, &UBDrawingController::zoomInToolSelected);
+    connect(UBApplication::mainWindow->actionZoomOut, &QAction::triggered, this, &UBDrawingController::zoomOutToolSelected);
+    connect(UBApplication::mainWindow->actionPointer, &QAction::triggered, this, &UBDrawingController::pointerToolSelected);
+    connect(UBApplication::mainWindow->actionLine, &QAction::triggered, this, &UBDrawingController::lineToolSelected);
+    connect(UBApplication::mainWindow->actionText, &QAction::triggered, this, &UBDrawingController::textToolSelected);
+    connect(UBApplication::mainWindow->actionCapture, &QAction::triggered, this, &UBDrawingController::captureToolSelected);
+    connect(UBApplication::mainWindow->actionOcr, &QAction::triggered, this, &UBDrawingController::ocrToolSelected);
 
-    //EV-7 - NNE - 20140210 : Maybe is no the right place to do this...
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(onActiveSceneChanged()));
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBDrawingController::onActiveSceneChanged);
 }
 
 
@@ -109,8 +108,7 @@ void UBDrawingController::setStylusTool(int tool)
         {
             UBApplication::boardController->activeScene()->deselectAllItems();
 
-            //Issue retours 2.4RC1 - CFA - 20140217 : hide drawing Palette children on setting stylus tool
-            UBApplication::boardController->paletteManager()->drawingPalette()->hideSubPalettes();
+            // hideSubPalettes disabled — legacy drawing palette removed
         }
         else
         {
@@ -168,6 +166,8 @@ void UBDrawingController::setStylusTool(int tool)
         */
         else if (mStylusTool == UBStylusTool::Capture)
             UBApplication::mainWindow->actionCapture->setChecked(true);
+        else if (mStylusTool == UBStylusTool::Ocr)
+            UBApplication::mainWindow->actionOcr->setChecked(true);
 
         if(mStylusTool != UBStylusTool::Drawing){
             UBApplication::boardController->shapeFactory().desactivate();
@@ -481,5 +481,11 @@ void UBDrawingController::captureToolSelected(bool checked)
 {
     if (checked)
         setStylusTool(UBStylusTool::Capture);
+}
+
+void UBDrawingController::ocrToolSelected(bool checked)
+{
+    if (checked)
+        setStylusTool(UBStylusTool::Ocr);
 }
 

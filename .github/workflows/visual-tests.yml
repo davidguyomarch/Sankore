@@ -1,0 +1,113 @@
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+name: Visual Regression Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      generate_references:
+        description: 'Generate new reference images (instead of comparing)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  visual-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential g++ make git ca-certificates curl \
+            libgl1-mesa-dev libglib2.0-0 libfontconfig1 libxkbcommon0 \
+            libdbus-1-3 libegl1 libxcb-xinerama0 libxcb-cursor0 \
+            python3 python3-pip
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt 6.8.2
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.2'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          modules: 'qt5compat qtmultimedia'
+          dir: '/opt'
+
+      - name: Set Qt environment
+        run: |
+          echo "Qt6_DIR=/opt/Qt/6.8.2/gcc_64" >> $GITHUB_ENV
+          echo "/opt/Qt/6.8.2/gcc_64/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=/opt/Qt/6.8.2/gcc_64/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Generate moc for visual test
+        run: |
+          cd tests
+          /opt/Qt/6.8.2/gcc_64/libexec/moc \
+            -I. -I../src \
+            -I/opt/Qt/6.8.2/gcc_64/include \
+            -I/opt/Qt/6.8.2/gcc_64/include/QtCore \
+            -I/opt/Qt/6.8.2/gcc_64/include/QtTest \
+            -I/opt/Qt/6.8.2/gcc_64/include/QtWidgets \
+            tst_UBVisualRegression.h -o premoc/moc_tst_UBVisualRegression.cpp
+          echo "moc generated successfully"
+
+      - name: Build visual test binary
+        run: |
+          cd tests
+          # Re-enable visual test in tests.pro temporarily
+          echo "" >> tests.pro
+          echo "# Visual regression test" >> tests.pro
+          echo "SOURCES += tst_UBVisualRegression.cpp premoc/moc_tst_UBVisualRegression.cpp" >> tests.pro
+          echo "RESOURCES += visual_tests.qrc" >> tests.pro
+          echo "QT += svg svgwidgets" >> tests.pro
+
+          qmake tests.pro
+          # Fix moc_predefs for x86_64
+          g++ -pipe --coverage -O2 -std=c++20 -Wall -Wextra -fPIC -dM -E \
+            -o build/moc/moc_predefs.h \
+            /opt/Qt/6.8.2/gcc_64/mkspecs/features/data/dummy.cpp
+          make -j$(nproc)
+
+      - name: Run visual tests
+        run: |
+          cd tests
+          export QT_QPA_PLATFORM=offscreen
+          if [ "${{ github.event.inputs.generate_references }}" = "true" ]; then
+            export UB_GENERATE_VISUAL_REFERENCES=1
+            echo "=== GENERATING reference images ==="
+          else
+            echo "=== COMPARING against reference images ==="
+          fi
+          ./build/OpenSankoreTests TestUBVisualRegression -v2 2>&1 || true
+
+      - name: List generated images
+        run: |
+          echo "=== Reference images ==="
+          find tests/visual/reference -name "*.png" -exec ls -la {} \; 2>/dev/null || echo "No reference images"
+          echo ""
+          echo "=== Actual images (failures) ==="
+          find tests/visual/actual -name "*.png" -exec ls -la {} \; 2>/dev/null || echo "No failure images"
+
+      - name: Upload visual test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-results
+          path: |
+            tests/visual/reference/
+            tests/visual/actual/
+          if-no-files-found: warn

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -22,6 +23,7 @@
 
 
 #include "UBDisplayManager.h"
+#include <QAbstractButton>
 #include <QGuiApplication>
 #include <QScreen>
 
@@ -263,8 +265,8 @@ void UBDisplayManager::blackout()
         Ui::BlackoutWidget *blackoutUi = new Ui::BlackoutWidget();
         blackoutUi->setupUi(blackoutWidget);
 
-        connect(blackoutUi->iconButton, SIGNAL(pressed()), blackoutWidget, SLOT(doActivity()));
-        connect(blackoutWidget, SIGNAL(activity()), this, SLOT(unBlackout()));
+        connect(blackoutUi->iconButton, &QAbstractButton::pressed, blackoutWidget, &UBBlackoutWidget::doActivity);
+        connect(blackoutWidget, &UBBlackoutWidget::activity, this, &UBDisplayManager::unBlackout);
 
         // display Uniboard logo on main screen
         blackoutUi->iconButton->setVisible(screenIndex == mControlScreenIndex);

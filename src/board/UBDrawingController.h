@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -24,7 +25,8 @@
 #ifndef UBDRAWINGCONTROLLER_H_
 #define UBDRAWINGCONTROLLER_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QColor>
 
 #include "core/UB.h"
 
@@ -111,6 +113,7 @@ class UBDrawingController : public QObject
         void textToolSelected(bool checked);
         void richTextToolSelected(bool checked);
         void captureToolSelected(bool checked);
+        void ocrToolSelected(bool checked);
 };
 
 #endif /* UBDRAWINGCONTROLLER_H_ */

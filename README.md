@@ -1,10 +1,24 @@
-# Open-Sankoré 3.1
+# Open-Sankoré - Community Edition
 
-![Build Windows](https://github.com/davidguyomarch/Sankore-3.1/actions/workflows/build-windows.yml/badge.svg)
-![Build Linux](https://github.com/davidguyomarch/Sankore-3.1/actions/workflows/build-linux.yml/badge.svg)
+![Build Windows](https://github.com/davidguyomarch/Sankore/actions/workflows/build-windows.yml/badge.svg)
+![Build Linux](https://github.com/davidguyomarch/Sankore/actions/workflows/build-linux.yml/badge.svg)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/davidguyomarch/0b042ec6f4db15ba496d37215c18a649/raw/coverage.json)
 
 Interactive whiteboard application for education, migrated to Qt 6.
+
+## About
+
+Open-Sankoré Community Edition is an actively maintained fork of the original Open-Sankoré project developed by GIP ENA.
+
+The original project was discontinued in 2013. This repository modernizes the software for current operating systems while preserving compatibility with existing .ubz documents.
+
+## Original project
+Open-Sankoré 3.1
+Copyright © 2010–2013 GIP ENA.
+
+## Community edition
+Copyright © 2026 David Guyomarch.
+Maintainer and lead developer.
 
 ## Features
 
@@ -20,7 +34,7 @@ Interactive whiteboard application for education, migrated to Qt 6.
 ### Windows (CI)
 
 ```bash
-qmake Sankore_3.1.pro CONFIG+=no_webengine
+qmake OpenSankore.pro CONFIG+=no_webengine
 nmake release
 windeployqt --release build\win32\release\product\Open-Sankore.exe
 ```
@@ -28,12 +42,12 @@ windeployqt --release build\win32\release\product\Open-Sankore.exe
 ### Linux (Docker)
 
 ```bash
-docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 Sankore_3.1.pro CONFIG+=no_webengine && make -j$(nproc)'
+docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'
 ```
 
 ## Downloads
 
-See [Releases](https://github.com/davidguyomarch/Sankore-3.1/releases) for pre-built packages:
+See [Releases](https://github.com/davidguyomarch/Sankore/releases) for pre-built packages:
 - Windows: `.exe` installer + `.zip` portable
 - Linux x64: `.deb` (Debian/Ubuntu) + `.rpm` (Fedora/RedHat)
 
@@ -46,4 +60,4 @@ See [Releases](https://github.com/davidguyomarch/Sankore-3.1/releases) for pre-b
 
 ## License
 
-GNU General Public License v3 — see [LICENSE.txt](LICENSE.txt)
+GNU General Public License v3 — see [LICENSE.md](LICENSE.md)

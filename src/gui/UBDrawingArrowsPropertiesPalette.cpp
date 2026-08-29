@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 David Guyomarch
+ */
+
 #include "UBDrawingArrowsPropertiesPalette.h"
 
 #include "core/UBApplication.h"
@@ -64,13 +68,13 @@ UBDrawingArrowsPropertiesPalette::UBDrawingArrowsPropertiesPalette(Qt::Orientati
     mButtonGroupEndArrowStyle->addButton(btnEndArrowStyleRound);
 
     // Connect buttons
-    connect(btnStartArrowStyleNone, SIGNAL(clicked()), this, SLOT(onBtnStartArrowStyleNone()));
-    connect(btnStartArrowStyleArrow, SIGNAL(clicked()), this, SLOT(onBtnStartArrowStyleArrow()));
-    connect(btnStartArrowStyleRound, SIGNAL(clicked()), this, SLOT(onBtnStartArrowStyleRound()));
+    connect(btnStartArrowStyleNone, &QAbstractButton::clicked, this, [this]() { onBtnStartArrowStyleNone(); });
+    connect(btnStartArrowStyleArrow, &QAbstractButton::clicked, this, [this]() { onBtnStartArrowStyleArrow(); });
+    connect(btnStartArrowStyleRound, &QAbstractButton::clicked, this, [this]() { onBtnStartArrowStyleRound(); });
 
-    connect(btnEndArrowStyleNone, SIGNAL(clicked()), this, SLOT(onBtnEndArrowStyleNone()));
-    connect(btnEndArrowStyleArrow, SIGNAL(clicked()), this, SLOT(onBtnEndArrowStyleArrow()));
-    connect(btnEndArrowStyleRound, SIGNAL(clicked()), this, SLOT(onBtnEndArrowStyleRound()));
+    connect(btnEndArrowStyleNone, &QAbstractButton::clicked, this, [this]() { onBtnEndArrowStyleNone(); });
+    connect(btnEndArrowStyleArrow, &QAbstractButton::clicked, this, [this]() { onBtnEndArrowStyleArrow(); });
+    connect(btnEndArrowStyleRound, &QAbstractButton::clicked, this, [this]() { onBtnEndArrowStyleRound(); });
 
     adjustSizeAndPosition();
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -84,7 +85,7 @@ class UBPreferencesController : public QObject
         UBBrushPropertiesFrame* mPenProperties;
         UBBrushPropertiesFrame* mMarkerProperties;
 
-    protected slots:
+    public slots:
 
         void close();
         void defaultSettings();

@@ -1,3 +1,9 @@
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 name: Build Linux ARM64
 
 on:
@@ -7,6 +13,10 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -14,6 +24,10 @@ jobs:
     permissions:
       checks: write
       contents: read
+
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
 
     steps:
       - name: Checkout code
@@ -28,6 +42,23 @@ jobs:
 
       - name: Build in ARM64 container
         uses: docker/setup-buildx-action@v3
+
+      - name: Generate git version header and set version
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
+          echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
+          cat src/core/git_version.h
+          # Extract version from git tag (v4.1.0 -> 4.1.0) or fall back
+          GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
+          if [[ "$GIT_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
+            echo "Updating version to $MAJ.$MIN.$PATCH from tag $GIT_TAG"
+            sed -i "s/VERSION_MAJ = .*/VERSION_MAJ = $MAJ/" OpenSankore.pro
+            sed -i "s/VERSION_MIN = .*/VERSION_MIN = $MIN/" OpenSankore.pro
+            sed -i "s/VERSION_PATCH = .*/VERSION_PATCH = $PATCH/" OpenSankore.pro
+          fi
 
       - name: Build and test in ARM64
         run: |
@@ -47,7 +78,16 @@ jobs:
                 libqt6opengl6-dev libqt6core5compat6-dev \
                 libgl1-mesa-dev libssl-dev zlib1g-dev \
                 libx11-dev libomp-dev pkg-config \
-                libpulse-dev
+                libpulse-dev libzinnia-dev \
+                gdb \
+                qml6-module-qtquick \
+                qml6-module-qtquick-controls \
+                qml6-module-qtquick-layouts \
+                qml6-module-qtquick-templates \
+                qml6-module-qtquick-window \
+                qml6-module-qt5compat-graphicaleffects \
+                qml6-module-qtqml-workerscript \
+                xvfb
 
               echo "=== Building QuaZip ==="
               git clone --depth 1 --branch v1.4 https://github.com/stachenov/quazip.git /tmp/quazip-src
@@ -62,12 +102,12 @@ jobs:
               ldconfig || true
 
               echo "=== Generating git version ==="
-              echo "#define GIT_COMMIT \"arm64-ci\"" > src/core/git_version.h
+              cat src/core/git_version.h
 
               echo "=== Running qmake ==="
               export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
               mkdir -p build/linux/release/moc build/linux/release/objects build/linux/release/rcc build/linux/release/ui build/linux/release/product
-              qmake6 Sankore_3.1.pro CONFIG+=no_webengine
+              qmake6 OpenSankore.pro CONFIG+=no_webengine
 
               echo "=== Building ==="
               make -j$(nproc)
@@ -76,7 +116,21 @@ jobs:
               export QT_QPA_PLATFORM=offscreen
               export LANG=C.UTF-8
               export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-              build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario
+              # Enable core dumps for crash analysis
+              ulimit -c unlimited
+              echo "core.%p" > /proc/sys/kernel/core_pattern 2>/dev/null || true
+              build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
+                EXIT_CODE=$?
+                echo "=== SMOKE TEST CRASHED (exit $EXIT_CODE) ==="
+                CORE_FILE=$(find / -name "core*" -newer build/linux/release/product/Open-Sankore 2>/dev/null | head -1)
+                if [ -n "$CORE_FILE" ]; then
+                  echo "=== BACKTRACE ==="
+                  gdb -batch -ex "bt full" -ex "quit" build/linux/release/product/Open-Sankore "$CORE_FILE" 2>&1 | head -80
+                else
+                  echo "No core file found"
+                fi
+                exit $EXIT_CODE
+              }
               echo "ARM64 smoke test passed!"
             '
 
@@ -84,6 +138,34 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Open-Sankore-Linux-arm64
+          name: open-sankore-linux-arm64
           path: build/linux/release/product/
+          if-no-files-found: warn
+
+      - name: Package .deb and .rpm for ARM64
+        if: success()
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v ${{ github.workspace }}:/src \
+            -w /src \
+            arm64v8/ubuntu:22.04 bash -c '
+              apt-get update
+              apt-get install -y dpkg-dev rpm
+              ./scripts/package-linux.sh arm64
+            '
+
+      - name: Upload ARM64 .deb package
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-sankore-linux-arm64-deb
+          path: build/packages/*.deb
+          if-no-files-found: warn
+
+      - name: Upload ARM64 .rpm package
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-sankore-linux-arm64-rpm
+          path: build/packages/*.rpm
           if-no-files-found: warn

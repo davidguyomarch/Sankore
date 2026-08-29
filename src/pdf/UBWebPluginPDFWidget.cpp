@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
+ * Copyright (C) 2026 David Guyomarch
  *
  * This file is part of Open-Sankoré.
  *
@@ -42,13 +43,13 @@ UBWebPluginPDFWidget::UBWebPluginPDFWidget(const QUrl &url, QWidget *parent)
 {
     QIcon previousPageIcon;
     QIcon nextPageIcon;
-    previousPageIcon.addFile(":/images/toolbar/previousPage.png", QSize(32, 32), QIcon::Normal);
-    nextPageIcon.addFile(":/images/toolbar/nextPage.png", QSize(32, 32), QIcon::Normal);
+    previousPageIcon.addFile(":/images/toolbar/svg/previousPage.svg", QSize(32, 32), QIcon::Normal);
+    nextPageIcon.addFile(":/images/toolbar/svg/nextPage.svg", QSize(32, 32), QIcon::Normal);
     mPreviousPageAction = new QAction(previousPageIcon, QString(), this);
     mNextPageAction = new QAction(nextPageIcon, QString(), this);
 
-    connect(mPreviousPageAction, SIGNAL(triggered()), this, SLOT(previousPage()));
-    connect(mNextPageAction, SIGNAL(triggered()), this, SLOT(nextPage()));
+    connect(mPreviousPageAction, &QAction::triggered, this, [this]() { previousPage(); });
+    connect(mNextPageAction, &QAction::triggered, this, [this]() { nextPage(); });
 
     mPreviousPageButton.setFixedSize(32, 32);
     mNextPageButton.setFixedSize(32, 32);
