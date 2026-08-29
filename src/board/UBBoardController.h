@@ -118,26 +118,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
             return mActiveScene;
         }
 
-        QColor penColorOnDarkBackground()
-        {
-            return mSettings->penColor(true);
-        }
-
-        QColor penColorOnLightBackground()
-        {
-            return mSettings->penColor(false);
-        }
-
-        QColor markerColorOnDarkBackground()
-        {
-            return mSettings->markerColor(true);
-        }
-
-        QColor markerColorOnLightBackground()
-        {
-            return mSettings->markerColor(false);
-        }
-
         qreal systemScaleFactor()
         {
             return mSystemScaleFactor;
@@ -211,7 +191,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
 
     public slots:
         void ClearUndoStack();
-        void colorPaletteChanged();
         void stylusToolDoubleClicked(int tool);
 
         void showDocumentsDialog();

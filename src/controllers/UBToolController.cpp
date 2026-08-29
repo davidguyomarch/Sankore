@@ -83,9 +83,6 @@ int UBToolController::penColorIndex() const
 void UBToolController::setPenColorIndex(int index)
 {
     UBSettings::settings()->setPenColorIndex(index);
-    // Notify UBBoardController to update its cached pen colors (used by UBSceneContext for drawing)
-    if (UBApplication::boardController)
-        UBApplication::boardController->colorPaletteChanged();
     emit penColorChanged();
     emit currentColorIndexChanged();
 }
@@ -126,8 +123,6 @@ int UBToolController::markerColorIndex() const
 void UBToolController::setMarkerColorIndex(int index)
 {
     UBSettings::settings()->setMarkerColorIndex(index);
-    if (UBApplication::boardController)
-        UBApplication::boardController->colorPaletteChanged();
     emit markerColorChanged();
     emit currentColorIndexChanged();
 }

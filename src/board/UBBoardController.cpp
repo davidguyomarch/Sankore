@@ -1929,13 +1929,6 @@ QColor UBBoardController::inferOpposite(const QColor &candidate, const char tool
     return retColor;
 }
 
-void UBBoardController::colorPaletteChanged()
-{
-    // Colors are now read live from UBSettings by UBSceneContext — no cache to update.
-    // Just emit the signal so any UI (e.g. legacy palette) can refresh.
-    emit penColorChanged();
-}
-
 
 qreal UBBoardController::currentZoom()
 {

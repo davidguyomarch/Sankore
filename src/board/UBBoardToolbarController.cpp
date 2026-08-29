@@ -61,7 +61,9 @@ void UBBoardToolbarController::setupToolbar()
     connect(colorChoice, SIGNAL(activated(int)), mBoardController->asQObject(), SLOT(setColorIndex(int)));
     connect(UBDrawingController::drawingController(), SIGNAL(colorIndexChanged(int)), colorChoice, SLOT(setCurrentIndex(int)));
     connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), colorChoice, SLOT(colorPaletteChanged()));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), mBoardController->asQObject(), SLOT(colorPaletteChanged()));
+    // Route colorPaletteChanged to boardController::penColorChanged for tools (e.g. compass)
+    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged,
+            UBApplication::boardController, &UBBoardController::penColorChanged);
 
     colorChoice->displayText(QVariant(mSettings->appToolBarDisplayText->get().toBool()));
     colorChoice->colorPaletteChanged();
