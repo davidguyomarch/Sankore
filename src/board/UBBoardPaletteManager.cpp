@@ -44,11 +44,6 @@
 
 #include "web/UBWebPage.h"
 #include "web/UBWebController.h"
-#ifdef SANKORE_WEBENGINE
-#include "web/browser/WBBrowserWindow.h"
-#include "web/browser/WBTabWidget.h"
-#include "web/browser/WBWebView.h"
-#endif
 
 #include "desktop/UBDesktopAnnotationController.h"
 
@@ -825,10 +820,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
         case eUBDockPaletteWidget_WEB:
             {
                 mAddItemPalette->setParent(UBApplication::mainWindow);
-
-#ifdef SANKORE_WEBENGINE
-                // Dock palettes permanently hidden — QML V2 replaces them
-#endif
 
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
