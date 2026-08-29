@@ -34,8 +34,6 @@
 
 #include "qtsingleapplication.h"
 
-class UniboardSankoreTransition;
-
 namespace Ui
 {
     class MainWindow;
@@ -72,8 +70,6 @@ class UBApplication : public QtSingleApplication
         static UBBoardController* boardController;
         static UBWebController* webController;
         static UBDocumentController* documentController;
-        static UniboardSankoreTransition* mUniboardSankoreTransition;
-
         static UBMainWindow* mainWindow;
 
         static UBApplication* app()
@@ -135,8 +131,6 @@ class UBApplication : public QtSingleApplication
 #ifdef Q_OS_MACOS
         void showMinimized();
 #endif
-        void importUniboardFiles();
-
         void onScreenCountChanged(int newCount);
 
     private:
