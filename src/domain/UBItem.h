@@ -28,6 +28,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QUuid>
 #include "domain/UBGraphicsItemDelegate.h"
 #include "core/UB.h"
 

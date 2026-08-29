@@ -25,7 +25,10 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QList>
+#include <QObject>
+#include <QRectF>
+#include <QTimer>
 
 #include "UBGraphicsMediaItem.h"
 #include "UBGraphicsMediaItemDelegate.h"

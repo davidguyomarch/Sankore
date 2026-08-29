@@ -28,6 +28,7 @@
 #include <QApplication>
 #include <QPainter>
 #include <QProcess>
+#include <QRegularExpression>
 #include <windows.h>
 #include <shellapi.h>
 

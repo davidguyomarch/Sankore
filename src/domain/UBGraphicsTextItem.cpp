@@ -30,6 +30,8 @@
 #include <QAbstractTextDocumentLayout>
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItem.h"
+
+#include <QTextTable>
 #include "UBGraphicsTextItemDelegate.h"
 #include "UBGraphicsScene.h"
 #include "UBGraphicsDelegateFrame.h"

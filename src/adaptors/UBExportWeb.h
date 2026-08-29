@@ -24,7 +24,8 @@
 #ifndef UBEXPORTWEB_H_
 #define UBEXPORTWEB_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 
 #include "UBExportAdaptor.h"
 

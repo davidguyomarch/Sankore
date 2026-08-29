@@ -24,7 +24,8 @@
 #ifndef UBEXPORTDOCUMENT_H_
 #define UBEXPORTDOCUMENT_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 
 #include "UBExportAdaptor.h"
 

@@ -23,6 +23,8 @@
 
 #include "UBCryptoUtils.h"
 
+#include <QDebug>
+
 #include <openssl/evp.h>
 
 UBCryptoUtils* UBCryptoUtils::sInstance(nullptr);

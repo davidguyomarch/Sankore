@@ -29,9 +29,11 @@
 #include <QListView>
 #include <QGraphicsView>
 #include <QAbstractListModel>
+#include <QSortFilterProxyModel>
 #include <QPixmap>
 #include <QVBoxLayout>
 #include <QSlider>
+#include <QTimer>
 #include <QUrl>
 #include <QStyledItemDelegate>
 #include <QLocale>
@@ -41,6 +43,8 @@
 #include <QProgressBar>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <QMimeData>
+#include <QTime>
 
 #include "UBDockPaletteWidget.h"
 #include "core/UBSettings.h"

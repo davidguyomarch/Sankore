@@ -24,7 +24,12 @@
 
 #include "UBHttpGet.h"
 
-#include <QtNetwork>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QPointF>
+#include <QSize>
+#include <QUrl>
 
 #include "network/UBNetworkAccessManager.h"
 #include "core/UBDownloadManager.h"

@@ -22,6 +22,8 @@
 
 
 #include "UBGraphicsTextItemUndoCommand.h"
+
+#include <QTextDocument>
 #include "UBGraphicsTextItem.h"
 
 

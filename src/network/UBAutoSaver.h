@@ -66,7 +66,9 @@
 #ifndef UBAUTOSAVER_H
 #define UBAUTOSAVER_H
 
-#include <QtCore>
+#include <QElapsedTimer>
+#include <QBasicTimer>
+#include <QObject>
 
 /*
     This class will call the save() slot on the parent object when the parent changes.

@@ -20,6 +20,11 @@
  */
 
 #include "UBTrashRegistery.h"
+
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
 #include "core/UBSettings.h"
 #include "board/UBFeaturesController.h"
 

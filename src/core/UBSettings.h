@@ -25,11 +25,29 @@
 #ifndef UBSETTINGS_H_
 #define UBSETTINGS_H_
 
-#include <QtCore>
+#include <QList>
+#include <QMap>
+#include <QNetworkProxy>
+#include <QObject>
+#include <QPointer>
+#include <QSettings>
+#include <QSettings>
+#include <QSize>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtNetwork>
+#include <QList>
+#include <QMap>
+#include <QNetworkProxy>
+#include <QObject>
+#include <QSettings>
+#include <QSize>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
 
 #include "UB.h"
 #include "UBSetting.h"

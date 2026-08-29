@@ -49,7 +49,24 @@
 #include <QDesktopServices>
 #include <QMenu>
 #include <QActionGroup>
-#include <QtXml>
+#include <QDir>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QFile>
+#include <QIODevice>
+#include <QList>
+#include <QLocale>
+#include <QMap>
+#include <QObject>
+#include <QPixmapCache>
+#include <QRect>
+#include <QRegularExpression>
+#include <QSize>
+#include <QString>
+#include <QStringList>
+#include <QTimer>
+#include <QTranslator>
+#include <QVariant>
 #include <QFontDatabase>
 
 #if defined(Q_OS_MACOSX)

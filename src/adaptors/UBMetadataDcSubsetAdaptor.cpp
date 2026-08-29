@@ -28,7 +28,14 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtXml>
+#include <QDateTime>
+#include <QDir>
+#include <QFile>
+#include <QIODevice>
+#include <QMap>
+#include <QString>
+#include <QVariant>
+#include <QXmlStreamWriter>
 #include <QScreen>
 #include <QGuiApplication>
 

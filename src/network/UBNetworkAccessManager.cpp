@@ -23,6 +23,8 @@
 
 
 #include "UBNetworkAccessManager.h"
+
+#include <QNetworkDiskCache>
 #include <QElapsedTimer>
 #include <QMessageBox>
 #include <QPushButton>
@@ -30,7 +32,19 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtNetwork>
+#include <QAuthenticator>
+#include <QCoreApplication>
+#include <QElapsedTimer>
+#include <QIODevice>
+#include <QList>
+#include <QNetworkAccessManager>
+#include <QNetworkProxy>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QSslError>
+#include <QString>
+#include <QStringList>
 
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"

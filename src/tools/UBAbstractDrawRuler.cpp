@@ -22,7 +22,9 @@
 
 
 #include "UBAbstractDrawRuler.h"
-#include <QtSvg>
+#include <QGraphicsSvgItem>
+#include <QPointF>
+#include <QVariant>
 #include "core/UB.h"
 #include "gui/UBResources.h"
 #include "domain/UBGraphicsScene.h"

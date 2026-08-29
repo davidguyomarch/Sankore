@@ -28,7 +28,11 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QByteArray>
+#include <QGraphicsSvgItem>
+#include <QString>
+#include <QUuid>
+#include <QVariant>
 #include <QGraphicsSvgItem>
 
 #include "UBItem.h"

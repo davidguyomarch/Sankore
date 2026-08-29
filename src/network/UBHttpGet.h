@@ -24,8 +24,20 @@
 #ifndef UBHTTPGET_H_
 #define UBHTTPGET_H_
 
-#include <QtCore>
-#include <QtNetwork>
+#include <QByteArray>
+#include <QNetworkReply>
+#include <QObject>
+#include <QPointF>
+#include <QSize>
+#include <QString>
+#include <QUrl>
+#include <QByteArray>
+#include <QNetworkReply>
+#include <QObject>
+#include <QPointF>
+#include <QSize>
+#include <QString>
+#include <QUrl>
 #include <QDropEvent>
 
 class UBHttpGet : public QObject

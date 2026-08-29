@@ -27,7 +27,13 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtNetwork>
+#include <QList>
+#include <QNetworkAccessManager>
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
+#include <QNetworkReply>
+#include <QObject>
+#include <QString>
 
 #include "ui_webPublishing.h"
 

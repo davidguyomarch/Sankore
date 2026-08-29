@@ -24,6 +24,7 @@
 
 #include "UBImportImage.h"
 
+#include <QImageReader>
 #include "document/UBDocumentProxy.h"
 
 #include "core/UBApplication.h"

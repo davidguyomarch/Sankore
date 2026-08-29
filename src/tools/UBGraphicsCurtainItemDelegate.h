@@ -29,7 +29,8 @@
 #include <QApplication>
 #include <QPainter>
 
-#include <QtSvg>
+#include <QObject>
+#include <QVariant>
 
 #include "core/UB.h"
 #include "domain/UBGraphicsItemDelegate.h"

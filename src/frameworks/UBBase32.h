@@ -24,7 +24,8 @@
 #ifndef UBBASE32_H_
 #define UBBASE32_H_
 
-#include <QtCore>
+#include <QByteArray>
+#include <QString>
 
 class UBBase32
 {

@@ -25,7 +25,10 @@
 #ifndef UBTHUMBNAILADAPTOR_H
 #define UBTHUMBNAILADAPTOR_H
 
-#include <QtCore>
+#include <QCoreApplication>
+#include <QList>
+#include <QPixmap>
+#include <QUrl>
 
 class UBDocument;
 class UBDocumentProxy;

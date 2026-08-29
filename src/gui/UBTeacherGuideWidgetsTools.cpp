@@ -22,6 +22,8 @@
 
 
 
+#include <QAbstractTextDocumentLayout>
+#include <QDrag>
 #include <QTreeWidget>
 #include <QFileDialog>
 #include <QVBoxLayout>

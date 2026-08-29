@@ -24,7 +24,8 @@
 #ifndef UBEXPORTPDF_H_
 #define UBEXPORTPDF_H_
 
-#include <QtCore>
+#include <QObject>
+#include <QString>
 #include "UBExportAdaptor.h"
 
 class UBDocumentProxy;

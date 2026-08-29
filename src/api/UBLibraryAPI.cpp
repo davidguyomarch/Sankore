@@ -24,6 +24,8 @@
 
 #include "UBLibraryAPI.h"
 
+#include <QDrag>
+
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 

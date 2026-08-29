@@ -28,7 +28,19 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtXml>
+#include <QByteArray>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QHash>
+#include <QList>
+#include <QLocale>
+#include <QMap>
+#include <QPointF>
+#include <QString>
+#include <QUuid>
+#include <QVector>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #include <QGraphicsItem>
 
 #include "frameworks/UBGeometryUtils.h"

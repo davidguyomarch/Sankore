@@ -8,6 +8,8 @@
 
 #include "UBAppController.h"
 
+#include <QTimer>
+
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"
 #include "gui/UBMainWindow.h"

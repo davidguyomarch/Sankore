@@ -28,7 +28,11 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QGraphicsSvgItem>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
+#include <QVariant>
 
 #include "core/UB.h"
 #include "domain/UBItem.h"

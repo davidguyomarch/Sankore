@@ -27,8 +27,19 @@
 
 #include <QWidget>
 #include <QApplication>
+#include <QBitArray>
 #include <QPainter>
-#include <QtSvg>
+#include <QGraphicsSvgItem>
+#include <QList>
+#include <QMimeData>
+#include <QObject>
+#include <QPoint>
+#include <QPointF>
+#include <QRectF>
+#include <QSizeF>
+#include <QString>
+#include <QTime>
+#include <QVariant>
 #include <QGraphicsSvgItem>
 #include <QMimeData>
 

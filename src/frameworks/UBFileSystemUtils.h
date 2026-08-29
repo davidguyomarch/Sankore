@@ -25,7 +25,15 @@
 #ifndef UBFILESYSTEMUTILS_H_
 #define UBFILESYSTEMUTILS_H_
 
-#include <QtCore>
+#include <QByteArray>
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QThread>
+#include <QUrl>
 #include <QThread>
 
 #include "core/UB.h"

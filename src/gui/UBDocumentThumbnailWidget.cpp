@@ -23,6 +23,8 @@
 
 
 #include "UBDocumentThumbnailWidget.h"
+
+#include <QTimer>
 #include <QScrollBar>
 
 #include "core/UBApplication.h"

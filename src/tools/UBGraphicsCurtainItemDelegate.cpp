@@ -25,7 +25,8 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QtSvg>
+#include <QObject>
+#include <QVariant>
 
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsDelegateFrame.h"

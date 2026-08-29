@@ -24,8 +24,16 @@
 
 #include "UBExportPDF.h"
 
-#include <QtCore>
-#include <QtSvg>
+#include <QObject>
+#include <QRectF>
+#include <QSize>
+#include <QSizeF>
+#include <QString>
+#include <QObject>
+#include <QRectF>
+#include <QSize>
+#include <QSizeF>
+#include <QString>
 #include <QPrinter>
 #include <QPageSize>
 #include <QScreen>

@@ -24,13 +24,32 @@
 
 #include "UBGraphicsScene.h"
 
+#include <QPropertyAnimation>
+
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
 #ifdef SANKORE_WEBENGINE
 #include <QWebEngineView>
 #endif
-#include <QtSvg>
+#include <QByteArray>
+#include <QDateTime>
+#include <QFile>
+#include <QLineF>
+#include <QList>
+#include <QMap>
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
+#include <QRegularExpression>
+#include <QSet>
+#include <QSize>
+#include <QString>
+#include <QStringList>
+#include <QUrl>
+#include <QUuid>
+#include <QVariant>
 #include <QGraphicsView>
 
 #include "frameworks/UBGeometryUtils.h"

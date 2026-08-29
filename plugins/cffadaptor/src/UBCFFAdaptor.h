@@ -25,7 +25,16 @@
 
 #include "UBCFFAdaptor_global.h"
 
-#include <QtCore>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
+#include <QList>
+#include <QMap>
+#include <QRect>
+#include <QSize>
+#include <QString>
+#include <QStringList>
+#include <QXmlStreamWriter>
 
 class QTransform;
 class QDomDocument;
