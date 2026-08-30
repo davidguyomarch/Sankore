@@ -8,7 +8,7 @@
 ; Builds the Windows installer from the windeployqt output
 
 #define MyAppName "Open-Sankoré"
-#define MyAppVersion "4.0.2"
+#define MyAppVersion "4.2.0"
 #define MyAppPublisher "Open-Sankoré Project"
 #define MyAppURL "https://github.com/davidguyomarch/Sankore"
 #define MyAppExeName "Open-Sankore.exe"

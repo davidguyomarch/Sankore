@@ -125,12 +125,17 @@ jobs:
           if ($gitTag -match '^v(\d+\.\d+\.\d+)') {
             $version = $Matches[1]
           } else {
-            $version = "4.0.2"  # fallback
+            # Extract version from .pro file
+            $proContent = Get-Content OpenSankore.pro -Raw
+            $maj = [regex]::Match($proContent, 'VERSION_MAJ\s*=\s*(\d+)').Groups[1].Value
+            $min = [regex]::Match($proContent, 'VERSION_MIN\s*=\s*(\d+)').Groups[1].Value
+            $pat = [regex]::Match($proContent, 'VERSION_PATCH\s*=\s*(\d+)').Groups[1].Value
+            $version = "$maj.$min.$pat"
           }
           Write-Host "Build version: $version"
           echo "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-          # Update .pro version numbers
+          # Update .pro version numbers (in case tag overrode them)
           $parts = $version.Split('.')
           $content = Get-Content OpenSankore.pro -Raw
           $content = $content -replace 'VERSION_MAJ = \d+', "VERSION_MAJ = $($parts[0])"
