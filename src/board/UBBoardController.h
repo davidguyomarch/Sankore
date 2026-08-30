@@ -54,7 +54,6 @@ class UBGraphicsAudioItem;
 class UBGraphicsWidgetItem;
 class UBBoardPaletteManager;
 class UBBoardNavigationController;
-class UBBoardToolbarController;
 class UBBoardZoomController;
 class UBBoardItemFactory;
 class UBItem;
@@ -304,7 +303,6 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         int mActiveSceneIndex;
         UBBoardPaletteManager *mPaletteManager;
         UBBoardNavigationController *mNavigationController;
-        UBBoardToolbarController *mToolbarController;
         UBBoardZoomController *mZoomController;
         UBBoardItemFactory *mItemFactory;
         UBSoftwareUpdateDialog *mSoftwareUpdateDialog;
