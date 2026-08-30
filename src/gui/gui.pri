@@ -33,16 +33,8 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBDockDownloadWidget.h \
     src/gui/UBFeaturesWidget.h \
     src/gui/UBFeaturesActionBar.h \
-    src/gui/UBDockTeacherGuideWidget.h \
-    src/gui/UBTeacherGuideWidget.h \
-    src/gui/UBTeacherGuideWidgetsTools.h \
     src/gui/UBMessagesDialog.h \
     src/gui/UBStartupHintsPalette.h \
-    src/gui/UBDockResourcesWidget.h \
-    src/gui/UBTeacherGuideResourceEditionWidget.h \
-    src/gui/UBTeacherGuideConstantes.h \
-    src/gui/UBTeacherGuideResourcesPresentationWidget.h \
-    src/gui/UBAbstractTeacherGuide.h \
     src/gui/UBAbstractSubPalette.h \
     src/gui/UBShapesPalette.h \
     src/gui/UBDrawingPolygonPalette.h \
@@ -91,15 +83,8 @@ SOURCES += src/gui/UBThumbnailView.cpp \
     src/gui/UBDockDownloadWidget.cpp \
     src/gui/UBFeaturesWidget.cpp \
     src/gui/UBFeaturesActionBar.cpp \
-    src/gui/UBDockTeacherGuideWidget.cpp \
-    src/gui/UBTeacherGuideWidget.cpp \
-    src/gui/UBTeacherGuideWidgetsTools.cpp \
     src/gui/UBMessagesDialog.cpp \
     src/gui/UBStartupHintsPalette.cpp \
-    src/gui/UBDockResourcesWidget.cpp \
-    src/gui/UBTeacherGuideResourceEditionWidget.cpp \
-    src/gui/UBTeacherGuideResourcesPresentationWidget.cpp \
-    src/gui/UBAbstractTeacherGuide.cpp \
     src/gui/UBAbstractSubPalette.cpp \
     src/gui/UBShapesPalette.cpp \
     src/gui/UBDrawingPolygonPalette.cpp \

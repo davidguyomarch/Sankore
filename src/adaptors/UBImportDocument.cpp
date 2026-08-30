@@ -180,8 +180,6 @@ UBDocumentProxy* UBImportDocument::importFile(const QFile& pFile, const QString&
 	}
 
     bool addTitlePage = false;
-    if(UBPersistenceManager::persistenceManager()->settings()->teacherGuidePageZeroActivated->get().toBool() && !QFile(documentRootFolder+"/page000.svg").exists())
-        addTitlePage=true;
 
     UBDocumentProxy* newDocument = UBPersistenceManager::persistenceManager()->createDocumentFromDir(documentRootFolder
                                                                                                      , pGroup

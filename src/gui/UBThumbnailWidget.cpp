@@ -40,8 +40,6 @@
 
 #include "board/UBBoardPaletteManager.h"
 #include "domain/UBGraphicsScene.h"
-#include "gui/UBTeacherGuideWidget.h"
-#include "gui/UBDockTeacherGuideWidget.h"
 
 UBThumbnailWidget::UBThumbnailWidget(QWidget* parent)
     : QGraphicsView(parent)
@@ -1049,15 +1047,6 @@ void UBSceneThumbnailProxyWidget::paint(QPainter *painter, const QStyleOptionGra
         else
             painter->drawImage(3*(BUTTONSIZE + BUTTONSPACING), 0, iconManager.renderMenuIconDisabled());
 
-    }
-
-    auto* tgDock = UBApplication::boardController->paletteManager()->teacherGuideDockWidget();
-    auto* trDock = UBApplication::boardController->paletteManager()->teacherResourcesDockWidget();
-    if((tgDock && tgDock->teacherGuideWidget() && tgDock->teacherGuideWidget()->hasUserDataInTeacherGuide())
-            || (trDock && trDock->hasUserDataInTeacherGuide())){
-        QPixmap toque(":images/toque.svg");
-        painter->setOpacity(0.6);
-        painter->drawPixmap(QPoint(UBSettings::maxThumbnailWidth - toque.width(),0),toque);
     }
 }
 

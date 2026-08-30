@@ -130,9 +130,6 @@
 #include "core/UBTextTools.h"
 #include "gui/UBDrawingStrokePropertiesPalette.h"
 
-#include "gui/UBTeacherGuideWidget.h"
-#include "gui/UBDockTeacherGuideWidget.h"
-
 #include "interfaces/IDataStorage.h"
 
 #include "document/UBDocumentContainer.h"
@@ -370,27 +367,6 @@ UBGraphicsScene* UBSvgSubsetAdaptor::loadScene(UBDocumentProxy* proxy, const QBy
 {
     UBSvgSubsetReader reader(proxy, UBTextTools::cleanHtmlCData(QString(pArray)).toLatin1());
     return reader.loadScene();
-}
-
-
-QDomDocument UBSvgSubsetAdaptor::readTeacherGuideNode(int sceneIndex)
-{
-    QString fileName = UBApplication::boardController->selectedDocument()->persistencePath() + UBFileSystemUtils::digitFileFormat("/page%1.svg", sceneIndex);
-    QFile file(fileName);
-    file.open(QIODevice::ReadOnly);
-    QByteArray fileByteArray=file.readAll();
-    QDomDocument domDocument;
-    domDocument.setContent(fileByteArray);
-    file.close();
-
-    QDomDocument result("teacherGuide");
-    QDomNodeList list = domDocument.childNodes().at(1).childNodes();
-    for(int i = 0 ; i < list.size(); i++){
-        if(list.at(i).nodeName() == "teacherGuide" || list.at(i).nodeName() == "teacherBar"){
-            result.appendChild(list.at(i).cloneNode());
-        }
-    }
-    return result;
 }
 
 
@@ -1362,9 +1338,7 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::writeSvgElement()
 
 bool UBSvgSubsetAdaptor::UBSvgSubsetWriter::persistScene(int pageIndex)
 {
-    //issue 1682 - NNE - add the test on the teacherResources
-    if (mScene->isModified() || (UBApplication::boardController->paletteManager()->teacherGuideDockWidget() && UBApplication::boardController->paletteManager()->teacherGuideDockWidget()->teacherGuideWidget() && UBApplication::boardController->paletteManager()->teacherGuideDockWidget()->teacherGuideWidget()->isModified()) ||
-            (UBApplication::boardController->paletteManager()->teacherResourcesDockWidget() && UBApplication::boardController->paletteManager()->teacherResourcesDockWidget()->isModified()))
+    if (mScene->isModified())
     {
 
         //Creating dom structure to store information
@@ -1684,18 +1658,12 @@ bool UBSvgSubsetAdaptor::UBSvgSubsetWriter::persistScene(int pageIndex)
         dataStorageItems << data;
 
         if(pageIndex != 0){
-            if(elements.value("teacherGuide"))
-                dataStorageItems += elements.value("teacherGuide")->save(pageIndex);
-
             if(elements.value("resourcesGuide"))
                 dataStorageItems += elements.value("resourcesGuide")->save(pageIndex);
         }
 
         // Issue 1683 - ALTI/AOU - 20131212
-        // On ne peut malheureusement pas utiliser UBTeacherGuidePageZeroWidget.save(),
-        // car celle-ci ne pourrait renvoyer que les élements du document chargé dans la Board.
-        // Or on veut pouvoir ici persister un autre Document, car par exemple quand on crée un nouveau Document :
-        // on le persite alors qu'il n'a pas encore été chargé dans la Board.
+        // Persist external files on page zero
         if(pageIndex == 0)
         {
             QVector<tIDataStorage*> result;
@@ -1711,10 +1679,8 @@ bool UBSvgSubsetAdaptor::UBSvgSubsetWriter::persistScene(int pageIndex)
 
             dataStorageItems += result;
         }
-        // Fin Issue 1683 - ALTI/AOU - 20131212
 
         dataStorageItems << new tIDataStorage("teacherGuide", eElementType_END);
-        //issue 1682 - NNE - 20140122 : END
 
         for (tIDataStorage* eachItem : dataStorageItems){
             if(eachItem->type == eElementType_START){

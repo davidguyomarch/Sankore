@@ -66,8 +66,6 @@
 #include "gui/UBKeyboardPalette.h"
 #include "gui/UBMagnifer.h"
 #include "gui/UBDockPaletteWidget.h"
-#include "gui/UBDockTeacherGuideWidget.h"
-#include "gui/UBTeacherGuideWidget.h"
 #include "gui/UBDocumentNavigator.h"
 
 #include "domain/UBGraphicsPixmapItem.h"
@@ -205,8 +203,6 @@ UBBoardController::~UBBoardController()
 
 int UBBoardController::currentPage()
 {
-    if(mSettings->teacherGuidePageZeroActivated->get().toBool())
-        return mActiveSceneIndex;
     return mActiveSceneIndex + 1;
 }
 
@@ -1835,10 +1831,7 @@ void UBBoardController::lastWindowClosed()
 {
     if (!mCleanupDone)
     {
-        bool teacherGuideModified = false;
-        if(UBApplication::boardController->paletteManager()->teacherGuideDockWidget())
-            teacherGuideModified = UBApplication::boardController->paletteManager()->teacherGuideDockWidget()->teacherGuideWidget()->isModified();
-        if (selectedDocument()->pageCount() == 1 && (!mActiveScene || mActiveScene->isEmpty()) && !teacherGuideModified)
+        if (selectedDocument()->pageCount() == 1 && (!mActiveScene || mActiveScene->isEmpty()))
         {
 //            UBPersistenceManager::persistenceManager()->deleteDocument(selectedDocument());
         }
@@ -1960,19 +1953,10 @@ void UBBoardController::show()
 
 void UBBoardController::persistCurrentScene(UBDocumentProxy *pProxy)
 {
-    UBBoardPaletteManager *paletteManager = UBApplication::boardController->paletteManager();
-    UBDockTeacherGuideWidget *tgDock = paletteManager->teacherGuideDockWidget();
-    UBTeacherGuideWidget *teacherGuide = tgDock ? tgDock->teacherGuideWidget() : nullptr;
-    UBDockResourcesWidget *teacherResources = paletteManager->teacherResourcesDockWidget();
-
-    //issue 1682 - NNE - 20140122 : Add the test on the teacherResources
     if(UBPersistenceManager::persistenceManager()
             && selectedDocument() && mActiveScene && mActiveSceneIndex != mDeletingSceneIndex
             && (mActiveSceneIndex >= 0) && mActiveSceneIndex != mMovingSceneIndex
-            && (mActiveScene->isModified()
-                || (teacherGuide && teacherGuide->isModified())
-                || (teacherResources && teacherResources->isModified()))
-            )
+            && mActiveScene->isModified())
     {
         UBPersistenceManager::persistenceManager()->persistDocumentScene(pProxy ? pProxy : selectedDocument(), mActiveScene, mActiveSceneIndex);
         updatePage(mActiveSceneIndex);

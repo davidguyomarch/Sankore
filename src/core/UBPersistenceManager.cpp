@@ -56,9 +56,6 @@
 #include "core/UBSetting.h"
 #include "core/UBForeignObjectsHandler.h"
 
-#include "gui/UBDockTeacherGuideWidget.h"
-#include "gui/UBTeacherGuideWidget.h"
-
 #include "document/UBDocumentProxy.h"
 
 #include "adaptors/UBExportPDF.h"
@@ -79,7 +76,6 @@ const QString UBPersistenceManager::objectDirectory = "objects"; // added to UBP
 const QString UBPersistenceManager::widgetDirectory = "widgets"; // added to UBPersistenceManager::mAllDirectories
 const QString UBPersistenceManager::videoDirectory = "videos"; // added to UBPersistenceManager::mAllDirectories
 const QString UBPersistenceManager::audioDirectory = "audios"; // added to
-const QString UBPersistenceManager::teacherGuideDirectory = "teacherGuideObjects";
 const QString UBPersistenceManager::fileDirectory = "files"; // Issue 1683 (Evolution) - AOU - 20131206
 
 const QString UBPersistenceManager::myDocumentsName = "MyDocuments";
@@ -104,7 +100,6 @@ UBPersistenceManager::UBPersistenceManager(QObject *pParent)
     mDocumentSubDirectories << widgetDirectory;
     mDocumentSubDirectories << videoDirectory;
     mDocumentSubDirectories << audioDirectory;
-    mDocumentSubDirectories << teacherGuideDirectory;
     mDocumentSubDirectories << fileDirectory; // Issue 1683 (Evolution) - AOU - 20131206
 
     mDocumentRepositoryPath = UBSettings::userDocumentDirectory();
@@ -887,10 +882,6 @@ UBGraphicsScene* UBPersistenceManager::loadDocumentScene(UBDocumentProxy* proxy,
         return mSceneCache.value(proxy, sceneIndex);
     else {
         UBGraphicsScene* scene = UBSvgSubsetAdaptor::loadScene(proxy, sceneIndex);
-        if(!scene && mSettings->teacherGuidePageZeroActivated->get().toBool()){
-            createDocumentSceneAt(proxy,0);
-            scene = UBSvgSubsetAdaptor::loadScene(proxy, 0);
-        }
 
         if (scene)
             mSceneCache.insert(proxy, sceneIndex, scene);
@@ -917,22 +908,11 @@ void UBPersistenceManager::persistDocumentScene(UBDocumentProxy* pDocumentProxy,
     dir.mkpath(pDocumentProxy->persistencePath());
 
 
-    UBBoardPaletteManager* paletteManager = UBApplication::boardController->paletteManager();
-    bool teacherGuideModified = false;
-    if(paletteManager && UBApplication::app()->boardController->currentPage() == pSceneIndex
-       && paletteManager->teacherGuideDockWidget() && paletteManager->teacherGuideDockWidget()->teacherGuideWidget())
-        teacherGuideModified = paletteManager->teacherGuideDockWidget()->teacherGuideWidget()->isModified();
-
-    bool teacherResourcesModified = false;
-    if(paletteManager && UBApplication::app()->boardController->currentPage() == pSceneIndex && paletteManager->teacherResourcesDockWidget())
-        teacherResourcesModified = paletteManager->teacherResourcesDockWidget()->isModified();
-
-
-    if (pDocumentProxy->isModified() || teacherGuideModified || teacherResourcesModified)
+    if (pDocumentProxy->isModified())
         UBMetadataDcSubsetAdaptor::persist(pDocumentProxy);
 
 
-    if (pScene->isModified() || teacherGuideModified || teacherResourcesModified)
+    if (pScene->isModified())
     {
         UBSvgSubsetAdaptor::persistScene(pDocumentProxy, pScene, pSceneIndex);
 
@@ -997,15 +977,7 @@ int UBPersistenceManager::sceneCount(const UBDocumentProxy* proxy)
         }
         else
         {
-            if(mSettings->teacherGuidePageZeroActivated->get().toBool() && pageIndex == 0){
-                // the document has no zero file but doesn't means that it hasn't any file
-                // at all. Just importing a document without the first page using a configuartion
-                // that enables zero page.
-                pageIndex++;
-                addedMissingZeroPage = true;
-            }
-            else
-                moreToProcess = false;
+            moreToProcess = false;
         }
     }
 
@@ -1138,64 +1110,6 @@ void UBPersistenceManager::purgeEmptyDocuments()
     {
         deleteDocument(docProxy);
     }
-}
-
-QString UBPersistenceManager::teacherGuideAbsoluteObjectPath(UBDocumentProxy* pDocumentProxy)
-{
-    return pDocumentProxy->persistencePath() + "/" + teacherGuideDirectory;
-}
-
-QString UBPersistenceManager::addObjectToTeacherGuideDirectory(UBDocumentProxy* pDocumentProxy, QString pPath)
-{
-    QString path = UBFileSystemUtils::removeLocalFilePrefix(pPath);
-    QFileInfo fi(path);
-    QString uuid = QUuid::createUuid().toString();
-
-    if (!fi.exists() || !pDocumentProxy)
-        return "";
-
-    QString fileName = UBPersistenceManager::teacherGuideDirectory + "/" + uuid + "." + fi.suffix();
-
-    QString destPath = pDocumentProxy->persistencePath() + "/" + fileName;
-
-    if (!QFile::exists(destPath)){
-        QDir dir;
-        dir.mkdir(pDocumentProxy->persistencePath() + "/" + UBPersistenceManager::teacherGuideDirectory);
-
-        QFile source(path);
-
-        source.copy(destPath);
-    }
-
-    return destPath;
-}
-
-QString UBPersistenceManager::addWidgetToTeacherGuideDirectory(UBDocumentProxy* pDocumentProxy, QString pPath)
-{
-    QString path = UBFileSystemUtils::removeLocalFilePrefix(pPath);
-    QFileInfo fi(path);
-    Q_ASSERT(fi.isDir());
-
-    int lastIndex = path.lastIndexOf(".");
-    QString extension("");
-    if(lastIndex != -1)
-        extension = path.right(path.length() - lastIndex);
-
-    QString uuid = QUuid::createUuid().toString();
-
-    if (!fi.exists() || !pDocumentProxy)
-        return "";
-
-    QString directoryName = UBPersistenceManager::teacherGuideDirectory + "/" + uuid + extension;
-    QString destPath = pDocumentProxy->persistencePath() + "/" + directoryName;
-
-    if (!QDir(destPath).exists()){
-        QDir dir;
-        dir.mkdir(pDocumentProxy->persistencePath() + "/" + UBPersistenceManager::teacherGuideDirectory);
-        UBFileSystemUtils::copyDir(path,destPath);
-    }
-
-    return destPath;
 }
 
 bool UBPersistenceManager::addFileToDocument(UBDocumentProxy* pDocumentProxy,
