@@ -5,7 +5,7 @@
 ### Flow complet
 
 ```
-Issue → Branche → Commits → Push branche → PR → CI passe → Test Windows VM → Squash merge → Branche supprimée
+Issue → Branche → Code → Build local → Tests local → Push → PR → CI passe → Test Windows VM → Squash merge → Branche supprimée
 ```
 
 **Master est toujours stable.** On ne push jamais directement sur master. Tout passe par une branche + PR.
@@ -62,7 +62,7 @@ feat(#134): description courte du changement
 ### 5. Push et PR
 
 Quand le travail est prêt à tester :
-1. Compiler en Docker pour valider la syntaxe
+1. Valider localement en Docker (build + tests + couverture — voir boucle de développement ci-dessous)
 2. Commiter avec le bon format `fix(#ID)` / `feat(#ID)`
 3. Pousser la branche (jamais master)
 4. Créer la PR immédiatement — **le CI Windows ne tourne que sur les PRs** (pas sur les branches seules)
@@ -77,10 +77,15 @@ gh pr create \
 
 - Description des changements
 
-## Tests
-- [x] Docker Linux build passes
+## Local validation
+- [x] Docker Linux ARM64 build passes
+- [x] Unit tests pass (17 suites, 0 failed)
+- [x] Coverage: XX.X% lines
+
+## CI validation
 - [ ] CI Windows passes
-- [ ] CI Linux passes
+- [ ] CI Linux x64 passes
+- [ ] CI Linux ARM64 passes
 - [ ] Tested on VM Windows
 
 Closes #135"
@@ -108,48 +113,93 @@ git branch -d <branche-locale>
 
 ---
 
-## Boucle de développement (Build → Validate → Test → Fix)
+## Boucle de développement (Build → Test → Validate → Push)
 
 Le développeur travaille sur **macOS ARM (M4 Pro)**. Il n'y a **pas de compilation locale Windows**.
-La validation se fait en 4 étapes :
 
+### Images Docker
+
+| Image | Base | Qt | Usage |
+|-------|------|-----|-------|
+| `sankore-dev` | Ubuntu 25.04 | Qt 6.8.3 | Build + tests + couverture (ARM64 natif) |
+| `sankore-dev-x64` | Ubuntu 25.04 | Qt 6.8.3 | Build + tests x64 via QEMU |
+| `sankore-qt6` | Ubuntu 24.04 | Qt 6.4 | Legacy — build app uniquement (pas de tests) |
+
+Pour construire les images (une seule fois) :
+```bash
+docker build -f Dockerfile.dev -t sankore-dev .
+docker build -f Dockerfile.dev --platform linux/amd64 -t sankore-dev-x64 .
 ```
-Code → Docker Linux (2 min) → Push + PR → CI Windows (25 min) → VM Windows (test manuel)
-                ↑                                                          |
-                └───────────── Kiro corrige ← startup.log ←───────────────┘
-                                                                  ↓
-                                                            Merge master
-```
 
-### Étape 1 : Validation rapide — Docker Linux (~2 min)
+### Script principal : `scripts/docker-build.sh`
 
-Avant tout push, compiler localement avec le Docker Linux pour attraper les erreurs C++ :
+Point d'entrée unique pour toute validation locale :
 
 ```bash
-docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c \
-  'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'
+# Workflow complet ARM64 natif : build app + tests + couverture (~3 min)
+./scripts/docker-build.sh
+
+# Build app uniquement (~2 min incrémental)
+./scripts/docker-build.sh --build-only
+
+# Tests + couverture uniquement (app déjà buildée)
+./scripts/docker-build.sh --test-only
+
+# Build x64 via QEMU (~10-15 min — plus lent)
+./scripts/docker-build.sh --x64
+
+# Supprimer les objets compilés et relancer
+./scripts/docker-build.sh --clean
+
+# Sans couverture (plus rapide)
+./scripts/docker-build.sh --no-coverage
 ```
 
-- **Image** : `sankore-qt6` (Ubuntu 24.04, Qt 6.2, aarch64)
-- **Ce que ça valide** : syntaxe C++, résolution de symboles, moc, QML dans les .qrc
-- **Ce que ça NE valide PAS** : compilation MSVC, runtime Windows, comportement visuel
-- **Durée** : ~2 min (incrémental) / ~5 min (clean)
+### Boucle complète
 
-Pour un build clean (après changements de .pro, .h ou .qrc) :
+```
+Code → docker-build.sh (3 min) → Push + PR → CI Windows (25 min) → VM Windows (test manuel)
+         ↑  build ✓                                                          |
+         ↑  tests ✓ (17 suites)                                              |
+         ↑  coverage ✓ (83%+)                                                |
+         └───────────── Kiro corrige ← startup.log ←────────────────────────┘
+                                                                    ↓
+                                                              Merge master
+```
+
+### Étape 1 : Validation locale complète — Docker (~3 min)
+
+Avant tout push, lancer le workflow complet :
+
 ```bash
-docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c \
-  'make clean; qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'
+./scripts/docker-build.sh
 ```
 
-### Étape 1b : Smoke test local — Docker Linux (~10 sec)
+Ce script fait dans l'ordre :
+1. **Build app** avec `--coverage` flags (qmake + make)
+2. **Build tests** (qmake tests.pro + pré-génération des moc + make)
+3. **Run tests** (17 suites QTest en mode offscreen)
+4. **Couverture** (lcov capture + filtrage + rapport)
+
+**Critères de validation** :
+- ✅ Build app réussit (pas d'erreur de compilation)
+- ✅ Build tests réussit (link OK)
+- ✅ **0 tests failed** — tout test en échec doit être corrigé avant push
+- ✅ Couverture ≥ 80% lignes sur le code sous test
+- ⚠️ La couverture peut baisser temporairement si on ajoute du code source sans tests associés
+
+**Ce que ça valide** : syntaxe C++, résolution de symboles, moc, QML dans les .qrc, logique métier via tests unitaires
+**Ce que ça NE valide PAS** : compilation MSVC, runtime Windows, comportement visuel, interaction souris
+
+### Étape 1b : Smoke test local — Docker (~10 sec)
 
 Après compilation, on peut lancer l'app en headless pour valider le démarrage et lire `startup.log` :
 
 ```bash
-docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c '
+docker run --rm -v $(pwd):/src -w /src sankore-dev bash -c '
   rm -f /src/build/linux/release/product/startup.log
-  xvfb-run -s "-screen 0 1920x1080x24" timeout 10 \
-    ./build/linux/release/product/Open-Sankore --quit-after=5 2>&1
+  export QT_QPA_PLATFORM=offscreen
+  timeout 10 ./build/linux/release/product/Open-Sankore --quit-after=5 2>&1
   echo ""; echo "=== STARTUP LOG ==="; echo ""
   cat /src/build/linux/release/product/startup.log 2>/dev/null || echo "NO LOG"
 '
@@ -174,7 +224,7 @@ git push
 gh pr create --base master --title "fix(#ID): description" --body "..."
 ```
 
-Le CI (`build-windows.yml`, `build-linux.yml`) tourne sur la PR. Vérifier que les builds passent avant de demander un test Windows.
+Le CI (`build-windows.yml`, `build-linux.yml`, `build-linux-arm64.yml`) tourne sur la PR. Vérifier que les builds passent avant de demander un test Windows.
 
 ### Étape 3 : Test sur VM Windows — deploy + run-test.bat
 
@@ -294,24 +344,33 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 
 1. **Vérifier la branche** — `git branch --show-current` doit correspondre à l'issue
 2. **Toujours lire le fichier avant de le modifier** — ne jamais proposer des changements sur du code pas lu
-3. **Compiler en Docker Linux** après les modifications pour valider la syntaxe
-4. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
-5. **Ne JAMAIS push sur master** — toujours pousser la branche feature/fix
+3. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
+4. **Ne JAMAIS push sur master** — toujours pousser la branche feature/fix
 
-### Après modifications
+### Après modifications — validation locale obligatoire
 
-1. Compiler en Docker : `docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c 'qmake6 OpenSankore.pro CONFIG+=no_webengine && make -j$(nproc)'`
-2. Si la compilation échoue, corriger avant de proposer un push
-3. Si la compilation réussit, commiter avec `fix(#ID)` / `feat(#ID)` et pousser la branche
-4. Créer la PR immédiatement (le CI ne tourne que sur les PRs)
+Avant tout commit et push, Kiro doit exécuter la validation locale complète :
+
+1. **Build app** : `./scripts/docker-build.sh --build-only`
+   - Si échec → corriger avant de continuer
+2. **Tests unitaires + couverture** : `./scripts/docker-build.sh --test-only`
+   - Si un test échoue → corriger avant de continuer
+   - Vérifier que la couverture ne régresse pas significativement
+3. **Si tout passe** → commiter avec `fix(#ID)` / `feat(#ID)` et pousser la branche
+4. **Créer la PR** immédiatement (le CI ne tourne que sur les PRs)
 5. Le développeur vérifie le CI, teste sur VM, puis demande le merge
+
+Commande unique pour tout valider :
+```bash
+./scripts/docker-build.sh
+```
 
 ### Quand le développeur envoie un startup.log
 
 1. Analyser chaque section du log
 2. Identifier les erreurs QML, positions incorrectes, widgets manquants
 3. Proposer des corrections précises avec les fichiers et lignes concernés
-4. Re-compiler en Docker pour valider
+4. Re-valider en Docker (build + tests) avant de proposer un push
 
 ### Ajouter des diagnostics
 
@@ -319,3 +378,35 @@ Si un bug est difficile à comprendre sans plus de contexte runtime :
 1. Ajouter des logs `[TAG]` dans le code C++ aux points clés
 2. Compiler, pousser la branche, et demander au développeur de renvoyer le startup.log
 3. Une fois le bug corrigé, nettoyer les logs temporaires (garder les logs structurels permanents)
+
+---
+
+## Infrastructure Docker locale
+
+### Fichiers
+
+| Fichier | Rôle |
+|---------|------|
+| `Dockerfile.dev` | Image dev complète (Ubuntu 25.04, Qt 6.8.3, GCC 14, lcov, xvfb, gdb) |
+| `Dockerfile.qt6` | Image legacy (Ubuntu 24.04, Qt 6.4) — build app uniquement, pas de tests |
+| `scripts/docker-build.sh` | Script orchestrateur : build + tests + couverture |
+| `tests/run_tests.sh` | Runner de tests standalone (utilisable dans le container) |
+
+### Performances (ARM64 natif sur M4 Pro)
+
+| Opération | Durée |
+|-----------|-------|
+| Build app (incrémental) | ~30s |
+| Build app (clean) | ~120s |
+| Build tests | ~25s |
+| Run tests (17 suites) | <1s |
+| Couverture (lcov) | ~2s |
+| **Workflow complet (incrémental)** | **~60s** |
+| **Workflow complet (clean)** | **~3 min** |
+| Build x64 via QEMU | ~10-15 min |
+
+### Notes techniques
+
+- **moc bug** : le moc système Qt 6.8.3 ne peut pas parser les system headers GCC 14 via `moc_predefs.h`. Le script `docker-build.sh` contourne ce problème en pré-générant les moc sans `moc_predefs.h` pour les headers affectés (`UBFileSystemUtils.h` + 4 headers de test).
+- **x64 via QEMU** : fonctionne via `--platform linux/amd64` dans Docker Desktop. 5-10x plus lent que le natif ARM64. Utile pour valider la compatibilité x64 avant le CI.
+- **Couverture** : mesurée uniquement sur le code source sous test (src/frameworks, src/core, src/document, src/adaptors, src/web, src/domain). Les fichiers moc, stubs et tests sont exclus.
