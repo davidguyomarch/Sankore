@@ -89,7 +89,12 @@ tests/build/
 tests/coverage_report/
 tests/*.info
 tests/target_wrapper.sh
+tests/qrc_visual_tests.cpp
 build_qt6/
+
+# Visual regression test output #
+##################################
+visual/
 
 # Local notes (not tracked)
 notes/
