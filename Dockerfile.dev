@@ -1,0 +1,70 @@
+# Open-Sankoré Community Edition — Development Docker image
+#
+# Copyright (C) 2026 David Guyomarch
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Multi-arch image for local development: build, test, coverage.
+# Works natively on ARM64 (M4 Pro), and via QEMU on x64.
+#
+# Uses Ubuntu 25.04 (Plucky) for Qt 6.8.3 system packages
+# (Ubuntu 24.04 only has Qt 6.4 which lacks QTimeZone::UTC etc.)
+#
+# Build:
+#   docker build -f Dockerfile.dev -t sankore-dev .
+#   docker build -f Dockerfile.dev --platform linux/amd64 -t sankore-dev-x64 .
+#
+# Usage: see scripts/docker-build.sh
+
+FROM ubuntu:25.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build essentials
+    build-essential \
+    cmake \
+    git \
+    pkg-config \
+    # Qt 6.8 (system packages — Ubuntu 25.04 ships Qt 6.8.3)
+    qt6-base-dev \
+    qt6-base-dev-tools \
+    qt6-svg-dev \
+    qt6-multimedia-dev \
+    qt6-declarative-dev \
+    qt6-tools-dev \
+    qt6-tools-dev-tools \
+    qt6-l10n-tools \
+    qt6-5compat-dev \
+    libqt6opengl6-dev \
+    libqt6quick6 \
+    libqt6quickwidgets6 \
+    libquazip1-qt6-dev \
+    qmake6 \
+    # Libraries needed by the app
+    libzinnia-dev \
+    libgl1-mesa-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libx11-dev \
+    libomp-dev \
+    libpulse-dev \
+    # QML runtime modules (for offscreen smoke tests)
+    qml6-module-qtquick \
+    qml6-module-qtquick-controls \
+    qml6-module-qtquick-layouts \
+    qml6-module-qtquick-templates \
+    qml6-module-qtquick-window \
+    qml6-module-qt5compat-graphicaleffects \
+    qml6-module-qtqml-workerscript \
+    # Testing & coverage
+    lcov \
+    xvfb \
+    # Debug tools
+    gdb \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+CMD ["/bin/bash"]
