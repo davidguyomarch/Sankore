@@ -6,15 +6,32 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 # package-linux.sh — Build .deb and .rpm packages from the compiled binary
-# Usage: ./scripts/package-linux.sh [architecture]
+# Usage: ./scripts/package-linux.sh [architecture] [version]
 #   architecture: amd64 (default) or arm64
+#   version:      e.g. 4.2.0 (default: extracted from OpenSankore.pro)
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 ARCH="${1:-amd64}"
-VERSION="4.0.2"
+
+# Version priority: $2 argument > extract from OpenSankore.pro
+if [ -n "${2:-}" ]; then
+    VERSION="$2"
+else
+    # Extract version from OpenSankore.pro (VERSION_MAJ.VERSION_MIN.VERSION_PATCH)
+    PRO_FILE="$PROJECT_DIR/OpenSankore.pro"
+    if [ -f "$PRO_FILE" ]; then
+        MAJ=$(grep -m1 'VERSION_MAJ\s*=' "$PRO_FILE" | sed 's/.*=\s*//' | tr -d '[:space:]')
+        MIN=$(grep -m1 'VERSION_MIN\s*=' "$PRO_FILE" | sed 's/.*=\s*//' | tr -d '[:space:]')
+        PATCH=$(grep -m1 'VERSION_PATCH\s*=' "$PRO_FILE" | sed 's/.*=\s*//' | tr -d '[:space:]')
+        VERSION="${MAJ}.${MIN}.${PATCH}"
+    else
+        echo "ERROR: Cannot determine version — pass it as second argument"
+        exit 1
+    fi
+fi
 PRODUCT_DIR="$PROJECT_DIR/build/linux/release/product"
 PKG_DIR="$PROJECT_DIR/build/packages"
 
