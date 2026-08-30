@@ -167,7 +167,7 @@ void UBSmoothStrokeItem::copyItemParameters(UBItem* copy) const
     cp->setUuid(QUuid::createUuid());
 }
 
-bool UBSmoothStrokeItem::subtractPath(const QPainterPath& eraserPath)
+bool UBSmoothStrokeItem::subtractPath(const QPainterPath& eraserPath, QList<QGraphicsItem*>& newItems)
 {
     // Convert eraser path to local coordinates
     QPainterPath localEraserPath = mapFromScene(eraserPath);
@@ -257,7 +257,10 @@ bool UBSmoothStrokeItem::subtractPath(const QPainterPath& eraserPath)
         newItem->finalize();
 
         if (ubScene)
+        {
             ubScene->addItem(newItem);
+            newItems.append(newItem);
+        }
     }
 
     return false; // item was modified, not removed
