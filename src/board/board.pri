@@ -2,7 +2,6 @@
 
 HEADERS      += src/board/UBBoardController.h \
                 src/board/UBBoardNavigationController.h \
-                src/board/UBBoardToolbarController.h \
                 src/board/UBBoardZoomController.h \
                 src/board/UBBoardItemFactory.h \
                 src/board/UBBoardPaletteManager.h \
@@ -12,7 +11,6 @@ HEADERS      += src/board/UBBoardController.h \
 
 SOURCES      += src/board/UBBoardController.cpp \
                 src/board/UBBoardNavigationController.cpp \
-                src/board/UBBoardToolbarController.cpp \
                 src/board/UBBoardZoomController.cpp \
                 src/board/UBBoardItemFactory.cpp \
                 src/board/UBBoardPaletteManager.cpp \

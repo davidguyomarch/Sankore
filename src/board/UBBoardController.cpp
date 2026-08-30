@@ -103,10 +103,10 @@
 
 #include "UBBoardPaletteManager.h"
 #include "UBBoardNavigationController.h"
-#include "UBBoardToolbarController.h"
 #include "UBBoardZoomController.h"
 #include "UBBoardItemFactory.h"
 
+#include "frameworks/UBPureFunctions.h"
 #include "core/UBSettings.h"
 #include "core/UBSettingsData.h"
 
@@ -140,7 +140,6 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
 {
     mSettings = UBSettings::settings();
     mNavigationController = new UBBoardNavigationController(this, this);
-    mToolbarController = new UBBoardToolbarController(this, mainWindow, mSettings, this);
     mZoomController = new UBBoardZoomController(this, this);
     mItemFactory = new UBBoardItemFactory(this, this);
     mZoomFactor = mSettings->boardZoomFactor->get().toDouble();
@@ -324,7 +323,38 @@ QRectF UBBoardController::controlGeometry()
 
 void UBBoardController::setupToolbar()
 {
-    mToolbarController->setupToolbar();
+    // Legacy toolbar is hidden (QML V2 TopBar replaces it) but QActions
+    // must stay connected for keyboard shortcuts and tool instruments.
+    mMainWindow->webToolBar->hide();
+    mMainWindow->documentToolBar->hide();
+    mMainWindow->boardToolBar->hide();
+
+    // Route colorPaletteChanged to penColorChanged (needed by compass/instruments)
+    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged,
+            this, &UBBoardController::penColorChanged);
+
+    // Action → slot connections (keyboard shortcuts, menu entries)
+    connect(mMainWindow->actionAdd, &QAction::triggered, this, &UBBoardController::addItem);
+    connect(mMainWindow->actionNewPage, &QAction::triggered, this, [this]() { addScene(); });
+    connect(mMainWindow->actionDuplicatePage, &QAction::triggered, this, [this]() { duplicateScene(); });
+    connect(mMainWindow->actionClearPage, &QAction::triggered, this, &UBBoardController::clearScene);
+    connect(mMainWindow->actionEraseItems, &QAction::triggered, this, &UBBoardController::clearSceneItems);
+    connect(mMainWindow->actionEraseAnnotations, &QAction::triggered, this, &UBBoardController::clearSceneAnnotation);
+    connect(mMainWindow->actionEraseBackground, &QAction::triggered, this, &UBBoardController::clearSceneBackground);
+    connect(mMainWindow->actionCenterImageBackground, &QAction::triggered, this, &UBBoardController::centerImageBackground);
+    connect(mMainWindow->actionAdjustImageBackground, &QAction::triggered, this, &UBBoardController::adjustImageBackground);
+    connect(mMainWindow->actionMosaicImageBackground, &QAction::triggered, this, &UBBoardController::mosaicImageBackground);
+    connect(mMainWindow->actionFillImageBackground, &QAction::triggered, this, &UBBoardController::fillImageBackground);
+    connect(mMainWindow->actionExtendImageBackground, &QAction::triggered, this, &UBBoardController::extendImageBackground);
+    connect(mMainWindow->actionUndo, &QAction::triggered, UBApplication::undoStack, &QUndoStack::undo);
+    connect(mMainWindow->actionRedo, &QAction::triggered, UBApplication::undoStack, &QUndoStack::redo);
+    connect(mMainWindow->actionRedo, &QAction::triggered, this, [this]() { startScript(); });
+    connect(mMainWindow->actionBack, &QAction::triggered, this, &UBBoardController::previousScene);
+    connect(mMainWindow->actionForward, &QAction::triggered, this, &UBBoardController::nextScene);
+    connect(mMainWindow->actionSleep, &QAction::triggered, this, [this]() { stopScript(); });
+    connect(mMainWindow->actionSleep, &QAction::triggered, this, &UBBoardController::blackout);
+    connect(mMainWindow->actionVirtualKeyboard, &QAction::triggered, this, &UBBoardController::showKeyboard);
+    connect(mMainWindow->actionImportPage, &QAction::triggered, this, &UBBoardController::importPage);
 }
 
 
@@ -341,7 +371,7 @@ void UBBoardController::setToolCursor(int tool)
 
 void UBBoardController::connectToolbar()
 {
-    // Delegated to mToolbarController via setupToolbar()
+    // Connections moved to setupToolbar()
 }
 
 void UBBoardController::startScript()
@@ -356,19 +386,19 @@ void UBBoardController::stopScript()
 
 void UBBoardController::initToolbarTexts()
 {
-    // Delegated to mToolbarController via setupToolbar()
+    // No-op: toolbar text setup moved to QML TopBar
 }
 
 
 void UBBoardController::setToolbarTexts()
 {
-    mToolbarController->setToolbarTexts();
+    // No-op: legacy toolbar is hidden (QML V2 TopBar)
 }
 
 
 QString UBBoardController::truncate(QString text, int maxWidth)
 {
-    return UBBoardToolbarController::truncate(text, maxWidth, mMainWindow->font());
+    return UBPure::truncateText(text, maxWidth, mMainWindow->font());
 }
 
 
@@ -1798,7 +1828,9 @@ void UBBoardController::undoRedoStateChange(bool canUndo)
 
 void UBBoardController::updateActionStates()
 {
-    mToolbarController->updateActionStates();
+    mMainWindow->actionBack->setEnabled(selectedDocument() && (activeSceneIndex() > 0));
+    mMainWindow->actionForward->setEnabled(selectedDocument() && (activeSceneIndex() < selectedDocument()->pageCount() - 1));
+    mMainWindow->actionErase->setEnabled(activeScene() && !activeScene()->isEmpty());
 }
 
 
@@ -2088,7 +2120,22 @@ void UBBoardController::notifyCache(bool visible)
 
 void UBBoardController::updatePageSizeState()
 {
-    mToolbarController->updatePageSizeState();
+    if (activeScene()->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_9))
+    {
+        mMainWindow->actionWidePageSize->setChecked(true);
+    }
+    else if (activeScene()->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio4_3))
+    {
+        mMainWindow->actionRegularPageSize->setChecked(true);
+    }
+    else if (activeScene()->nominalSize() == mSettings->documentSizes.value(DocumentSizeRatio::Ratio16_10))
+    {
+        mMainWindow->actionWidePageSize_16_10->setChecked(true);
+    }
+    else
+    {
+        mMainWindow->actionCustomPageSize->setChecked(true);
+    }
 }
 
 

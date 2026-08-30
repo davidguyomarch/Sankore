@@ -9,13 +9,11 @@
 #include "tst_UBBoardSubControllers.h"
 #include <QFont>
 #include <QPair>
+#include "frameworks/UBPureFunctions.h"
 
 // Forward declarations of testable static functions (implemented in stub)
 namespace UBBoardZoomController {
     QPair<qreal, qreal> computeZoomRatio(qreal requestedRatio, qreal currentViewScale, qreal systemScaleFactor, qreal maxZoom);
-}
-namespace UBBoardToolbarController {
-    QString truncate(const QString& text, int maxWidth, const QFont& font);
 }
 
 // --- Zoom ratio tests ---
@@ -60,7 +58,7 @@ void TestUBBoardSubControllers::testComputeZoomRatio_zoomOut()
 void TestUBBoardSubControllers::testTruncate_shortText()
 {
     QFont font("Arial", 12);
-    QString result = UBBoardToolbarController::truncate("Hi", 200, font);
+    QString result = UBPure::truncateText("Hi", 200, font);
     QCOMPARE(result, QString("Hi"));  // short enough, no elision
 }
 
@@ -68,7 +66,7 @@ void TestUBBoardSubControllers::testTruncate_longText()
 {
     QFont font("Arial", 12);
     QString longText = "This is an extremely long toolbar text that should definitely be truncated";
-    QString result = UBBoardToolbarController::truncate(longText, 48, font);
+    QString result = UBPure::truncateText(longText, 48, font);
     // Should be shorter than original and end with ellipsis
     QVERIFY(result.length() < longText.length());
     QVERIFY(result.contains(QChar(0x2026)) || result.endsWith("..."));
@@ -77,6 +75,6 @@ void TestUBBoardSubControllers::testTruncate_longText()
 void TestUBBoardSubControllers::testTruncate_emptyText()
 {
     QFont font("Arial", 12);
-    QString result = UBBoardToolbarController::truncate("", 48, font);
+    QString result = UBPure::truncateText("", 48, font);
     QCOMPARE(result, QString(""));
 }
