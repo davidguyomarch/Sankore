@@ -7,18 +7,24 @@ Open-Sankoré was originally developed by GIP ENA
 between 2010 and 2013.
 The project itself is based on UniBoard, originally initiated at the University of Lausanne.
 
-* GIP ENA — Groupement d'Intérêt Public pour l'Éducation Numérique en Afrique (2010–2013)
-* Original contributors listed in the source file headers.
+Copyright © 2010–2013 GIP ENA.
+Original contributors are listed in the source file headers.
 
-## Current Maintainer
+## Community Edition
 
-* David Guyomarch (2026–present)
+Copyright © 2026 David Guyomarch, for original contributions and
+modifications made to this Community Edition.
 
-## Contributions by David Guyomarch
+### Maintainer
 
-* Migration to Qt 6.
-* Modern build system improvements.
-* Bug fixes.
-* New features.
-* Documentation updates.
-* Continuous Integration / Docker support.
+David Guyomarch (2026–present)
+
+### Contributions
+
+* Migration to Qt 6
+* Modern build system (qmake, CI/CD, Docker)
+* Bug fixes and stability improvements
+* QML V2 user interface
+* Handwriting recognition (OCR)
+* Documentation
+* Continuous Integration and packaging (Windows, Linux x64, Linux ARM64)
