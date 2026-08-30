@@ -62,6 +62,7 @@ class UBSmoothStrokeItem;
 class UBMagnifierParams;
 class UBMagnifierHandler;
 class UBBackgroundRenderer;
+class UBToolOverlay;
 class UBGraphicsCache;
 class UBGraphicsGroupContainerItem;
 
@@ -388,9 +389,6 @@ public slots:
 
         void initPolygonItem(UBGraphicsPolygonItem*);
 
-        void drawEraser(const QPointF& pEndPoint, bool isFirstDraw = false);
-        void drawPointer(const QPointF& pEndPoint, bool isFirstDraw = false);
-
 
         virtual void keyReleaseEvent(QKeyEvent * keyEvent);
 
@@ -403,15 +401,12 @@ public slots:
 
     private:
         void setDocumentUpdated();
-        void createEraiser();
-        void createPointer();
         QString cleanHtml(const QString& _html);
 
         UBSettings* mSettings;
         UBSceneContext mContext;
 
-        QGraphicsEllipseItem* mEraser;
-        QGraphicsEllipseItem* mPointer;
+        UBToolOverlay* mToolOverlay;
 
         QSet<QGraphicsItem*> mAddedItems;
         QSet<QGraphicsItem*> mRemovedItems;

@@ -25,6 +25,7 @@
 #include "UBGraphicsScene.h"
 #include "UBMagnifierHandler.h"
 #include "UBBackgroundRenderer.h"
+#include "UBToolOverlay.h"
 
 #include <QPropertyAnimation>
 
@@ -304,10 +305,9 @@ void UBZLayerController::setLayerType(QGraphicsItem *pItem, itemLayerType::Enum 
 
 UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoStack, const UBSceneContext& context)
     : UBCoreGraphicsScene(parent)
-    , mEraser(0)
-    , mPointer(0)
     , mDocument(parent)
     , mBackgroundRenderer(nullptr)
+    , mToolOverlay(nullptr)
     , mBackgroundObject(0)
     , mBackgroundObjectDisposition(Center)
     , mBackgroundObjectUrl(QUrl())
@@ -333,8 +333,10 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
 
     setUuid(QUuid::createUuid());
     setDocument(parent);
-    createEraiser();
-    createPointer();
+
+    mToolOverlay = new UBToolOverlay(this, mTools, this);
+    mToolOverlay->createEraser();
+    mToolOverlay->createPointer();
 
     if (UBApplication::applicationController)
     {
@@ -351,13 +353,14 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
 
     mBackgroundRenderer = new UBBackgroundRenderer(this,
         [this](bool isDark) {
-            if (mEraser) {
+            QGraphicsEllipseItem* eraser = mToolOverlay->eraserItem();
+            if (eraser) {
                 if (isDark) {
-                    mEraser->setBrush(UBSettings::eraserBrushDarkBackground);
-                    mEraser->setPen(UBSettings::eraserPenDarkBackground);
+                    eraser->setBrush(UBSettings::eraserBrushDarkBackground);
+                    eraser->setPen(UBSettings::eraserPenDarkBackground);
                 } else {
-                    mEraser->setBrush(UBSettings::eraserBrushLightBackground);
-                    mEraser->setPen(UBSettings::eraserPenLightBackground);
+                    eraser->setBrush(UBSettings::eraserBrushLightBackground);
+                    eraser->setPen(UBSettings::eraserPenLightBackground);
                 }
             }
         }, this);
@@ -566,13 +569,13 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
             eraserWidth /= mContext.currentZoom();
 
             eraseLineTo(scenePos, eraserWidth);
-            drawEraser(scenePos, true);
+            mToolOverlay->drawEraser(scenePos, mContext, true);
 
             accepted = true;
         }
         else if (currentTool == UBStylusTool::Pointer)
         {
-            drawPointer(scenePos, true);
+            mToolOverlay->drawPointer(scenePos, mContext, true);
             accepted = true;
         }
     }
@@ -600,7 +603,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
 
     if (currentTool == UBStylusTool::Eraser)
     {
-        drawEraser(position);
+        mToolOverlay->drawEraser(position, mContext);
         accepted = true;
     }
 
@@ -732,7 +735,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
         }
         else if (currentTool == UBStylusTool::Pointer)
         {
-            drawPointer(position);
+            mToolOverlay->drawPointer(position, mContext);
         }
 
         accepted = true;
@@ -761,9 +764,9 @@ bool UBGraphicsScene::inputDeviceRelease()
 
     bool accepted = false;
 
-    if (mPointer)
+    if (mToolOverlay->pointerItem())
     {
-        mPointer->hide();
+        mToolOverlay->hidePointer();
         accepted = true;
     }
 
@@ -871,41 +874,6 @@ bool UBGraphicsScene::inputDeviceRelease()
     mCurrentStroke = nullptr;
 
     return accepted;
-}
-
-void UBGraphicsScene::drawEraser(const QPointF &pPoint, bool isFirstDraw)
-{
-    qreal eraserWidth = mContext.currentEraserWidth();
-    eraserWidth /= mContext.systemScaleFactor();
-    eraserWidth /= mContext.currentZoom();
-
-    qreal eraserRadius = eraserWidth / 2;
-
-    // TODO UB 4.x optimize - no need to do that every time we move it
-    if (mEraser) {
-        mEraser->setRect(QRectF(pPoint.x() - eraserRadius, pPoint.y() - eraserRadius, eraserWidth, eraserWidth));
-
-        if(isFirstDraw) {
-          mEraser->show();
-        }
-    }
-}
-
-void UBGraphicsScene::drawPointer(const QPointF &pPoint, bool isFirstDraw)
-{
-    qreal pointerDiameter = mContext.pointerDiameter / mContext.currentZoom();
-    qreal pointerRadius = pointerDiameter / 2;
-
-    // TODO UB 4.x optimize - no need to do that every time we move it
-    if (mPointer) {
-        mPointer->setRect(QRectF(pPoint.x() - pointerRadius,
-                                 pPoint.y() - pointerRadius,
-                                 pointerDiameter,
-                                 pointerDiameter));
-        if(isFirstDraw) {
-            mPointer->show();
-        }
-    }
 }
 
 void UBGraphicsScene::moveTo(const QPointF &pPoint)
@@ -1252,8 +1220,7 @@ UBGraphicsPolygonItem* UBGraphicsScene::polygonToPolygonItem(const QPolygonF pPo
 
 void UBGraphicsScene::hideEraser()
 {
-    if (mEraser)
-        mEraser->hide();
+    mToolOverlay->hideEraser();
 }
 
 void UBGraphicsScene::leaveEvent(QEvent * event)
@@ -2583,36 +2550,6 @@ void UBGraphicsScene::setDocumentUpdated()
     if (document())
         document()->setMetaData(UBSettingsData::documentUpdatedAt
                 , UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-}
-
-void UBGraphicsScene::createEraiser()
-{
-    mEraser = new QGraphicsEllipseItem(); // mem : owned and destroyed by the scene
-    mEraser->setRect(QRect(0, 0, 0, 0));
-    mEraser->setVisible(false);
-
-    mEraser->setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Control));
-    mEraser->setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::Eraiser)); //Necessary to set if we want z value to be assigned correctly
-
-    mTools << mEraser;
-    addItem(mEraser);
-
-}
-
-void UBGraphicsScene::createPointer()
-{
-    mPointer = new QGraphicsEllipseItem();  // mem : owned and destroyed by the scene
-    mPointer->setRect(QRect(0, 0, 20, 20));
-    mPointer->setVisible(false);
-
-    mPointer->setPen(Qt::NoPen);
-    mPointer->setBrush(QBrush(QColor(255, 0, 0, 186)));
-
-    mPointer->setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Tool));
-    mPointer->setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::Pointer)); //Necessary to set if we want z value to be assigned correctly
-
-    mTools << mPointer;
-    addItem(mPointer);
 }
 
 void UBGraphicsScene::setToolCursor(int tool)
