@@ -520,7 +520,7 @@ void UBBoardView::handleItemsSelection(QGraphicsItem *item)
     if (item)
     {
         //  item has group as first parent - it is any item or UBGraphicsStrokesGroup.
-        if(item->parentItem() && UBGraphicsGroupContainerItem::Type == movingItem->parentItem()->type())
+        if(item->parentItem() && UBGraphicsGroupContainerItem::Type == item->parentItem()->type())
             return;
 
         // delegate buttons shouldn't selected
@@ -714,14 +714,14 @@ bool UBBoardView::itemShouldBeMoved(QGraphicsItem *item)
     if (!(mMouseButtonIsPressed || mTabletStylusIsPressed))
         return false;
 
-    if (movingItem->data(UBGraphicsItemData::ItemLocked).toBool())
+    if (item->data(UBGraphicsItemData::ItemLocked).toBool())
         return false;
 
-    if (movingItem->parentItem() && UBGraphicsGroupContainerItem::Type == movingItem->parentItem()->type() && !movingItem->isSelected() && movingItem->parentItem()->isSelected())
+    if (item->parentItem() && UBGraphicsGroupContainerItem::Type == item->parentItem()->type() && !item->isSelected() && item->parentItem()->isSelected())
         return false;
 
-    if (movingItem->parentItem() && UBGraphicsGroupContainerItem::Type == movingItem->parentItem()->type())
-        if(dynamic_cast<UBGraphicsGroupContainerItem*>(movingItem->parentItem())->Delegate()->isLocked())
+    if (item->parentItem() && UBGraphicsGroupContainerItem::Type == item->parentItem()->type())
+        if(dynamic_cast<UBGraphicsGroupContainerItem*>(item->parentItem())->Delegate()->isLocked())
             return false;
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
@@ -933,7 +933,7 @@ void UBBoardView::handleItemMouseMove(QMouseEvent *event)
         // a cludge for terminate moving of w3c widgets.
         // in some cases w3c widgets catches mouse move and doesn't sends that events to web page,
         // at simple - in google map widget - mouse move events doesn't comes to web page from rectangle of wearch bar on bottom right corner of widget.
-        if (mWidgetMoved && (UBGraphicsW3CWidgetItem::Type == movingItem->type() || UBGraphicsGroupContainerItem::Type == movingItem->type()))
+        if (movingItem && mWidgetMoved && (UBGraphicsW3CWidgetItem::Type == movingItem->type() || UBGraphicsGroupContainerItem::Type == movingItem->type()))
             movingItem->setPos(posBeforeMove);
     }
 }
@@ -1300,7 +1300,7 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
           return;
       }
 
-      if(currentTool == UBStylusTool::Play && movingItem->data(UBGraphicsItemData::ItemLocked).toBool()){
+      if(currentTool == UBStylusTool::Play && movingItem && movingItem->data(UBGraphicsItemData::ItemLocked).toBool()){
           event->accept();
           return;
       }
