@@ -61,6 +61,7 @@ class UBGraphicsStroke;
 class UBSmoothStrokeItem;
 class UBMagnifierParams;
 class UBMagnifierHandler;
+class UBBackgroundRenderer;
 class UBGraphicsCache;
 class UBGraphicsGroupContainerItem;
 
@@ -228,20 +229,9 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
             return mDocument;
         }
 
-        bool isDarkBackground() const
-        {
-            return mDarkBackground;
-        }
-
-        bool isLightBackground() const
-        {
-            return !mDarkBackground;
-        }
-
-        bool isCrossedBackground() const
-        {
-            return mCrossedBackground;
-        }
+        bool isDarkBackground() const;
+        bool isLightBackground() const;
+        bool isCrossedBackground() const;
 
         bool hasBackground()
         {
@@ -404,8 +394,6 @@ public slots:
 
         virtual void keyReleaseEvent(QKeyEvent * keyEvent);
 
-        void recolorAllItems();
-
        virtual void drawItems (QPainter * painter, int numItems,
                 QGraphicsItem * items[], const QStyleOptionGraphicsItem options[], QWidget * widget = 0);
 
@@ -430,10 +418,7 @@ public slots:
 
         UBDocumentProxy* mDocument;
 
-        bool mDarkBackground;
-        bool mCrossedBackground;
-        bool mIsDesktopMode;
-        qreal mZoomFactor;
+        UBBackgroundRenderer* mBackgroundRenderer;
 
         QGraphicsItem* mBackgroundObject;
         // Issue 1684 - CFA - 20131128
