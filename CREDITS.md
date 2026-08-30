@@ -1,30 +1,44 @@
 # Credits
 
-## School Fonts
+## Fonts
 
-**Andika Basic** — Open Font License
-© SIL International
+All fonts bundled with Open-Sankoré are free/open-source and commercially redistributable.
+
+### School Fonts — `resources/customizations/fonts/`
+
+**Andika Basic** — SIL Open Font License 1.1
+© 2004-2008 SIL International
 Source: https://scripts.sil.org/Andika
+File: `AndBasR.ttf`
 
-**Ecolier Court, Ecolier Ligne Court** — Open Font License
+**Écolier Court** — SIL Open Font License
 © Jean-Marie Douteau
+Source: https://perso.orange.fr/jm.douteau/
+File: `ec_cour.ttf`
 
-**Ecolier lignes pointillés, Écolier pointillés, Écolier CP, Écolier CP pointillés** — Creative Commons BY-NC-ND
+**Écolier Lignes Court** — SIL Open Font License
 © Jean-Marie Douteau
+File: `ecl_cour.ttf`
 
-**Cursive Standard**
-© Antoine Fetet, based on a font by Jean-Claude Gineau
-Authorized for non-commercial use within Open-Sankoré
+**Marelle** — SIL Open Font License 1.1
+© 2026 Ministère de l'Éducation nationale, Laurent Bourcellier, Jonathan Fabreguettes, Rosalie Wagner
+Source: https://marelle.forge.apps.education.fr/
+License file: `Marelle-OFL-LICENSE.txt`
+Files: `Marelle-Regular.ttf`, `Marelle2-Regular.ttf`, `MarelleBaton-Regular.ttf`, `MarelleBaton2-Regular.ttf`, `MarelleLIGNES-Regular.otf`, `MarelleLIGNES2-Regular.otf`, `MarelleLIGNESBaton-Regular.otf`, `MarelleLIGNESBaton2-Regular.otf`
 
-**Script Ecole, Script Case Ecole**
-© Henri Rogelet — Authorized for non-commercial use
-Source: http://pointecole.free.fr/polices.html
+### PostScript Fonts — `resources/fonts/`
 
-**Alphonet** (phonetic font)
-© Henri Rogelet — Authorized for non-commercial use
+**URW Base35** (Nimbus Sans, Nimbus Roman, Nimbus Mono, Standard Symbols, Dingbats) — AGPL-3.0 with font embedding exception
+© URW++ Design & Development GmbH
+Source: https://github.com/ArtifexSoftware/urw-base35-fonts
+Files: 14 `.pfb` files (n019*.pfb, n021*.pfb, n022*.pfb, d050000l.pfb, s050000l.pfb)
 
-**EcritureA, EcritureB**
-DGESCO — Laurence Bedoin & Malou Verlomme
+### Widget Fonts — `resources/library/applications/`
+
+**Font Awesome** — SIL Open Font License (fonts), MIT (CSS/code)
+© Dave Gandy / Fonticons Inc.
+Source: https://fontawesome.com
+Files: `Combinoscope.wgt/fonts/FontAwesome.otf`, `Compteur.wgt/fonts/FontAwesome.otf`
 
 ## Icons
 
