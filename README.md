@@ -32,16 +32,22 @@ existing `.ubz` documents.
 - **Dark / light theme** — switchable via the theme manager
 - **School fonts** — bundled cursive fonts for education (Marelle, Andika, Écolier)
 
+## Platform support
+
+| Platform | Architecture | Status | CI | Packages |
+|----------|-------------|--------|-----|----------|
+| Windows | x64 | ✅ Official | GitHub Actions | `.exe` installer, `.zip` portable |
+| Linux | x64 | ✅ Official | GitHub Actions | `.deb`, `.rpm` |
+| Linux | ARM64 | ✅ Official | GitHub Actions | `.deb`, `.rpm` |
+| macOS | ARM64 / x64 | ⚠️ Dev only | — | — |
+
+macOS is used as the development host (Docker-based Linux builds) but is not a
+distribution target. There is no native macOS build or packaging.
+
 ## Downloads
 
 Pre-built packages are available on the
-[Releases](https://github.com/davidguyomarch/Sankore/releases) page:
-
-| Platform | Architecture | Format |
-|----------|-------------|--------|
-| Windows | x64 | `.exe` installer + `.zip` portable |
-| Linux | x64 | `.deb` (Debian/Ubuntu) + `.rpm` (Fedora/RHEL) |
-| Linux | ARM64 | `.deb` (Debian/Ubuntu) + `.rpm` (Fedora/RHEL) |
+[Releases](https://github.com/davidguyomarch/Sankore/releases) page.
 
 ## Building from source
 
