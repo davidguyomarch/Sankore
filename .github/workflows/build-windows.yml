@@ -26,14 +26,14 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
           lfs: false
 
       - name: Cache Qt 6.8.2
         id: cache-qt
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: C:\Qt
           key: qt-6.8.2-win64-msvc2022-qt5compat-multimedia-shadertools
@@ -56,7 +56,7 @@ jobs:
 
       - name: Cache vcpkg OpenSSL
         id: cache-vcpkg
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ env.VCPKG_INSTALLATION_ROOT }}\installed\x64-windows
@@ -80,7 +80,7 @@ jobs:
 
       - name: Cache zlib + QuaZip
         id: cache-libs
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             C:\zlib
@@ -202,7 +202,7 @@ jobs:
 
       - name: Publish test results
         if: always()
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: tests/build/test-results.xml
           check_name: Windows Unit Tests
@@ -266,7 +266,7 @@ jobs:
 
       - name: Upload artifact
         if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-sankore-windows-x64
           path: build/win32/release/product/
@@ -274,7 +274,7 @@ jobs:
 
       - name: Upload installer
         if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-sankore-windows-x64-installer
           path: build/installer/Open-Sankore-*-installer.exe

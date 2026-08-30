@@ -83,7 +83,7 @@ jobs:
 
       - name: Cache Qt 6.8.2
         id: cache-qt
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /opt/qt
           key: qt-6.8.2-linux-gcc-64-core5compat-multimedia-shadertools
@@ -101,13 +101,13 @@ jobs:
           echo "LD_LIBRARY_PATH=/opt/qt/6.8.2/gcc_64/lib:${LD_LIBRARY_PATH:-}" >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
       - name: Cache QuaZip
         id: cache-quazip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/quazip-install
           key: quazip-1.4-ubuntu2204-qt6.8.2-v1
@@ -260,7 +260,7 @@ jobs:
 
       - name: Publish test results
         if: always()
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: tests/build/test-results.xml
           check_name: Linux Unit Tests
@@ -268,7 +268,7 @@ jobs:
 
       - name: Upload visual test artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: visual-regression-images
           path: |
@@ -351,7 +351,7 @@ jobs:
 
       - name: Upload binary artifact
         if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64
           path: build/linux/release/product/
@@ -359,7 +359,7 @@ jobs:
 
       - name: Upload coverage report
         if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report-linux
           path: tests/build/coverage_html/
@@ -367,7 +367,7 @@ jobs:
 
       - name: Upload .deb package
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-deb
           path: build/packages/*.deb
@@ -375,7 +375,7 @@ jobs:
 
       - name: Upload .rpm package
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-rpm
           path: build/packages/*.rpm
@@ -467,7 +467,7 @@ jobs:
 
       - name: Upload AppImage
         if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-appimage
           path: Open-Sankore-x86_64.AppImage
