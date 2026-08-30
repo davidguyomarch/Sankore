@@ -13,8 +13,29 @@ Copyright © 2026 David Guyomarch.
 
 This project is distributed under the terms of the GNU General Public License version 3 (GPL-3.0).
 
-**Additional permission:**
-The OpenSSL linking exception present in the original project is preserved where applicable.
+## Additional permission — OpenSSL linking exception
+
+As per section 7 of the GNU General Public License, the following
+additional permission applies to original source files that carry it
+in their file headers (files authored by GIP ENA, 2010–2013):
+
+> In addition, as a special exception, the copyright holders of
+> Open-Sankoré give you permission to combine Open-Sankoré with the
+> OpenSSL project's "OpenSSL" library (or with modified versions of
+> it that use the same license as the "OpenSSL" library). You may
+> copy and distribute such a system following the terms of the GNU
+> GPL for Open-Sankoré and the licenses of the other code concerned,
+> provided that you include the source code of that other code when
+> and as the GNU GPL requires distribution of source code.
+
+This exception applies **only** to files that explicitly state it in
+their headers. New files added to the project (Copyright © 2026 David
+Guyomarch) are licensed under GPL-3.0-only without this exception.
+
+**Note:** Since OpenSSL 3.0 (2021), OpenSSL uses the Apache License 2.0,
+which is GPL-3.0 compatible. This exception is preserved for legal
+continuity with the original project headers but is no longer
+technically necessary for builds linking OpenSSL 3.x.
 
 ---
 
