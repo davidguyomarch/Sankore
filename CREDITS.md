@@ -31,9 +31,14 @@ DGESCO — Laurence Bedoin & Malou Verlomme
 
 ## Icons
 
-[Phosphor Icons](https://phosphoricons.com) — MIT License (QML V2 UI)
+**Phosphor Icons** — MIT License
+© Phosphor Icons contributors
+Source: https://github.com/phosphor-icons/core
+Website: https://phosphoricons.com
+Used in the QML V2 UI for all toolbar and palette icons.
 
-Yusuke Kamiyamane — teacherGuide icons
+**Yusuke Kamiyamane** — CC-BY-3.0
+teacherGuide icons
 
 ## Translations
 
@@ -61,8 +66,8 @@ A special thanks to:
 
 ## Third-Party Libraries
 
-See the Licences tab in Preferences for full license texts:
+See [THIRD_PARTY.md](THIRD_PARTY.md) for the full inventory. Key dependencies:
+- Qt 6 — LGPL-3.0
 - OpenSSL — Apache License 2.0
-- zlib — zlib License
-- Xpdf — GPL-3.0
 - QuaZIP — LGPL-2.1
+- zlib — zlib License

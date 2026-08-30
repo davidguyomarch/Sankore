@@ -31,21 +31,21 @@ Xpdf source files (`XPDFRenderer.h`, `XPDFRenderer.cpp`) exist in `src/pdf/` but
 
 ## Icons
 
-| Component | License | Bundled? | Location | Commercial redistribution |
-|-----------|---------|----------|----------|--------------------------|
-| Phosphor Icons (regular) | MIT | Yes | `resources/icons/phosphor/` | Yes |
-| Yusuke Kamiyamane icons | CC-BY-3.0 | Yes | `resources/customizations/teacherGuide/` | Yes, with attribution |
-| Font Awesome 4 | OFL-1.1 (fonts), MIT (CSS/code) | Yes (2 widgets) | `Combinoscope.wgt/fonts/`, `Compteur.wgt/fonts/` | Yes |
+| Component | License | Bundled? | Location | Commercial redistribution | Source |
+|-----------|---------|----------|----------|--------------------------|--------|
+| Phosphor Icons (regular) | MIT | Yes | `resources/icons/phosphor/` | Yes | [github.com/phosphor-icons/core](https://github.com/phosphor-icons/core) |
+| Yusuke Kamiyamane icons | CC-BY-3.0 | Yes | `resources/customizations/teacherGuide/` | Yes, with attribution | — |
+| Font Awesome 4 | OFL-1.1 (fonts), MIT (CSS/code) | Yes (2 widgets) | `Combinoscope.wgt/fonts/`, `Compteur.wgt/fonts/` | Yes | [fontawesome.com](https://fontawesome.com) |
 
 ## Fonts
 
-| Component | License | Bundled? | Location | Commercial redistribution |
-|-----------|---------|----------|----------|--------------------------|
-| Andika Basic | OFL-1.1 | Yes | `resources/customizations/fonts/AndBasR.ttf` | Yes |
-| Écolier Court | OFL | Yes | `resources/customizations/fonts/ec_cour.ttf` | Yes |
-| Écolier Lignes Court | OFL | Yes | `resources/customizations/fonts/ecl_cour.ttf` | Yes |
-| Marelle (8 variants) | OFL-1.1 | Yes | `resources/customizations/fonts/Marelle*.ttf`, `Marelle*.otf` | Yes |
-| URW Base35 (14 files) | AGPL-3.0 + font exception | Yes | `resources/fonts/*.pfb` | Yes |
+| Component | License | Bundled? | Location | Commercial redistribution | Source |
+|-----------|---------|----------|----------|--------------------------|--------|
+| Andika Basic | OFL-1.1 | Yes | `resources/customizations/fonts/AndBasR.ttf` | Yes | [scripts.sil.org](https://scripts.sil.org/Andika) |
+| Écolier Court | OFL | Yes | `resources/customizations/fonts/ec_cour.ttf` | Yes | Jean-Marie Douteau |
+| Écolier Lignes Court | OFL | Yes | `resources/customizations/fonts/ecl_cour.ttf` | Yes | Jean-Marie Douteau |
+| Marelle (8 variants) | OFL-1.1 | Yes | `resources/customizations/fonts/Marelle*.ttf`, `Marelle*.otf` | Yes | [marelle.forge.apps.education.fr](https://marelle.forge.apps.education.fr/) |
+| URW Base35 (14 files) | AGPL-3.0 + font exception | Yes | `resources/fonts/*.pfb` | Yes | [github.com/ArtifexSoftware/urw-base35-fonts](https://github.com/ArtifexSoftware/urw-base35-fonts) |
 
 ### Notes on fonts
 
