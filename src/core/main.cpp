@@ -28,6 +28,7 @@
 #include <QTimer>
 #include <cstdio>
 #include <string>
+#include <thread>
 #ifdef _WIN32
 #include <windows.h>
 #include <dbghelp.h>
@@ -238,8 +239,25 @@ int main(int argc, char *argv[])
         }
     }
     if (quitAfterSec > 0) {
-        QTimer::singleShot(quitAfterSec * 1000, &app, &QCoreApplication::quit);
-        qDebug() << "CI mode: will auto-quit after" << quitAfterSec << "seconds";
+        // Use a std::thread watchdog instead of QTimer::singleShot.
+        // QTimer requires the Qt event loop to be running, but UBApplication::exec()
+        // performs heavy synchronous init (QML widget creation, etc.) BEFORE calling
+        // QApplication::exec(). In offscreen mode, this init can hang indefinitely,
+        // so the QTimer never fires and the app never quits (issue #169).
+        // A detached thread with sleep + _exit() guarantees termination regardless
+        // of event loop state.
+        int timeout = quitAfterSec;
+        std::thread([timeout]() {
+            std::this_thread::sleep_for(std::chrono::seconds(timeout));
+            qDebug() << "CI watchdog: quit-after timer expired, forcing exit";
+            // Flush gcov data before exiting (Linux)
+#ifndef _WIN32
+            if (__gcov_dump)
+                __gcov_dump();
+#endif
+            _exit(0);
+        }).detach();
+        qDebug() << "CI mode: watchdog will force exit after" << quitAfterSec << "seconds";
     }
 
     QString dumpPath = UBSettings::userDataDirectory() + "/log";
