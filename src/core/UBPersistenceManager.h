@@ -70,7 +70,6 @@ class UBPersistenceManager : public QObject
         static const QString videoDirectory;
         static const QString audioDirectory;
         static const QString widgetDirectory;
-        static const QString teacherGuideDirectory;
         static const QString fileDirectory; // Issue 1683 (Evolution) - AOU - 20131206
 
         static const QString myDocumentsName;
@@ -141,10 +140,6 @@ class UBPersistenceManager : public QObject
 
         QString generateUniqueDocumentPath();
         QString generateUniqueDocumentPath(const QString& baseFolder);
-
-        QString teacherGuideAbsoluteObjectPath(UBDocumentProxy* pDocumentProxy);
-        QString addObjectToTeacherGuideDirectory(UBDocumentProxy* proxy, QString pPath);
-        QString addWidgetToTeacherGuideDirectory(UBDocumentProxy* pDocumentProxy, QString pPath);
 
         bool addDirectoryContentToDocument(const QString& documentRootFolder, UBDocumentProxy* pDocument);
 

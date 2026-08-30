@@ -33,7 +33,6 @@
 #endif
 
 #include "gui/UBFeaturesWidget.h"
-#include "gui/UBDockResourcesWidget.h"
 #include "gui/UBDockPalette.h"
 #include "core/UBApplicationController.h"
 
@@ -44,7 +43,6 @@ class UBBoardController;
 class UBKeyboardPalette;
 class UBMainWindow;
 class UBApplicationController;
-class UBDockTeacherGuideWidget;
 class UBCreateLinkPalette;
 class QQuickWidget;
 class UBToolController;
@@ -71,11 +69,6 @@ class UBBoardPaletteManager : public QObject
         UBKeyboardPalette *mKeyboardPalette;
 
         UBCreateLinkPalette* linkPalette();
-
-        UBDockTeacherGuideWidget* teacherGuideDockWidget() { return nullptr; }
-
-        //issue 1682 - NNE - 20140110
-        UBDockResourcesWidget* teacherResourcesDockWidget(){ return mTeacherResources; }
 
         void processPalettersWidget(UBDockPalette *paletter, eUBDockPaletteWidgetMode mode);
         void changeMode(eUBDockPaletteWidgetMode newMode, bool isInit = false);
@@ -121,9 +114,6 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mShapesPaletteV2Qml;
 
         UBCreateLinkPalette* mLinkPalette;
-
-        //issue 1682 - NNE - 20131218
-        UBDockResourcesWidget *mTeacherResources;
 
         UBActionPalette* mAddItemPalette;
         UBActionPalette* mImageBackgroundPalette;

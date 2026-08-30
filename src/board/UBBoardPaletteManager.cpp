@@ -38,7 +38,6 @@
 #include "gui/UBToolWidget.h"
 #include "gui/UBActionPalette.h"
 #include "gui/UBFavoriteToolPalette.h"
-#include "gui/UBDockTeacherGuideWidget.h"
 #include "gui/UBStartupHintsPalette.h"
 #include "gui/UBCreateLinkPalette.h"
 
@@ -96,7 +95,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPaletteMode(eUBDockPaletteWidget_BOARD)
 {
     mSettings = UBSettings::settings();
-    mTeacherResources = nullptr;
     setupPalettes();
     connectPalettes();
 }
@@ -140,7 +138,6 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 {
     // Dock palettes removed (QML V2 replaces them).
     // Only keep mpFeaturesWidget (used by addItemToLibrary).
-    mTeacherResources = new UBDockResourcesWidget;
     mpFeaturesWidget = new UBFeaturesWidget();
 }
 

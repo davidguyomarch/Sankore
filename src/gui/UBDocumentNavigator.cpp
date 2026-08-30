@@ -41,9 +41,6 @@
 #include "board/UBBoardPaletteManager.h"
 #include "core/UBApplicationController.h"
 
-#include "gui/UBDockTeacherGuideWidget.h"
-#include "gui/UBTeacherGuideWidget.h"
-
 
 /**
  * \brief Constructor
