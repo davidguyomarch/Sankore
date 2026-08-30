@@ -38,7 +38,7 @@
 #include "core/UBDisplayManager.h"
 
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include "ui_preferences.h"
 
@@ -564,7 +564,7 @@ void UBPreferencesController::opacitySliderChanged(int value)
 
     if (slider == mMarkerProperties->opacitySlider)
     {
-        UBDrawingController::drawingController()->setMarkerAlpha(opacity);
+        UBToolController::toolController()->setMarkerAlpha(opacity);
     }
 }
 
@@ -577,7 +577,7 @@ void UBPreferencesController::colorSelected(const QColor& color)
 
     if (index >= 0)
     {
-        UBDrawingController::drawingController()->setPenColor(false, color, index);
+        UBToolController::toolController()->setPenColor(false, color, index);
         return;
     }
 
@@ -585,21 +585,21 @@ void UBPreferencesController::colorSelected(const QColor& color)
 
     if (index >= 0)
     {
-        UBDrawingController::drawingController()->setPenColor(true, color, index);
+        UBToolController::toolController()->setPenColor(true, color, index);
     }
 
     index = mMarkerProperties->lightBackgroundColorPickers.indexOf(colorPicker);
 
     if (index >= 0)
     {
-        UBDrawingController::drawingController()->setMarkerColor(false, color, index);
+        UBToolController::toolController()->setMarkerColor(false, color, index);
     }
 
     index = mMarkerProperties->darkBackgroundColorPickers.indexOf(colorPicker);
 
     if (index >= 0)
     {
-        UBDrawingController::drawingController()->setMarkerColor(true, color, index);
+        UBToolController::toolController()->setMarkerColor(true, color, index);
     }
 
 }

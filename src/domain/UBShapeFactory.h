@@ -10,7 +10,7 @@
 class UBAbstractGraphicsItem;
 class UBBoardView;
 class QMouseEvent;
-class UBDrawingController;
+class UBToolController;
 
 class UBShapeFactory : public QObject
 {
@@ -114,7 +114,7 @@ private:
     Qt::PenStyle mCurrentPenStyle;
 
     int mThickness;
-    UBDrawingController *mDrawingController;
+    UBToolController *mDrawingController;
 
     int mNVertices;
 

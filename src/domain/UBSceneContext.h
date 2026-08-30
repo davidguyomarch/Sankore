@@ -11,7 +11,7 @@
 
 #include <QColor>
 
-class UBDrawingController;
+class UBToolController;
 class UBBoardController;
 
 /**
@@ -26,7 +26,7 @@ struct UBSceneContext
     class UBBoardController* boardController = nullptr;
 
     // --- Drawing controller (nullable for tests) ---
-    UBDrawingController* drawingController = nullptr;
+    UBToolController* drawingController = nullptr;
 
     // --- Static values (used when boardController is null, i.e. in tests) ---
     qreal testSystemScaleFactor = 1.0;

@@ -38,7 +38,7 @@
 #include "gui/UBMainWindow.h"
 
 #include "board/UBBoardView.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardPaletteManager.h"
 
@@ -70,8 +70,8 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
         , mPendingMarkerButtonPressed(false)
         , mPendingEraserButtonPressed(false)
         , mbArrowClicked(false)
-        , mBoardStylusTool(UBDrawingController::drawingController()->stylusTool())
-        , mDesktopStylusTool(UBDrawingController::drawingController()->stylusTool())
+        , mBoardStylusTool(UBToolController::toolController()->stylusTool())
+        , mDesktopStylusTool(UBToolController::toolController()->stylusTool())
 {
     mSettings = UBSettings::settings();
 
@@ -97,7 +97,7 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     // dereference a null drawingController.  (#135)
     {
         UBSceneContext ctx;
-        ctx.drawingController = UBDrawingController::drawingController();
+        ctx.drawingController = UBToolController::toolController();
         ctx.boardController = UBApplication::boardController;
         mTransparentDrawingScene->setSceneContext(ctx);
     }
@@ -132,7 +132,7 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     connect(mTransparentDrawingView, &UBBoardView::resized, this, [this]() { onTransparentWidgetResized(); });
 
 
-    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged, this, &UBDesktopAnnotationController::stylusToolChanged);
+    connect(UBToolController::toolController(), &UBToolController::stylusToolChanged, this, &UBDesktopAnnotationController::stylusToolChanged);
 
     // Add the desktop associated palettes
     mDesktopPenPalette = new UBDesktopPenPalette(mTransparentDrawingView);
@@ -322,9 +322,9 @@ void UBDesktopAnnotationController::showWindow()
 
     updateBackground();
 
-    mBoardStylusTool = UBDrawingController::drawingController()->stylusTool();
+    mBoardStylusTool = UBToolController::toolController()->stylusTool();
 
-    UBDrawingController::drawingController()->setStylusTool(mDesktopStylusTool);
+    UBToolController::toolController()->setStylusTool(mDesktopStylusTool);
 
 #ifdef Q_OS_WIN
     // On Windows, WA_TranslucentBackground may not work reliably with DWM.
@@ -380,7 +380,7 @@ void UBDesktopAnnotationController::updateBackground()
     QBrush newBrush;
 
     if (mIsFullyTransparent
-            || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
+            || UBToolController::toolController()->stylusTool() == UBStylusTool::Selector)
     {
         newBrush = QBrush(Qt::transparent);
 #ifdef Q_OS_LINUX
@@ -411,8 +411,8 @@ void UBDesktopAnnotationController::hideWindow()
 
     mDesktopPalette->hide();
 
-    mDesktopStylusTool = UBDrawingController::drawingController()->stylusTool();
-    UBDrawingController::drawingController()->setStylusTool(mBoardStylusTool);
+    mDesktopStylusTool = UBToolController::toolController()->stylusTool();
+    UBToolController::toolController()->setStylusTool(mBoardStylusTool);
 }
 
 
@@ -422,7 +422,7 @@ void UBDesktopAnnotationController::goToUniboard()
     hideWindow();
 
     UBPlatformUtils::setDesktopMode(false);
-    UBDrawingController::drawingController()->setInDestopMode(false);
+    UBToolController::toolController()->setInDesktopMode(false);
 
     emit restoreUniboard();
 }
@@ -554,7 +554,7 @@ void UBDesktopAnnotationController::penActionPressed()
     mbArrowClicked = false;
     mDesktopMarkerPalette->hide();
     mDesktopEraserPalette->hide();
-    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
+    UBToolController::toolController()->setStylusTool(UBStylusTool::Pen);
     mPenHoldTimer = QTime::currentTime();
     mPendingPenButtonPressed = true;
 
@@ -608,7 +608,7 @@ void UBDesktopAnnotationController::eraserActionPressed()
     mbArrowClicked = false;
     mDesktopPenPalette->hide();
     mDesktopMarkerPalette->hide();
-    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Eraser);
+    UBToolController::toolController()->setStylusTool(UBStylusTool::Eraser);
     mEraserHoldTimer = QTime::currentTime();
     mPendingEraserButtonPressed = true;
 
@@ -663,7 +663,7 @@ void UBDesktopAnnotationController::markerActionPressed()
     mbArrowClicked = false;
     mDesktopPenPalette->hide();
     mDesktopEraserPalette->hide();
-    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Marker);
+    UBToolController::toolController()->setStylusTool(UBStylusTool::Marker);
     mMarkerHoldTimer = QTime::currentTime();
     mPendingMarkerButtonPressed = true;
 
@@ -940,12 +940,12 @@ void UBDesktopAnnotationController::refreshMask()
 {
     if (mTransparentDrawingScene && mTransparentDrawingView->isVisible()) {
         if(mIsFullyTransparent
-                || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector
+                || UBToolController::toolController()->stylusTool() == UBStylusTool::Selector
                 //Needed to work correctly when another actions on stylus are checked
-                || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Eraser
-                || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Pointer
-                || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Pen
-                || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
+                || UBToolController::toolController()->stylusTool() == UBStylusTool::Eraser
+                || UBToolController::toolController()->stylusTool() == UBStylusTool::Pointer
+                || UBToolController::toolController()->stylusTool() == UBStylusTool::Pen
+                || UBToolController::toolController()->stylusTool() == UBStylusTool::Marker)
         {
             updateMask(true);
         }

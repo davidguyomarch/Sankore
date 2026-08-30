@@ -35,7 +35,7 @@
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include "gui/UBMainWindow.h"
 

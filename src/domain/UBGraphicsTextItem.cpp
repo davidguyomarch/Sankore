@@ -39,7 +39,7 @@
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardView.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "core/UBSettings.h"
 
 #include "document/UBDocumentProxy.h"
@@ -276,7 +276,7 @@ QVariant UBGraphicsTextItem::itemChange(GraphicsItemChange change, const QVarian
 void UBGraphicsTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     // It is a cludge...
-    if (UBStylusTool::Play == UBDrawingController::drawingController()->stylusTool())
+    if (UBStylusTool::Play == UBToolController::toolController()->stylusTool())
     {
         QGraphicsTextItem::mousePressEvent(event);
         event->accept();
@@ -367,7 +367,7 @@ void UBGraphicsTextItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     // scene()->itemAt(pos) returns 0 if pos is not over text, but over text item, but mouse press comes.
     // It is a cludge...
-    if (UBStylusTool::Play == UBDrawingController::drawingController()->stylusTool())
+    if (UBStylusTool::Play == UBToolController::toolController()->stylusTool())
     {
         QPointF distance = event->pos() - event->lastPos();
         if( fabs(distance.x()) < 1 && fabs(distance.y()) < 1

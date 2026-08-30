@@ -24,7 +24,7 @@
 #include "UBAbstractGraphicsItem.h"
 #include "UBGraphicsDelegateFrame.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "UBFreeHandle.h"
 
 #include "core/UBApplication.h"

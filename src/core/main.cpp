@@ -151,7 +151,7 @@ static void unixSignalHandler(int sig)
 #include "UBApplication.h"
 #include "UBSettings.h"
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "domain/UBGraphicsScene.h"
 #include "adaptors/UBExportPDF.h"
 
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
 
                 // Phase 4: Simulate a pen stroke
                 qDebug() << "Smoke: simulate drawing";
-                UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
+                UBToolController::toolController()->setStylusTool(UBStylusTool::Pen);
                 UBGraphicsScene* scene = bc->activeScene();
                 if (scene) {
                     scene->inputDevicePress(QPointF(100, 100));

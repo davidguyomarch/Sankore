@@ -3,7 +3,7 @@
 #include "customWidgets/UBGraphicsItemAction.h"
 #include "UBGraphicsDelegateFrame.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"

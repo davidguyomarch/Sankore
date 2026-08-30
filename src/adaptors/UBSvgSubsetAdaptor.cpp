@@ -115,7 +115,7 @@
 
 #include "board/UBBoardView.h"
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "board/UBBoardPaletteManager.h"
 
 #include "frameworks/UBFileSystemUtils.h"

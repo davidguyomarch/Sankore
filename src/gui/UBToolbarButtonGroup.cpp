@@ -37,7 +37,7 @@
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 
 UBToolbarButtonGroup::UBToolbarButtonGroup(QToolBar *toolBar, const QList<QAction*> &actions)
@@ -205,18 +205,18 @@ void UBToolbarButtonGroup::colorPaletteChanged()
 
     QList<QColor> colors;
 
-//    if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Pen
-//        || UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line)
+//    if (UBToolController::toolController()->stylusTool() == UBStylusTool::Pen
+//        || UBToolController::toolController()->stylusTool() == UBStylusTool::Line)
 //    {
 //        colors = mSettings->penColors(isDarkBackground);
 //    }
-//    else if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
+//    else if (UBToolController::toolController()->stylusTool() == UBStylusTool::Marker)
 //    {
 //        colors = mSettings->markerColors(isDarkBackground);
 //    }
 
     colors = mSettings->penColors(isDarkBackground);
-    if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Marker)
+    if (UBToolController::toolController()->stylusTool() == UBStylusTool::Marker)
     {
         colors = mSettings->markerColors(isDarkBackground);
     }

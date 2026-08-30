@@ -72,7 +72,7 @@
 
 #include "board/UBBoardController.h"
 #include "board/UBBoardPaletteManager.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 
 #include "gui/UBThumbnailView.h"

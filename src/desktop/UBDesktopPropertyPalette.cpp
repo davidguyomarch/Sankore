@@ -26,7 +26,7 @@
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "gui/UBMainWindow.h"
 #include "gui/UBToolbarButtonGroup.h"
 #include "gui/UBRightPalette.h"
@@ -58,10 +58,11 @@ UBDesktopPenPalette::UBDesktopPenPalette(QWidget *parent)
 
     colorChoice->displayText(false);
 
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, colorChoice, &UBToolbarButtonGroup::setCurrentIndex);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, this, [this]() { close(); });
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged, colorChoice, &UBToolbarButtonGroup::colorPaletteChanged);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged, this, &UBActionPalette::close);
+    //connect(colorChoice, SIGNAL(activated(int)), this, SLOT(UBApplication::boardController->setColorIndex(int)));
+    connect(UBToolController::toolController(), &UBToolController::colorIndexChanged, colorChoice, &UBToolbarButtonGroup::setCurrentIndex);
+    connect(UBToolController::toolController(), &UBToolController::colorIndexChanged, this, [this]() { close(); });
+    connect(UBToolController::toolController(), &UBToolController::colorPaletteChanged, colorChoice, &UBToolbarButtonGroup::colorPaletteChanged);
+    connect(UBToolController::toolController(), &UBToolController::colorPaletteChanged, this, &UBActionPalette::close);
 
     layout()->addWidget(colorChoice);
 
@@ -75,10 +76,10 @@ UBDesktopPenPalette::UBDesktopPenPalette(QWidget *parent)
             new UBToolbarButtonGroup(UBApplication::mainWindow->boardToolBar, lineWidthActions);
     lineWidthChoice->displayText(false);
 
-    connect(lineWidthChoice, &UBToolbarButtonGroup::activated, UBDrawingController::drawingController(), &UBDrawingController::setLineWidthIndex);
+    connect(lineWidthChoice, &UBToolbarButtonGroup::activated, UBToolController::toolController(), &UBToolController::setLineWidthIndex);
     connect(lineWidthChoice, &UBToolbarButtonGroup::activated, this, [this]() { close(); });
-    connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged, lineWidthChoice, &UBToolbarButtonGroup::setCurrentIndex);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged, this, [this]() { close(); });
+    connect(UBToolController::toolController(), &UBToolController::lineWidthIndexChanged, lineWidthChoice, &UBToolbarButtonGroup::setCurrentIndex);
+    connect(UBToolController::toolController(), &UBToolController::lineWidthIndexChanged, this, [this]() { close(); });
 
     onParentMaximized();
 
@@ -125,7 +126,7 @@ UBDesktopEraserPalette::UBDesktopEraserPalette(QWidget *parent)
 
     UBToolbarButtonGroup *eraserWidthChoice = new UBToolbarButtonGroup(UBApplication::mainWindow->boardToolBar, eraserWidthActions);
 
-    connect(eraserWidthChoice, &UBToolbarButtonGroup::activated, UBDrawingController::drawingController(), &UBDrawingController::setEraserWidthIndex);
+    connect(eraserWidthChoice, &UBToolbarButtonGroup::activated, UBToolController::toolController(), &UBToolController::setEraserWidthIndex);
     connect(eraserWidthChoice, &UBToolbarButtonGroup::activated, this, [this]() { close(); });
     connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, &QAction::triggered, this, [this]() { close(); });
 
@@ -151,10 +152,11 @@ UBDesktopMarkerPalette::UBDesktopMarkerPalette(QWidget *parent)
     UBToolbarButtonGroup *colorChoice = new UBToolbarButtonGroup(UBApplication::mainWindow->boardToolBar, colorActions);
     colorChoice->displayText(false);
 
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, colorChoice, &UBToolbarButtonGroup::setCurrentIndex);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, this, [this]() { close(); });
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged, colorChoice, &UBToolbarButtonGroup::colorPaletteChanged);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged, this, &UBActionPalette::close);
+    //connect(colorChoice, SIGNAL(activated(int)), this, SLOT(UBApplication::boardController->setColorIndex(int)));
+    connect(UBToolController::toolController(), &UBToolController::colorIndexChanged, colorChoice, &UBToolbarButtonGroup::setCurrentIndex);
+    connect(UBToolController::toolController(), &UBToolController::colorIndexChanged, this, [this]() { close(); });
+    connect(UBToolController::toolController(), &UBToolController::colorPaletteChanged, colorChoice, &UBToolbarButtonGroup::colorPaletteChanged);
+    connect(UBToolController::toolController(), &UBToolController::colorPaletteChanged, this, &UBActionPalette::close);
 
     layout()->addWidget(colorChoice);
 
@@ -167,10 +169,10 @@ UBDesktopMarkerPalette::UBDesktopMarkerPalette(QWidget *parent)
     UBToolbarButtonGroup *lineWidthChoice = new UBToolbarButtonGroup(UBApplication::mainWindow->boardToolBar, lineWidthActions);
     lineWidthChoice->displayText(false);
 
-    connect(lineWidthChoice, &UBToolbarButtonGroup::activated, UBDrawingController::drawingController(), &UBDrawingController::setLineWidthIndex);
+    connect(lineWidthChoice, &UBToolbarButtonGroup::activated, UBToolController::toolController(), &UBToolController::setLineWidthIndex);
     connect(lineWidthChoice, &UBToolbarButtonGroup::activated, this, [this]() { close(); });
-    connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged, lineWidthChoice, &UBToolbarButtonGroup::setCurrentIndex);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged, this, [this]() { close(); });
+    connect(UBToolController::toolController(), &UBToolController::lineWidthIndexChanged, lineWidthChoice, &UBToolbarButtonGroup::setCurrentIndex);
+    connect(UBToolController::toolController(), &UBToolController::lineWidthIndexChanged, this, [this]() { close(); });
 
     layout()->addWidget(lineWidthChoice);
 }

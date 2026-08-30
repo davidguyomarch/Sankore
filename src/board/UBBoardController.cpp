@@ -92,7 +92,7 @@
 #include "document/UBDocumentProxy.h"
 #include "document/UBDocumentController.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "board/UBBoardView.h"
 
 #include "adaptors/UBMetadataDcSubsetAdaptor.h"
@@ -165,10 +165,10 @@ void UBBoardController::init()
     connect(UBApplication::undoStack, &QUndoStack::canRedoChanged,
             this, &UBBoardController::undoRedoStateChange);
 
-    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+    connect(UBToolController::toolController(), &UBToolController::stylusToolChanged,
             this, &UBBoardController::setToolCursor);
 
-    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+    connect(UBToolController::toolController(), &UBToolController::stylusToolChanged,
             this, &UBBoardController::stylusToolChanged);
 
     connect(UBApplication::app(), &QApplication::lastWindowClosed,
@@ -326,7 +326,7 @@ void UBBoardController::setupToolbar()
     mMainWindow->boardToolBar->hide();
 
     // Route colorPaletteChanged to penColorChanged (needed by compass/instruments)
-    connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged,
+    connect(UBToolController::toolController(), &UBToolController::colorPaletteChanged,
             this, &UBBoardController::penColorChanged);
 
     // Action → slot connections (keyboard shortcuts, menu entries)
@@ -788,7 +788,7 @@ void UBBoardController::blackout()
 void UBBoardController::showKeyboard(bool show)
 {
     if(show)
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
     mPaletteManager->showVirtualKeyboard(show);
 }
 
@@ -874,7 +874,7 @@ void UBBoardController::groupButtonClicked()
     if (groupAction->text() == mActionGroupText) { //The only way to get information from item, considering using smth else
         UBGraphicsGroupContainerItem *groupItem = activeScene()->createGroup(selItems);
         groupItem->setSelected(true);
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
     }
     else if (groupAction->text() == mActionUngroupText) {
@@ -1020,7 +1020,7 @@ void UBBoardController::addLinkToPage(QString sourceUrl, QSize size, QPointF pos
         widgetItem->setUuid(QUuid::createUuid());
         widgetItem->setSourceUrl(QUrl::fromLocalFile(widgetUrl));
 
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
     }
 }
 
@@ -1134,7 +1134,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
         else
         {
             mActiveScene->scaleToFitDocumentSize(pixItem, false, UBSettings::objectInControlViewMargin);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
             pixItem->setSelected(true);
         }
 
@@ -1189,7 +1189,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
         else
         {
             mActiveScene->scaleToFitDocumentSize(svgItem, false, UBSettings::objectInControlViewMargin);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
             svgItem->setSelected(true);
 
         }
@@ -1223,7 +1223,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
         }
         else
         {
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
 
         return appleWidgetItem;
@@ -1244,7 +1244,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             mActiveScene->setAsBackgroundObject(w3cWidgetItem, true, false, disposition);
         }
         else
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
         w3cWidgetItem->setSelected(true);
 
@@ -1290,7 +1290,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             connect(this, &UBBoardController::activeSceneChanged, mediaVideoItem, &UBGraphicsMediaItem::activeSceneChanged);
         }
 
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
         return mediaVideoItem;
     }
@@ -1334,7 +1334,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             connect(this, &UBBoardController::activeSceneChanged, audioMediaItem, &UBGraphicsMediaItem::activeSceneChanged);
         }
 
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
         return audioMediaItem;
     }
@@ -1383,7 +1383,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             widgetItem->setSourceUrl(QUrl::fromLocalFile(widgetUrl));
             widgetItem->resize(size);
 
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
             return widgetItem;
         }
@@ -1426,27 +1426,27 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
         if (sourceUrl.toString() == UBToolsManager::manager()->compass.id)
         {
             mActiveScene->addCompass(pPos);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->ruler.id)
         {
             mActiveScene->addRuler(pPos);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->protractor.id)
         {
             mActiveScene->addProtractor(pPos);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->triangle.id)
         {
             mActiveScene->addTriangle(pPos);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->cache.id)
         {
             mActiveScene->addCache();
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->magnifier.id)
         {
@@ -1456,17 +1456,17 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
             params.zoom = 2;
             params.sizePercentFromScene = 20;
             mActiveScene->addMagnifier(params);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->mask.id)
         {
             mActiveScene->addMask(pPos);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else if (sourceUrl.toString() == UBToolsManager::manager()->aristo.id)
         {
             mActiveScene->addAristo(pPos);
-            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
         }
         else
         {
@@ -1514,7 +1514,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
 
                             widgetItem->setSourceUrl(sourceUrl);
 
-                            UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+                            UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
                             return widgetItem;
                         }
@@ -1882,27 +1882,27 @@ void UBBoardController::lastWindowClosed()
 
 void UBBoardController::setColorIndex(int pColorIndex)
 {
-    UBDrawingController::drawingController()->setColorIndex(pColorIndex);
+    UBToolController::toolController()->setColorIndex(pColorIndex);
 
-    if (UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Marker &&
-            UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Line &&
-            UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Text &&
-            UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Selector)
+    if (UBToolController::toolController()->stylusTool() != UBStylusTool::Marker &&
+            UBToolController::toolController()->stylusTool() != UBStylusTool::Line &&
+            UBToolController::toolController()->stylusTool() != UBStylusTool::Text &&
+            UBToolController::toolController()->stylusTool() != UBStylusTool::Selector)
     {
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Pen);
     }
 
-    if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Pen ||
-            UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line ||
-            UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Text ||
-            UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
+    if (UBToolController::toolController()->stylusTool() == UBStylusTool::Pen ||
+            UBToolController::toolController()->stylusTool() == UBStylusTool::Line ||
+            UBToolController::toolController()->stylusTool() == UBStylusTool::Text ||
+            UBToolController::toolController()->stylusTool() == UBStylusTool::Selector)
     {
-        if (UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Selector)
+        if (UBToolController::toolController()->stylusTool() == UBStylusTool::Selector)
         {
             // If we are in mode board, then do that
             if(UBApplication::applicationController->displayMode() == UBApplicationController::Board)
             {
-                UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Pen);
+                UBToolController::toolController()->setStylusTool(UBStylusTool::Pen);
                 mMainWindow->actionPen->setChecked(true);
             }
         }
@@ -2377,7 +2377,7 @@ void UBBoardController::updateSceneContext()
 
     UBSceneContext ctx;
     ctx.boardController = this;
-    ctx.drawingController = UBDrawingController::drawingController();
+    ctx.drawingController = UBToolController::toolController();
     ctx.pointerDiameter = UBSettings::pointerDiameter;
     ctx.eraserFineWidth = mSettings->eraserFineWidth();
     ctx.eraserMediumWidth = mSettings->eraserMediumWidth();

@@ -43,7 +43,7 @@
 #include "domain/UBGraphicsGroupContainerItem.h"
 
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 
 #include "customWidgets/UBGraphicsItemAction.h"
@@ -141,7 +141,7 @@ bool UBGraphicsGroupContainerItemDelegate::mousePressEvent(QGraphicsSceneMouseEv
     //TODO claudio
     // another chunk of duplicated code
     delegated()->deselectCurrentItem();
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
     if(currentTool == UBStylusTool::Play){
         if(mAction)
             mAction->play();

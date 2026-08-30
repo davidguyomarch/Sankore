@@ -32,7 +32,7 @@
 #include "core/UBSettings.h"
 #include "core/UBApplicationController.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "board/UBBoardController.h"
 #include "domain/UBShapeFactory.h"
 

@@ -40,7 +40,7 @@
 #include "board/UBBoardView.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardPaletteManager.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 
 #include "document/UBDocumentProxy.h"
@@ -381,10 +381,10 @@ void UBApplicationController::showBoard()
 
     emit mainModeChanged(Board);
 
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
     // Legacy code forced Selector here — disabled for QML V2 UI which sets Pen at startup
     // if (UBStylusTool::Selector != currentTool)
-    //     UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+    //     UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
     UBApplication::boardController->freezeW3CWidgets(false);
     UBApplication::boardController->activeScene()->updateGroupButtonState();
@@ -505,8 +505,8 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
         UBPlatformUtils::bringPreviousProcessToFront();
     }
 
-    UBDrawingController::drawingController()->setInDestopMode(true);
-    UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+    UBToolController::toolController()->setInDesktopMode(true);
+    UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 }
 
 

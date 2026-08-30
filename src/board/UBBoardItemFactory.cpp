@@ -19,7 +19,7 @@
 #include "UBBoardItemFactory.h"
 #include "UBBoardController.h"
 #include "UBBoardView.h"
-#include "UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include <QApplication>
 #include <QClipboard>

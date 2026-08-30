@@ -28,7 +28,7 @@
 #include "core/UB.h"
 #include "gui/UBResources.h"
 #include "domain/UBGraphicsScene.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 

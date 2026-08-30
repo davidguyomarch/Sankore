@@ -31,7 +31,7 @@
 #include "core/UBApplication.h"
 #include "gui/UBResources.h"
 #include "board/UBBoardController.h" // TODO UB 4.x clean that dependency
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 
 const QRect UBGraphicsRuler::sDefaultRect = QRect(0, 0, 800, 96);
@@ -279,7 +279,7 @@ QRectF UBGraphicsRuler::rotateButtonRect() const
 
 void UBGraphicsRuler::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
     if (currentTool == UBStylusTool::Selector || currentTool == UBStylusTool::Play)
     {
@@ -297,7 +297,7 @@ void UBGraphicsRuler::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
         event->accept();
     }
-    else if (UBDrawingController::drawingController()->isDrawingTool())
+    else if (UBToolController::toolController()->isDrawingTool())
     {
         event->accept();
     }
@@ -387,7 +387,7 @@ void UBGraphicsRuler::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsRuler::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
     if (currentTool == UBStylusTool::Selector ||
         currentTool == UBStylusTool::Play)
@@ -416,10 +416,10 @@ void UBGraphicsRuler::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
         event->accept();
         update();
     }
-    else if (UBDrawingController::drawingController()->isDrawingTool())
+    else if (UBToolController::toolController()->isDrawingTool())
     {
         setCursor(drawRulerLineCursor());
-        UBDrawingController::drawingController()->mActiveRuler = this;
+        UBToolController::toolController()->mActiveRuler = this;
         event->accept();
     }
 }
@@ -431,7 +431,7 @@ void UBGraphicsRuler::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     mCloseSvgItem->setVisible(mShowButtons);
     mResizeSvgItem->setVisible(mShowButtons);
     mRotateSvgItem->setVisible(mShowButtons);
-    UBDrawingController::drawingController()->mActiveRuler = nullptr;
+    UBToolController::toolController()->mActiveRuler = nullptr;
     event->accept();
     update();
 }
@@ -494,7 +494,7 @@ void UBGraphicsRuler::DrawLine(const QPointF& scenePos, qreal width)
     itemPos = mapToScene(itemPos);
 
     // We have to use "pointed" line for marker tool
-    scene()->drawLineTo(itemPos, width, UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Marker);
+    scene()->drawLineTo(itemPos, width, UBToolController::toolController()->stylusTool() != UBStylusTool::Marker);
 }
 
 void UBGraphicsRuler::EndLine()
