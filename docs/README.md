@@ -1,407 +1,378 @@
-# Open-Sankoré — Documentation technique
+# Open-Sankoré Community Edition — Technical Documentation
 
-## Table des matières
+## Table of contents
 
-1. [Présentation du projet](#présentation-du-projet)
-2. [Stack technique](#stack-technique)
-3. [Architecture du projet](#architecture-du-projet)
-4. [Structure des répertoires](#structure-des-répertoires)
-5. [Modules source (src/)](#modules-source)
-6. [Système de build](#système-de-build)
-7. [Système de plugins](#système-de-plugins)
-8. [Ressources](#ressources)
-9. [Internationalisation](#internationalisation)
-10. [Support multi-plateforme](#support-multi-plateforme)
-11. [Compilation](#compilation)
-12. [Licence](#licence)
-
----
-
-## Présentation du projet
-
-**Open-Sankoré** est un logiciel libre de tableau numérique interactif (TNI) destiné à l'enseignement. Il permet aux enseignants de créer et d'animer des présentations interactives sur tableau blanc interactif ou écran.
-
-| Champ | Valeur |
-|-------|--------|
-| Version | 2.5.1 |
-| Licence | GNU GPL v3 (avec exception de liaison OpenSSL) |
-| Copyright | 2010-2013 GIP ENA (Groupement d'Intérêt Public pour l'Éducation Numérique en Afrique) |
-| Langage | C++ |
-| Framework | Qt 4.8 |
-
-### Fonctionnalités principales
-
-- Annotation et dessin sur tableau blanc interactif
-- Outils géométriques (règle, compas, rapporteur, équerre)
-- Import/export de documents (PDF, CFF, SVG, images, vidéos)
-- Navigateur web intégré
-- Bibliothèque de ressources (animations, widgets, images, sons, vidéos)
-- Enregistrement de séances (podcast)
-- Mode annotation bureau (desktop)
-- Clavier virtuel
-- Gestion de documents multi-pages
-- Undo/Redo complet
+1. [Project overview](#project-overview)
+2. [Tech stack](#tech-stack)
+3. [Architecture](#architecture)
+4. [Source directory structure](#source-directory-structure)
+5. [QML V2 interface](#qml-v2-interface)
+6. [Build system](#build-system)
+7. [Platform support](#platform-support)
+8. [Building from source](#building-from-source)
+9. [Testing](#testing)
+10. [Resources](#resources)
+11. [Third-party dependencies](#third-party-dependencies)
+12. [License](#license)
 
 ---
 
-## Stack technique
+## Project overview
 
-| Composant | Technologie |
-|-----------|-------------|
-| Langage | C++ |
-| Framework GUI | Qt 4.8 (QtGui, QtWebKit, QtSvg, QtNetwork, Phonon, QtXml, QtScript, QtXmlPatterns) |
-| Build system | qmake (.pro / .pri) |
-| Multimédia | Phonon (audio/vidéo) |
-| PDF | XPDF (rendu), pdf-merger (manipulation) |
-| Compression | QuaZip (gestion ZIP) |
-| Cryptographie | OpenSSL |
-| Instance unique | QtSingleApplication |
-| Installeur Windows | Inno Setup |
-| Installeur macOS | DMG (dmgutil) |
-| Installeur Linux | .deb (Debian/Ubuntu) |
+**Open-Sankoré Community Edition** is a free, open-source interactive whiteboard
+application for education. It is an actively maintained continuation of the
+original Open-Sankoré project (GIP ENA, 2010–2013), modernized for current
+operating systems.
+
+| Field | Value |
+|-------|-------|
+| Version | 4.2.0 |
+| License | GPL-3.0 (with OpenSSL linking exception on original files) |
+| Original copyright | © 2010–2013 GIP ENA |
+| Community Edition copyright | © 2026 David Guyomarch |
+| Language | C++17 |
+| Framework | Qt 6.8 |
+| Platforms | Windows x64, Linux x64, Linux ARM64 |
+
+This project is not affiliated with, endorsed by, or maintained by GIP ENA or
+the original Open-Sankoré project.
+
+### Key features
+
+- Freehand drawing (pen, marker, eraser) with configurable colors and sizes
+- Geometric instruments (ruler, compass, protractor, triangle, aristo)
+- Shape creation (rectangles, ellipses, lines, polygons)
+- Document management (`.ubz` format)
+- PDF import and export
+- Desktop annotation mode
+- Multi-page whiteboard with thumbnail sidebar
+- Handwriting recognition (Zinnia on Linux, Windows Ink on Windows)
+- Laser pointer for presentations
+- Modern QML V2 interface with dark/light theme
+- Bundled cursive school fonts (Marelle, Andika, Écolier)
 
 ---
 
-## Architecture du projet
+## Tech stack
 
-L'application suit un pattern **MVC** (Modèle-Vue-Contrôleur) avec une architecture modulaire :
+| Component | Technology |
+|-----------|-----------|
+| Language | C++17 |
+| Framework | Qt 6.8.2 (Windows), Qt 6.8.3 (Linux) |
+| UI | QML V2 (StylusPalette, TopBar, PageNavigator, DrawingPropsBar, ShapesPalette) + legacy Qt Widgets |
+| Build system | qmake (`.pro` / `.pri` files) |
+| PDF | pdf-merger (built-in, uses zlib for FlateDecode) |
+| Compression | QuaZip 1.4 (`.ubz` document format) |
+| Cryptography | OpenSSL 3.x (Apache-2.0) |
+| Single instance | QLockFile-based (`qtsingleapplication`) |
+| Handwriting (Linux) | Zinnia (BSD-3-Clause) |
+| Handwriting (Windows) | Windows Ink API |
+| Icons | Phosphor Icons (MIT) |
+| Installer (Windows) | Inno Setup |
+| Packaging (Linux) | `.deb` + `.rpm` |
+| CI/CD | GitHub Actions |
+| Dev environment | Docker (Ubuntu 25.04, Qt 6.8.3) |
+
+### What's stubbed / disabled
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Web widgets | ⚠️ Stubbed | QtWebEngine not linked; "Web view disabled" |
+| Embedded browser | ⚠️ Stubbed | Delegates to system browser |
+| Podcast recording | ⚠️ Disabled | Needs Qt Multimedia rewrite |
+
+---
+
+## Architecture
+
+The application follows an MVC pattern with a modular architecture:
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   UBApplication                      │
-│              (QtSingleApplication)                   │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────┐  │
-│  │ UBBoard      │  │ UBDocument   │  │ UBWeb    │  │
-│  │ Controller   │  │ Controller   │  │ Controller│  │
-│  └──────┬───────┘  └──────┬───────┘  └────┬─────┘  │
-│         │                  │               │        │
-│  ┌──────▼───────┐  ┌──────▼───────┐  ┌────▼─────┐  │
-│  │ UBGraphics   │  │ UBDocument   │  │ Web      │  │
-│  │ Scene/View   │  │ Proxy        │  │ View     │  │
-│  └──────────────┘  └──────────────┘  └──────────┘  │
-│                                                     │
-├─────────────────────────────────────────────────────┤
-│  Adaptors (Import/Export) │ Frameworks │ Network    │
-├─────────────────────────────────────────────────────┤
-│  Plugins (CFF Adaptor)    │ PDF Merger │ Tools      │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    UBApplication                         │
+│               (QLockFile single-instance)                │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
+│  │ UBBoard     │  │ UBDocument   │  │ UBApplication │  │
+│  │ Controller  │  │ Controller   │  │ Controller    │  │
+│  └──────┬──────┘  └──────┬───────┘  └───────┬───────┘  │
+│         │                │                   │          │
+│  ┌──────▼──────┐  ┌──────▼───────┐  ┌───────▼───────┐  │
+│  │ UBGraphics  │  │ UBDocument   │  │ QML V2 UI     │  │
+│  │ Scene/View  │  │ Proxy        │  │ Controllers   │  │
+│  └─────────────┘  └──────────────┘  └───────────────┘  │
+│                                                         │
+├─────────────────────────────────────────────────────────┤
+│  QML V2 Controllers: UBToolController, UBPageController, │
+│  UBAppController, UBThemeManager                         │
+├─────────────────────────────────────────────────────────┤
+│  Adaptors (PDF, SVG, CFF) │ Frameworks │ Recognition    │
+├─────────────────────────────────────────────────────────┤
+│  Plugins (CFF Adaptor)    │ PDF Merger │ Tools          │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### Composants clés
+### Key components
 
-- **UBApplication** — Singleton principal, hérite de `QtSingleApplication` (une seule instance autorisée)
-- **UBBoardController** — Gère la logique du tableau (dessin, outils, pages)
-- **UBDocumentController** — Gère les documents (création, ouverture, navigation)
-- **UBWebController** — Gère le navigateur web intégré
-- **UBGraphicsScene** — Scène graphique Qt contenant tous les éléments du tableau
-- **UBApplicationController** — Gère les transitions entre les modes (board, document, web)
-- **UBSettings** — Configuration et préférences de l'application
-- **UBPersistenceManager** — Persistance des documents
+- **UBApplication** — Main singleton, QLockFile-based single instance
+- **UBBoardController** — Whiteboard logic (drawing, tools, pages)
+- **UBDocumentController** — Document management (open, save, organize)
+- **UBToolController** — Active tool, colors, sizes, shapes (QML V2)
+- **UBPageController** — Page navigation, add/remove (QML V2)
+- **UBAppController** — App mode, background, undo/redo, quit (QML V2)
+- **UBThemeManager** — Dark/light theme, QML color palette
+- **UBGraphicsScene** — Qt graphics scene containing all board items
+- **UBSettings** — Application settings and preferences
+- **UBPersistenceManager** — Document persistence
 
 ---
 
-## Structure des répertoires
+## Source directory structure
 
 ```
-Open-Sankore/
-├── src/                    # Code source principal
-├── plugins/                # Plugins (CFF Adaptor)
-├── resources/              # Ressources de l'application
-│   ├── forms/              # Fichiers UI Qt Designer
-│   ├── i18n/               # Traductions (40+ langues)
-│   ├── images/             # Icônes et images (SVG, PNG)
-│   ├── fonts/              # Polices PostScript
-│   ├── library/            # Bibliothèque de contenus
-│   ├── etc/                # Fichiers de configuration
-│   ├── macx/               # Ressources macOS
-│   ├── linux/              # Ressources Linux
-│   └── sankore.qrc         # Fichier de ressources Qt
-├── OpenSankore.pro         # Fichier projet principal
-├── Dockerfile.qt6          # Docker de développement (Ubuntu 24.04, Qt 6)
-├── LICENSE.md              # Licence GPLv3 (texte complet inclus)
-├── AUTHORS.md              # Auteurs et contributeurs
-└── docs/                   # Documentation (ce répertoire)
+src/
+  adaptors/           # Import/export (PDF, SVG, CFF, documents)
+  board/              # Whiteboard controller, view, palette manager
+  controllers/        # QML V2 controllers (Tool, Page, App)
+  core/               # Application lifecycle, settings, main.cpp
+  document/           # Document model, document controller
+  domain/             # Graphics scene, items, delegates, shapes
+  frameworks/         # Stubs (WebEngine), single-instance, utilities
+  gui/                # Legacy UI windows, widgets, dialogs
+  network/            # HTTP and network features
+  pdf/                # PDF rendering (XPDFRenderer stubbed)
+  pdf-merger/         # Built-in PDF merge library (uses zlib)
+  qml/                # QML V2 interface files + UBThemeManager
+  recognition/        # Handwriting recognition (Zinnia / Windows Ink)
+  tools/              # Geometric instruments (ruler, compass, etc.)
+  desktop/            # Desktop annotation mode
+  web/                # OEmbed parser (web controller stubbed)
+  transition/         # Uniboard → Sankoré migration
+plugins/              # CFF adaptor plugin
+tests/                # QTest unit tests (17+ suites)
+resources/            # UI forms, icons (Phosphor), fonts, translations
+.github/workflows/    # CI pipelines
+scripts/              # Build, packaging, and deploy scripts
 ```
+
+### Key source files
+
+| File | Description |
+|------|-------------|
+| `src/core/main.cpp` | Entry point, startup logging, crash handler (Windows) |
+| `src/core/UBApplication.h/cpp` | Main application class |
+| `src/core/UBSettings.h/cpp` | Settings management |
+| `src/board/UBBoardController.h/cpp` | Whiteboard logic |
+| `src/board/UBBoardView.h/cpp` | Board rendering |
+| `src/domain/UBGraphicsScene.h/cpp` | Main graphics scene |
+| `src/controllers/UBToolController.h/cpp` | QML V2 tool controller |
+| `src/controllers/UBPageController.h/cpp` | QML V2 page controller |
+| `src/controllers/UBAppController.h/cpp` | QML V2 app controller |
+| `src/qml/UBThemeManager.h/cpp` | Theme manager (dark/light) |
 
 ---
 
-## Modules source
+## QML V2 interface
 
-Le répertoire `src/` est organisé en modules indépendants, chacun avec son fichier `.pri` :
+The v4.1.0+ UI is built with QML, replacing most of the legacy Qt Widgets palettes.
 
-| Module | Rôle |
-|--------|------|
-| `core/` | Initialisation, application, settings, point d'entrée (`main.cpp`) |
-| `board/` | Contrôleur du tableau, vue, dessin, gestion des pages |
-| `gui/` | Interface utilisateur (fenêtre principale, palettes, dialogues) |
-| `domain/` | Éléments graphiques (items, scènes, strokes, delegates) |
-| `document/` | Gestion des documents (proxy, container, contrôleur) |
-| `adaptors/` | Import/export (PDF, CFF, SVG, web, métadonnées) |
-| `frameworks/` | Utilitaires (plateforme, fichiers, crypto, géométrie) |
-| `web/` | Navigateur web intégré |
-| `network/` | Opérations réseau (téléchargements, HTTP) |
-| `pdf/` | Rendu PDF (basé sur XPDF) |
-| `pdf-merger/` | Manipulation et fusion de PDF |
-| `podcast/` | Enregistrement vidéo et encodage de séances |
-| `tools/` | Outils géométriques (règle, compas, rapporteur, équerre) |
-| `desktop/` | Mode annotation bureau |
-| `api/` | API pour widgets et bibliothèque |
-| `transition/` | Migration Uniboard → Sankoré |
-| `interfaces/` | Définitions d'interfaces |
-| `customWidgets/` | Widgets Qt personnalisés |
-| `globals/` | Définitions globales |
+### Controllers
 
-### Fichiers source clés
+| Controller | Role | QML property |
+|-----------|------|-------------|
+| `UBToolController` | Active tool, colors, sizes, shapes | `toolController` |
+| `UBPageController` | Page navigation, add/remove | `pageController` |
+| `UBAppController` | App mode, background, undo/redo, quit, preferences | `appController` |
+| `UBThemeManager` | Dark/light theme, QML color palette | `themeManager` |
 
-| Fichier | Description |
-|---------|-------------|
-| `src/core/main.cpp` | Point d'entrée, gestion des messages, logging |
-| `src/core/UBApplication.h/cpp` | Classe application principale |
-| `src/core/UB.h` | Enums globaux (outils, types MIME, couches) |
-| `src/core/UBSettings.h/cpp` | Gestion des paramètres |
-| `src/board/UBBoardController.h/cpp` | Logique du tableau |
-| `src/board/UBBoardView.h/cpp` | Rendu du tableau |
-| `src/domain/UBGraphicsScene.h/cpp` | Scène graphique principale |
-| `src/gui/UBMainWindow.h/cpp` | Fenêtre principale |
+### QML files (`src/qml/`)
+
+| File | Widget | Position |
+|------|--------|----------|
+| `StylusPaletteV2.qml` | Tool palette | Bottom center |
+| `TopBar.qml` | Top bar (modes, undo, pages, background, prefs, quit) | Top |
+| `PageNavigator.qml` | Page thumbnail sidebar | Left |
+| `DrawingPropsBar.qml` | Color/size context bar | Above StylusPalette |
+| `ShapesPaletteV2.qml` | Shapes palette + properties | Left, above bottom bar |
+| `DocumentsTopBar.qml` | Documents mode top bar | Top (documents mode) |
+
+### Icons
+
+The QML V2 UI uses **Phosphor Icons** (regular weight, MIT License).
+
+- SVG files: `resources/icons/phosphor/*.svg`
+- QRC prefix: `/icons/phosphor/`
+- Rendering: `Image` + `ColorOverlay` for theme support
 
 ---
 
-## Système de build
+## Build system
 
-### Fichier projet principal : `OpenSankore.pro`
+### Project file: `OpenSankore.pro`
 
-Le projet utilise **qmake** avec un système modulaire de fichiers `.pri` :
+The project uses **qmake** with modular `.pri` files:
 
 ```qmake
 TARGET = "Open-Sankore"
 TEMPLATE = app
-QT += webkit svg network phonon xml script xmlpatterns
+CONFIG += c++20
 
-# Modules inclus
-include(src/core/core.pri)
-include(src/board/board.pri)
-include(src/gui/gui.pri)
-# ... (18 modules au total)
+QT += svg svgwidgets network multimedia multimediawidgets
+QT += xml qml quick quickwidgets widgets printsupport core5compat
 
-# Plugins
-include(plugins/plugins.pri)
-
-# Dépendances tierces
-include($THIRD_PARTY_PATH/quazip/quazip.pri)
-include($THIRD_PARTY_PATH/trolltech/singleapplication/qtsingleapplication.pri)
+# WebEngine is optional (disabled by default)
+# qmake OpenSankore.pro CONFIG+=no_webengine
 ```
 
-### Versionnement
+### Version
 
 ```
-VERSION_MAJ = 2
-VERSION_MIN = 5
+VERSION_MAJ = 4
+VERSION_MIN = 2
 VERSION_TYPE = r    # a=alpha, b=beta, r=release
-VERSION_PATCH = 1
+VERSION_PATCH = 0
 ```
 
-### Répertoires de build
-
-La sortie est organisée par plateforme et configuration :
+### Build output
 
 ```
 build/
-├── macx/
-│   ├── debug/
-│   └── release/product/    # Application finale
-├── win32/
-│   ├── debug/
-│   └── release/product/
-└── linux/
-    ├── debug/
-    └── release/product/
-```
-
-### Dépendance externe
-
-Le projet dépend d'un répertoire tiers externe :
-
-```
-THIRD_PARTY_PATH = ../Sankore-ThirdParty
-```
-
-Ce répertoire doit contenir :
-- QuaZip (gestion ZIP)
-- QtSingleApplication
-- Bibliothèques spécifiques à la plateforme (`libs.pri`)
-
----
-
-## Système de plugins
-
-### Architecture
-
-Le système de plugins est intégré au build via `plugins/plugins.pri`. Actuellement, un seul plugin est implémenté :
-
-### CFF Adaptor (`plugins/cffadaptor/`)
-
-Gère l'import/export au format **CFF** (Common File Format / IWB format) :
-
-```
-plugins/cffadaptor/
-├── UBCFFAdaptor.pro        # Projet du plugin
-├── src/
-│   ├── UBCFFAdaptor.h/cpp  # Adaptateur principal
-│   ├── UBCFFAdaptor_global.h
-│   ├── UBCFFConstants.h    # Constantes du format
-│   └── UBGlobals.h         # Globales du plugin
-└── resources/              # Ressources du plugin
+├── win32/release/product/    # Windows executable
+└── linux/release/product/    # Linux executable
 ```
 
 ---
 
-## Ressources
+## Platform support
 
-### Formulaires UI (`resources/forms/`)
-
-Fichiers Qt Designer pour l'interface :
-
-| Fichier | Description |
-|---------|-------------|
-| `mainWindow.ui` | Fenêtre principale |
-| `preferences.ui` | Dialogue de préférences |
-| `brushProperties.ui` | Propriétés du pinceau |
-| `documents.ui` | Gestionnaire de documents |
-| `trapFlash.ui` | Capture Flash |
-| `youTubePublishingDialog.ui` | Publication YouTube |
-
-### Bibliothèque de contenus (`resources/library/`)
-
-```
-library/
-├── animations/       # Animations interactives
-├── applications/     # Applications/widgets
-├── audios/           # Fichiers audio
-├── interactivities/  # Activités interactives
-├── pictures/         # Images
-├── search/           # Moteur de recherche
-├── shape/            # Formes géométriques
-└── videos/           # Vidéos
-```
-
-### Images (`resources/images/`)
-
-Plus de 100 fichiers (SVG et PNG) pour l'interface : icônes d'outils, curseurs, palettes de couleurs, arrière-plans.
+| Platform | Architecture | CI | Compiler | Qt | Packages |
+|----------|-------------|-----|----------|-----|----------|
+| Windows | x64 | ✅ GitHub Actions | MSVC 2022 | 6.8.2 (aqtinstall) | `.exe` installer, `.zip` |
+| Linux | x64 | ✅ GitHub Actions | GCC | 6.8.2 (aqtinstall) | `.deb`, `.rpm` |
+| Linux | ARM64 | ✅ GitHub Actions | GCC | 6.8.3 (system) | `.deb`, `.rpm` |
+| macOS | ARM64/x64 | — | — | — | Dev only (Docker builds) |
 
 ---
 
-## Internationalisation
+## Building from source
 
-L'application supporte **40+ langues** via le système Qt Linguist :
-
-| Code | Langue | Code | Langue |
-|------|--------|------|--------|
-| ar | Arabe | it | Italien |
-| bg | Bulgare | ja | Japonais |
-| ca | Catalan | ko | Coréen |
-| cs | Tchèque | nb | Norvégien |
-| da | Danois | nl | Néerlandais |
-| de | Allemand | pl | Polonais |
-| el | Grec | pt | Portugais |
-| en | Anglais | ro | Roumain |
-| es | Espagnol | ru | Russe |
-| fi | Finnois | sk | Slovaque |
-| fr | Français | sv | Suédois |
-| fr_CH | Français (Suisse) | tr | Turc |
-| hi | Hindi | zh | Chinois |
-| hu | Hongrois | zh_CN | Chinois simplifié |
-| iw | Hébreu | zh_TW | Chinois traditionnel |
-
-Les fichiers de traduction (`.ts`) sont dans `resources/i18n/` et compilés en `.qm` lors du build.
-
----
-
-## Support multi-plateforme
-
-### Windows
-
-- **Compilateur** : Visual Studio 2008 (VC9), 32-bit et 64-bit
-- **Qt** : 4.8 (répertoire `../Qt-4.8`)
-- **Installeur** : Inno Setup (`Sankore 3.1.iss`)
-- **Spécificités** : QAxContainer (ActiveX), compilation parallèle (`/MP`)
-- **Note** : Le script `release.win7.vc9.bat` a été supprimé — le build Windows passe désormais par GitHub Actions CI
-
-### macOS
-
-- **Architecture** : Intel 32-bit (x86) — limitation QuickTime
-- **SDK** : MacOSX 10.6
-- **Déploiement** : OS X 10.5+
-- **Installeur** : DMG via `dmgutil`
-- **Spécificités** : Framework Foundation, OpenSSL, Breakpad (crash reporting)
-- **Note** : Le script `release.macx.sh` a été supprimé — le build macOS n'est plus supporté actuellement
-
-### Linux
-
-- **Distributions** : Debian/Ubuntu
-- **Architectures** : i386, amd64
-- **Package** : .deb
-- **Script** : `buildDebianPackage.sh`
-- **Dépendances** : Qt 4.8, bibliothèques système
-- **Note** : Installer `ttf-mscorefonts-installer` pour les polices web
-
----
-
-## Compilation
-
-### Prérequis
-
-1. **Qt 4.8** installé (avec les modules webkit, svg, phonon, xml, script, xmlpatterns)
-2. **Sankore-ThirdParty** cloné au même niveau que le projet :
-   ```
-   parent/
-   ├── Open-Sankore/          # Ce dépôt
-   └── Sankore-ThirdParty/    # Dépendances tierces
-   ```
-3. Compilateur C++ adapté à la plateforme
-
-### Build rapide
+### Windows (MSVC 2022, CI)
 
 ```bash
-# Générer le Makefile
-qmake OpenSankore.pro
-
-# Compiler
-make -j$(nproc)
+qmake OpenSankore.pro CONFIG+=no_webengine
+nmake release
+windeployqt --release build\win32\release\product\Open-Sankore.exe
 ```
 
-### Build release par plateforme
+### Linux (Docker — recommended)
 
-**Linux (paquet .deb, legacy) :**
 ```bash
-./buildDebianPackage.sh
+# Build the dev image (once)
+docker build -f Dockerfile.dev -t sankore-dev .
+
+# Full validation: build + tests + coverage (~1-3 min)
+./scripts/docker-build.sh
+
+# Build only (~30s incremental)
+./scripts/docker-build.sh --build-only
+
+# Tests + coverage only
+./scripts/docker-build.sh --test-only
+
+# x64 via QEMU (~10-15 min)
+./scripts/docker-build.sh --x64
 ```
 
-> **Note :** Les scripts `release.macx.sh` et `release.win7.vc9.bat` ont été supprimés. Le build passe désormais par GitHub Actions CI (voir `.github/workflows/`).
+### Dependencies
 
-### Sortie
-
-L'exécutable final se trouve dans :
-```
-build/<plateforme>/release/product/
-```
+| Dependency | Version | Source | Linking |
+|------------|---------|--------|---------|
+| Qt 6 | 6.8.2 / 6.8.3 | aqtinstall (CI) / system (Linux) | Dynamic |
+| OpenSSL | 3.x | vcpkg (Win) / system (Linux) | Dynamic |
+| QuaZip | 1.4 | Built from source | Static (Win), Dynamic (Linux) |
+| zlib | 1.3.1 | Built from source (Win) / system (Linux) | Static (Win) |
+| Zinnia | system | `libzinnia-dev` (Linux only) | Dynamic |
 
 ---
 
-## Licence
+## Testing
 
-Open-Sankoré est distribué sous **GNU General Public License v3** avec une exception de liaison spécifique pour la bibliothèque OpenSSL.
+Unit tests use the **QTest** framework and run inside Docker:
 
-```
-Copyright (C) 2010-2013 Groupement d'Intérêt Public pour
-l'Éducation Numérique en Afrique (GIP ENA)
-
-Open-Sankoré is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, version 3 of the License,
-with a specific linking exception for the OpenSSL project's
-"OpenSSL" library.
+```bash
+./scripts/docker-build.sh --test-only
 ```
 
-Le texte complet de la licence est disponible dans `LICENSE.md`.
+- **17+ test suites** covering: document model, file utilities, geometry, SVG transforms,
+  string utilities, version parsing, settings, metadata, base32, OEmbed, crypto,
+  smooth stroke rendering, graphics scene, handwriting recognition, visual regression
+- **83%+ line coverage** on tested modules (measured with lcov)
+- **Smoke test**: headless app startup via `--quit-after=5` with `startup.log` analysis
+
+---
+
+## Resources
+
+### Fonts (`resources/customizations/fonts/`)
+
+All bundled fonts are free/open-source:
+
+| Font | License | Purpose |
+|------|---------|---------|
+| Marelle (8 variants) | OFL 1.1 | Primary cursive school font |
+| Andika Basic | OFL 1.1 | Sans-serif reading font |
+| Écolier Court | OFL | Cursive school font |
+| Écolier Lignes Court | OFL | Cursive school font with lines |
+
+PostScript fonts (URW Base35, AGPL-3.0 + font exception) are in `resources/fonts/`.
+
+Font loading is dynamic — `UBResources::buildFontList()` loads all fonts from the
+`customizations/fonts/` directory via `QFontDatabase::addApplicationFont()`.
+
+### Translations (`resources/i18n/`)
+
+40+ languages supported via Qt Linguist (`.ts` files compiled to `.qm` at build time).
+
+### Widgets (`resources/library/applications/`)
+
+30 `.wgt` mini-applications (HTML/JS/CSS) inherited from the original project.
+
+---
+
+## Third-party dependencies
+
+See [THIRD_PARTY.md](../THIRD_PARTY.md) for the complete inventory with licenses,
+bundling status, and commercial redistribution terms.
+
+| Component | License | Bundled? |
+|-----------|---------|----------|
+| Qt 6 | LGPL-3.0 | No (system/CI) |
+| OpenSSL | Apache-2.0 | No (vcpkg/system) |
+| QuaZip | LGPL-2.1 | No (built from source) |
+| zlib | zlib | No (built from source / system) |
+| pdf-merger | GPL-3.0 | Yes (`src/pdf-merger/`) |
+| Zinnia | BSD-3-Clause | No (system, Linux only) |
+| Phosphor Icons | MIT | Yes (`resources/icons/phosphor/`) |
+| Font Awesome | OFL / MIT | Yes (2 legacy widgets only) |
+
+---
+
+## License
+
+Open-Sankoré Community Edition is distributed under the **GNU General Public
+License version 3** (GPL-3.0).
+
+**Original source files** (GIP ENA, 2010–2013) include an OpenSSL linking exception
+as an additional permission under GPL section 7. The verbatim text of this exception
+is preserved in [LICENSE.md](../LICENSE.md).
+
+**New source files** (David Guyomarch, 2026) are licensed under GPL-3.0-only,
+without the OpenSSL exception.
+
+Since OpenSSL 3.0 (2021), OpenSSL uses the Apache License 2.0, which is GPL-3.0
+compatible. The exception is preserved for legal continuity with the inherited
+source headers.
+
+See [LICENSE.md](../LICENSE.md), [NOTICE.md](../NOTICE.md),
+[CREDITS.md](../CREDITS.md), and [THIRD_PARTY.md](../THIRD_PARTY.md) for full details.
