@@ -53,15 +53,26 @@ UBGraphicsMediaItemDelegate::UBGraphicsMediaItemDelegate(UBGraphicsMediaItem* pD
     QPalette palette;
     palette.setBrush ( QPalette::Light, Qt::darkGray );
 
-    connect(mMedia, SIGNAL(stateChanged (QMediaPlayer::PlaybackState, QMediaPlayer::PlaybackState)), this, SLOT(mediaStateChanged (QMediaPlayer::PlaybackState, QMediaPlayer::PlaybackState)));
-    connect(mMedia, SIGNAL(finished()), this, SLOT(updatePlayPauseState()));
-    connect(mMedia, SIGNAL(tick(qint64)), this, SLOT(updateTicker(qint64)));
-    connect(mMedia, SIGNAL(totalTimeChanged(qint64)), this, SLOT(totalTimeChanged(qint64)));
+    connect(mMedia, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState newState) {
+        // The old slot signature took (newState, oldState) but QMediaPlayer::playbackStateChanged
+        // only provides newState. We pass StoppedState as a placeholder for oldState since
+        // mediaStateChanged only uses oldState to detect StoppedState→* transitions for totalTime init.
+        static QMediaPlayer::PlaybackState previousState = QMediaPlayer::StoppedState;
+        QMediaPlayer::PlaybackState oldState = previousState;
+        previousState = newState;
+        mediaStateChanged(newState, oldState);
+    });
+    connect(mMedia, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia)
+            updatePlayPauseState();
+    });
+    connect(mMedia, &QMediaPlayer::positionChanged, this, &UBGraphicsMediaItemDelegate::updateTicker);
+    connect(mMedia, &QMediaPlayer::durationChanged, this, &UBGraphicsMediaItemDelegate::totalTimeChanged);
 
     if (delegated()->hasLinkedImage())
     {
         mToolBarShowTimer = new QTimer();
-        connect(mToolBarShowTimer, SIGNAL(timeout()), this, SLOT(hideToolBar()));
+        connect(mToolBarShowTimer, &QTimer::timeout, this, &UBGraphicsMediaItemDelegate::hideToolBar);
         mToolBarShowTimer->setInterval(m_iToolBarShowingInterval);
     }
     if (delegated()->isMuted())
@@ -93,10 +104,10 @@ void UBGraphicsMediaItemDelegate::hideToolBar()
 void UBGraphicsMediaItemDelegate::buildButtons()
 {
     mPlayPauseButton = new DelegateButton(":/images/play.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    connect(mPlayPauseButton, SIGNAL(clicked(bool)), this, SLOT(togglePlayPause()));
+    connect(mPlayPauseButton, &DelegateButton::clicked, this, &UBGraphicsMediaItemDelegate::togglePlayPause);
 
     mStopButton = new DelegateButton(":/images/stop.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
-    connect(mStopButton, SIGNAL(clicked(bool)), mMedia, SLOT(stop()));
+    connect(mStopButton, &DelegateButton::clicked, mMedia, &QMediaPlayer::stop);
 
     mMediaControl = new DelegateMediaControl(delegated(), mToolBarItem);
     mMediaControl->setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -107,8 +118,8 @@ void UBGraphicsMediaItemDelegate::buildButtons()
     else
         mMuteButton = new DelegateButton(":/images/soundOn.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
 
-    connect(mMuteButton, SIGNAL(clicked(bool)), delegated(), SLOT(toggleMute())); 
-    connect(mMuteButton, SIGNAL(clicked(bool)), this, SLOT(toggleMute())); // for changing button image
+    connect(mMuteButton, &DelegateButton::clicked, delegated(), &UBGraphicsMediaItem::toggleMute); 
+    connect(mMuteButton, &DelegateButton::clicked, this, &UBGraphicsMediaItemDelegate::toggleMute); // for changing button image
 
     mToolBarButtons << mPlayPauseButton << mStopButton << mMuteButton;
 
@@ -118,10 +129,10 @@ void UBGraphicsMediaItemDelegate::buildButtons()
 
     if (mToolBarShowTimer)
     {
-        connect(mPlayPauseButton, SIGNAL(clicked(bool)), mToolBarShowTimer, SLOT(start()));
-        connect(mStopButton, SIGNAL(clicked(bool)), mToolBarShowTimer, SLOT(start()));
-        connect(mMediaControl, SIGNAL(used()), mToolBarShowTimer, SLOT(start()));
-        connect(mMuteButton, SIGNAL(clicked(bool)), mToolBarShowTimer, SLOT(start()));
+        connect(mPlayPauseButton, &DelegateButton::clicked, mToolBarShowTimer, qOverload<>(&QTimer::start));
+        connect(mStopButton, &DelegateButton::clicked, mToolBarShowTimer, qOverload<>(&QTimer::start));
+        connect(mMediaControl, &DelegateMediaControl::used, mToolBarShowTimer, qOverload<>(&QTimer::start));
+        connect(mMuteButton, &DelegateButton::clicked, mToolBarShowTimer, qOverload<>(&QTimer::start));
     }
 
     UBGraphicsMediaItem *audioItem = dynamic_cast<UBGraphicsMediaItem*>(mDelegated);

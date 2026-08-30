@@ -113,15 +113,15 @@ void UBToolWidget::initialize()
     setFixedSize(mToolWidget->boundingRect().width() + mContentMargin * 2, mToolWidget->boundingRect().height() + mContentMargin * 2);
 
 #ifdef SANKORE_WEBENGINE
-    connect(mWebView->page(), SIGNAL(loadFinished(bool)), this, SLOT(javaScriptWindowObjectCleared()));
+    connect(mWebView->page(), &QWebEnginePage::loadFinished, this, &UBToolWidget::javaScriptWindowObjectCleared);
     mWebView->load(mToolWidget->mainHtml());
     mWebView->setAcceptDrops(false);
     mWebView->settings()->setAttribute(QWebEngineSettings::PluginsEnabled, true);
     mWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
 #endif
 
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(javaScriptWindowObjectCleared()));
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(reactOnBoardChanged()));
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBToolWidget::javaScriptWindowObjectCleared);
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBToolWidget::reactOnBoardChanged);
 }
 
 

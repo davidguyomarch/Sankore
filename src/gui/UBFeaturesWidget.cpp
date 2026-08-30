@@ -87,38 +87,38 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
     layout->addWidget(mActionBar);
 
     //issue 1474 - NNE - 20131119
-    connect(centralWidget->listView(), SIGNAL(restoreFeature(QVector<UBFeature>)), controller, SLOT(restoreFeature(QVector<UBFeature>)));
+    connect(centralWidget->listView(), &UBFeaturesListView::restoreFeature, controller, &UBFeaturesController::restoreFeature);
 
-    connect(centralWidget->listView(), SIGNAL(clicked(QModelIndex)), this, SLOT(currentSelected(QModelIndex)));
-    connect(centralWidget->listView()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection))
-            , this, SLOT(processViewSelectionChanged(QItemSelection,QItemSelection)));
-    connect(this, SIGNAL(sendFileNameList(QStringList)), centralWidget, SIGNAL(sendFileNameList(QStringList)));
-    connect(this, SIGNAL(allowNewFolderButton(bool)), mActionBar, SLOT(allowNewFolderBtn(bool)));
-    connect(this, SIGNAL(allowDeleteButton(bool)), mActionBar, SLOT(allowDeleteButton(bool)));
-    connect(mActionBar, SIGNAL(searchElement(const QString &)), this, SLOT( searchStarted(const QString &)));
-    connect(mActionBar, SIGNAL(newFolderToCreate()), this, SLOT(createNewFolder()));
-    connect(mActionBar, SIGNAL(deleteElements(const UBFeaturesMimeData *)), this, SLOT(deleteElements(const UBFeaturesMimeData *)));
-    connect(mActionBar, SIGNAL(deleteSelectedElements()), this, SLOT(deleteSelectedElements()));
-    connect(mActionBar, SIGNAL(addToFavorite(const UBFeaturesMimeData *)), this, SLOT(addToFavorite(const UBFeaturesMimeData *)));
-    connect(mActionBar, SIGNAL(removeFromFavorite(const UBFeaturesMimeData *)), this, SLOT(removeFromFavorite(const UBFeaturesMimeData *)));
-    connect(mActionBar, SIGNAL(addElementsToFavorite() ), this, SLOT ( addElementsToFavorite()) );
-    connect(mActionBar, SIGNAL(removeElementsFromFavorite()), this, SLOT (removeElementsFromFavorite()));
+    connect(centralWidget->listView(), &QAbstractItemView::clicked, this, &UBFeaturesWidget::currentSelected);
+    connect(centralWidget->listView()->selectionModel(), &QItemSelectionModel::selectionChanged
+            , this, &UBFeaturesWidget::processViewSelectionChanged);
+    connect(this, &UBFeaturesWidget::sendFileNameList, centralWidget, &UBFeaturesCentralWidget::sendFileNameList);
+    connect(this, &UBFeaturesWidget::allowNewFolderButton, mActionBar, &UBFeaturesActionBar::allowNewFolderBtn);
+    connect(this, &UBFeaturesWidget::allowDeleteButton, mActionBar, &UBFeaturesActionBar::allowDeleteButton);
+    connect(mActionBar, &UBFeaturesActionBar::searchElement, this, &UBFeaturesWidget::searchStarted);
+    connect(mActionBar, &UBFeaturesActionBar::newFolderToCreate, this, &UBFeaturesWidget::createNewFolder);
+    connect(mActionBar, &UBFeaturesActionBar::deleteElements, this, &UBFeaturesWidget::deleteElements);
+    connect(mActionBar, &UBFeaturesActionBar::deleteSelectedElements, this, &UBFeaturesWidget::deleteSelectedElements);
+    connect(mActionBar, &UBFeaturesActionBar::addToFavorite, this, &UBFeaturesWidget::addToFavorite);
+    connect(mActionBar, &UBFeaturesActionBar::removeFromFavorite, this, &UBFeaturesWidget::removeFromFavorite);
+    connect(mActionBar, &UBFeaturesActionBar::addElementsToFavorite, this, &UBFeaturesWidget::addElementsToFavorite);
+    connect(mActionBar, &UBFeaturesActionBar::removeElementsFromFavorite, this, &UBFeaturesWidget::removeElementsFromFavorite);
 
-    connect(mActionBar, SIGNAL(rescanModel()), this, SLOT(rescanModel()));
-    connect(pathListView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(currentSelected(const QModelIndex &)));
-    connect(UBApplication::boardController, SIGNAL(displayMetadata(QMap<QString,QString>)), this, SLOT(onDisplayMetadata( QMap<QString,QString>)));
-    connect(UBDownloadManager::downloadManager(), SIGNAL( addDownloadedFileToLibrary( bool, QUrl, QString, QByteArray, QString))
-             , this, SLOT(onAddDownloadedFileToLibrary(bool, QUrl, QString,QByteArray, QString)));
-    connect(centralWidget, SIGNAL(lockMainWidget(bool)), this, SLOT(lockIt(bool)));
-    connect(centralWidget, SIGNAL(createNewFolderSignal(QString)), controller, SLOT(addNewFolder(QString)));
-    connect(controller, SIGNAL(scanStarted()), centralWidget, SLOT(scanStarted()));
-    connect(controller, SIGNAL(scanFinished()), centralWidget, SLOT(scanFinished()));
-    connect(controller, SIGNAL(scanStarted()), mActionBar, SLOT(lockIt()));
-    connect(controller, SIGNAL(scanFinished()), mActionBar, SLOT(unlockIt()));
-    connect(controller, SIGNAL(maxFilesCountEvaluated(int)), centralWidget, SIGNAL(maxFilesCountEvaluated(int)));
-    connect(controller, SIGNAL(featureAddedFromThread()), centralWidget, SIGNAL(increaseStatusBarValue()));
-    connect(controller, SIGNAL(scanCategory(QString)), centralWidget, SIGNAL(scanCategory(QString)));
-    connect(controller, SIGNAL(scanPath(QString)), centralWidget, SIGNAL(scanPath(QString)));
+    connect(mActionBar, &UBFeaturesActionBar::rescanModel, this, &UBFeaturesWidget::rescanModel);
+    connect(pathListView, &QAbstractItemView::clicked, this, &UBFeaturesWidget::currentSelected);
+    connect(UBApplication::boardController, &UBBoardController::displayMetadata, this, &UBFeaturesWidget::onDisplayMetadata);
+    connect(UBDownloadManager::downloadManager(), &UBDownloadManager::addDownloadedFileToLibrary
+             , this, &UBFeaturesWidget::onAddDownloadedFileToLibrary);
+    connect(centralWidget, &UBFeaturesCentralWidget::lockMainWidget, this, &UBFeaturesWidget::lockIt);
+    connect(centralWidget, &UBFeaturesCentralWidget::createNewFolderSignal, controller, qOverload<QString>(&UBFeaturesController::addNewFolder));
+    connect(controller, &UBFeaturesController::scanStarted, centralWidget, &UBFeaturesCentralWidget::scanStarted);
+    connect(controller, &UBFeaturesController::scanFinished, centralWidget, &UBFeaturesCentralWidget::scanFinished);
+    connect(controller, &UBFeaturesController::scanStarted, mActionBar, &UBFeaturesActionBar::lockIt);
+    connect(controller, &UBFeaturesController::scanFinished, mActionBar, &UBFeaturesActionBar::unlockIt);
+    connect(controller, &UBFeaturesController::maxFilesCountEvaluated, centralWidget, &UBFeaturesCentralWidget::maxFilesCountEvaluated);
+    connect(controller, &UBFeaturesController::featureAddedFromThread, centralWidget, &UBFeaturesCentralWidget::increaseStatusBarValue);
+    connect(controller, &UBFeaturesController::scanCategory, centralWidget, &UBFeaturesCentralWidget::scanCategory);
+    connect(controller, &UBFeaturesController::scanPath, centralWidget, &UBFeaturesCentralWidget::scanPath);
 }
 
 UBFeaturesWidget::~UBFeaturesWidget()
@@ -358,7 +358,7 @@ void UBFeaturesWidget::onDisplayMetadata( QMap<QString,QString> metadata )
         if (!imageGatherer)
             imageGatherer = new UBDownloadHttpFile(0, this);
 
-        connect(imageGatherer, SIGNAL(downloadFinished(int, bool, QUrl, QUrl, QString, QByteArray, QPointF, QSize, bool)), this, SLOT(onPreviewLoaded(int, bool, QUrl, QUrl, QString, QByteArray, QPointF, QSize, bool)));
+        connect(imageGatherer, &UBDownloadHttpFile::downloadFinished, this, &UBFeaturesWidget::onPreviewLoaded);
 
         // We send here the request and store its reply in order to be able to cancel it if needed
         imageGatherer->get(QUrl(widgetsThumbsUrl), QPoint(0,0), QSize(), false);
@@ -516,10 +516,10 @@ UBFeaturesListView::UBFeaturesListView( QWidget* parent, const char* name )
     timer.setInterval(1000);
     timer.setSingleShot(true);
 
-    connect(&timer, SIGNAL(timeout()), this, SLOT(onLongPressEvent()));
+    connect(&timer, &QTimer::timeout, this, &UBFeaturesListView::onLongPressEvent);
 
-    connect(restoreAction, SIGNAL(triggered()), this, SLOT(emitRestoreFeature()));
-    connect(restoreAction, SIGNAL(triggered()), this, SLOT(hideContextMenu()));
+    connect(restoreAction, &QAction::triggered, this, &UBFeaturesListView::emitRestoreFeature);
+    connect(restoreAction, &QAction::triggered, this, &UBFeaturesListView::hideContextMenu);
     //issue 1474 - NNE - 20131118 : END
 }
 
@@ -665,7 +665,7 @@ UBFeaturesNavigatorWidget::UBFeaturesNavigatorWidget(QWidget *parent, const char
     mainLayer->addWidget(mListSlider, 0);
     mainLayer->setContentsMargins(0,0,0,0);
 
-    connect(mListSlider, SIGNAL(valueChanged(int)), mListView, SLOT(thumbnailSizeChanged(int)));
+    connect(mListSlider, &QSlider::valueChanged, mListView, &UBFeaturesListView::thumbnailSizeChanged);
 }
 
 void UBFeaturesNavigatorWidget::setSliderPosition(int pValue)
@@ -712,19 +712,19 @@ UBFeaturesCentralWidget::UBFeaturesCentralWidget(QWidget *parent) : QWidget(pare
     mAdditionalDataContainer->addWidget(dlg);
     mAdditionalDataContainer->setCurrentIndex(NewFolderDialog);
 
-    connect(dlg, SIGNAL(createNewFolder(QString)), this, SLOT(createNewFolderSlot(QString)));
-    connect(dlg, SIGNAL(closeDialog()), this, SLOT(hideAdditionalData()));
-    connect(this, SIGNAL(sendFileNameList(QStringList)), dlg, SLOT(setFileNameList(QStringList)));
+    connect(dlg, &UBFeaturesNewFolderDialog::createNewFolder, this, &UBFeaturesCentralWidget::createNewFolderSlot);
+    connect(dlg, &UBFeaturesNewFolderDialog::closeDialog, this, &UBFeaturesCentralWidget::hideAdditionalData);
+    connect(this, &UBFeaturesCentralWidget::sendFileNameList, dlg, &UBFeaturesNewFolderDialog::setFileNameList);
 
     //Progress bar to show scanning progress
     UBFeaturesProgressInfo *progressBar = new UBFeaturesProgressInfo();
     mAdditionalDataContainer->addWidget(progressBar);
     mAdditionalDataContainer->setCurrentIndex(ProgressBarWidget);
 
-    connect(this, SIGNAL(maxFilesCountEvaluated(int)), progressBar, SLOT(setProgressMax(int)));
-    connect(this, SIGNAL(increaseStatusBarValue()), progressBar, SLOT(increaseProgressValue()));
-    connect(this, SIGNAL(scanCategory(QString)), progressBar, SLOT(setCommmonInfoText(QString)));
-    connect(this, SIGNAL(scanPath(QString)), progressBar, SLOT(setDetailedInfoText(QString)));
+    connect(this, &UBFeaturesCentralWidget::maxFilesCountEvaluated, progressBar, &UBFeaturesProgressInfo::setProgressMax);
+    connect(this, &UBFeaturesCentralWidget::increaseStatusBarValue, progressBar, &UBFeaturesProgressInfo::increaseProgressValue);
+    connect(this, &UBFeaturesCentralWidget::scanCategory, progressBar, &UBFeaturesProgressInfo::setCommmonInfoText);
+    connect(this, &UBFeaturesCentralWidget::scanPath, progressBar, &UBFeaturesProgressInfo::setDetailedInfoText);
 
     mLayout->addWidget(mStackedWidget, 1);
     mLayout->addWidget(mAdditionalDataContainer, 0);
@@ -838,9 +838,9 @@ UBFeaturesNewFolderDialog::UBFeaturesNewFolderDialog(QWidget *parent) : QWidget(
 
     acceptButton->setEnabled(false);
 
-    connect(acceptButton, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(mLineEdit, SIGNAL(textEdited(QString)), this, SLOT(reactOnTextChanged(QString)));
+    connect(acceptButton, &QPushButton::clicked, this, &UBFeaturesNewFolderDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, this, &UBFeaturesNewFolderDialog::reject);
+    connect(mLineEdit, &QLineEdit::textEdited, this, &UBFeaturesNewFolderDialog::reactOnTextChanged);
 
     reactOnTextChanged(QString());
 }
@@ -954,7 +954,7 @@ UBFeaturesWebView::UBFeaturesWebView(QWidget* parent, const char* name):QWidget(
     mpView = new QWebEngineView(this);
     mpWebSettings = mpView->page()->settings();
     mpLayout->addWidget(mpView);
-    connect(mpView, SIGNAL(loadFinished(bool)), this, SLOT(onLoadFinished(bool)));
+    connect(mpView, &QWebEngineView::loadFinished, this, &UBFeaturesWebView::onLoadFinished);
 #else
     mpView = nullptr;
     mpWebSettings = nullptr;
@@ -1088,13 +1088,13 @@ UBFeatureProperties::UBFeatureProperties( QWidget *parent, const char *name ) : 
     mpLayout->addWidget(mpObjInfos, 1);
     mpLayout->setContentsMargins(0,0,0,0);
 
-    connect( mpAddPageButton, SIGNAL(clicked()), this, SLOT(onAddToPage()) );
+    connect( mpAddPageButton, &UBFeatureItemButton::clicked, this, &UBFeatureProperties::onAddToPage );
     // Issue 1684 - CFA - 20131120
-    connect( mpSetAsBackgroundButton, SIGNAL( pressed() ), this, SLOT( setAsBackgroundPressed() ) );
-    connect( mpSetAsBackgroundButton, SIGNAL( released() ), this, SLOT( setAsBackgroundReleased() ) );
-    connect( mpSetAsDefaultBackgroundButton, SIGNAL( pressed() ), this, SLOT( setAsDefaultBackgroundPressed() ) );
-    connect( mpSetAsDefaultBackgroundButton, SIGNAL( released() ), this, SLOT( setAsDefaultBackgroundReleased() ) );
-    connect( mpAddToLibButton, SIGNAL( clicked() ), this, SLOT(onAddToLib() ) );
+    connect( mpSetAsBackgroundButton, &UBFeatureItemButton::pressed, this, &UBFeatureProperties::setAsBackgroundPressed );
+    connect( mpSetAsBackgroundButton, &UBFeatureItemButton::released, this, &UBFeatureProperties::setAsBackgroundReleased );
+    connect( mpSetAsDefaultBackgroundButton, &UBFeatureItemButton::pressed, this, &UBFeatureProperties::setAsDefaultBackgroundPressed );
+    connect( mpSetAsDefaultBackgroundButton, &UBFeatureItemButton::released, this, &UBFeatureProperties::setAsDefaultBackgroundReleased );
+    connect( mpAddToLibButton, &UBFeatureItemButton::clicked, this, &UBFeatureProperties::onAddToLib );
 }
 
 UBFeatureProperties::~UBFeatureProperties()
@@ -1290,7 +1290,7 @@ void UBFeatureProperties::setAsBackgroundPressed()
     mSetAsBackgroundButtonPressedTime = QTime::currentTime();
 
     mPendingSetAsBackgroundButtonPressed = true;
-    QTimer::singleShot(1000, this, SLOT(setAsBackgroundReleased()));
+    QTimer::singleShot(1000, this, &UBFeatureProperties::setAsBackgroundReleased);
 }
 
 void UBFeatureProperties::setAsBackgroundReleased()
@@ -1315,7 +1315,7 @@ void UBFeatureProperties::setAsDefaultBackgroundPressed()
     mSetAsDefaultBackgroundButtonPressedTime = QTime::currentTime();
 
     mPendingSetAsDefaultBackgroundButtonPressed = true;
-    QTimer::singleShot(1000, this, SLOT(setAsDefaultBackgroundReleased()));
+    QTimer::singleShot(1000, this, &UBFeatureProperties::setAsDefaultBackgroundReleased);
 }
 
 

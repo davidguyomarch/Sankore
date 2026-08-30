@@ -58,7 +58,6 @@ UBDesktopPenPalette::UBDesktopPenPalette(QWidget *parent)
 
     colorChoice->displayText(false);
 
-    //connect(colorChoice, SIGNAL(activated(int)), this, SLOT(UBApplication::boardController->setColorIndex(int)));
     connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, colorChoice, &UBToolbarButtonGroup::setCurrentIndex);
     connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, this, [this]() { close(); });
     connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged, colorChoice, &UBToolbarButtonGroup::colorPaletteChanged);
@@ -152,7 +151,6 @@ UBDesktopMarkerPalette::UBDesktopMarkerPalette(QWidget *parent)
     UBToolbarButtonGroup *colorChoice = new UBToolbarButtonGroup(UBApplication::mainWindow->boardToolBar, colorActions);
     colorChoice->displayText(false);
 
-    //connect(colorChoice, SIGNAL(activated(int)), this, SLOT(UBApplication::boardController->setColorIndex(int)));
     connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, colorChoice, &UBToolbarButtonGroup::setCurrentIndex);
     connect(UBDrawingController::drawingController(), &UBDrawingController::colorIndexChanged, this, [this]() { close(); });
     connect(UBDrawingController::drawingController(), &UBDrawingController::colorPaletteChanged, colorChoice, &UBToolbarButtonGroup::colorPaletteChanged);

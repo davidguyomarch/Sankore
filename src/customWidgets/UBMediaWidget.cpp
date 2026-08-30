@@ -73,9 +73,9 @@ UBMediaWidget::UBMediaWidget(eMediaType type, QWidget *parent, const char *name)
     mpSeekerLayout->addWidget(mpSlider, 1);
     mpSeekerLayout->setContentsMargins(0, 0, 0, 0);
 
-    connect(mpPlayStopButton, SIGNAL(clicked()), this, SLOT(onPlayStopClicked()));
-    connect(mpPauseButton, SIGNAL(clicked()), this, SLOT(onPauseClicked()));
-    connect(mpSlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderChanged(int)));
+    connect(mpPlayStopButton, &UBMediaButton::clicked, this, &UBMediaWidget::onPlayStopClicked);
+    connect(mpPauseButton, &UBMediaButton::clicked, this, &UBMediaWidget::onPauseClicked);
+    connect(mpSlider, &QSlider::valueChanged, this, &UBMediaWidget::onSliderChanged);
 }
 
 /**
@@ -106,9 +106,14 @@ void UBMediaWidget::setFile(const QString &filePath)
     mFilePath = filePath;
     mpMediaObject = new QMediaPlayer(this);
     // setTickInterval removed in Qt6
-    connect(mpMediaObject, SIGNAL(stateChanged(QMediaPlayer::PlaybackState,QMediaPlayer::PlaybackState)), this, SLOT(onStateChanged(QMediaPlayer::PlaybackState,QMediaPlayer::PlaybackState)));
-    connect(mpMediaObject, SIGNAL(totalTimeChanged(qint64)), this, SLOT(onTotalTimeChanged(qint64)));
-    connect(mpMediaObject, SIGNAL(tick(qint64)), this, SLOT(onTick(qint64)));
+    connect(mpMediaObject, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState newState) {
+        static QMediaPlayer::PlaybackState previousState = QMediaPlayer::StoppedState;
+        QMediaPlayer::PlaybackState oldState = previousState;
+        previousState = newState;
+        onStateChanged(newState, oldState);
+    });
+    connect(mpMediaObject, &QMediaPlayer::durationChanged, this, &UBMediaWidget::onTotalTimeChanged);
+    connect(mpMediaObject, &QMediaPlayer::positionChanged, this, &UBMediaWidget::onTick);
     mpMediaObject->setSource(QUrl::fromLocalFile(filePath));
     createMediaPlayer();
 }
