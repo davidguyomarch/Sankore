@@ -81,6 +81,12 @@ signals:
     void deleteSelectedElements();
     void rescanModel();
 
+public slots:
+    void lockIt();
+    void unlockIt();
+    void allowNewFolderBtn(bool pAllow) {mpNewFolderBtn->setEnabled(pAllow);}
+    void allowDeleteButton(bool pAllow);
+
 private slots:
 	void onSearchTextChanged(QString txt);
 	void onActionNewFolder();
@@ -88,10 +94,6 @@ private slots:
     void onActionRemoveFavorite();
     void onActionTrash();
     void onActionRescanModel();
-    void lockIt();
-    void unlockIt();
-    void allowNewFolderBtn(bool pAllow) {mpNewFolderBtn->setEnabled(pAllow);}
-    void allowDeleteButton(bool pAllow);
 
 protected:
 	void dropEvent( QDropEvent *event );

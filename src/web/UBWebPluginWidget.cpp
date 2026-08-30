@@ -36,8 +36,10 @@ UBWebPluginWidget::UBWebPluginWidget(const QUrl &url, QWidget *parent)
 {
     UBHttpGet* httpGet = new UBHttpGet(this);
     
-    connect(httpGet, SIGNAL(downloadFinished(bool, QUrl, QString, QByteArray, QPointF, QSize, bool)), this, SLOT(downloadFinished(bool, QUrl, QString, QByteArray)));
-    connect(httpGet, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgress(qint64, qint64)));
+    connect(httpGet, &UBHttpGet::downloadFinished, this, [this](bool pSuccess, QUrl sourceUrl, QString pContentTypeHeader, QByteArray pData, QPointF, QSize, bool) {
+        downloadFinished(pSuccess, sourceUrl, pContentTypeHeader, pData);
+    });
+    connect(httpGet, &UBHttpGet::downloadProgress, this, &UBWebPluginWidget::downloadProgress);
     
     httpGet->get(url);
 }

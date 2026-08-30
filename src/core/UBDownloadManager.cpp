@@ -109,7 +109,7 @@ UBDownloadManager::UBDownloadManager(QObject *parent, const char *name):QObject(
     setObjectName(name);
     init();
 
-    connect(this, SIGNAL(fileAddedToDownload()), this, SLOT(onUpdateDownloadLists()));
+    connect(this, &UBDownloadManager::fileAddedToDownload, this, &UBDownloadManager::onUpdateDownloadLists);
 }
 
 /**
@@ -383,7 +383,7 @@ void UBDownloadManager::startFileDownload(sDownloadFileDesc desc)
     if (desc.srcUrl.startsWith("file://") || desc.srcUrl.startsWith("/"))
     {
         UBAsyncLocalFileDownloader * cpHelper = new UBAsyncLocalFileDownloader(desc, QByteArray(), this);
-        connect(cpHelper, SIGNAL(signal_asyncCopyFinished(int, bool, QUrl, QUrl, QString, QByteArray, QPointF, QSize, bool)), this, SLOT(onDownloadFinished(int, bool, QUrl, QUrl,QString, QByteArray, QPointF, QSize, bool)));
+        connect(cpHelper, &UBAsyncLocalFileDownloader::signal_asyncCopyFinished, this, &UBDownloadManager::onDownloadFinished);
         QObject *res = dynamic_cast<QObject *>(cpHelper->download());
         if (!res)
             delete res;
@@ -393,9 +393,9 @@ void UBDownloadManager::startFileDownload(sDownloadFileDesc desc)
     else
     {
         UBDownloadHttpFile* http = new UBDownloadHttpFile(desc.id, this);
-        connect(http, SIGNAL(downloadProgress(int, qint64,qint64)), this, SLOT(onDownloadProgress(int,qint64,qint64)));
-        connect(http, SIGNAL(downloadFinished(int, bool, QUrl, QUrl, QString, QByteArray, QPointF, QSize, bool)), this, SLOT(onDownloadFinished(int, bool, QUrl, QUrl, QString, QByteArray, QPointF, QSize, bool)));
-        connect(http, SIGNAL(downloadError(int)), this, SLOT(onDownloadError(int)));
+        connect(http, &UBDownloadHttpFile::downloadProgress, this, &UBDownloadManager::onDownloadProgress);
+        connect(http, &UBDownloadHttpFile::downloadFinished, this, &UBDownloadManager::onDownloadFinished);
+        connect(http, &UBDownloadHttpFile::downloadError, this, &UBDownloadManager::onDownloadError);
 
         //the desc.srcUrl is encoded. So we have to decode it before.
         QUrl url;
@@ -642,8 +642,8 @@ UBDownloadHttpFile::UBDownloadHttpFile(int fileId, QObject *parent):UBHttpGet(pa
 {
     mId = fileId;
 
-    connect(this, SIGNAL(downloadFinished(bool,QUrl,QString,QByteArray,QPointF,QSize,bool)), this, SLOT(onDownloadFinished(bool,QUrl,QString,QByteArray,QPointF,QSize,bool)));
-    connect(this, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(onDownloadProgress(qint64,qint64)));
+    connect(this, &UBHttpGet::downloadFinished, this, &UBDownloadHttpFile::onDownloadFinished);
+    connect(this, &UBHttpGet::downloadProgress, this, &UBDownloadHttpFile::onDownloadProgress);
 }
 
 /**

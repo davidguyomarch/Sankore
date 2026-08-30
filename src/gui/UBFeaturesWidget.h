@@ -225,9 +225,10 @@ private:
     QString textRestoreManyFile;
 //issue 1474 - NNE - 20131118 : END
 
-private slots:
+public slots:
     void thumbnailSizeChanged(int);
 
+private slots:
     //issue 1474 - NNE - 20131121
     /**
       * Action performs when the user makes a long press by the view.
@@ -319,13 +320,12 @@ signals:
 
 public slots:
     void showAdditionalData(AddWidget pWidgetType, AddWidgetState pState = NonModal);
+    void scanStarted();
+    void scanFinished();
 
 private slots:
     void createNewFolderSlot(QString pStr);
     void hideAdditionalData();
-
-    void scanStarted();
-    void scanFinished();
 };
 
 class UBFeaturesNewFolderDialog : public QWidget
@@ -341,10 +341,12 @@ signals:
     void createNewFolder(QString str);
     void closeDialog();
 
+public slots:
+    void setFileNameList(const QStringList &pLst);
+
 private slots:
     void accept();
     void reject();
-    void setFileNameList(const QStringList &pLst);
     void reactOnTextChanged(const QString &pStr);
 
 private:
@@ -363,7 +365,7 @@ class UBFeaturesProgressInfo: public QWidget {
 public:
     UBFeaturesProgressInfo(QWidget *parent = 0);
 
-private slots:
+public slots:
     void setCommmonInfoText(const QString &str);
     void setDetailedInfoText(const QString &str);
     void setProgressMin(int pValue);

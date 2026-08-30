@@ -347,7 +347,6 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     }
 
 //    Just for debug. Do not delete please
-//    connect(this, SIGNAL(selectionChanged()), this, SLOT(selectionChangedProcessing()));
     connect(this, &QGraphicsScene::selectionChanged, this, &UBGraphicsScene::updateGroupButtonState);
 }
 

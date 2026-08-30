@@ -178,12 +178,12 @@ void UBGraphicsWidgetItem::initialize()
     // WebEngine does not support page palette
     // Link delegation handled differently in WebEngine
 
-    connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(javaScriptWindowObjectCleared()));
+    connect(mainFrame(), &QWebFrame::javaScriptWindowObjectCleared, this, &UBGraphicsWidgetItem::javaScriptWindowObjectCleared);
     // geometryChangeRequested not available in WebEngine
-    connect(this, SIGNAL(loadFinished(bool)), this, SLOT(mainFrameLoadFinished (bool)));
-    connect(mainFrame(), SIGNAL(initialLayoutCompleted()), this, SLOT(initialLayoutCompleted()));
+    connect(this, &QGraphicsWebView::loadFinished, this, &UBGraphicsWidgetItem::mainFrameLoadFinished);
+    connect(mainFrame(), &QWebFrame::initialLayoutCompleted, this, &UBGraphicsWidgetItem::initialLayoutCompleted);
     // linkClicked handled via navigation policy in WebEngine
-    connect(UBApplication::boardController, SIGNAL(backgroundChanged()), this, SLOT(sendJSChangeBackgroundEvent()));
+    connect(UBApplication::boardController, &UBBoardController::backgroundChanged, this, &UBGraphicsWidgetItem::sendJSChangeBackgroundEvent);
 }
 
 void UBGraphicsWidgetItem::onLinkClicked(const QUrl& url)
@@ -1041,8 +1041,8 @@ UBGraphicsW3CWidgetItem::UBGraphicsW3CWidgetItem(const QUrl& pWidgetUrl, QGraphi
     }
     f.close();
 
-    connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(javaScriptWindowObjectCleared()));
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(javaScriptWindowObjectCleared()));
+    connect(mainFrame(), &QWebFrame::javaScriptWindowObjectCleared, this, &UBGraphicsW3CWidgetItem::javaScriptWindowObjectCleared);
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged, this, &UBGraphicsW3CWidgetItem::javaScriptWindowObjectCleared);
 
     load(mMainHtmlUrl);
 
