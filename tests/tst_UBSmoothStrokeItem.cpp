@@ -148,7 +148,8 @@ void TestUBSmoothStrokeItem::testSubtractPath_partialErase()
     QPainterPath eraserPath;
     eraserPath.addRect(90, 50, 20, 40); // y=50..90, well above the stroke at y=0
 
-    bool shouldRemove = item.subtractPath(eraserPath);
+    QList<QGraphicsItem*> newFragments;
+    bool shouldRemove = item.subtractPath(eraserPath, newFragments);
 
     // Item should NOT be removed (eraser missed)
     QVERIFY(!shouldRemove);
@@ -171,7 +172,8 @@ void TestUBSmoothStrokeItem::testSubtractPath_fullErase()
     QPainterPath eraserPath;
     eraserPath.addRect(-100, -100, 500, 500);
 
-    bool shouldRemove = item.subtractPath(eraserPath);
+    QList<QGraphicsItem*> newFragments;
+    bool shouldRemove = item.subtractPath(eraserPath, newFragments);
 
     QVERIFY(shouldRemove);
 }

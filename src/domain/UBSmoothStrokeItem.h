@@ -104,8 +104,9 @@ public:
     /**
      * Subtract an eraser path from this stroke.
      * Returns true if the item should be removed (path became empty).
+     * Any new fragment items created by the split are appended to @p newItems.
      */
-    bool subtractPath(const QPainterPath& eraserPath);
+    bool subtractPath(const QPainterPath& eraserPath, QList<QGraphicsItem*>& newItems);
 
     QRectF boundingRect() const override;
 
