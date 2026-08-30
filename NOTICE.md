@@ -1,6 +1,8 @@
 # NOTICE
 
 This project is a community continuation of Open-Sankoré.
+It is not affiliated with, endorsed by, or maintained by GIP ENA or the
+original Open-Sankoré project.
 
 ## Copyright
 
