@@ -34,7 +34,6 @@ Xpdf source files (`XPDFRenderer.h`, `XPDFRenderer.cpp`) exist in `src/pdf/` but
 | Component | License | Bundled? | Location | Commercial redistribution | Source |
 |-----------|---------|----------|----------|--------------------------|--------|
 | Phosphor Icons (regular) | MIT | Yes | `resources/icons/phosphor/` | Yes | [github.com/phosphor-icons/core](https://github.com/phosphor-icons/core) |
-| Yusuke Kamiyamane icons | CC-BY-3.0 | Yes | `resources/customizations/teacherGuide/` | Yes, with attribution | — |
 | Font Awesome 4 | OFL-1.1 (fonts), MIT (CSS/code) | Yes (2 widgets) | `Combinoscope.wgt/fonts/`, `Compteur.wgt/fonts/` | Yes | [fontawesome.com](https://fontawesome.com) |
 
 ## Fonts

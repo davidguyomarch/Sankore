@@ -37,9 +37,6 @@ Source: https://github.com/phosphor-icons/core
 Website: https://phosphoricons.com
 Used in the QML V2 UI for all toolbar and palette icons.
 
-**Yusuke Kamiyamane** — CC-BY-3.0
-teacherGuide icons
-
 ## Translations
 
 A special thanks to:
