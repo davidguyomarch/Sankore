@@ -11,7 +11,7 @@ It has been migrated to Qt 6 and features a new QML V2 interface (v4.1.0+).
 - **Linux x64 build**: ✅ binary + .deb + .rpm via GitHub Actions CI
 - **Linux ARM64 build**: ✅ binary + .deb + .rpm via GitHub Actions CI
 - **QML V2 UI**: ✅ StylusPaletteV2, TopBar, PageNavigator, DrawingPropsBar, ShapesPaletteV2
-- **Unit tests**: ✅ 6 suites QTest
+- **Unit tests**: ✅ 17+ suites QTest (83%+ line coverage)
 - **Documents mode**: ✅ Réactivé (ancienne vue UBDocumentController)
 - **Desktop mode**: ⚠️ Réactivé mais crash au clic souris (#135)
 
@@ -19,10 +19,10 @@ It has been migrated to Qt 6 and features a new QML V2 interface (v4.1.0+).
 
 - **Build system**: qmake (`.pro` / `.pri` files)
 - **Language**: C++17
-- **Framework**: Qt 6.8.2 (Windows), Qt 6.2 (Linux)
-- **Target platforms**: Windows x64 (MSVC 2022), Linux x64 (GCC 11), Linux ARM64
+- **Framework**: Qt 6.8.2 (Windows CI), Qt 6.8.3 (Linux / Docker dev)
+- **Target platforms**: Windows x64 (MSVC 2022), Linux x64 (GCC 14), Linux ARM64
 - **CI**: GitHub Actions (`build-windows.yml`, `build-linux.yml`, `build-linux-arm64.yml`, `release.yml`)
-- **Docker dev**: `sankore-qt6` image (Ubuntu 24.04, Qt 6, aarch64)
+- **Docker dev**: `sankore-dev` image (Ubuntu 25.04, Qt 6.8.3, aarch64)
 - **Issue tracking**: https://github.com/davidguyomarch/Sankore/issues
 - **Git workflow**: voir `.kiro/steering/dev-workflow.md`
 - **CI/CD doc**: voir `.kiro/steering/ci-cd.md`
@@ -80,7 +80,7 @@ resources/            # UI forms, icons (Phosphor), translations
 
 Voir issue #131 pour l'inventaire complet. Points clés :
 - `UBStylusPalette` / `UBDrawingPalette` / `UBNavigatorPalette` / `UBWebToolsPalette` : supprimés (#154)
-- `UBDrawingController` : coexiste avec `UBToolController` (issue #128)
+- `UBDrawingController` : supprimé, fusionné dans `UBToolController` (#148)
 - Floating palettes (backgrounds, erase, page) : fonctionnelles, pas encore QML
 - `UBDocumentController` : vue Documents avec ancien design (issue #134)
 
@@ -202,3 +202,53 @@ The QML V2 UI uses **Phosphor Icons** (regular weight) for all toolbar and palet
 | Delete | x-circle | x-circle.svg |
 | Layer up | arrow-up | arrow-up.svg |
 | Layer down | arrow-down | arrow-down.svg |
+
+## Licensing & Legal — Rules for Kiro
+
+### Project license structure
+
+| File | Purpose |
+|------|---------|
+| `LICENSE.md` | GPL-3.0 full text + verbatim OpenSSL linking exception |
+| `NOTICE.md` | Copyright holders, licensing summary, non-affiliation disclaimer |
+| `CREDITS.md` | Human-readable acknowledgments (fonts, icons, translators) |
+| `THIRD_PARTY.md` | Technical/legal inventory of ALL third-party dependencies |
+| `AUTHORS.md` | Copyright holders and maintainer role (separate from each other) |
+| `SECURITY.md` | Vulnerability reporting via GitHub Private Security Advisories |
+| `CONTRIBUTING.md` | Contribution guide, dev setup, PR checklist |
+| `MAINTAINERS.md` | Current maintainer and responsibilities |
+| `BRANDING.md` | Logo and visual identity documentation |
+
+### Rules for Kiro when modifying these files
+
+1. **Never mix copyright and maintainer role.** Copyright = intellectual property. Maintainer = operational responsibility. They go in separate sections.
+2. **THIRD_PARTY.md is the single source of truth** for all third-party dependencies. When adding or removing a dependency, update this file with: component, version, license (SPDX), bundled status, linking method, commercial redistribution terms, source URL.
+3. **CREDITS.md references THIRD_PARTY.md** for details. Keep CREDITS.md human-readable and focused on acknowledgments.
+4. **New source files** must include `SPDX-License-Identifier: GPL-3.0-only` in the header. Do NOT include the OpenSSL exception — it applies only to original GIP ENA files.
+5. **Never add non-free assets** (fonts, icons, images) without checking the license first. All bundled assets must be free for commercial redistribution (OFL, MIT, Apache-2.0, AGPL with font exception, etc.).
+
+### Fonts — Rules for Kiro
+
+1. **All bundled fonts must be free/open-source** (OFL, Apache-2.0, or equivalent). Non-commercial, CC BY-NC-ND, or proprietary fonts are NOT acceptable.
+2. **Current free fonts**: Andika Basic (OFL), Écolier Court (OFL), Écolier Lignes Court (OFL), Marelle (OFL), URW Base35 (AGPL + font exception).
+3. **Marelle is the primary cursive school font** — it replaces all previously removed non-free school fonts (Cursive Standard, EcritureA/B, ScriptEcole, Alphonet, etc.).
+4. **When adding a new font**, add it to `resources/customizations/fonts/`, include its license file, and update both CREDITS.md and THIRD_PARTY.md.
+5. **Font loading is dynamic** — `UBResources::buildFontList()` loads all fonts from `customizations/fonts/` via `QFontDatabase::addApplicationFont()`. No code changes needed when adding/removing font files.
+
+### Icons — Rules for Kiro (extends Phosphor section above)
+
+1. **Phosphor Icons (MIT)** are the only icon set used in the QML V2 UI. Attribution is in CREDITS.md and THIRD_PARTY.md.
+2. **Font Awesome (OFL/MIT)** is embedded in 2 legacy widgets only (Combinoscope, Compteur). Do not add Font Awesome to new code.
+3. **No Kamiyamane/Fugue icons** remain in the project. The historical credit was removed — do not re-add.
+
+### OpenSSL exception
+
+- Original files (GIP ENA, 2010-2013) carry a GPL-3.0 + OpenSSL linking exception in their headers.
+- New files use GPL-3.0-only — do NOT add the OpenSSL exception to new code.
+- The verbatim exception text is preserved in `LICENSE.md` for legal continuity.
+- Since OpenSSL 3.0 (Apache-2.0), the exception is no longer technically necessary but is preserved for the inherited headers.
+
+### Security
+
+- **No personal emails** in any committed file. Use GitHub Private Security Advisories for vulnerability reporting.
+- **No secrets, tokens, or credentials** in committed files.
