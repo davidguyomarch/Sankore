@@ -25,7 +25,7 @@
 #include <QGraphicsSceneHoverEvent>
 #include "UBGraphicsAristo.h"
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "core/UBApplication.h"
 #include "domain/UBGraphicsScene.h"
 
@@ -686,7 +686,7 @@ void UBGraphicsAristo::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsAristo::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
     if (currentTool == UBStylusTool::Selector)  {
         mShowButtons = true;
@@ -719,9 +719,9 @@ void UBGraphicsAristo::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
         event->accept();
         update();
 
-    } else if (UBDrawingController::drawingController()->isDrawingTool())  {
+    } else if (UBToolController::toolController()->isDrawingTool())  {
             setCursor(drawRulerLineCursor());
-            UBDrawingController::drawingController()->mActiveRuler = this;
+            UBToolController::toolController()->mActiveRuler = this;
             event->accept();
     }
 }
@@ -734,14 +734,14 @@ void UBGraphicsAristo::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     mRotateSvgItem->setVisible(false);
     mResizeSvgItem->setVisible(false);
     mCloseSvgItem->setVisible(false);
-    UBDrawingController::drawingController()->mActiveRuler = nullptr;
+    UBToolController::toolController()->mActiveRuler = nullptr;
     event->accept();
     update();
 }
 
 void UBGraphicsAristo::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
     if (currentTool == UBStylusTool::Selector)
     {
@@ -774,7 +774,7 @@ void UBGraphicsAristo::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
         event->accept();
     }
-    else if (UBDrawingController::drawingController()->isDrawingTool())
+    else if (UBToolController::toolController()->isDrawingTool())
         event->accept();
 }
 
@@ -848,7 +848,7 @@ void UBGraphicsAristo::DrawLine(const QPointF &scenePos, qreal width)
 
     // We have to use "pointed" line for marker tool
     scene()->drawLineTo(itemPos, width,
-            UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Marker);
+            UBToolController::toolController()->stylusTool() != UBStylusTool::Marker);
 }
 
 void UBGraphicsAristo::EndLine()

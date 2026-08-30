@@ -30,7 +30,7 @@
 #include "tools/UBGraphicsTriangle.h"
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "domain/UBGraphicsScene.h"
 
 
@@ -767,7 +767,7 @@ void UBGraphicsTriangle::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsTriangle::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
     if (currentTool == UBStylusTool::Selector ||
         currentTool == UBStylusTool::Play)
@@ -797,9 +797,9 @@ void UBGraphicsTriangle::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
         event->accept();
         update();
 
-    } else if (UBDrawingController::drawingController()->isDrawingTool())  {
+    } else if (UBToolController::toolController()->isDrawingTool())  {
             setCursor(drawRulerLineCursor());
-            UBDrawingController::drawingController()->mActiveRuler = this;
+            UBToolController::toolController()->mActiveRuler = this;
             event->accept();
     }
 }
@@ -813,14 +813,14 @@ void UBGraphicsTriangle::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     mVFlipSvgItem->setVisible(false);
     mHFlipSvgItem->setVisible(false);
     mRotateSvgItem->setVisible(false);
-    UBDrawingController::drawingController()->mActiveRuler = nullptr;
+    UBToolController::toolController()->mActiveRuler = nullptr;
     event->accept();
     update();
 }
 
 void UBGraphicsTriangle::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
     if (currentTool == UBStylusTool::Selector ||
         currentTool == UBStylusTool::Play)
@@ -845,7 +845,7 @@ void UBGraphicsTriangle::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
             setCursor(moveCursor());
 
         event->accept();
-    }  else if (UBDrawingController::drawingController()->isDrawingTool())  {
+    }  else if (UBToolController::toolController()->isDrawingTool())  {
         event->accept();
     }
 }
@@ -895,7 +895,7 @@ void UBGraphicsTriangle::DrawLine(const QPointF &scenePos, qreal width)
 
     // We have to use "pointed" line for marker tool
     scene()->drawLineTo(itemPos, width,
-            UBDrawingController::drawingController()->stylusTool() != UBStylusTool::Marker);
+            UBToolController::toolController()->stylusTool() != UBStylusTool::Marker);
 }
 
 void UBGraphicsTriangle::EndLine()

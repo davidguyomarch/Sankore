@@ -73,7 +73,7 @@
 #include "web/UBWebController.h"
 
 #include "frameworks/UBFileSystemUtils.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include "gui/UBCreateLinkPalette.h"
 
@@ -434,7 +434,7 @@ bool UBGraphicsItemDelegate::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     Q_UNUSED(event);
 
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
     if(!mMoved && currentTool == UBStylusTool::Play)
     {
         if(mAction)
@@ -488,7 +488,7 @@ void UBGraphicsItemDelegate::positionHandles()
         mDelegated->setData(UBGraphicsItemData::ItemLocked, QVariant(isLocked()));
         updateFrame();
 
-        if (UBStylusTool::Play != UBDrawingController::drawingController()->stylusTool())
+        if (UBStylusTool::Play != UBToolController::toolController()->stylusTool())
             mFrame->show();
 
         updateButtons(true);

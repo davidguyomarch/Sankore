@@ -14,7 +14,7 @@
 // Include the full header only in the app build (not tests)
 #if defined(QT_SVG_LIB) && !defined(QT_TESTLIB_LIB)
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "core/UBSettings.h"
 #endif
 

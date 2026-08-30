@@ -78,7 +78,7 @@
 #include "document/UBDocumentProxy.h"
 
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "board/UBBoardView.h"
 
 #include "UBGraphicsItemUndoCommand.h"
@@ -565,7 +565,7 @@ bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pres
     if (!mContext.drawingController)
         return false;
 
-    UBDrawingController *dc = mContext.drawingController;
+    UBToolController *dc = mContext.drawingController;
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)dc->stylusTool();
 
     QPointF position = QPointF(scenePos);
@@ -739,7 +739,7 @@ bool UBGraphicsScene::inputDeviceRelease()
         accepted = true;
     }
 
-    UBDrawingController *dc = mContext.drawingController;
+    UBToolController *dc = mContext.drawingController;
 
     if (dc->isDrawingTool() || mDrawWithCompass)
     {

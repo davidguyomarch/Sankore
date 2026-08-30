@@ -63,7 +63,7 @@
 #include "domain/UBGraphicsPixmapItem.h"
 
 #include "document/UBDocumentProxy.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include "tools/UBToolsManager.h"
 
@@ -226,7 +226,7 @@ void UBBoardPaletteManager::setupPalettes()
     mStylusPaletteQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
 
     // New V2 controller — direct binding, no QAction
-    mToolController = new UBToolController(this);
+    mToolController = UBToolController::toolController();
     // Force Pen as the active tool at startup (the old UBStylusController/QActionGroup
     // may have changed UBDrawingController to Selector during finalize())
     mToolController->setActiveTool(UBToolController::Pen);
@@ -508,7 +508,7 @@ void UBBoardPaletteManager::connectPalettes()
     connect(UBApplication::mainWindow->boardToolBar, &QToolBar::actionTriggered, this, [this]() { closeAllPopupPalettes(); });
 
     // Close popup palettes on any stylus tool change
-    connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged, this, [this]() { closeAllPopupPalettes(); });
+    connect(UBToolController::toolController(), &UBToolController::stylusToolChanged, this, [this]() { closeAllPopupPalettes(); });
 
     connect(UBApplication::mainWindow->actionPlainLightBackground, &QAction::triggered, this, [this]() { changeBackground(); });
     connect(UBApplication::mainWindow->actionCrossedLightBackground, &QAction::triggered, this, [this]() { changeBackground(); });
@@ -909,7 +909,7 @@ void UBBoardPaletteManager::addItemToCurrentPage()
         UBApplication::boardController->downloadURL(mItemUrl);
     else
     {
-        UBDrawingController::drawingController()->setStylusTool(UBStylusTool::Selector);
+        UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
 
         UBGraphicsPixmapItem* item = UBApplication::boardController->activeScene()->addPixmap(mPixmap, nullptr, mPos, mScaleFactor);
 

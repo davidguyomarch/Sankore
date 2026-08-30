@@ -32,7 +32,7 @@
 #include "domain/UBGraphicsScene.h"
 
 #include "board/UBBoardController.h" // TODO UB 4.x clean that dependency
-#include "board/UBDrawingController.h" // TODO UB 4.x clean that dependency
+#include "controllers/UBToolController.h" // TODO UB 4.x clean that dependency
 
 
 const QRect UBGraphicsCompass::sDefaultRect = QRect(0, -20, 300, 48);
@@ -90,7 +90,7 @@ UBGraphicsCompass::UBGraphicsCompass()
     setFlag(QGraphicsItem::ItemIsSelectable, false);
 
     connect(UBApplication::boardController, &UBBoardController::penColorChanged, this, &UBGraphicsCompass::penColorChanged);
-    connect(UBDrawingController::drawingController(), &UBDrawingController::lineWidthIndexChanged, this, [this]() { lineWidthChanged(); });
+    connect(UBToolController::toolController(), &UBToolController::lineWidthIndexChanged, this, [this]() { lineWidthChanged(); });
 }
 
 UBGraphicsCompass::~UBGraphicsCompass()
@@ -195,8 +195,8 @@ QVariant UBGraphicsCompass::itemChange(GraphicsItemChange change, const QVariant
 
 void UBGraphicsCompass::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector &&
-        UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector &&
+        UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     bool closing = false;
@@ -234,8 +234,8 @@ void UBGraphicsCompass::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsCompass::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector &&
-        UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector &&
+        UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     if (!mResizing && !mRotating && !mDrawing)
@@ -279,8 +279,8 @@ void UBGraphicsCompass::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsCompass::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector &&
-        UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector &&
+        UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     if (mResizing)
@@ -320,8 +320,8 @@ void UBGraphicsCompass::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsCompass::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector &&
-        UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector &&
+        UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     mOuterCursor = cursor();
@@ -350,8 +350,8 @@ void UBGraphicsCompass::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 
 void UBGraphicsCompass::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector &&
-        UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector &&
+        UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     mShowButtons = false;
@@ -364,8 +364,8 @@ void UBGraphicsCompass::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 void UBGraphicsCompass::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector &&
-        UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector &&
+        UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     mShowButtons = shape().contains(event->pos());
@@ -575,10 +575,10 @@ void UBGraphicsCompass::paintCenterCross()
     QPointF needleCrossCenter = mapToScene(needlePosition());
     scene()->moveTo(QPointF(needleCrossCenter.x() - 5, needleCrossCenter.y()));
     scene()->drawLineTo(QPointF(needleCrossCenter.x() + 5, needleCrossCenter.y()), 1,
-        UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line);
+        UBToolController::toolController()->stylusTool() == UBStylusTool::Line);
     scene()->moveTo(QPointF(needleCrossCenter.x(), needleCrossCenter.y() - 5));
     scene()->drawLineTo(QPointF(needleCrossCenter.x(), needleCrossCenter.y() + 5), 1,
-        UBDrawingController::drawingController()->stylusTool() == UBStylusTool::Line);
+        UBToolController::toolController()->stylusTool() == UBStylusTool::Line);
 }
 
 QPointF UBGraphicsCompass::needlePosition() const

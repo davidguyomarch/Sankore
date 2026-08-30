@@ -24,7 +24,7 @@
 #include "UBAbstractGraphicsItem.h"
 #include "UBGraphicsDelegateFrame.h"
 
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 UB3HEditableGraphicsRectItem::UB3HEditableGraphicsRectItem(QGraphicsItem* parent)
     : UB3HEditablesGraphicsBasicShapeItem(parent)

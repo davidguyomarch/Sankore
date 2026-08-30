@@ -28,7 +28,7 @@
 #include "gui/UBResources.h"
 #include "domain/UBGraphicsScene.h"
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "UBAbstractDrawRuler.h"
 
 
@@ -272,7 +272,7 @@ void UBGraphicsProtractor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsProtractor::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector && UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Play)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector && UBToolController::toolController ()->stylusTool() != UBStylusTool::Play)
         return;
 
     if (!mShowButtons)
@@ -303,7 +303,7 @@ void UBGraphicsProtractor::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 void UBGraphicsProtractor::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if (UBDrawingController::drawingController ()->stylusTool() != UBStylusTool::Selector)
+    if (UBToolController::toolController ()->stylusTool() != UBStylusTool::Selector)
         return;
 
     Tool currentTool = toolFromPos(event->pos());

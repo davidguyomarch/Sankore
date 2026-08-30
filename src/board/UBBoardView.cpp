@@ -41,7 +41,7 @@
 #include <QVariant>
 #include <QListView>
 
-#include "UBDrawingController.h"
+#include "controllers/UBToolController.h"
 
 #include "frameworks/UBGeometryUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -186,7 +186,7 @@ void UBBoardView::init ()
   unsetCursor();
 
   // Update cursor immediately when tool changes (QML toolbar, keyboard shortcuts, etc.)
-  connect(UBDrawingController::drawingController(), &UBDrawingController::stylusToolChanged,
+  connect(UBToolController::toolController(), &UBToolController::stylusToolChanged,
           this, &UBBoardView::setToolCursor);
 
   movingItem = nullptr;
@@ -377,7 +377,7 @@ void UBBoardView::tabletEvent (QTabletEvent * event)
         return;
     }
 
-    UBDrawingController *dc = UBDrawingController::drawingController ();
+    UBToolController *dc = UBToolController::toolController ();
 
     QPointF tabletPos = event->pos();
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)dc->stylusTool ();
@@ -575,7 +575,7 @@ Here we determines cases when items should to get mouse press event at pressing 
         return false;
 
     // some behavior depends on current tool.
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();    
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();    
 
     //EV-7 - NNE - 20140103
     if(UBShapeFactory::isShape(item)){
@@ -678,7 +678,7 @@ bool UBBoardView::itemShouldReceiveSuspendedMousePressEvent(QGraphicsItem *item)
     if (item == scene()->backgroundObject())
         return false;
 
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
 
     switch(item->type())
     {
@@ -724,7 +724,7 @@ bool UBBoardView::itemShouldBeMoved(QGraphicsItem *item)
         if(dynamic_cast<UBGraphicsGroupContainerItem*>(movingItem->parentItem())->Delegate()->isLocked())
             return false;
 
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
 
     //EV-7 - NNE - 20140103
     if(UBShapeFactory::isShape(item)){
@@ -772,7 +772,7 @@ QGraphicsItem* UBBoardView::determineItemToPress(QGraphicsItem *item)
 {
     if(item)
     {
-        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
 
         //TODO claudio
         // another chuck of very good code        
@@ -807,7 +807,7 @@ QGraphicsItem* UBBoardView::determineItemToMove(QGraphicsItem *item)
 {
     if(item)
     {
-        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController()->stylusTool();
+        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
 
         //W3C widgets should take mouse move events from play tool.
         if ((UBStylusTool::Play == currentTool) && (UBGraphicsWidgetItem::Type == item->type()))
@@ -1047,8 +1047,8 @@ QWidget *UBBoardView::widgetForTabletEvent(QWidget *w, const QPoint &pos)
 #endif
 void UBBoardView::longPressEvent()
 {
-   UBDrawingController *drawingController = UBDrawingController::drawingController();
-   UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+   UBToolController *drawingController = UBToolController::toolController();
+   UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
    disconnect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
 
@@ -1098,7 +1098,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
     if (event->button () == Qt::LeftButton && isInteractive ())
     {
 
-        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
         if (!mTabletStylusIsPressed)
             mMouseButtonIsPressed = true;
@@ -1237,7 +1237,7 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
         }
         else
         {
-            if(UBDrawingController::drawingController()->mActiveRuler==nullptr)
+            if(UBToolController::toolController()->mActiveRuler==nullptr)
             {
                 viewport()->setCursor (QCursor (Qt::BlankCursor));
             }
@@ -1270,7 +1270,7 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
   }
 
   mIsDragInProgress = true;
-  UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+  UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
   mLongPressTimer.stop();
 
@@ -1348,7 +1348,7 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
 
       handleItemMouseMove(event);
     }
-  else if ((UBDrawingController::drawingController()->isDrawingTool())
+  else if ((UBToolController::toolController()->isDrawingTool())
     && !mMouseButtonIsPressed)
   {
       QGraphicsView::mouseMoveEvent (event);
@@ -1393,7 +1393,7 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
     //EV-7 - NNE - 20131231
     emit mouseRelease(event);
 
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBDrawingController::drawingController ()->stylusTool ();
+    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
   setToolCursor (currentTool);
   // first/ propagate device release to the scene
@@ -1513,7 +1513,7 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
           UBGraphicsTextItem* textItem = scene()->addTextHtml ("", mapToScene (rubberRect.topLeft ()));
           event->accept ();
 
-          UBDrawingController::drawingController ()->setStylusTool (UBStylusTool::Selector);
+          UBToolController::toolController ()->setStylusTool (UBStylusTool::Selector);
 
           textItem->setSelected (true);
           textItem->setFocus();
@@ -1539,7 +1539,7 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
        if (widget)
            widget->setFocus();
 
-       UBDrawingController::drawingController ()->setStylusTool (UBStylusTool::Selector);
+       UBToolController::toolController ()->setStylusTool (UBStylusTool::Selector);
 
   }
   else if (currentTool == UBStylusTool::Capture)

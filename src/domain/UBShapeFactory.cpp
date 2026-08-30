@@ -15,7 +15,7 @@
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardView.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "gui/UBMainWindow.h"
 #include "UBGraphicsScene.h"
 
@@ -183,7 +183,7 @@ void UBShapeFactory::setEndArrowType(UBAbstractGraphicsPathItem::ArrowType arrow
 void UBShapeFactory::init()
 {
     mBoardView = UBApplication::boardController->controlView();
-    mDrawingController = UBDrawingController::drawingController();
+    mDrawingController = UBToolController::toolController();
 
     //Our custom dash is a point follow by a space
     mDotDashes << 0.1 << 3;

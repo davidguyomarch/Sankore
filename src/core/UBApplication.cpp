@@ -89,7 +89,7 @@
 #include "UBApplicationController.h"
 
 #include "board/UBBoardController.h"
-#include "board/UBDrawingController.h"
+#include "controllers/UBToolController.h"
 #include "board/UBBoardView.h"
 #include "board/UBBoardPaletteManager.h"
 #include "controllers/UBToolController.h"
@@ -247,7 +247,7 @@ UBApplication::~UBApplication()
 
     UBDownloadManager::destroy();
 
-    UBDrawingController::destroy();
+    UBToolController::destroy();
 
     UBSettings::destroy();
 
@@ -388,7 +388,7 @@ int UBApplication::exec(const QString& pFileToImport)
     boardController->paletteManager()->connectToDocumentController();
 
     UBApplication::mainWindow->actionPen->setChecked(false); // force re-trigger
-    UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+    UBToolController::toolController()->setStylusTool((int)UBStylusTool::Pen);
 
     applicationController = new UBApplicationController(boardController->controlView(),
                                                         boardController->displayView(),
@@ -505,7 +505,7 @@ int UBApplication::exec(const QString& pFileToImport)
             tc->setActiveTool(UBStylusTool::Pen);
             tc->setPenColorIndex(0); // Black — index 0 in the color palette
         } else {
-            UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
+            UBToolController::toolController()->setStylusTool((int)UBStylusTool::Pen);
         }
     });
 
