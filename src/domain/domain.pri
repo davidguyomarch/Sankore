@@ -4,6 +4,7 @@ HEADERS += src/domain/UBGraphicsScene.h \
     src/domain/UBMagnifierHandler.h \
     src/domain/UBBackgroundRenderer.h \
     src/domain/UBToolOverlay.h \
+    src/domain/UBEraserHandler.h \
     src/domain/UBGraphicsItemUndoCommand.h \
     src/domain/UBGraphicsTextItemUndoCommand.h \
     src/domain/UBGraphicsItemTransformUndoCommand.h \
@@ -63,6 +64,7 @@ SOURCES += src/domain/UBGraphicsScene.cpp \
     src/domain/UBMagnifierHandler.cpp \
     src/domain/UBBackgroundRenderer.cpp \
     src/domain/UBToolOverlay.cpp \
+    src/domain/UBEraserHandler.cpp \
     src/domain/UBGraphicsItemUndoCommand.cpp \
     src/domain/UBGraphicsTextItemUndoCommand.cpp \
     src/domain/UBGraphicsItemTransformUndoCommand.cpp \
