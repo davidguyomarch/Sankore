@@ -1,44 +1,33 @@
 # Credits
 
-## Fonts
+For a detailed technical and legal inventory of all third-party dependencies,
+see [THIRD_PARTY.md](THIRD_PARTY.md).
 
-All fonts bundled with Open-Sankoré are free/open-source and commercially redistributable.
+## School Fonts
 
-### School Fonts — `resources/customizations/fonts/`
-
-**Andika Basic** — SIL Open Font License 1.1
-© 2004-2008 SIL International
+**Andika Basic** — Open Font License
+© SIL International
 Source: https://scripts.sil.org/Andika
-File: `AndBasR.ttf`
 
-**Écolier Court** — SIL Open Font License
+**Ecolier Court, Ecolier Ligne Court** — Open Font License
 © Jean-Marie Douteau
-Source: https://perso.orange.fr/jm.douteau/
-File: `ec_cour.ttf`
 
-**Écolier Lignes Court** — SIL Open Font License
+**Ecolier lignes pointillés, Écolier pointillés, Écolier CP, Écolier CP pointillés** — Creative Commons BY-NC-ND
 © Jean-Marie Douteau
-File: `ecl_cour.ttf`
 
-**Marelle** — SIL Open Font License 1.1
-© 2026 Ministère de l'Éducation nationale, Laurent Bourcellier, Jonathan Fabreguettes, Rosalie Wagner
-Source: https://marelle.forge.apps.education.fr/
-License file: `Marelle-OFL-LICENSE.txt`
-Files: `Marelle-Regular.ttf`, `Marelle2-Regular.ttf`, `MarelleBaton-Regular.ttf`, `MarelleBaton2-Regular.ttf`, `MarelleLIGNES-Regular.otf`, `MarelleLIGNES2-Regular.otf`, `MarelleLIGNESBaton-Regular.otf`, `MarelleLIGNESBaton2-Regular.otf`
+**Cursive Standard**
+© Antoine Fetet, based on a font by Jean-Claude Gineau
+Authorized for non-commercial use within Open-Sankoré
 
-### PostScript Fonts — `resources/fonts/`
+**Script Ecole, Script Case Ecole**
+© Henri Rogelet — Authorized for non-commercial use
+Source: http://pointecole.free.fr/polices.html
 
-**URW Base35** (Nimbus Sans, Nimbus Roman, Nimbus Mono, Standard Symbols, Dingbats) — AGPL-3.0 with font embedding exception
-© URW++ Design & Development GmbH
-Source: https://github.com/ArtifexSoftware/urw-base35-fonts
-Files: 14 `.pfb` files (n019*.pfb, n021*.pfb, n022*.pfb, d050000l.pfb, s050000l.pfb)
+**Alphonet** (phonetic font)
+© Henri Rogelet — Authorized for non-commercial use
 
-### Widget Fonts — `resources/library/applications/`
-
-**Font Awesome** — SIL Open Font License (fonts), MIT (CSS/code)
-© Dave Gandy / Fonticons Inc.
-Source: https://fontawesome.com
-Files: `Combinoscope.wgt/fonts/FontAwesome.otf`, `Compteur.wgt/fonts/FontAwesome.otf`
+**EcritureA, EcritureB**
+DGESCO — Laurence Bedoin & Malou Verlomme
 
 ## Icons
 
