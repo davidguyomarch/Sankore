@@ -60,7 +60,7 @@ class UBGraphicsCurtainItem;
 class UBGraphicsStroke;
 class UBSmoothStrokeItem;
 class UBMagnifierParams;
-class UBMagnifier;
+class UBMagnifierHandler;
 class UBGraphicsCache;
 class UBGraphicsGroupContainerItem;
 
@@ -400,7 +400,6 @@ public slots:
 
         void drawEraser(const QPointF& pEndPoint, bool isFirstDraw = false);
         void drawPointer(const QPointF& pEndPoint, bool isFirstDraw = false);
-        void DisposeMagnifierQWidgets();
 
 
         virtual void keyReleaseEvent(QKeyEvent * keyEvent);
@@ -471,8 +470,7 @@ public slots:
         //        tmp stub for divide addings scene objects from undo mechanism implementation
         bool mUndoRedoStackEnabled;
 
-        UBMagnifier *magniferControlViewWidget;
-        UBMagnifier *magniferDisplayViewWidget;
+        UBMagnifierHandler *mMagnifierHandler;
 
         UBZLayerController *mZLayerController;
         UBGraphicsPolygonItem* mpLastPolygon;
