@@ -24,6 +24,7 @@
 
 #include "UBGraphicsScene.h"
 #include "UBMagnifierHandler.h"
+#include "UBBackgroundRenderer.h"
 
 #include <QPropertyAnimation>
 
@@ -306,10 +307,7 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     , mEraser(0)
     , mPointer(0)
     , mDocument(parent)
-    , mDarkBackground(false)
-    , mCrossedBackground(false)
-    , mIsDesktopMode(false)
-    , mZoomFactor(1)
+    , mBackgroundRenderer(nullptr)
     , mBackgroundObject(0)
     , mBackgroundObjectDisposition(Center)
     , mBackgroundObjectUrl(QUrl())
@@ -350,6 +348,19 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     connect(this, &QGraphicsScene::selectionChanged, this, &UBGraphicsScene::updateGroupButtonState);
 
     mMagnifierHandler = new UBMagnifierHandler(this, this);
+
+    mBackgroundRenderer = new UBBackgroundRenderer(this,
+        [this](bool isDark) {
+            if (mEraser) {
+                if (isDark) {
+                    mEraser->setBrush(UBSettings::eraserBrushDarkBackground);
+                    mEraser->setPen(UBSettings::eraserPenDarkBackground);
+                } else {
+                    mEraser->setBrush(UBSettings::eraserBrushLightBackground);
+                    mEraser->setPen(UBSettings::eraserPenLightBackground);
+                }
+            }
+        }, this);
 }
 
 UBGraphicsScene::~UBGraphicsScene()
@@ -362,6 +373,21 @@ UBGraphicsScene::~UBGraphicsScene()
     if (mZLayerController)
         delete mZLayerController;
         mZLayerController = nullptr;
+}
+
+bool UBGraphicsScene::isDarkBackground() const
+{
+    return mBackgroundRenderer->isDarkBackground();
+}
+
+bool UBGraphicsScene::isLightBackground() const
+{
+    return mBackgroundRenderer->isLightBackground();
+}
+
+bool UBGraphicsScene::isCrossedBackground() const
+{
+    return mBackgroundRenderer->isCrossedBackground();
 }
 
 void UBGraphicsScene::selectionChangedProcessing()
@@ -493,7 +519,7 @@ bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pre
                 mCurrentSmoothStroke->setColorOnDarkBackground(colorOnDarkBG);
                 mCurrentSmoothStroke->setColorOnLightBackground(colorOnLightBG);
 
-                if (mDarkBackground)
+                if (isDarkBackground())
                     mCurrentSmoothStroke->setStrokeColor(colorOnDarkBG);
                 else
                     mCurrentSmoothStroke->setStrokeColor(colorOnLightBG);
@@ -1151,90 +1177,18 @@ void UBGraphicsScene::drawArcTo(const QPointF& pCenterPoint, qreal pSpanAngle)
 
 void UBGraphicsScene::setBackground(bool pIsDark, bool pIsCrossed)
 {
-    bool needRepaint = false;
-
-    if (mDarkBackground != pIsDark)
-    {
-        mDarkBackground = pIsDark;
-
-        if (mEraser)
-        {
-            if (mDarkBackground)
-            {
-                mEraser->setBrush(UBSettings::eraserBrushDarkBackground);
-                mEraser->setPen(UBSettings::eraserPenDarkBackground);
-            }
-            else
-            {
-                mEraser->setBrush(UBSettings::eraserBrushLightBackground);
-                mEraser->setPen(UBSettings::eraserPenLightBackground);
-            }
-        }
-
-        recolorAllItems();
-
-        needRepaint = true;
+    if (mBackgroundRenderer->setBackground(pIsDark, pIsCrossed))
         setModified(true);
-    }
-
-    if (mCrossedBackground != pIsCrossed)
-    {
-        mCrossedBackground = pIsCrossed;
-        needRepaint = true;
-        setModified(true);
-    }
-
-    if (needRepaint)
-    {
-        for (QGraphicsView* view : views())
-        {
-            view->resetCachedContent();
-        }
-    }
 }
 
 void UBGraphicsScene::setBackgroundZoomFactor(qreal zoom)
 {
-    mZoomFactor = zoom;
+    mBackgroundRenderer->setZoomFactor(zoom);
 }
 
 void UBGraphicsScene::setDrawingMode(bool bModeDesktop)
 {
-    mIsDesktopMode = bModeDesktop;
-}
-
-void UBGraphicsScene::recolorAllItems()
-{
-    QMap<QGraphicsView*, QGraphicsView::ViewportUpdateMode> previousUpdateModes;
-    for (QGraphicsView* view : views())
-    {
-        previousUpdateModes.insert(view, view->viewportUpdateMode());
-        view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
-    }
-
-    bool currentIslight = isLightBackground();
-    for (QGraphicsItem *item : items()) {
-        if (item->type() == UBGraphicsStrokesGroup::Type) {
-            UBGraphicsStrokesGroup *curGroup = static_cast<UBGraphicsStrokesGroup*>(item);
-//            QColor compareColor =  curGroup->color(currentIslight ? UBGraphicsStrokesGroup::colorOnDarkBackground
-//                                                                  : UBGraphicsStrokesGroup::colorOnLightBackground);
-
-//            if (curGroup->color() == compareColor) {
-//                QColor newColor = curGroup->color(!currentIslight ? UBGraphicsStrokesGroup::colorOnDarkBackground
-//                                                                  : UBGraphicsStrokesGroup::colorOnLightBackground);
-//                curGroup->setColor(newColor);
-//            }
-            UBGraphicsStrokesGroup::colorType reqCol = currentIslight ? UBGraphicsStrokesGroup::colorOnLightBackground
-                                                                      : UBGraphicsStrokesGroup::colorOnDarkBackground;
-
-            curGroup->setColor(curGroup->color(reqCol));
-        }
-    }
-
-    for (QGraphicsView* view : views())
-    {
-        view->setViewportUpdateMode(previousUpdateModes.value(view));
-    }
+    mBackgroundRenderer->setDesktopMode(bModeDesktop);
 }
 
 UBGraphicsPolygonItem* UBGraphicsScene::lineToPolygonItem(const QLineF &pLine, const qreal &pWidth)
@@ -1265,7 +1219,7 @@ void UBGraphicsScene::initPolygonItem(UBGraphicsPolygonItem* polygonItem)
         colorOnLightBG = mContext.penColorOnLightBackground();
     }
 
-    if (mDarkBackground)
+    if (isDarkBackground())
     {
         polygonItem->setColor(colorOnDarkBG);
     }
@@ -2542,55 +2496,12 @@ void UBGraphicsScene::drawItems (QPainter * painter, int numItems,
 
 void UBGraphicsScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
-    if (mIsDesktopMode)
+    if (mBackgroundRenderer->isDesktopMode())
     {
-        QGraphicsScene::drawBackground (painter, rect);
+        QGraphicsScene::drawBackground(painter, rect);
         return;
     }
-    bool darkBackground = isDarkBackground ();
-
-    if (darkBackground)
-    {
-      painter->fillRect (rect, QBrush (QColor (Qt::black)));
-    }
-    else
-    {
-      painter->fillRect (rect, QBrush (QColor (Qt::white)));
-    }
-
-    if (mZoomFactor > 0.5)
-    {
-        QColor bgCrossColor;
-
-        if (darkBackground)
-            bgCrossColor = UBSettings::crossDarkBackground;
-        else
-            bgCrossColor = UBSettings::crossLightBackground;
-        if (mZoomFactor < 1.0)
-        {
-            int alpha = 255 * mZoomFactor / 2;
-            bgCrossColor.setAlpha (alpha); // fade the crossing on small zooms
-        }
-
-        painter->setPen (bgCrossColor);
-
-        if (isCrossedBackground())
-        {
-            qreal firstY = ((int) (rect.y () / UBSettings::crossSize)) * UBSettings::crossSize;
-
-            for (qreal yPos = firstY; yPos < rect.y () + rect.height (); yPos += UBSettings::crossSize)
-            {
-                painter->drawLine (rect.x (), yPos, rect.x () + rect.width (), yPos);
-            }
-
-            qreal firstX = ((int) (rect.x () / UBSettings::crossSize)) * UBSettings::crossSize;
-
-            for (qreal xPos = firstX; xPos < rect.x () + rect.width (); xPos += UBSettings::crossSize)
-            {
-                painter->drawLine (xPos, rect.y (), xPos, rect.y () + rect.height ());
-            }
-        }
-    }
+    mBackgroundRenderer->paintBackground(painter, rect);
 }
 
 void UBGraphicsScene::keyReleaseEvent(QKeyEvent * keyEvent)
