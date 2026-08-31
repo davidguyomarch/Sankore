@@ -63,6 +63,7 @@ class UBMagnifierParams;
 class UBMagnifierHandler;
 class UBBackgroundRenderer;
 class UBToolOverlay;
+class UBDrawingHandler;
 class UBGraphicsCache;
 class UBGraphicsGroupContainerItem;
 
@@ -159,6 +160,12 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
 
         void addShapeToUndoStack(QGraphicsItem* item);
         void removeShapeToUndoStack(QGraphicsItem* item);
+
+        // --- Accessors for extracted handlers ---
+        QSet<QGraphicsItem*>& addedItemsRef() { return mAddedItems; }
+        QSet<QGraphicsItem*>& removedItemsRef() { return mRemovedItems; }
+        void setDocumentUpdated();
+        UBDrawingHandler* drawingHandler() { return mDrawingHandler; }
 
         UBGraphicsWidgetItem* addWidget(const QUrl& pWidgetUrl, const QPointF& pPos = QPointF(0, 0));
         UBGraphicsProxyWidget *addWidget(QWidget *widget, Qt::WindowFlags wFlags = Qt::WindowFlags());
@@ -337,10 +344,7 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
             mTools << item;
         }
 
-        const QPointF& previousPoint()
-        {
-            return mPreviousPoint;
-        }
+        const QPointF& previousPoint();
 
         void setSelectedZLevel(QGraphicsItem *item);
         void setOwnZlevel(QGraphicsItem *item);
@@ -384,11 +388,6 @@ public slots:
        void textItemAdded(UBGraphicsTextItem* textItem);
 
     protected:
-        UBGraphicsPolygonItem* lineToPolygonItem(const QLineF& pLine, const qreal& pWidth);
-        UBGraphicsPolygonItem* arcToPolygonItem(const QLineF& pStartRadius, qreal pSpanAngle, qreal pWidth);
-
-        void initPolygonItem(UBGraphicsPolygonItem*);
-
 
         virtual void keyReleaseEvent(QKeyEvent * keyEvent);
 
@@ -400,7 +399,6 @@ public slots:
         virtual void drawBackground(QPainter *painter, const QRectF &rect);
 
     private:
-        void setDocumentUpdated();
         QString cleanHtml(const QString& _html);
 
         UBSettings* mSettings;
@@ -420,10 +418,7 @@ public slots:
         UBFeatureBackgroundDisposition mBackgroundObjectDisposition;
         QUrl mBackgroundObjectUrl;
 
-        QPointF mPreviousPoint;
-        qreal mPreviousWidth;
-
-        QList<UBGraphicsPolygonItem*> mPreviousPolygonItems;
+        UBDrawingHandler* mDrawingHandler;
 
         SceneViewState mViewState;
 
@@ -431,13 +426,10 @@ public slots:
 
         QSet<QGraphicsItem*> mTools;
 
-        UBGraphicsPolygonItem *mArcPolygonItem;
-
         QSize mNominalSize;
 
         RenderingContext mRenderingContext;
 
-        UBGraphicsStroke* mCurrentStroke;
         UBSmoothStrokeItem* mCurrentSmoothStroke = nullptr;
 
         bool mShouldUseOMP;
@@ -453,16 +445,6 @@ public slots:
         UBMagnifierHandler *mMagnifierHandler;
 
         UBZLayerController *mZLayerController;
-        UBGraphicsPolygonItem* mpLastPolygon;
-
-        bool mDrawWithCompass;
-
-        // Stroke smoothing (Catmull-Rom interpolation)
-        QVector<QPointF> mSmoothBuffer;   // circular buffer of last 4 points
-        QVector<qreal> mSmoothWidths;     // corresponding widths
-        void drawSmoothedSegment(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3,
-                                 qreal w1, qreal w2, bool bLineStyle);
-        void flushSmoothBuffer(bool bLineStyle);
 
 };
 
