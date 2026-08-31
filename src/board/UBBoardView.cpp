@@ -1463,13 +1463,39 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
         }
     }
     emit mouseRelease(event);
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] mouseReleaseEvent after emit mouseRelease\n";
+            logFile.close();
+        }
+    }
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
   setToolCursor (currentTool);
   // first/ propagate device release to the scene
   if (scene ())
+  {
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] calling inputDeviceRelease, tool=" << (int)currentTool << "\n";
+            logFile.close();
+        }
+    }
     scene ()->inputDeviceRelease ();
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] inputDeviceRelease returned\n";
+            logFile.close();
+        }
+    }
+  }
 
   if (currentTool == UBStylusTool::Selector)
   {
@@ -1675,7 +1701,15 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
 
   mLongPressTimer.stop();
 
-  UBApplication::boardController->controlView()->viewport()->update(); // Issue 1026 - ALTI - 20131024 : depuis que le thumbnail courant est une view "live" de la boardScene, il peut y avoir des "trainées" quand on déplace rapidement les objets. Il faut rafraichir en fin de déplacement.
+  {
+      QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+      if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+          QTextStream out(&logFile);
+          out << "[DIAG] mouseReleaseEvent END, about to update viewport\n";
+          logFile.close();
+      }
+  }
+  UBApplication::boardController->controlView()->viewport()->update(); // Issue 1026
 }
 
 void
