@@ -27,6 +27,9 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 #include <QGraphicsSvgItem>
 #include <QList>
 #include <QObject>
@@ -1072,7 +1075,23 @@ void UBBoardView::longPressEvent()
 void UBBoardView::mousePressEvent (QMouseEvent *event)
 {
     //EV-7 - NNE - 20131231
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[DIAG] mousePressEvent ENTER, movingItem=" << (void*)movingItem << "\n";
+            logFile.close();
+        }
+    }
     emit mousePress(event);
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] mousePressEvent after emit mousePress, movingItem=" << (void*)movingItem << "\n";
+            logFile.close();
+        }
+    }
 
 
     if (!bIsControl && !bIsDesktop) {
@@ -1262,7 +1281,29 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
 {
 
     //EV-7 - NNE - 20131231
+    {
+        static int mmCount = 0;
+        if (++mmCount <= 5) {
+            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream out(&logFile);
+                out << "\n[DIAG] mouseMoveEvent ENTER #" << mmCount << ", movingItem=" << (void*)movingItem << "\n";
+                logFile.close();
+            }
+        }
+    }
     emit mouseMove(event);
+    {
+        static int mmCount2 = 0;
+        if (++mmCount2 <= 5) {
+            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream out(&logFile);
+                out << "[DIAG] mouseMoveEvent after emit mouseMove #" << mmCount2 << ", movingItem=" << (void*)movingItem << "\n";
+                logFile.close();
+            }
+        }
+    }
 
   if(!mIsDragInProgress && ((mapToScene(event->pos()) - mLastPressedMousePos).manhattanLength() < QApplication::startDragDistance()))
   {
@@ -1378,7 +1419,29 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
     {
       if (!mTabletStylusIsPressed && scene ())
       {
+          {
+              static int idmCount = 0;
+              if (++idmCount <= 5) {
+                  QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+                  if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+                      QTextStream out(&logFile);
+                      out << "[DIAG] calling inputDeviceMove #" << idmCount << "\n";
+                      logFile.close();
+                  }
+              }
+          }
           scene ()->inputDeviceMove (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())), mMouseButtonIsPressed);
+          {
+              static int idmCount2 = 0;
+              if (++idmCount2 <= 5) {
+                  QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+                  if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+                      QTextStream out(&logFile);
+                      out << "[DIAG] inputDeviceMove returned #" << idmCount2 << "\n";
+                      logFile.close();
+                  }
+              }
+          }
       }
       event->accept ();
     }
@@ -1391,6 +1454,14 @@ void
 UBBoardView::mouseReleaseEvent (QMouseEvent *event)
 {
     //EV-7 - NNE - 20131231
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[DIAG] mouseReleaseEvent ENTER, movingItem=" << (void*)movingItem << "\n";
+            logFile.close();
+        }
+    }
     emit mouseRelease(event);
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();

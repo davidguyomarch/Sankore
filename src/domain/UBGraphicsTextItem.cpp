@@ -32,6 +32,9 @@
 #include "UBGraphicsTextItem.h"
 
 #include <QTextTable>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 #include "UBGraphicsTextItemDelegate.h"
 #include "UBGraphicsScene.h"
 #include "UBGraphicsDelegateFrame.h"
@@ -937,6 +940,14 @@ QString UBGraphicsTextItem::findAndReplaceAttribute(QString tag, QString oldAttr
 
 void UBGraphicsTextItem::changeHTMLMode()
 {
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] TextItem::changeHTMLMode this=" << (void*)this << "\n";
+            logFile.close();
+        }
+    }
     if(isActivatedTextEditor)
         activateTextEditor(false);
 

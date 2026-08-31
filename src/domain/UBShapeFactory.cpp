@@ -4,6 +4,10 @@
 
 #include "UBShapeFactory.h"
 #include "UBGraphicsEllipseItem.h"
+
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 #include "UBGraphicsRectItem.h"
 #include "UBGraphicsLineItem.h"
 #include "UBEditableGraphicsRegularShapeItem.h"
@@ -381,6 +385,17 @@ void UBShapeFactory::createPolygon(bool create)
 
 void UBShapeFactory::onMouseMove(QMouseEvent *event)
 {
+    {
+        static int sfmmCount = 0;
+        if (++sfmmCount <= 5) {
+            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream out(&logFile);
+                out << "[DIAG] ShapeFactory::onMouseMove #" << sfmmCount << " mIsCreating=" << mIsCreating << " mIsPress=" << mIsPress << " mCurrentShape=" << (void*)mCurrentShape << "\n";
+                logFile.close();
+            }
+        }
+    }
     if(mIsCreating && mIsPress){
         mCursorMoved = true;
         QPointF cursorPosition = mBoardView->mapToScene(event->pos());
@@ -451,6 +466,14 @@ void UBShapeFactory::onMouseMove(QMouseEvent *event)
 
 void UBShapeFactory::onMousePress(QMouseEvent *event)
 {
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] ShapeFactory::onMousePress mIsCreating=" << mIsCreating << " mCurrentShape=" << (void*)mCurrentShape << "\n";
+            logFile.close();
+        }
+    }
     if(mIsCreating){
         mCursorMoved = false;
         mIsPress = true;
@@ -545,6 +568,14 @@ void UBShapeFactory::onMousePress(QMouseEvent *event)
 
 void UBShapeFactory::onMouseRelease(QMouseEvent *event)
 {
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[DIAG] ShapeFactory::onMouseRelease mIsCreating=" << mIsCreating << " mCurrentShape=" << (void*)mCurrentShape << "\n";
+            logFile.close();
+        }
+    }
     Q_UNUSED(event);
     mIsPress = false;
 
