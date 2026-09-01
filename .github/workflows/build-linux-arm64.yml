@@ -126,8 +126,13 @@ jobs:
               # Enable core dumps for crash analysis
               ulimit -c unlimited
               echo "core.%p" > /proc/sys/kernel/core_pattern 2>/dev/null || true
-              timeout 60 build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || {
-                EXIT_CODE=$?
+              # A crash (non-zero exit) must fail the build. #169 fixed the
+              # offscreen --quit-after hang (std::thread watchdog), so a clean
+              # startup now exits 0. On crash we dump the backtrace, then
+              # propagate the failure by re-exiting with the original code.
+              EXIT_CODE=0
+              timeout 60 build/linux/release/product/Open-Sankore --quit-after=10 --smoke-scenario || EXIT_CODE=$?
+              if [ "$EXIT_CODE" -ne 0 ]; then
                 echo "=== SMOKE TEST CRASHED (exit $EXIT_CODE) ==="
                 CORE_FILE=$(find / -name "core*" -newer build/linux/release/product/Open-Sankore 2>/dev/null | head -1)
                 if [ -n "$CORE_FILE" ]; then
@@ -136,8 +141,8 @@ jobs:
                 else
                   echo "No core file found"
                 fi
-                echo "Continuing despite crash (see #169)"
-              }
+                exit $EXIT_CODE
+              fi
               echo "ARM64 smoke test completed"
             '
 
