@@ -471,6 +471,14 @@ linux-* {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unknown-pragmas
         QMAKE_CXXFLAGS_WARN_ON += -Wno-overloaded-virtual
     }
+
+    # When building with coverage (CI / docker-build.sh pass --coverage), define
+    # UB_COVERAGE so main.cpp emits a strong __gcov_dump() flush before _exit().
+    # Without this, the CI smoke run terminates via _exit() and never writes any
+    # .gcda file, leaving app coverage empty (issue #230).
+    contains(QMAKE_CXXFLAGS, --coverage) {
+        DEFINES += UB_COVERAGE
+    }
 }
 
 RESOURCES += resources/sankore.qrc

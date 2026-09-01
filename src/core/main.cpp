@@ -129,17 +129,33 @@ struct StartupProbe {
 static StartupProbe _startupProbe;
 #endif
 
+// === COVERAGE FLUSH HELPER ===
+// When built with --coverage, gcov normally writes .gcda files from atexit
+// handlers. Those handlers never run when we terminate with _exit() (used by
+// the CI watchdog and the signal handler below), so the .gcda files are never
+// produced and app coverage comes out empty (issue #230).
+//
+// The fix is to call __gcov_dump() explicitly before _exit(). We must NOT use a
+// weak declaration: under GCC 14 the public symbol __gcov_dump is weak and stays
+// unresolved (address 0), so `if (__gcov_dump)` is always false and the flush is
+// silently skipped. A *strong* reference resolves correctly against libgcov, but
+// would break linking of the normal (non-coverage) release build. So we only
+// declare and call it when UB_COVERAGE is defined — this macro is injected by the
+// build only when --coverage is on (see OpenSankore.pro / CI).
+#if defined(UB_COVERAGE) && !defined(_WIN32)
+extern "C" void __gcov_dump(void); // strong ref — resolved by libgcov under --coverage
+static inline void ubFlushCoverage() { __gcov_dump(); }
+#else
+static inline void ubFlushCoverage() {}
+#endif
+
 // === UNIX SIGNAL HANDLER (coverage flush + clean exit) ===
 #ifndef _WIN32
-// GCC coverage flush — ensure .gcda files are written on signal
-extern "C" void __gcov_dump(void) __attribute__((weak));
-
 static void unixSignalHandler(int sig)
 {
     Q_UNUSED(sig);
-    // Flush gcov data if compiled with --coverage
-    if (__gcov_dump)
-        __gcov_dump();
+    // Flush gcov data (no-op unless built with coverage) before exiting.
+    ubFlushCoverage();
     // Exit cleanly so atexit handlers also run
     _exit(0);
 }
@@ -250,11 +266,8 @@ int main(int argc, char *argv[])
         std::thread([timeout]() {
             std::this_thread::sleep_for(std::chrono::seconds(timeout));
             qDebug() << "CI watchdog: quit-after timer expired, forcing exit";
-            // Flush gcov data before exiting (Linux)
-#ifndef _WIN32
-            if (__gcov_dump)
-                __gcov_dump();
-#endif
+            // Flush gcov data before exiting (no-op unless built with coverage).
+            ubFlushCoverage();
             _exit(0);
         }).detach();
         qDebug() << "CI mode: watchdog will force exit after" << quitAfterSec << "seconds";
