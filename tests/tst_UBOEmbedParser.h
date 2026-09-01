@@ -26,6 +26,13 @@ private slots:
     void testGetJSONInfos_partialData();
     void testGetXMLInfos_allFields();
 
+    // UBOEmbedParser::parse() — <link> discovery on real UBOEmbedParser instance
+    void testParse_noLinksEmitsParsedImmediately();
+    void testParse_emptyHtmlEmitsParsedImmediately();
+    void testParse_oembedLinkEmitsParseContent();
+    void testParse_nonOembedLinkIgnored();
+    void testParse_multipleOembedLinks();
+
     // Regression test for #229: parse() must not crash when an oembed link is
     // found before setNetworkAccessManager() has been called. The constructor
     // must initialise mpNam (nullptr) and mPending (0).

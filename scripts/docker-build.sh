@@ -288,6 +288,14 @@ if $COVERAGE && $RUN_TESTS; then
 
         OBJECTS_DIR="build/objects"
 
+        # Remove stale .gcda files that have no matching .gcno (e.g. qrc_visual_tests
+        # rebuilt without coverage, or leftover from a previous build config). lcov
+        # errors out on these with "(path) cannot process .gcda ... .gcno is missing".
+        for gcda in $(find "$OBJECTS_DIR" -name "*.gcda" 2>/dev/null); do
+            gcno="${gcda%.gcda}.gcno"
+            [ -f "$gcno" ] || rm -f "$gcda"
+        done
+
         # Check we have .gcda files
         GCDA_COUNT=$(find "$OBJECTS_DIR" -name "*.gcda" 2>/dev/null | wc -l)
         if [ "$GCDA_COUNT" -eq 0 ]; then
@@ -299,7 +307,7 @@ if $COVERAGE && $RUN_TESTS; then
 
         # Capture raw coverage
         lcov --capture --directory "$OBJECTS_DIR" \
-             --output-file build/coverage_raw.info --quiet --ignore-errors inconsistent 2>/dev/null || true
+             --output-file build/coverage_raw.info --quiet --ignore-errors inconsistent,path 2>/dev/null || true
 
         if [ ! -f build/coverage_raw.info ]; then
             echo "⚠ lcov capture failed."
@@ -311,18 +319,18 @@ if $COVERAGE && $RUN_TESTS; then
              "*/src/frameworks/*" "*/src/core/*" "*/src/document/*" \
              "*/src/adaptors/*" "*/src/web/*" "*/src/domain/*" \
              "*/stubs/*" \
-             --output-file build/coverage_filtered.info --quiet --ignore-errors inconsistent,unused 2>/dev/null || true
+             --output-file build/coverage_filtered.info --quiet --ignore-errors inconsistent,unused,path 2>/dev/null || true
 
         if [ ! -s build/coverage_filtered.info ]; then
             # Fallback: remove only system paths instead
             lcov --remove build/coverage_raw.info \
                  "/usr/*" "*/moc_*" "*/premoc/*" "*/build/moc/*" \
-                 --output-file build/coverage_filtered.info --quiet --ignore-errors inconsistent,unused 2>/dev/null || true
+                 --output-file build/coverage_filtered.info --quiet --ignore-errors inconsistent,unused,path 2>/dev/null || true
         fi
 
         lcov --remove build/coverage_filtered.info \
              "*/tst_*" "*/moc_*" "*/premoc/*" "*/stubs/*" \
-             --output-file build/coverage.info --quiet --ignore-errors inconsistent,unused 2>/dev/null || true
+             --output-file build/coverage.info --quiet --ignore-errors inconsistent,unused,path 2>/dev/null || true
 
         # Summary
         echo ""
@@ -374,7 +382,7 @@ if $COVERAGE && $RUN_TESTS; then
         genhtml build/coverage.info \
             --output-directory build/coverage_html \
             --title "Open-Sankoré Unit Test Coverage" \
-            --quiet --ignore-errors inconsistent 2>/dev/null || true
+            --quiet --ignore-errors inconsistent,path 2>/dev/null || true
 
         if [ -d build/coverage_html ]; then
             echo ""
