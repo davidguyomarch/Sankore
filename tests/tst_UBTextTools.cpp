@@ -43,6 +43,13 @@ void TestUBTextTools::testCleanHtml_extractsBody()
     // The extracted slice must start at the opening <body tag.
     QVERIFY(result.startsWith(QStringLiteral("<body")));
     QVERIFY(result.contains(QStringLiteral("content")));
+
+    // The slice must stop at the </body boundary and must NOT overshoot into
+    // the trailing markup (e.g. "</html>"). This is the regression guard for
+    // issue #228 where mid() was called with an absolute index as its length,
+    // which ran start+end characters into the string.
+    QCOMPARE(result, QStringLiteral("<body>content</body"));
+    QVERIFY(!result.contains(QStringLiteral("</html>")));
 }
 
 void TestUBTextTools::testCleanHtml_noBody()
@@ -65,4 +72,14 @@ void TestUBTextTools::testCleanHtml_caseInsensitive()
     QString input = QStringLiteral("<HTML><BODY>upper</BODY></HTML>");
     QString result = UBTextTools::cleanHtml(input);
     QVERIFY(result.startsWith(QStringLiteral("<BODY")));
+    QCOMPARE(result, QStringLiteral("<BODY>upper</BODY"));
+}
+
+void TestUBTextTools::testCleanHtml_openTagButNoCloseTag()
+{
+    // Opening <body but no closing </body. The guard must treat this as "no
+    // valid body slice" and return the original html unchanged, rather than
+    // producing a garbage slice from a negative end index (issue #228 note).
+    QString input = QStringLiteral("<html><body>content only");
+    QCOMPARE(UBTextTools::cleanHtml(input), input);
 }
