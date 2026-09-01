@@ -19,6 +19,14 @@ assets), so a hand-maintained SBOM is more accurate than a generated one.
 > matching entry in the SBOM (and vice versa). The `sbom-check` CI job flags
 > drift between the two, but the content update is manual.
 
+## Asset licensing vs source license
+
+The licenses of bundled assets (fonts, icons, widgets) are independent of the
+GPL-3.0 license covering the Open-Sankoré source code. All assets currently
+bundled permit commercial redistribution. Should any asset with additional
+restrictions be introduced, those restrictions would apply to that asset only
+and would not alter the GPL-3.0 license of the source code.
+
 ## Libraries
 
 | Component | Version | License | Bundled? | Linking | Commercial redistribution | Source |
