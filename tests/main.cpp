@@ -29,6 +29,9 @@
 #include "tst_UBOEmbedParser.h"
 #include "tst_UBSvgTransform.h"
 #include "tst_UBForeignObjectsHelper.h"
+#include "tst_UBTextTools.h"
+#include "tst_UBStrokeProperty.h"
+#include "tst_UBWidgetUtils.h"
 #include "tst_UBGraphicsScene.h"
 #include "tst_UBVisualRegression.h"
 #include "tst_UBRecognition.h"
@@ -104,6 +107,18 @@ int main(int argc, char *argv[])
 
     {
         TestUBForeignObjectsHelper test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBTextTools test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBStrokeProperty test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBWidgetUtils test;
         status |= QTest::qExec(&test, argc, argv);
     }
     {

@@ -32,6 +32,9 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/domain/UBSceneContext.h \
            ../src/domain/UBItem.h \
            ../src/domain/UBSmoothStrokeItem.h \
+           ../src/core/UBTextTools.h \
+           ../src/domain/UBStrokeProperty.h \
+           ../src/frameworks/UBWidgetUtils.h \
            tst_UBGraphicsScene.h \
            tst_UBVisualRegression.h \
            tst_UBRecognition.h \
@@ -44,7 +47,10 @@ SOURCES += ../src/frameworks/UBStringUtils.cpp \
            ../src/frameworks/UBBase32.cpp \
            ../src/adaptors/UBIniFileParser.cpp \
            ../src/adaptors/UBSvgTransformUtils.cpp \
-           ../src/core/UBForeignObjectsUtils.cpp
+           ../src/core/UBForeignObjectsUtils.cpp \
+           ../src/core/UBTextTools.cpp \
+           ../src/domain/UBStrokeProperty.cpp \
+           ../src/frameworks/UBWidgetUtils.cpp
 
 # For UBFileSystemUtils we need a minimal version without OpenSSL/QuaZip deps
 # We provide a test stub instead (not in HEADERS to avoid moc issues on Linux)
@@ -107,6 +113,9 @@ SOURCES += main.cpp \
            tst_UBOEmbedParser.cpp \
            tst_UBSvgTransform.cpp \
            tst_UBForeignObjectsHelper.cpp \
+           tst_UBTextTools.cpp \
+           tst_UBStrokeProperty.cpp \
+           tst_UBWidgetUtils.cpp \
            tst_UBGraphicsScene.cpp \
            tst_UBVisualRegression.cpp \
            tst_UBRecognition.cpp \
@@ -124,7 +133,10 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBMetadataDcSubsetAdaptor.cpp \
            premoc/moc_tst_UBOEmbedParser.cpp \
            premoc/moc_tst_UBSvgTransform.cpp \
-           premoc/moc_tst_UBForeignObjectsHelper.cpp
+           premoc/moc_tst_UBForeignObjectsHelper.cpp \
+           premoc/moc_tst_UBTextTools.cpp \
+           premoc/moc_tst_UBStrokeProperty.cpp \
+           premoc/moc_tst_UBWidgetUtils.cpp
 
 
 # Build output
