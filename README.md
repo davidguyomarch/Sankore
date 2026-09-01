@@ -55,7 +55,7 @@ Pre-built packages are available on the
 
 | Dependency | Tested version | Notes |
 |------------|---------------|-------|
-| Qt 6 | 6.8.2 (Windows CI), 6.8.3 (Linux) | Modules: core5compat, multimedia, svg, qml, quick, quickwidgets, printsupport |
+| Qt 6 | 6.8.2 (Windows and Linux CI) | Modules: core5compat, multimedia, svg, qml, quick, quickwidgets, printsupport |
 | OpenSSL | 3.x | Apache-2.0. Installed via vcpkg (Win) or system (Linux) |
 | QuaZip | 1.4 | Built from source in CI |
 | zlib | 1.3.1 | Built from source (Win) or system (Linux) |

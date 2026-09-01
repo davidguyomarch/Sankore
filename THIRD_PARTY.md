@@ -31,7 +31,7 @@ and would not alter the GPL-3.0 license of the source code.
 
 | Component | Version | License | Bundled? | Linking | Commercial redistribution | Source |
 |-----------|---------|---------|----------|---------|--------------------------|--------|
-| Qt 6 | 6.8.3 (Win), 6.8.3 (Linux) | LGPL-3.0 / GPL-3.0 | No (system / CI) | Dynamic | Yes, under LGPL terms | [qt.io](https://www.qt.io/) |
+| Qt 6 | 6.8.2 (Windows and Linux CI) | LGPL-3.0 / GPL-3.0 | No (system / CI) | Dynamic | Yes, under LGPL terms | [qt.io](https://www.qt.io/) |
 | OpenSSL | 3.x | Apache-2.0 | No (vcpkg / system) | Dynamic | Yes | [openssl.org](https://www.openssl.org/) |
 | QuaZip | 1.4 | LGPL-2.1 | No (built from source in CI) | Static (Win), Dynamic (Linux) | Yes | [github.com/stachenov/quazip](https://github.com/stachenov/quazip) |
 | zlib | 1.3.1 | zlib | No (built from source in CI) | Static (Win), System (Linux) | Yes | [zlib.net](https://zlib.net/) |
@@ -63,14 +63,15 @@ Xpdf source files (`XPDFRenderer.h`, `XPDFRenderer.cpp`) exist in `src/pdf/` but
 | Component | License | Bundled? | Location | Commercial redistribution | Source |
 |-----------|---------|----------|----------|--------------------------|--------|
 | Andika Basic | OFL-1.1 | Yes | `resources/customizations/fonts/AndBasR.ttf` | Yes | [scripts.sil.org](https://scripts.sil.org/Andika) |
-| Écolier Court | OFL | Yes | `resources/customizations/fonts/ec_cour.ttf` | Yes | Jean-Marie Douteau |
-| Écolier Lignes Court | OFL | Yes | `resources/customizations/fonts/ecl_cour.ttf` | Yes | Jean-Marie Douteau |
+| Écolier Court | OFL-1.1 (`resources/customizations/fonts/Ecolier-OFL-LICENSE.txt`) | Yes | `resources/customizations/fonts/ec_cour.ttf` | Yes | Jean-Marie Douteau |
+| Écolier Lignes Court | OFL-1.1 (`resources/customizations/fonts/Ecolier-OFL-LICENSE.txt`) | Yes | `resources/customizations/fonts/ecl_cour.ttf` | Yes | Jean-Marie Douteau |
 | Marelle (8 variants) | OFL-1.1 | Yes | `resources/customizations/fonts/Marelle*.ttf`, `Marelle*.otf` | Yes | [marelle.forge.apps.education.fr](https://marelle.forge.apps.education.fr/) |
 | URW Base35 (14 files) | AGPL-3.0 + font exception | Yes | `resources/fonts/*.pfb` | Yes | [github.com/ArtifexSoftware/urw-base35-fonts](https://github.com/ArtifexSoftware/urw-base35-fonts) |
 
 ### Notes on fonts
 
 - **Marelle**: official cursive school font from the French Ministère de l'Éducation nationale (2026). License file at `resources/customizations/fonts/Marelle-OFL-LICENSE.txt`.
+- **Écolier Court / Écolier Lignes Court**: only these two Écolier fonts by Jean-Marie Douteau are OFL; other Écolier variants (CP, pointillés) are non-free and are not bundled. License file at `resources/customizations/fonts/Ecolier-OFL-LICENSE.txt`, which documents the provenance (author's notice + Fedora's `ecolier-court-fonts` package).
 - **URW Base35**: PostScript base fonts (Nimbus Sans = Helvetica, Nimbus Roman = Times, Nimbus Mono = Courier, etc.). The AGPL font exception allows embedding in documents and applications without triggering AGPL copyleft.
 - All non-free fonts were removed in issue #186.
 
@@ -86,4 +87,5 @@ Xpdf source files (`XPDFRenderer.h`, `XPDFRenderer.cpp`) exist in `src/pdf/` but
 | `NOTICE.md` | Copyright holders and licensing summary |
 | `CREDITS.md` | Human-readable acknowledgments |
 | `resources/customizations/fonts/Marelle-OFL-LICENSE.txt` | Marelle font OFL-1.1 license |
+| `resources/customizations/fonts/Ecolier-OFL-LICENSE.txt` | Écolier Court / Lignes Court OFL-1.1 license + provenance |
 | `resources/icons/phosphor/LICENSE` | Phosphor Icons MIT license |
