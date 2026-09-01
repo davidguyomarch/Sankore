@@ -125,6 +125,13 @@ jobs:
             tar czf "Open-Sankore-${VERSION}-linux-arm64.tar.gz" -C artifacts/arm64 .
           fi
 
+      - name: Validate and stage SBOM
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          python3 scripts/check-sbom.py
+          cp sbom.spdx.json "Open-Sankore-${VERSION}-sbom.spdx.json"
+
       - name: List release assets
         run: |
           echo "=== Release assets ==="
@@ -143,3 +150,4 @@ jobs:
             artifacts/arm64-pkg/*.deb
             artifacts/arm64-pkg/*.rpm
             Open-Sankore-*-linux-arm64.tar.gz
+            Open-Sankore-*-sbom.spdx.json

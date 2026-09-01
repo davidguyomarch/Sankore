@@ -1,0 +1,43 @@
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# Validates that sbom.spdx.json stays consistent with THIRD_PARTY.md and with
+# the project version in OpenSankore.pro. This is a validation gate, not an
+# SBOM generator: the project has no single build manifest a scanner could
+# consume, so the SBOM is curated by hand and this job keeps it honest.
+
+name: SBOM check
+
+on:
+  push:
+    paths:
+      - 'sbom.spdx.json'
+      - 'THIRD_PARTY.md'
+      - 'OpenSankore.pro'
+      - 'scripts/check-sbom.py'
+      - '.github/workflows/sbom-check.yml'
+  pull_request:
+    paths:
+      - 'sbom.spdx.json'
+      - 'THIRD_PARTY.md'
+      - 'OpenSankore.pro'
+      - 'scripts/check-sbom.py'
+      - '.github/workflows/sbom-check.yml'
+
+jobs:
+  sbom-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Validate SBOM
+        run: python3 scripts/check-sbom.py
