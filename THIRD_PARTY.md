@@ -3,7 +3,21 @@
 Technical and legal inventory of all third-party dependencies bundled with or
 linked by Open-Sankoré Community Edition.
 
-Last updated: 2026-08-30
+Last updated: 2026-09-01
+
+## SBOM (Software Bill of Materials)
+
+A machine-readable SBOM is maintained at [`sbom.spdx.json`](sbom.spdx.json)
+(SPDX 2.3 format). It is a curated document derived from this file, not the
+output of an automatic scanner — the project mixes several dependency sources
+(Qt via aqtinstall, OpenSSL via vcpkg, QuaZip/zlib built from source, bundled
+assets), so a hand-maintained SBOM is more accurate than a generated one.
+
+> **When cutting a new release:** update both this file and `sbom.spdx.json`
+> together. Bump the `versionInfo` of the top-level package and the `created`
+> timestamp, and make sure every component listed in the tables below has a
+> matching entry in the SBOM (and vice versa). The `sbom-check` CI job flags
+> drift between the two, but the content update is manual.
 
 ## Libraries
 
