@@ -5,12 +5,26 @@ see [THIRD_PARTY.md](THIRD_PARTY.md).
 
 ## School Fonts
 
+These fonts are bundled with the current Community Edition distribution. Only
+fonts listed as bundled in [THIRD_PARTY.md](THIRD_PARTY.md) are included.
+
 **Andika Basic** — Open Font License
 © SIL International
 Source: https://scripts.sil.org/Andika
 
 **Ecolier Court, Ecolier Ligne Court** — Open Font License
 © Jean-Marie Douteau
+
+**Marelle** — Open Font License 1.1
+© Ministère de l'Éducation nationale (France)
+Source: https://marelle.forge.apps.education.fr/
+
+### Historical font credits
+
+The following fonts were present in historical Open-Sankoré releases but are
+**no longer distributed** with the Community Edition, because their licensing
+terms do not permit unrestricted (commercial) redistribution. They were removed
+in issue #186. The credits are kept here to acknowledge their original authors.
 
 **Ecolier lignes pointillés, Écolier pointillés, Écolier CP, Écolier CP pointillés** — Creative Commons BY-NC-ND
 © Jean-Marie Douteau
