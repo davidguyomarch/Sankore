@@ -152,6 +152,7 @@ docker run --rm -v $(pwd):/src -w /src sankore-qt6 bash -c \
 - **Compilation locale** : Docker Linux uniquement (voir `dev-workflow.md`)
 - **Branches** : `fix/<id>-<desc>` ou `feat/<id>-<desc>` (voir `dev-workflow.md`)
 - **Push to master** : squash merge uniquement, sur demande explicite
+- **Correction de bug** : reproduire d'abord le bug par un test unitaire (qui échoue/crashe sur le code actuel), puis corriger, puis vérifier que le TU passe (voir `dev-workflow.md` → « Correction de bug — reproduire d'abord en test unitaire »)
 - **Web module is stubbed** — browser/ excluded from build
 - **Warnings are non-blocking**: D9025 (/O2 vs /Od) and LNK4217 (UBCFFAdaptor dllimport)
 

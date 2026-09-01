@@ -38,8 +38,10 @@
 
 
 UBOEmbedParser::UBOEmbedParser(QObject *parent, const char* name)
+    : QObject(parent)
+    , mpNam(nullptr)
+    , mPending(0)
 {
-    Q_UNUSED(parent);
     setObjectName(name);
     mParsedTitles.clear();
     connect(this, &UBOEmbedParser::parseContent, this, &UBOEmbedParser::onParseContent);

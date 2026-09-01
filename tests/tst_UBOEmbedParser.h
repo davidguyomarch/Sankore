@@ -32,6 +32,12 @@ private slots:
     void testParse_oembedLinkEmitsParseContent();
     void testParse_nonOembedLinkIgnored();
     void testParse_multipleOembedLinks();
+
+    // Regression test for #229: parse() must not crash when an oembed link is
+    // found before setNetworkAccessManager() has been called. The constructor
+    // must initialise mpNam (nullptr) and mPending (0).
+    void testParseWithoutNamDoesNotCrash();
+    void testConstructorInitialisesMembers();
 };
 
 #endif // TST_UBOEMBEDPARSER_H

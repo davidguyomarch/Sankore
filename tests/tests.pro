@@ -79,8 +79,9 @@ win32-msvc* {
 SOURCES += stubs/UBCryptoUtils_stub.cpp
 
 # UBOEmbedParser — tests compile the real UBOEmbedUtils.cpp (parsing logic)
-# and the real UBOEmbedParser.cpp (link discovery in parse()). UBOEmbedParser is
-# a QObject, so its moc is pre-generated (premoc) like the other QObject sources.
+# and the real UBOEmbedParser.cpp (link discovery in parse() + #229 regression).
+# UBOEmbedParser is a QObject, so its moc is pre-generated (premoc) on Linux to
+# avoid the moc bug, and added to HEADERS on MSVC for qmake auto-moc.
 SOURCES += ../src/web/UBOEmbedUtils.cpp \
            ../src/web/UBOEmbedParser.cpp
 win32-msvc* {

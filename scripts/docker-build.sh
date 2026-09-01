@@ -206,6 +206,11 @@ if $BUILD_TESTS; then
             ../src/frameworks/UBFileSystemUtils.h \
             -o premoc/moc_UBFileSystemUtils.cpp
 
+        # UBOEmbedParser (QObject under test for #229 regression)
+        $MOC_BIN $MOC_COMMON_FLAGS \
+            ../src/web/UBOEmbedParser.h \
+            -o premoc/moc_UBOEmbedParser.cpp
+
         # Test class headers that moc fails to process with moc_predefs.h
         for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem; do
             $MOC_BIN $MOC_COMMON_FLAGS \

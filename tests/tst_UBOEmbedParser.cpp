@@ -14,6 +14,12 @@
 #include <QVector>
 #include <QNetworkAccessManager>
 
+#include <new>
+#include <cstring>
+
+Q_DECLARE_METATYPE(sOEmbedContent)
+Q_DECLARE_METATYPE(QVector<sOEmbedContent>)
+
 void TestUBOEmbedParser::testGetJSONInfos_video()
 {
     QString json = R"({
@@ -290,4 +296,68 @@ void TestUBOEmbedParser::testParse_multipleOembedLinks()
     parser.parse(html);
 
     QCOMPARE(contentSpy.count(), 2);
+}
+
+// --- Regression tests for #229 ---------------------------------------------
+//
+// UBOEmbedParser's constructor used to leave mpNam (QNetworkAccessManager*) and
+// mPending (int) uninitialised. When parse() discovered an oembed <link> before
+// setNetworkAccessManager() had been called, it emitted parseContent, whose slot
+// onParseContent() checks `nullptr != mpNam` and then calls mpNam->get(). With
+// an uninitialised pointer the null guard passes on garbage and mpNam->get()
+// dereferences invalid memory -> crash.
+//
+// Making the reproduction deterministic: constructing a UBOEmbedParser on a
+// fresh stack often reads mpNam as 0x0 by luck, so a naive test passes even on
+// the buggy code (undefined behaviour is not guaranteed to crash). We therefore
+// placement-new the parser into a buffer pre-filled with a non-zero poison
+// pattern. On the buggy constructor mpNam keeps the poison value, the guard
+// passes, and mpNam->get() dereferences the poison -> deterministic crash. The
+// fixed constructor overwrites mpNam with nullptr, so the guard correctly skips
+// the get() call and the test passes.
+void TestUBOEmbedParser::testParseWithoutNamDoesNotCrash()
+{
+    // Poisoned storage: every byte non-zero so any uninitialised pointer member
+    // reads as a non-null (invalid) address.
+    alignas(UBOEmbedParser) unsigned char storage[sizeof(UBOEmbedParser)];
+    memset(storage, 0xEF, sizeof(storage));
+
+    UBOEmbedParser* parser = new (storage) UBOEmbedParser();
+
+    // HTML with two <link> elements, the second being an oembed discovery link.
+    // parse() skips the first captured result and inspects the rest, so we need
+    // at least two <link> tags for the oembed one to be considered.
+    const QString html =
+        "<html><head>"
+        "<link rel=\"stylesheet\" href=\"style.css\">"
+        "<link rel=\"alternate\" type=\"application/json+oembed\" href=\"http://example.com/oembed?format=json\">"
+        "</head></html>";
+
+    // No setNetworkAccessManager(): with the fix mpNam is nullptr and the guard
+    // in onParseContent() skips mpNam->get(). With the bug mpNam is the poison
+    // pattern (non-null), so mpNam->get() dereferences garbage -> SIGSEGV.
+    parser->parse(html);
+
+    // Reaching this point means the uninitialised-pointer dereference did not
+    // happen (i.e. the constructor initialised mpNam to nullptr).
+    QVERIFY(true);
+
+    parser->~UBOEmbedParser();
+}
+
+void TestUBOEmbedParser::testConstructorInitialisesMembers()
+{
+    // With no oembed links, mPending must be 0 and parse() must synchronously
+    // emit oembedParsed with an empty content vector.
+    qRegisterMetaType<QVector<sOEmbedContent>>("QVector<sOEmbedContent>");
+
+    UBOEmbedParser parser;
+    QSignalSpy spy(&parser, &UBOEmbedParser::oembedParsed);
+
+    parser.parse("<html><head><title>no oembed here</title></head></html>");
+
+    QCOMPARE(spy.count(), 1);
+    const QList<QVariant> args = spy.takeFirst();
+    const QVector<sOEmbedContent> contents = args.at(0).value<QVector<sOEmbedContent>>();
+    QCOMPARE(contents.size(), 0);
 }
