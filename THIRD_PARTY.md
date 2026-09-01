@@ -33,7 +33,7 @@ Xpdf source files (`XPDFRenderer.h`, `XPDFRenderer.cpp`) exist in `src/pdf/` but
 
 | Component | License | Bundled? | Location | Commercial redistribution | Source |
 |-----------|---------|----------|----------|--------------------------|--------|
-| Phosphor Icons (regular) | MIT | Yes | `resources/icons/phosphor/` | Yes | [github.com/phosphor-icons/core](https://github.com/phosphor-icons/core) |
+| Phosphor Icons (regular) | MIT (`resources/icons/phosphor/LICENSE`) | Yes | `resources/icons/phosphor/` | Yes | [github.com/phosphor-icons/core](https://github.com/phosphor-icons/core) |
 | Font Awesome 4 | OFL-1.1 (fonts), MIT (CSS/code) | Yes (2 widgets) | `Combinoscope.wgt/fonts/`, `Compteur.wgt/fonts/` | Yes | [fontawesome.com](https://fontawesome.com) |
 
 ## Fonts
@@ -64,3 +64,4 @@ Xpdf source files (`XPDFRenderer.h`, `XPDFRenderer.cpp`) exist in `src/pdf/` but
 | `NOTICE.md` | Copyright holders and licensing summary |
 | `CREDITS.md` | Human-readable acknowledgments |
 | `resources/customizations/fonts/Marelle-OFL-LICENSE.txt` | Marelle font OFL-1.1 license |
+| `resources/icons/phosphor/LICENSE` | Phosphor Icons MIT license |
