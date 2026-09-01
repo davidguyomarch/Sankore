@@ -21,7 +21,8 @@
       "licenseConcluded": "GPL-3.0-only",
       "licenseDeclared": "GPL-3.0-only",
       "copyrightText": "Copyright (C) 2010-2013 GIP ENA; Copyright (C) 2026 David Guyomarch",
-      "supplier": "Organization: Open-Sankoré Community Edition"
+      "supplier": "Organization: Open-Sankoré Community Edition",
+      "comment": "The repository contains historical Open-Sankoré source files (GIP ENA, 2010-2013) carrying a GPL-3.0 OpenSSL linking exception in their headers. New Community Edition files are GPL-3.0-only without that exception. The exception applies only to those historical files, not to the package as a whole, so it is not reflected in the package-level license fields. See LICENSE.md for the verbatim exception text."
     },
     {
       "name": "Qt",
