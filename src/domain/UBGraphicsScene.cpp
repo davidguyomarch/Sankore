@@ -28,6 +28,7 @@
 #include "UBToolOverlay.h"
 #include "UBEraserHandler.h"
 #include "UBDrawingHandler.h"
+#include "UBInputRouter.h"
 
 #include <QPropertyAnimation>
 
@@ -314,7 +315,7 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     , mBackgroundObjectDisposition(Center)
     , mBackgroundObjectUrl(QUrl())
     , mDrawingHandler(nullptr)
-    , mInputDeviceIsPressed(false)
+    , mInputRouter(nullptr)
     , mRenderingContext(Screen)
     , mShouldUseOMP(true)
     , mUndoRedoStackEnabled(enableUndoRedoStack)
@@ -351,6 +352,7 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
     mMagnifierHandler = new UBMagnifierHandler(this, this);
 
     mDrawingHandler = new UBDrawingHandler();
+    mInputRouter = new UBInputRouter(this);
 
     mBackgroundRenderer = new UBBackgroundRenderer(this,
         [this](bool isDark) {
@@ -369,6 +371,9 @@ UBGraphicsScene::UBGraphicsScene(UBDocumentProxy* parent, bool enableUndoRedoSta
 
 UBGraphicsScene::~UBGraphicsScene()
 {
+    delete mInputRouter;
+    mInputRouter = nullptr;
+
     delete mDrawingHandler;
     mDrawingHandler = nullptr;
 
@@ -457,427 +462,17 @@ void UBGraphicsScene::updateGroupButtonState()
 
 bool UBGraphicsScene::inputDevicePress(const QPointF& scenePos, const qreal& pressure)
 {
-    //mMesure1Ms = 0;
-    //mMesure2Ms = 0;
-
-    bool accepted = false;
-
-    // Guard: drawingController may be null on scenes without a live board context.  (#135)
-    if (!mContext.drawingController)
-        return false;
-
-    if (mInputDeviceIsPressed)
-    {
-        qWarning() << "scene received input device pressed, without input device release, muting event as input device move";
-        accepted = inputDeviceMove(scenePos, pressure);
-    }
-    else
-    {
-        mInputDeviceIsPressed = true;
-
-        UBStylusTool::Enum currentTool = (UBStylusTool::Enum)mContext.drawingController->stylusTool();
-
-        if (mContext.drawingController->isDrawingTool())
-        {
-            // -----------------------------------------------------------------
-            // We fall here if we are using the Pen, the Marker or the Line tool
-            // -----------------------------------------------------------------
-            qreal width = 0;
-
-            if (currentTool != UBStylusTool::Line){
-                // Handle the pressure
-                width = mContext.drawingController->currentToolWidth() * pressure;
-            }else{
-                // Ignore pressure for the line tool
-                width = mContext.drawingController->currentToolWidth();
-            }
-
-            width /= mContext.systemScaleFactor();
-            width /= mContext.currentZoom();
-
-            mAddedItems.clear();
-            mRemovedItems.clear();
-
-            // -----------------------------------------------------------------
-            // New smooth stroke pipeline (single QPainterPath item)
-            // Used for Pen and Marker freehand. Line tool uses legacy pipeline.
-            // -----------------------------------------------------------------
-            bool useSmoothStroke = mSettings->appSmoothStrokeItem->get().toBool()
-                                   && !mContext.drawingController->mActiveRuler;
-
-            if (useSmoothStroke)
-            {
-                mCurrentSmoothStroke = new UBSmoothStrokeItem();
-                mCurrentSmoothStroke->setStrokeWidth(width);
-
-                // Set colors based on tool and background
-                QColor colorOnDarkBG, colorOnLightBG;
-                if (currentTool == UBStylusTool::Marker)
-                {
-                    colorOnDarkBG = mContext.markerColorOnDarkBackground();
-                    colorOnLightBG = mContext.markerColorOnLightBackground();
-                }
-                else
-                {
-                    colorOnDarkBG = mContext.penColorOnDarkBackground();
-                    colorOnLightBG = mContext.penColorOnLightBackground();
-                }
-
-                mCurrentSmoothStroke->setColorOnDarkBackground(colorOnDarkBG);
-                mCurrentSmoothStroke->setColorOnLightBackground(colorOnLightBG);
-
-                if (isDarkBackground())
-                    mCurrentSmoothStroke->setStrokeColor(colorOnDarkBG);
-                else
-                    mCurrentSmoothStroke->setStrokeColor(colorOnLightBG);
-
-                mCurrentSmoothStroke->setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
-
-                addItem(mCurrentSmoothStroke);
-                mCurrentSmoothStroke->addPoint(scenePos, pressure);
-
-                mDrawingHandler->setCurrentStroke(nullptr);
-            }
-            else
-            {
-                // Legacy polygon-based pipeline (Line tool, ruler-guided, or setting disabled)
-                // delete current stroke, if not assigned to any polygon
-                if (mDrawingHandler->currentStroke() && mDrawingHandler->currentStroke()->polygons().empty()){
-                    delete mDrawingHandler->currentStroke();
-                    mDrawingHandler->setCurrentStroke(nullptr);
-                }
-
-                mDrawingHandler->setCurrentStroke(new UBGraphicsStroke());
-                mCurrentSmoothStroke = nullptr;
-
-                if (mContext.drawingController->mActiveRuler)
-                {
-                    mContext.drawingController->mActiveRuler->StartLine(scenePos, width);
-                }
-                else
-                {
-                    moveTo(scenePos);
-                    drawLineTo(scenePos, width, mContext.drawingController->stylusTool() == UBStylusTool::Line);
-                }
-            }
-            accepted = true;
-        }
-        else if (currentTool == UBStylusTool::Eraser)
-        {
-            mAddedItems.clear();
-            mRemovedItems.clear();
-            moveTo(scenePos);
-
-            qreal eraserWidth = mContext.currentEraserWidth();
-            eraserWidth /= mContext.systemScaleFactor();
-            eraserWidth /= mContext.currentZoom();
-
-            eraseLineTo(scenePos, eraserWidth);
-            mToolOverlay->drawEraser(scenePos, mContext, true);
-
-            accepted = true;
-        }
-        else if (currentTool == UBStylusTool::Pointer)
-        {
-            mToolOverlay->drawPointer(scenePos, mContext, true);
-            accepted = true;
-        }
-    }
-
-    if (mDrawingHandler->currentStroke() && mDrawingHandler->currentStroke()->polygons().empty()){
-        delete mDrawingHandler->currentStroke();
-        mDrawingHandler->setCurrentStroke(nullptr);
-    }
-
-    return accepted;
+    return mInputRouter->inputDevicePress(scenePos, pressure);
 }
 
 bool UBGraphicsScene::inputDeviceMove(const QPointF& scenePos, const qreal& pressure)
 {
-    bool accepted = false;
-
-    // Guard: drawingController may be null on scenes without a live board context.  (#135)
-    if (!mContext.drawingController)
-        return false;
-
-    UBToolController *dc = mContext.drawingController;
-    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)dc->stylusTool();
-
-    QPointF position = QPointF(scenePos);
-
-    if (currentTool == UBStylusTool::Eraser)
-    {
-        mToolOverlay->drawEraser(position, mContext);
-        accepted = true;
-    }
-
-    if (mInputDeviceIsPressed)
-    {
-        if (dc->isDrawingTool())
-        {
-            // --- New smooth stroke pipeline: just accumulate points ---
-            if (mCurrentSmoothStroke)
-            {
-                if (currentTool == UBStylusTool::Line)
-                {
-                    // Line tool: rubber-band from start to snapped endpoint
-                    QPointF startPos = mCurrentSmoothStroke->rawPoints().first();
-                    // Map start from local back to scene for angle calc
-                    QPointF sceneStart = mCurrentSmoothStroke->mapToScene(startPos);
-
-                    QLineF radius(sceneStart, position);
-                    qreal angle = radius.angle();
-                    angle = qRound(angle / 45) * 45;
-                    qreal radiusLength = radius.length();
-                    QPointF snappedPos(
-                        sceneStart.x() + radiusLength * cos((angle * PI) / 180),
-                        sceneStart.y() - radiusLength * sin((angle * PI) / 180));
-                    QLineF chord(position, snappedPos);
-                    if (chord.length() < qMin((int)16, (int)(radiusLength / 20)))
-                        position = snappedPos;
-
-                    mCurrentSmoothStroke->setLastPoint(position, pressure);
-                }
-                else
-                {
-                    mCurrentSmoothStroke->addPoint(position, pressure);
-                }
-            }
-            else
-            {
-            qreal width = 0;
-
-            if (currentTool != UBStylusTool::Line){
-                // Handle the pressure
-                width = dc->currentToolWidth() * pressure;
-            }else{
-                // Ignore pressure for line tool
-                width = dc->currentToolWidth();
-            }
-
-            width /= mContext.systemScaleFactor();
-            width /= mContext.currentZoom();
-
-            if (currentTool == UBStylusTool::Line || dc->mActiveRuler)
-            {
-                if (mContext.drawingController->stylusTool() != UBStylusTool::Marker)
-                if(nullptr != mDrawingHandler->lastPolygon() && nullptr != mDrawingHandler->currentStroke() && mAddedItems.size() > 0){
-                    UBCoreGraphicsScene::removeItemFromDeletion(mDrawingHandler->lastPolygon());
-                    mAddedItems.remove(mDrawingHandler->lastPolygon());
-                    mDrawingHandler->currentStroke()->remove(mDrawingHandler->lastPolygon());
-                    if (mDrawingHandler->currentStroke()->polygons().empty()){
-                        delete mDrawingHandler->currentStroke();
-                        mDrawingHandler->setCurrentStroke(nullptr);
-                    }
-                    removeItem(mDrawingHandler->lastPolygon());
-                    mDrawingHandler->previousPolygonItems().removeAll(mDrawingHandler->lastPolygon());
-                }
-
-                // ------------------------------------------------------------------------
-                // Here we wanna make sure that the Line will 'grip' at i*45, i*90 degrees
-                // ------------------------------------------------------------------------
-
-                QLineF radius(mDrawingHandler->previousPoint(), position);
-                qreal angle = radius.angle();
-                angle = qRound(angle / 45) * 45;
-                qreal radiusLength = radius.length();
-                QPointF newPosition(
-                    mDrawingHandler->previousPoint().x() + radiusLength * cos((angle * PI) / 180),
-                    mDrawingHandler->previousPoint().y() - radiusLength * sin((angle * PI) / 180));
-                QLineF chord(position, newPosition);
-                                    if (chord.length() < qMin((int)16, (int)(radiusLength / 20)))
-                    position = newPosition;
-            }
-
-            if(dc->mActiveRuler){
-                dc->mActiveRuler->DrawLine(position, width);
-            }else{
-                bool bLineStyle = mContext.drawingController->stylusTool() == UBStylusTool::Line;
-                if (!bLineStyle && currentTool != UBStylusTool::Line
-                    && currentTool != UBStylusTool::Marker)
-                {
-                    // Freehand Pen stroke: route through smoothing buffer if enabled
-                    if (mSettings->appStrokeSmoothing->get().toBool())
-                    {
-                        mDrawingHandler->smoothBuffer().append(position);
-                        mDrawingHandler->smoothWidths().append(width);
-
-                        if (mDrawingHandler->smoothBuffer().size() >= 4)
-                        {
-                            int n = mDrawingHandler->smoothBuffer().size();
-                            mDrawingHandler->drawSmoothedSegment(this, mContext,
-                                mDrawingHandler->smoothBuffer()[n-4], mDrawingHandler->smoothBuffer()[n-3],
-                                mDrawingHandler->smoothBuffer()[n-2], mDrawingHandler->smoothBuffer()[n-1],
-                                mDrawingHandler->smoothWidths()[n-3], mDrawingHandler->smoothWidths()[n-2],
-                                false);
-                        }
-                        else if (mDrawingHandler->smoothBuffer().size() == 2)
-                        {
-                            // Draw first segment directly (not enough points yet for spline)
-                            drawLineTo(position, width, false);
-                        }
-                    }
-                    else
-                    {
-                        drawLineTo(position, width, false);
-                    }
-                }
-                else
-                {
-                    drawLineTo(position, width, bLineStyle);
-                }
-            }
-            } // end legacy else branch
-        }
-        else if (currentTool == UBStylusTool::Eraser)
-        {
-            qreal eraserWidth = mContext.currentEraserWidth();
-            eraserWidth /= mContext.systemScaleFactor();
-            eraserWidth /= mContext.currentZoom();
-
-            eraseLineTo(position, eraserWidth);
-        }
-        else if (currentTool == UBStylusTool::Pointer)
-        {
-            mToolOverlay->drawPointer(position, mContext);
-        }
-
-        accepted = true;
-    }
-
-    return accepted;
+    return mInputRouter->inputDeviceMove(scenePos, pressure);
 }
 
 bool UBGraphicsScene::inputDeviceRelease()
 {
-    // Guard: drawingController may be null on scenes without a live board context.  (#135)
-    if (!mContext.drawingController)
-        return false;
-
-    /*
-    if (mMesure1Ms > 0 ||  mMesure2Ms > 0)
-    {
-        qWarning() << "---------------------------";
-        qWarning() << "mMesure1Ms: " << mMesure1Ms;
-        qWarning() << "mMesure2Ms: " << mMesure2Ms;
-
-        mMesure1Ms = 0;
-        mMesure2Ms = 0;
-    }
-    */
-
-    bool accepted = false;
-
-    if (mToolOverlay->pointerItem())
-    {
-        mToolOverlay->hidePointer();
-        accepted = true;
-    }
-
-    UBToolController *dc = mContext.drawingController;
-
-    if (dc->isDrawingTool() || mDrawingHandler->drawWithCompass())
-    {
-        // --- New smooth stroke pipeline: finalize and wire undo ---
-        if (mCurrentSmoothStroke)
-        {
-            mCurrentSmoothStroke->finalize();
-
-            // The item was already added to the scene in inputDevicePress.
-            // Wire it into the undo system.
-            mAddedItems.clear();
-            mAddedItems << mCurrentSmoothStroke;
-
-            mCurrentSmoothStroke = nullptr;
-        }
-        else
-        {
-        // --- Legacy polygon pipeline ---
-        // Flush any remaining smoothing buffer points
-        mDrawingHandler->flushSmoothBuffer(this, mContext, dc->stylusTool() == UBStylusTool::Line);
-
-        if(mDrawingHandler->arcPolygonItem()){
-
-                UBGraphicsStrokesGroup* pStrokes = new UBGraphicsStrokesGroup();
-
-                // Add the arc
-                mAddedItems.remove(mDrawingHandler->arcPolygonItem());
-                removeItem(mDrawingHandler->arcPolygonItem());
-                UBCoreGraphicsScene::removeItemFromDeletion(mDrawingHandler->arcPolygonItem());
-                mDrawingHandler->arcPolygonItem()->setStrokesGroup(pStrokes);
-                pStrokes->addToGroup(mDrawingHandler->arcPolygonItem());
-
-                // Add the center cross
-                for (QGraphicsItem* item : mAddedItems){
-                    mAddedItems.remove(item);
-                    removeItem(item);
-                    UBCoreGraphicsScene::removeItemFromDeletion(item);
-
-                    UBGraphicsPolygonItem *crossLine = qgraphicsitem_cast<UBGraphicsPolygonItem *>(item);
-                    if (crossLine)
-                        crossLine->setStrokesGroup(pStrokes);
-
-                    pStrokes->addToGroup(item);
-                }
-
-                mAddedItems.clear();
-                mAddedItems << pStrokes;
-                addItem(pStrokes);
-                mDrawingHandler->setDrawWithCompass(false);
-
-        }
-        else if (mDrawingHandler->currentStroke()){
-                UBGraphicsStrokesGroup* pStrokes = new UBGraphicsStrokesGroup();
-
-                // Remove the strokes that were just drawn here and replace them by a stroke item
-                for (UBGraphicsPolygonItem* poly : mDrawingHandler->currentStroke()->polygons()){
-                    mDrawingHandler->previousPolygonItems().removeAll(poly);
-                    removeItem(poly);
-                    UBCoreGraphicsScene::removeItemFromDeletion(poly);
-                    poly->setStrokesGroup(pStrokes);
-                    pStrokes->addToGroup(poly);
-                }
-
-                // TODO LATER : Generate well pressure-interpolated polygons and create the line group with them
-
-                mAddedItems.clear();
-                mAddedItems << pStrokes;
-                addItem(pStrokes);
-
-            if (mDrawingHandler->currentStroke()->polygons().empty()){
-                delete mDrawingHandler->currentStroke();
-                mDrawingHandler->setCurrentStroke(0);
-            }
-        }
-        } // end legacy else
-    }
-
-    if (mRemovedItems.size() > 0 || mAddedItems.size() > 0)
-    {
-
-        if (mUndoRedoStackEnabled) { //should be deleted after scene own undo stack implemented
-            UBGraphicsItemUndoCommand* udcmd = new UBGraphicsItemUndoCommand(this, mRemovedItems, mAddedItems); //deleted by the undoStack
-
-            if(UBApplication::undoStack)
-                UBApplication::undoStack->push(udcmd);
-        }
-
-        mRemovedItems.clear();
-        mAddedItems.clear();
-        accepted = true;
-    }
-
-    mInputDeviceIsPressed = false;
-
-    setDocumentUpdated();
-
-    if (mDrawingHandler->currentStroke() && mDrawingHandler->currentStroke()->polygons().empty()){
-        delete mDrawingHandler->currentStroke();
-    }
-
-    mDrawingHandler->setCurrentStroke(nullptr);
-
-    return accepted;
+    return mInputRouter->inputDeviceRelease();
 }
 
 void UBGraphicsScene::moveTo(const QPointF &pPoint)

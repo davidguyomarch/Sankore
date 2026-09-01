@@ -6,6 +6,7 @@ HEADERS += src/domain/UBGraphicsScene.h \
     src/domain/UBToolOverlay.h \
     src/domain/UBEraserHandler.h \
     src/domain/UBDrawingHandler.h \
+    src/domain/UBInputRouter.h \
     src/domain/UBGraphicsItemUndoCommand.h \
     src/domain/UBGraphicsTextItemUndoCommand.h \
     src/domain/UBGraphicsItemTransformUndoCommand.h \
@@ -67,6 +68,7 @@ SOURCES += src/domain/UBGraphicsScene.cpp \
     src/domain/UBToolOverlay.cpp \
     src/domain/UBEraserHandler.cpp \
     src/domain/UBDrawingHandler.cpp \
+    src/domain/UBInputRouter.cpp \
     src/domain/UBGraphicsItemUndoCommand.cpp \
     src/domain/UBGraphicsTextItemUndoCommand.cpp \
     src/domain/UBGraphicsItemTransformUndoCommand.cpp \
