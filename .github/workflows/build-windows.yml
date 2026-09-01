@@ -156,6 +156,14 @@ jobs:
 
           qmake OpenSankore.pro CONFIG+=no_webengine
 
+      - name: Debug — check UBDrawingHandler in generated Makefile
+        shell: pwsh
+        run: |
+          Write-Host "=== OBJECTS entries mentioning handlers ==="
+          Select-String -Path Makefile.Release -Pattern "Handler|Overlay|Renderer" | Where-Object { $_.Line -match "\.obj" } | ForEach-Object { Write-Host $_.Line.Trim() }
+          Write-Host "=== Does UBDrawingHandler.obj appear at all? ==="
+          Select-String -Path Makefile.Release -Pattern "UBDrawingHandler\.obj" | ForEach-Object { Write-Host ("L{0}: {1}" -f $_.LineNumber, $_.Line.Trim()) }
+
       - name: Build
         shell: cmd
         run: |
