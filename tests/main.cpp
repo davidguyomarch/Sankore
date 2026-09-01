@@ -32,6 +32,7 @@
 #include "tst_UBTextTools.h"
 #include "tst_UBStrokeProperty.h"
 #include "tst_UBWidgetUtils.h"
+#include "tst_UBGraphicsStroke.h"
 #include "tst_UBGraphicsScene.h"
 #include "tst_UBVisualRegression.h"
 #include "tst_UBRecognition.h"
@@ -119,6 +120,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBWidgetUtils test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBGraphicsStroke test;
         status |= QTest::qExec(&test, argc, argv);
     }
     {

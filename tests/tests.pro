@@ -34,6 +34,7 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/domain/UBSmoothStrokeItem.h \
            ../src/core/UBTextTools.h \
            ../src/domain/UBStrokeProperty.h \
+           ../src/domain/UBGraphicsStroke.h \
            ../src/frameworks/UBWidgetUtils.h \
            tst_UBGraphicsScene.h \
            tst_UBVisualRegression.h \
@@ -51,6 +52,10 @@ SOURCES += ../src/frameworks/UBStringUtils.cpp \
            ../src/core/UBTextTools.cpp \
            ../src/domain/UBStrokeProperty.cpp \
            ../src/frameworks/UBWidgetUtils.cpp
+
+# UBGraphicsStroke — compiled via a testable wrapper that shadows the heavy
+# UBGraphicsPolygonItem header with a lightweight stub (see the wrapper comment).
+SOURCES += stubs/UBGraphicsStroke_testable.cpp
 
 # For UBFileSystemUtils we need a minimal version without OpenSSL/QuaZip deps
 # We provide a test stub instead (not in HEADERS to avoid moc issues on Linux)
@@ -74,7 +79,15 @@ win32-msvc* {
 SOURCES += stubs/UBCryptoUtils_stub.cpp
 
 # UBOEmbedParser — tests compile the real UBOEmbedUtils.cpp (parsing logic)
-SOURCES += ../src/web/UBOEmbedUtils.cpp
+# and the real UBOEmbedParser.cpp (link discovery in parse()). UBOEmbedParser is
+# a QObject, so its moc is pre-generated (premoc) like the other QObject sources.
+SOURCES += ../src/web/UBOEmbedUtils.cpp \
+           ../src/web/UBOEmbedParser.cpp
+win32-msvc* {
+    HEADERS += ../src/web/UBOEmbedParser.h
+} else {
+    SOURCES += premoc/moc_UBOEmbedParser.cpp
+}
 
 # UBMetadataDcSubsetAdaptor — tests compile the real UBMetadataLoader.cpp (load logic)
 SOURCES += ../src/adaptors/UBMetadataLoader.cpp
@@ -116,6 +129,7 @@ SOURCES += main.cpp \
            tst_UBTextTools.cpp \
            tst_UBStrokeProperty.cpp \
            tst_UBWidgetUtils.cpp \
+           tst_UBGraphicsStroke.cpp \
            tst_UBGraphicsScene.cpp \
            tst_UBVisualRegression.cpp \
            tst_UBRecognition.cpp \
@@ -136,7 +150,8 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBForeignObjectsHelper.cpp \
            premoc/moc_tst_UBTextTools.cpp \
            premoc/moc_tst_UBStrokeProperty.cpp \
-           premoc/moc_tst_UBWidgetUtils.cpp
+           premoc/moc_tst_UBWidgetUtils.cpp \
+           premoc/moc_tst_UBGraphicsStroke.cpp
 
 
 # Build output
