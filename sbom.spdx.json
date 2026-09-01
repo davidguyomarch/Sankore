@@ -27,10 +27,10 @@
     {
       "name": "Qt",
       "SPDXID": "SPDXRef-Package-Qt",
-      "versionInfo": "6.8.3",
+      "versionInfo": "6.8.2",
       "downloadLocation": "https://www.qt.io/",
       "externalRefs": [
-        { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/qt@6.8.3" }
+        { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/qt@6.8.2" }
       ],
       "licenseConcluded": "LGPL-3.0-only OR GPL-3.0-only",
       "licenseDeclared": "LGPL-3.0-only OR GPL-3.0-only",

@@ -31,7 +31,7 @@ and would not alter the GPL-3.0 license of the source code.
 
 | Component | Version | License | Bundled? | Linking | Commercial redistribution | Source |
 |-----------|---------|---------|----------|---------|--------------------------|--------|
-| Qt 6 | 6.8.3 (Win), 6.8.3 (Linux) | LGPL-3.0 / GPL-3.0 | No (system / CI) | Dynamic | Yes, under LGPL terms | [qt.io](https://www.qt.io/) |
+| Qt 6 | 6.8.2 (Windows and Linux CI) | LGPL-3.0 / GPL-3.0 | No (system / CI) | Dynamic | Yes, under LGPL terms | [qt.io](https://www.qt.io/) |
 | OpenSSL | 3.x | Apache-2.0 | No (vcpkg / system) | Dynamic | Yes | [openssl.org](https://www.openssl.org/) |
 | QuaZip | 1.4 | LGPL-2.1 | No (built from source in CI) | Static (Win), Dynamic (Linux) | Yes | [github.com/stachenov/quazip](https://github.com/stachenov/quazip) |
 | zlib | 1.3.1 | zlib | No (built from source in CI) | Static (Win), System (Linux) | Yes | [zlib.net](https://zlib.net/) |
