@@ -390,34 +390,41 @@ void UBShapeFactory::onMouseMove(QMouseEvent *event)
             if (mShapeType == Ellipse)
             {
                 UB3HEditableGraphicsEllipseItem* shape = dynamic_cast<UB3HEditableGraphicsEllipseItem*>(mCurrentShape);
-                QRectF rect = QRectF(shape->pos(), cursorPosition);
+                if (shape)
+                {
+                    QRectF rect = QRectF(shape->pos(), cursorPosition);
 
-                shape->setRadiusX(rect.width()/2);
-                shape->setRadiusY(rect.height()/2);
+                    shape->setRadiusX(rect.width()/2);
+                    shape->setRadiusY(rect.height()/2);
+                }
             }
             else if(mShapeType == Circle)
             {
                 UB1HEditableGraphicsCircleItem* shape = dynamic_cast<UB1HEditableGraphicsCircleItem*>(mCurrentShape);
 
-                shape->setRect(QRectF(shape->pos(), cursorPosition));
+                if (shape)
+                    shape->setRect(QRectF(shape->pos(), cursorPosition));
             }
             else if (mShapeType == Rectangle)
             {
                 UB3HEditableGraphicsRectItem* shape = dynamic_cast<UB3HEditableGraphicsRectItem*>(mCurrentShape);
 
-                shape->setRect(QRectF(shape->pos(), cursorPosition));
+                if (shape)
+                    shape->setRect(QRectF(shape->pos(), cursorPosition));
             }
             else if(mShapeType == Square)
             {
                 UB1HEditableGraphicsSquareItem* shape = dynamic_cast<UB1HEditableGraphicsSquareItem*>(mCurrentShape);
 
-                shape->setRect(QRectF(shape->pos(), cursorPosition));
+                if (shape)
+                    shape->setRect(QRectF(shape->pos(), cursorPosition));
             }
             else if (mShapeType == Line)
             {
                 UBEditableGraphicsLineItem* line = dynamic_cast<UBEditableGraphicsLineItem*>(mCurrentShape);
 
-                line->setEndPoint(cursorPosition);
+                if (line)
+                    line->setEndPoint(cursorPosition);
             }
         }else{
             if(mShapeType == Pen){
@@ -434,8 +441,11 @@ void UBShapeFactory::onMouseMove(QMouseEvent *event)
                 }
             }else if (mShapeType == RegularPolygon){
                 UBEditableGraphicsRegularShapeItem* regularPathItem = dynamic_cast<UBEditableGraphicsRegularShapeItem*>(mCurrentShape);
-                regularPathItem->updatePath(cursorPosition);
-                mBoundingRect = regularPathItem->boundingRect();
+                if (regularPathItem)
+                {
+                    regularPathItem->updatePath(cursorPosition);
+                    mBoundingRect = regularPathItem->boundingRect();
+                }
             }
         }
         if (mCurrentShape)
