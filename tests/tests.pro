@@ -68,7 +68,17 @@ win32-msvc* {
 SOURCES += stubs/UBCryptoUtils_stub.cpp
 
 # UBOEmbedParser — tests compile the real UBOEmbedUtils.cpp (parsing logic)
+# and the real UBOEmbedParser.cpp (QObject) for the #229 regression tests.
 SOURCES += ../src/web/UBOEmbedUtils.cpp
+SOURCES += ../src/web/UBOEmbedParser.cpp
+
+# UBOEmbedParser is a QObject: moc is pre-generated to avoid the Linux moc bug
+# (see build/moc handling below and docker-build.sh).
+win32-msvc* {
+    HEADERS += ../src/web/UBOEmbedParser.h
+} else {
+    SOURCES += premoc/moc_UBOEmbedParser.cpp
+}
 
 # UBMetadataDcSubsetAdaptor — tests compile the real UBMetadataLoader.cpp (load logic)
 SOURCES += ../src/adaptors/UBMetadataLoader.cpp

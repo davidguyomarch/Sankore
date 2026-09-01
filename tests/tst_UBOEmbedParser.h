@@ -25,6 +25,12 @@ private slots:
     void testGetXMLInfos_emptyXml();
     void testGetJSONInfos_partialData();
     void testGetXMLInfos_allFields();
+
+    // Regression test for #229: parse() must not crash when an oembed link is
+    // found before setNetworkAccessManager() has been called. The constructor
+    // must initialise mpNam (nullptr) and mPending (0).
+    void testParseWithoutNamDoesNotCrash();
+    void testConstructorInitialisesMembers();
 };
 
 #endif // TST_UBOEMBEDPARSER_H

@@ -353,6 +353,41 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 3. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
 4. **Ne JAMAIS push sur master** — toujours pousser la branche feature/fix
 
+### Correction de bug — reproduire d'abord en test unitaire
+
+**Règle : avant de corriger un bug, essayer de le reproduire par un test unitaire, puis corriger.**
+
+C'est l'approche « test-first » (ou red-green) appliquée aux bugs. Le flow :
+
+1. **Écrire un TU qui reproduit le bug** — le test doit échouer (ou crasher) sur le code
+   actuel. C'est la preuve tangible que le bug existe et qu'on l'a bien compris.
+2. **Lancer le TU sur le code non corrigé** pour confirmer qu'il échoue/crashe.
+3. **Corriger le code**.
+4. **Relancer le TU** : il doit maintenant passer. Le test reste dans la suite comme test
+   de non-régression permanent.
+5. **Valider la suite complète** (`./scripts/docker-build.sh`) pour vérifier qu'aucune
+   régression n'a été introduite.
+
+Pourquoi :
+- Le test documente le bug et empêche sa réapparition (non-régression).
+- Il force à comprendre la cause racine avant de coder la correction.
+- Il donne une preuve reproductible plutôt qu'une correction « à l'aveugle ».
+
+Cas particuliers :
+- **Bugs de mémoire non initialisée / undefined behavior** : un simple test peut passer par
+  chance (ex. un pointeur non initialisé qui vaut `nullptr` par hasard). Pour rendre la
+  reproduction **déterministe**, construire l'objet sur un buffer « empoisonné »
+  (placement-new sur un tampon rempli d'un motif non nul comme `0xEF`) afin que le membre
+  non initialisé soit lu comme une adresse invalide non nulle → crash garanti sur le code
+  buggé, test qui passe sur le code corrigé. (Exemple : #229 `UBOEmbedParser`.)
+- **Bug non reproductible en TU** (rendu visuel, interaction souris, comportement runtime
+  Windows) : si aucun TU raisonnable ne peut le capturer, le documenter dans la PR, ajouter
+  des diagnostics `[TAG]` dans `startup.log` (voir plus bas), et corriger avec l'aide des
+  logs de la VM. Noter explicitement pourquoi le bug n'a pas pu être couvert par un TU.
+- **Ajout d'une nouvelle classe QObject sous test** : compiler la vraie source dans
+  `tests/tests.pro`, pré-générer son moc dans `docker-build.sh` (motif `premoc/`), et
+  régénérer le `premoc/moc_tst_*.cpp` du fichier de test si on ajoute des slots.
+
 ### Après modifications — validation locale obligatoire
 
 Avant tout commit et push, Kiro doit exécuter la validation locale complète :

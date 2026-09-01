@@ -238,6 +238,12 @@ jobs:
             -I/opt/qt/6.8.2/gcc_64/include -I/opt/qt/6.8.2/gcc_64/include/QtCore \
             -I/opt/qt/6.8.2/gcc_64/include/QtGui -I/opt/qt/6.8.2/gcc_64/include/QtWidgets \
             ../src/frameworks/UBFileSystemUtils.h -o premoc/moc_UBFileSystemUtils.cpp
+          # Pre-generate moc for UBOEmbedParser.h (QObject under test for #229 regression)
+          /opt/qt/6.8.2/gcc_64/libexec/moc -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_TESTLIB_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB \
+            -I/opt/qt/6.8.2/gcc_64/mkspecs/linux-g++ -I. -I../src \
+            -I/opt/qt/6.8.2/gcc_64/include -I/opt/qt/6.8.2/gcc_64/include/QtCore \
+            -I/opt/qt/6.8.2/gcc_64/include/QtGui -I/opt/qt/6.8.2/gcc_64/include/QtWidgets \
+            ../src/web/UBOEmbedParser.h -o premoc/moc_UBOEmbedParser.cpp
           make -j$(nproc)
 
       - name: Run unit tests with coverage
