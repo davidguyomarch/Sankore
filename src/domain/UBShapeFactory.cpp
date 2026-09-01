@@ -568,40 +568,51 @@ void UBShapeFactory::onMouseRelease(QMouseEvent *event)
     {
         UB3HEditableGraphicsRectItem* shape = dynamic_cast<UB3HEditableGraphicsRectItem*>(mCurrentShape);
 
-        QRectF rect = shape->rect();
-
-        shape->setRect(reverseRect(rect));
+        if (shape)
+        {
+            QRectF rect = shape->rect();
+            shape->setRect(reverseRect(rect));
+        }
     }
     else if(mShapeType == Square)
     {
         UB1HEditableGraphicsSquareItem* shape = dynamic_cast<UB1HEditableGraphicsSquareItem*>(mCurrentShape);
 
-        QRectF rect = shape->rect();
-
-        shape->setRect(reverseRect(rect));
+        if (shape)
+        {
+            QRectF rect = shape->rect();
+            shape->setRect(reverseRect(rect));
+        }
     }
     else if(mShapeType == Ellipse)
     {
         UB3HEditableGraphicsEllipseItem* shape = dynamic_cast<UB3HEditableGraphicsEllipseItem*>(mCurrentShape);
 
-        QRectF rect = shape->rect();
-
-        shape->setRect(reverseRect(rect));
+        if (shape)
+        {
+            QRectF rect = shape->rect();
+            shape->setRect(reverseRect(rect));
+        }
     }
     else if(mShapeType == Circle)
     {
         UB1HEditableGraphicsCircleItem* shape = dynamic_cast<UB1HEditableGraphicsCircleItem*>(mCurrentShape);
 
-        QRectF rect = shape->rect();
-
-        shape->setRect(reverseRect(rect));
+        if (shape)
+        {
+            QRectF rect = shape->rect();
+            shape->setRect(reverseRect(rect));
+        }
     }
     else if(mShapeType == RegularPolygon)
     {
         UBEditableGraphicsRegularShapeItem* shape = dynamic_cast<UBEditableGraphicsRegularShapeItem*>(mCurrentShape);
 
-        QPointF startPoint = shape->correctStartPoint();
-        shape->setStartPoint(startPoint);
+        if (shape)
+        {
+            QPointF startPoint = shape->correctStartPoint();
+            shape->setStartPoint(startPoint);
+        }
     }
     else if(mShapeType == Pen)
     {
