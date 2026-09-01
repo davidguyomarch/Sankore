@@ -54,6 +54,16 @@ jobs:
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Install jom (parallel nmake)
+        shell: pwsh
+        run: |
+          $jomZip = "$env:RUNNER_TEMP\jom.zip"
+          $jomDir = "C:\jom"
+          Invoke-WebRequest -Uri "https://download.qt.io/official_releases/jom/jom_1_1_7.zip" -OutFile $jomZip
+          Expand-Archive -Path $jomZip -DestinationPath $jomDir -Force
+          echo "$jomDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Write-Host "jom installed to $jomDir"
+
       - name: Cache vcpkg OpenSSL
         id: cache-vcpkg
         uses: actions/cache@v5
@@ -62,6 +72,8 @@ jobs:
             ${{ env.VCPKG_INSTALLATION_ROOT }}\installed\x64-windows
             ${{ env.VCPKG_INSTALLATION_ROOT }}\installed\x64-windows-static
           key: vcpkg-openssl-x64-windows-v1
+          restore-keys: |
+            vcpkg-openssl-x64-windows-
 
       - name: Install OpenSSL via vcpkg
         if: steps.cache-vcpkg.outputs.cache-hit != 'true'
@@ -160,7 +172,7 @@ jobs:
         shell: cmd
         run: |
           set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
-          nmake release
+          jom -j %NUMBER_OF_PROCESSORS% release
 
       - name: List build output
         if: always()
@@ -177,7 +189,7 @@ jobs:
           set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
           cd tests
           qmake tests.pro
-          nmake
+          jom -j %NUMBER_OF_PROCESSORS%
 
       - name: Run unit tests
         shell: cmd
