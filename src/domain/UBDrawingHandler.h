@@ -17,7 +17,7 @@ class QGraphicsItem;
 class UBGraphicsPolygonItem;
 class UBGraphicsScene;
 class UBGraphicsStroke;
-class UBSceneContext;
+struct UBSceneContext;
 class UBSettings;
 
 /**

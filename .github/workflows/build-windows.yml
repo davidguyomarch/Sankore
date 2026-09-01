@@ -156,16 +156,6 @@ jobs:
 
           qmake OpenSankore.pro CONFIG+=no_webengine
 
-      - name: Debug — compile UBDrawingHandler.cpp in isolation
-        shell: cmd
-        run: |
-          set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
-          echo === Compiling only UBDrawingHandler.obj ===
-          nmake release build\win32\release\objects\UBDrawingHandler.obj
-          echo === dumpbin symbols for drawLineTo ===
-          dumpbin /symbols build\win32\release\objects\UBDrawingHandler.obj | findstr /C:"drawLineTo"
-          echo === exit ===
-
       - name: Build
         shell: cmd
         run: |
