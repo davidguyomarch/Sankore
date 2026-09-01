@@ -32,9 +32,10 @@ DGESCO — Laurence Bedoin & Malou Verlomme
 ## Icons
 
 **Phosphor Icons** — MIT License
-© Phosphor Icons contributors
+Copyright (c) 2023 Phosphor Icons
 Source: https://github.com/phosphor-icons/core
 Website: https://phosphoricons.com
+License text: [resources/icons/phosphor/LICENSE](resources/icons/phosphor/LICENSE)
 Used in the QML V2 UI for all toolbar and palette icons.
 
 ## Translations
