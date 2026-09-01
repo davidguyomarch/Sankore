@@ -160,13 +160,11 @@ Le build Windows supporte `workflow_dispatch` : on peut lancer un build manuelle
 # 1. Lancer le build sur la branche
 gh workflow run build-windows.yml --ref feature/ma-branche
 
-# 2. Trouver le run ID du dernier build réussi
-gh run list --workflow=build-windows.yml --branch=feature/ma-branche --status=success --limit=1
+# 2. Télécharger l'artefact (le script choisit le dernier build réussi et
+#    signale les builds en cours ou les échecs plus récents)
+./scripts/deploy-latest.sh --branch feature/ma-branche   # ou --pr <numéro>
 
-# 3. Télécharger l'artefact (~25 min après le lancement)
-./scripts/deploy-latest.sh <run-id>
-
-# 4. Dans la VM Windows : Z:\sankore-install\run-test.bat
+# 3. Dans la VM Windows : Z:\sankore-install\run-test.bat
 ```
 
 ### Depuis l'interface GitHub

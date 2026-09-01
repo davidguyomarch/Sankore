@@ -228,14 +228,20 @@ Le CI (`build-windows.yml`, `build-linux.yml`, `build-linux-arm64.yml`) tourne s
 
 ### Étape 3 : Test sur VM Windows — deploy + run-test.bat
 
-Le développeur déploie l'artefact CI de la PR et le teste :
+Le développeur déploie l'artefact CI de la PR et le teste. Le script `deploy-latest.sh` sélectionne automatiquement le dernier build Windows réussi et signale les builds en cours ou les échecs plus récents :
 
 ```bash
-# Trouver le run ID du build de la branche
-gh run list --workflow=build-windows.yml --branch=fix/135-desktop-crash --status=success --limit=1
+# Par PR (résout la branche automatiquement)
+./scripts/deploy-latest.sh --pr 212
 
-# Télécharger l'artefact
+# Par branche
+./scripts/deploy-latest.sh --branch fix/135-desktop-crash
+
+# Par run ID explicite
 ./scripts/deploy-latest.sh <run-id>
+
+# Dernier build réussi sur master (défaut)
+./scripts/deploy-latest.sh
 ```
 
 Puis dans la VM Windows :
