@@ -8,6 +8,11 @@
 
 #include "tst_UBOEmbedParser.h"
 #include "web/UBOEmbedUtils.h"
+#include "web/UBOEmbedParser.h"
+
+#include <QSignalSpy>
+#include <QVector>
+#include <QNetworkAccessManager>
 
 void TestUBOEmbedParser::testGetJSONInfos_video()
 {
@@ -188,4 +193,101 @@ void TestUBOEmbedParser::testGetXMLInfos_allFields()
     QCOMPARE(content.thumbHeight, QString("480"));
     QCOMPARE(content.providerName, QString("Vimeo"));
     QCOMPARE(content.version, 1.0f);
+}
+
+// --- UBOEmbedParser::parse() ---
+//
+// parse() scans the html for <link ...> tags via a global regex, then (starting
+// from the SECOND match) inspects each tag's type/href attributes. Tags whose
+// type contains "oembed" trigger a parseContent(href) signal; when no oembed
+// href is found, oembedParsed() is emitted straight away.
+
+void TestUBOEmbedParser::testParse_noLinksEmitsParsedImmediately()
+{
+    UBOEmbedParser parser;
+    QSignalSpy parsedSpy(&parser, &UBOEmbedParser::oembedParsed);
+    QSignalSpy contentSpy(&parser, &UBOEmbedParser::parseContent);
+
+    parser.parse(QStringLiteral("<html><body>no links here</body></html>"));
+
+    QCOMPARE(parsedSpy.count(), 1);
+    QCOMPARE(contentSpy.count(), 0);
+}
+
+void TestUBOEmbedParser::testParse_emptyHtmlEmitsParsedImmediately()
+{
+    UBOEmbedParser parser;
+    QSignalSpy parsedSpy(&parser, &UBOEmbedParser::oembedParsed);
+
+    parser.parse(QString());
+
+    QCOMPARE(parsedSpy.count(), 1);
+}
+
+void TestUBOEmbedParser::testParse_oembedLinkEmitsParseContent()
+{
+    UBOEmbedParser parser;
+    // parseContent is connected internally to onParseContent, which dereferences
+    // the network access manager. Provide one so the oembed path is exercised
+    // without dereferencing an uninitialised pointer.
+    QNetworkAccessManager nam;
+    parser.setNetworkAccessManager(&nam);
+
+    QSignalSpy parsedSpy(&parser, &UBOEmbedParser::oembedParsed);
+    QSignalSpy contentSpy(&parser, &UBOEmbedParser::parseContent);
+
+    // parse() processes matches from the 2nd onward, so a leading placeholder
+    // <link> is required before the real oembed link is considered.
+    QString html =
+        "<head>"
+        "<link rel=\"stylesheet\" href=\"style.css\">"
+        "<link type=\"application/json+oembed\" href=\"http://provider/oembed?url=x\">"
+        "</head>";
+
+    parser.parse(html);
+
+    QCOMPARE(contentSpy.count(), 1);
+    QCOMPARE(contentSpy.at(0).at(0).toString(),
+             QStringLiteral("http://provider/oembed?url=x"));
+    // A pending network fetch means oembedParsed is NOT emitted yet.
+    QCOMPARE(parsedSpy.count(), 0);
+}
+
+void TestUBOEmbedParser::testParse_nonOembedLinkIgnored()
+{
+    UBOEmbedParser parser;
+    QSignalSpy parsedSpy(&parser, &UBOEmbedParser::oembedParsed);
+    QSignalSpy contentSpy(&parser, &UBOEmbedParser::parseContent);
+
+    QString html =
+        "<head>"
+        "<link rel=\"icon\" href=\"favicon.ico\">"
+        "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"
+        "</head>";
+
+    parser.parse(html);
+
+    // No oembed type => nothing to fetch => parsed emitted immediately.
+    QCOMPARE(contentSpy.count(), 0);
+    QCOMPARE(parsedSpy.count(), 1);
+}
+
+void TestUBOEmbedParser::testParse_multipleOembedLinks()
+{
+    UBOEmbedParser parser;
+    QNetworkAccessManager nam;
+    parser.setNetworkAccessManager(&nam);
+
+    QSignalSpy contentSpy(&parser, &UBOEmbedParser::parseContent);
+
+    QString html =
+        "<head>"
+        "<link rel=\"stylesheet\" href=\"style.css\">"
+        "<link type=\"application/json+oembed\" href=\"http://p/one\">"
+        "<link type=\"text/xml+oembed\" href=\"http://p/two\">"
+        "</head>";
+
+    parser.parse(html);
+
+    QCOMPARE(contentSpy.count(), 2);
 }

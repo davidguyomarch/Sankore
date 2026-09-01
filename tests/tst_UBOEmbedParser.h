@@ -25,6 +25,13 @@ private slots:
     void testGetXMLInfos_emptyXml();
     void testGetJSONInfos_partialData();
     void testGetXMLInfos_allFields();
+
+    // UBOEmbedParser::parse() — <link> discovery on real UBOEmbedParser instance
+    void testParse_noLinksEmitsParsedImmediately();
+    void testParse_emptyHtmlEmitsParsedImmediately();
+    void testParse_oembedLinkEmitsParseContent();
+    void testParse_nonOembedLinkIgnored();
+    void testParse_multipleOembedLinks();
 };
 
 #endif // TST_UBOEMBEDPARSER_H
