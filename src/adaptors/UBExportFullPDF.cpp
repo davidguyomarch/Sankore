@@ -100,6 +100,11 @@ void UBExportFullPDF::saveOverlayPdf(UBDocumentProxy* pDocumentProxy, const QStr
     for(int pageIndex = 0 ; pageIndex < pDocumentProxy->pageCount(); pageIndex++)
     {
         UBGraphicsScene* scene = UBPersistenceManager::persistenceManager()->loadDocumentScene(pDocumentProxy, pageIndex);
+        if (!scene)
+        {
+            qWarning() << "UBExportFullPDF: skipping page" << pageIndex << "- scene failed to load";
+            continue;
+        }
 
         // set background to white, no grid for PDF output
         bool isDark = scene->isDarkBackground();
@@ -197,6 +202,11 @@ void UBExportFullPDF::persistsDocument(UBDocumentProxy* pDocumentProxy, const QS
             for(int pageIndex = 0 ; pageIndex < existingPageCount; pageIndex++)
             {
                 UBGraphicsScene* scene = UBPersistenceManager::persistenceManager()->loadDocumentScene(pDocumentProxy, pageIndex);
+                if (!scene)
+                {
+                    qWarning() << "UBExportFullPDF: skipping page" << pageIndex << "- scene failed to load";
+                    continue;
+                }
                 UBGraphicsPDFItem *pdfItem = qgraphicsitem_cast<UBGraphicsPDFItem*>(scene->backgroundObject());
 
 				QSize pageSize = scene->nominalSize();

@@ -108,6 +108,11 @@ void UBExportPDF::persistsDocument(UBDocumentProxy* pDocumentProxy, const QStrin
     for(int pageIndex = 0 ; pageIndex < existingPageCount; pageIndex++)
     {
         UBGraphicsScene* scene = UBPersistenceManager::persistenceManager()->loadDocumentScene(pDocumentProxy, pageIndex);
+        if (!scene)
+        {
+            qWarning() << "UBExportPDF: skipping page" << pageIndex << "- scene failed to load";
+            continue;
+        }
         UBApplication::showMessage(tr("Exporting page %1 of %2").arg(pageIndex + 1).arg(existingPageCount));
         // set background to white, no crossing for PDF output
         bool isDark = scene->isDarkBackground();
