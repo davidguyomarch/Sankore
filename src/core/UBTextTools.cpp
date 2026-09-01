@@ -21,14 +21,20 @@ QString UBTextTools::cleanHtml(const QString& _html)
 
     QString cleanSource = "";
     QString simplifiedHtml = _html;
+    const QString lowerHtml = simplifiedHtml.toLower();
 
-    int start = simplifiedHtml.toLower().indexOf(START_TAG);
-    int end = simplifiedHtml.toLower().indexOf(END_TAG) + END_TAG.size();
+    int start = lowerHtml.indexOf(START_TAG);
+    int endTag = lowerHtml.indexOf(END_TAG);
 
-    if(start != -1 && end != -1)
-        cleanSource = simplifiedHtml.mid(start, end);
-    else
+    if (start != -1 && endTag != -1) {
+        // endTag is the index of "</body"; advance past it so the closing tag
+        // name is included, then slice [start, end) using a *length*, not an
+        // absolute index (issue #228).
+        int end = endTag + END_TAG.size();
+        cleanSource = simplifiedHtml.mid(start, end - start);
+    } else {
         cleanSource = _html;
+    }
 
     return cleanSource;
 }

@@ -24,6 +24,7 @@ private slots:
     void testCleanHtml_noBody();
     void testCleanHtml_bodyWithAttributes();
     void testCleanHtml_caseInsensitive();
+    void testCleanHtml_openTagButNoCloseTag();
 };
 
 #endif // TST_UBTEXTTOOLS_H
