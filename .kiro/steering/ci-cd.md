@@ -13,6 +13,7 @@ Le projet utilise GitHub Actions avec 3 workflows :
 | Build Windows | `build-windows.yml` | push master, PR | ~15 min |
 | Build Linux x64 | `build-linux.yml` | push master, PR | ~10 min |
 | Release | `release.yml` | tag `v*` | ~25 min |
+| SBOM check | `sbom-check.yml` | push/PR touchant SBOM, THIRD_PARTY.md, version | <1 min |
 
 ## Workflow : Build Windows (`build-windows.yml`)
 
@@ -77,11 +78,27 @@ Push d'un tag `v*` (ex: `v3.1.0`)
 
 1. Build Windows (même étapes que build-windows.yml)
 2. Build Linux x64 (même étapes que build-linux.yml)
-3. Crée une GitHub Release avec les assets :
+3. Valide le SBOM (`scripts/check-sbom.py`) et le copie en `Open-Sankore-<version>-sbom.spdx.json`
+4. Crée une GitHub Release avec les assets :
    - `Open-Sankore-Windows-x64.zip`
    - `Open-Sankore-*-setup.exe`
    - `open-sankore_*_amd64.deb`
    - `open-sankore-*.x86_64.rpm`
+   - `Open-Sankore-*-sbom.spdx.json`
+
+### Checklist AVANT de poser un tag de release
+
+À faire manuellement avant de tagger `v<version>` (le CI valide mais ne rédige pas
+le contenu) :
+
+1. **Bumper la version** dans `OpenSankore.pro` (`VERSION_MAJ` / `VERSION_MIN` / `VERSION_PATCH`).
+2. **Mettre à jour le SBOM** `sbom.spdx.json` :
+   - `versionInfo` du package `SPDXRef-Package-OpenSankore` = nouvelle version
+   - `created` = date du jour
+   - une entrée par composant listé dans `THIRD_PARTY.md` (et inversement)
+3. **Mettre à jour `THIRD_PARTY.md`** si des dépendances ont changé (+ `Last updated`).
+4. **Lancer `python3 scripts/check-sbom.py`** — doit sortir `OK` (version alignée, pas de dérive).
+   Le job `sbom-check.yml` refait cette vérification sur la PR, mais lance-le en local d'abord.
 
 ## Couverture de code (Coverage)
 
