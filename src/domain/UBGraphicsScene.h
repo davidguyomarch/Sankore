@@ -64,6 +64,7 @@ class UBMagnifierHandler;
 class UBBackgroundRenderer;
 class UBToolOverlay;
 class UBDrawingHandler;
+class UBInputRouter;
 class UBGraphicsCache;
 class UBGraphicsGroupContainerItem;
 
@@ -166,6 +167,8 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         QSet<QGraphicsItem*>& removedItemsRef() { return mRemovedItems; }
         void setDocumentUpdated();
         UBDrawingHandler* drawingHandler() { return mDrawingHandler; }
+        UBToolOverlay* toolOverlay() { return mToolOverlay; }
+        UBSettings* settings() { return mSettings; }
 
         UBGraphicsWidgetItem* addWidget(const QUrl& pWidgetUrl, const QPointF& pPos = QPointF(0, 0));
         UBGraphicsProxyWidget *addWidget(QWidget *widget, Qt::WindowFlags wFlags = Qt::WindowFlags());
@@ -419,18 +422,15 @@ public slots:
         QUrl mBackgroundObjectUrl;
 
         UBDrawingHandler* mDrawingHandler;
+        UBInputRouter* mInputRouter;
 
         SceneViewState mViewState;
-
-        bool mInputDeviceIsPressed;
 
         QSet<QGraphicsItem*> mTools;
 
         QSize mNominalSize;
 
         RenderingContext mRenderingContext;
-
-        UBSmoothStrokeItem* mCurrentSmoothStroke = nullptr;
 
         bool mShouldUseOMP;
 
