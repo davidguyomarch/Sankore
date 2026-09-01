@@ -1,4 +1,4 @@
-# Open-Sankoré — Community Edition
+# Open-Sankoré Community Edition
 
 ![Build Windows](https://github.com/davidguyomarch/Sankore/actions/workflows/build-windows.yml/badge.svg)
 ![Build Linux x64](https://github.com/davidguyomarch/Sankore/actions/workflows/build-linux.yml/badge.svg)
