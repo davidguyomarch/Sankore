@@ -172,7 +172,10 @@ jobs:
         shell: cmd
         run: |
           set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
-          jom -j %NUMBER_OF_PROCESSORS% release
+          rem qmake's top-level Makefile only delegates to Makefile.Release via a
+          rem sub-make that does NOT inherit -j, so the app compile stayed serial.
+          rem Invoke jom directly on Makefile.Release to parallelize the .cpp build.
+          jom -j %NUMBER_OF_PROCESSORS% -f Makefile.Release
 
       - name: List build output
         if: always()
