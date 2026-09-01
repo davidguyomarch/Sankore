@@ -156,13 +156,15 @@ jobs:
 
           qmake OpenSankore.pro CONFIG+=no_webengine
 
-      - name: Debug — check UBDrawingHandler in generated Makefile
-        shell: pwsh
+      - name: Debug — compile UBDrawingHandler.cpp in isolation
+        shell: cmd
         run: |
-          Write-Host "=== OBJECTS entries mentioning handlers ==="
-          Select-String -Path Makefile.Release -Pattern "Handler|Overlay|Renderer" | Where-Object { $_.Line -match "\.obj" } | ForEach-Object { Write-Host $_.Line.Trim() }
-          Write-Host "=== Does UBDrawingHandler.obj appear at all? ==="
-          Select-String -Path Makefile.Release -Pattern "UBDrawingHandler\.obj" | ForEach-Object { Write-Host ("L{0}: {1}" -f $_.LineNumber, $_.Line.Trim()) }
+          set VCPKG_ROOT=%VCPKG_INSTALLATION_ROOT%
+          echo === Compiling only UBDrawingHandler.obj ===
+          nmake release build\win32\release\objects\UBDrawingHandler.obj
+          echo === dumpbin symbols for drawLineTo ===
+          dumpbin /symbols build\win32\release\objects\UBDrawingHandler.obj | findstr /C:"drawLineTo"
+          echo === exit ===
 
       - name: Build
         shell: cmd
