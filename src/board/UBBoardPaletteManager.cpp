@@ -327,7 +327,7 @@ void UBBoardPaletteManager::setupPalettes()
         for (const auto& e : mDrawingPropsBarQml->errors())
             qWarning() << "DrawingPropsBar QML error:" << e.toString();
 
-    // Size: 280 for pen/marker (colors + widths), 120 for eraser (widths only)
+    // Size: 280 for pen/marker (colors + widths), 210 for eraser (widths + actions)
     // Also hides/shows the QQuickWidget at C++ level to avoid ghost black bar (#129)
     auto updatePropsBarSize = [this]() {
         if (!mDrawingPropsBarQml || !mContainer || !mStylusPaletteQml)
@@ -337,7 +337,8 @@ void UBBoardPaletteManager::setupPalettes()
             return;
         }
         bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
-        int barW = isEraser ? 120 : 280;
+        // Eraser bar holds widths + 2 action buttons (erase ink / erase page, #249)
+        int barW = isEraser ? 210 : 280;
         mDrawingPropsBarQml->setFixedSize(barW, 48);
         // Apply rounded mask so clicks outside the rounded shape pass through
         QPainterPath path;

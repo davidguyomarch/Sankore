@@ -135,6 +135,10 @@ public:
     Q_INVOKABLE void applyStrokeToSelection();
     Q_INVOKABLE void alignSelection();
 
+    // --- Eraser options (issue #249) ---
+    Q_INVOKABLE void eraseAllInk();     // erase all strokes/annotations on the page
+    Q_INVOKABLE void eraseWholePage();  // erase the entire page content
+
     // --- Geometric instrument tracking ---
     UBAbstractDrawRuler* mActiveRuler = nullptr;
 

@@ -117,5 +117,67 @@ Rectangle {
                 }
             }
         }
+
+        // === Eraser actions (issue #249) — only shown for the eraser ===
+        Rectangle {
+            visible: root.isEraser
+            width: 1; height: 24
+            color: themeManager.border
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Row {
+            visible: root.isEraser
+            spacing: 4
+            anchors.verticalCenter: parent.verticalCenter
+
+            EraserActionButton {
+                icon: "broom"
+                tooltip: "Effacer toute l'encre"
+                onClicked: toolController.eraseAllInk()
+            }
+            EraserActionButton {
+                icon: "trash"
+                tooltip: "Effacer toute la page"
+                onClicked: toolController.eraseWholePage()
+            }
+        }
+    }
+
+    // === Reusable eraser action button ===
+    component EraserActionButton: Rectangle {
+        property string icon
+        property string tooltip
+        signal clicked()
+
+        width: 28; height: 28
+        radius: 6
+        color: eaMouse.containsMouse ? themeManager.surfaceHover : "transparent"
+
+        Image {
+            id: eaIcon
+            anchors.centerIn: parent
+            width: 18; height: 18
+            source: "qrc:/icons/phosphor/" + parent.icon + ".svg"
+            sourceSize: Qt.size(18, 18)
+            visible: false
+        }
+        ColorOverlay {
+            anchors.fill: eaIcon
+            source: eaIcon
+            color: themeManager.onSurface
+        }
+        MouseArea {
+            id: eaMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: parent.clicked()
+        }
+        ToolTip {
+            visible: eaMouse.containsMouse
+            delay: 500
+            text: parent.tooltip
+        }
     }
 }
