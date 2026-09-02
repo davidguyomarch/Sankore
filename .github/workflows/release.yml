@@ -35,42 +35,67 @@ jobs:
           # the artifacts (.deb/.rpm/.exe metadata) carry the release version.
           # We deliberately do NOT reuse branch/PR/master builds: those ran with
           # a non-tag ref and would embed the 0.0.0-dev fallback version.
-          build_on_tag() {
-            local workflow="$1"
-            local var_name="$2"
+          #
+          # The three builds are dispatched FIRST (concurrently), then waited on,
+          # so the total time is roughly the longest single build (~33 min)
+          # rather than their sum (~75 min).
 
-            echo "$workflow: dispatching on $TAG_REF..."
-            gh workflow run "$workflow" --ref "$TAG_REF"
+          workflows=("build-windows.yml" "build-linux.yml" "build-linux-arm64.yml")
+          var_names=("win_run" "linux_run" "arm64_run")
 
-            # Wait for the run to appear, then watch it to completion.
-            local run_id=""
+          # Last existing run id per workflow, so we can tell the newly triggered
+          # run apart from an older one on the same tag.
+          declare -A prev_id
+          for wf in "${workflows[@]}"; do
+            prev_id[$wf]=$(gh run list --workflow="$wf" --branch "$TAG_REF" --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
+          done
+
+          # 1) Dispatch all three (non-blocking).
+          for wf in "${workflows[@]}"; do
+            echo "$wf: dispatching on $TAG_REF..."
+            gh workflow run "$wf" --ref "$TAG_REF"
+          done
+
+          # 2) Resolve each newly triggered run id (must differ from prev_id).
+          declare -A run_id
+          for wf in "${workflows[@]}"; do
+            rid=""
             for i in $(seq 1 24); do
               sleep 5
-              run_id=$(gh run list --workflow="$workflow" --branch "$TAG_REF" --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
-              [ -n "$run_id" ] && break
+              rid=$(gh run list --workflow="$wf" --branch "$TAG_REF" --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
+              if [ -n "$rid" ] && [ "$rid" != "${prev_id[$wf]}" ]; then
+                break
+              fi
+              rid=""
             done
+            run_id[$wf]="$rid"
+            [ -n "$rid" ] && echo "$wf: triggered run $rid" || echo "$wf: could not find triggered run"
+          done
 
-            if [ -z "$run_id" ]; then
-              echo "$workflow: could not find triggered run"
-              echo "${var_name}=" >> $GITHUB_OUTPUT
-              return
-            fi
+          # 3) Wait on all three concurrently, then record each conclusion.
+          for wf in "${workflows[@]}"; do
+            [ -n "${run_id[$wf]}" ] && gh run watch "${run_id[$wf]}" --exit-status >/dev/null 2>&1 &
+          done
+          wait
 
-            echo "$workflow: triggered run $run_id, waiting for completion..."
-            gh run watch "$run_id" --exit-status || true
-            local status
-            status=$(gh run view "$run_id" --json conclusion -q '.conclusion')
-            if [ "$status" = "success" ]; then
-              echo "${var_name}=$run_id" >> $GITHUB_OUTPUT
+          # 4) Publish the run id per workflow, but only if it succeeded.
+          for idx in "${!workflows[@]}"; do
+            wf="${workflows[$idx]}"
+            var="${var_names[$idx]}"
+            rid="${run_id[$wf]}"
+            if [ -n "$rid" ]; then
+              status=$(gh run view "$rid" --json conclusion -q '.conclusion')
+              if [ "$status" = "success" ]; then
+                echo "$wf: run $rid succeeded"
+                echo "${var}=$rid" >> $GITHUB_OUTPUT
+              else
+                echo "$wf: run $rid finished with status=$status"
+                echo "${var}=" >> $GITHUB_OUTPUT
+              fi
             else
-              echo "$workflow: run $run_id finished with status=$status"
-              echo "${var_name}=" >> $GITHUB_OUTPUT
+              echo "${var}=" >> $GITHUB_OUTPUT
             fi
-          }
-
-          build_on_tag "build-windows.yml" "win_run"
-          build_on_tag "build-linux.yml" "linux_run"
-          build_on_tag "build-linux-arm64.yml" "arm64_run"
+          done
 
       - name: Download Windows artifacts
         if: steps.find-runs.outputs.win_run != ''
