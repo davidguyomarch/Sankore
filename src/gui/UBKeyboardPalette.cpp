@@ -29,6 +29,7 @@
 #include <QSize>
 
 #include "UBKeyboardPalette.h"
+#include "UBKeyboardPaletteColors.h"
 #include "core/UBSettings.h"
 
 #include "core/UBApplication.h"
@@ -172,6 +173,13 @@ UBKeyboardPalette::~UBKeyboardPalette()
     }
 
     onActivated(false);
+}
+
+QColor UBKeyboardPalette::keyLabelColor()
+{
+    // Dark near-black glyph color, readable on the light-grey key faces
+    // regardless of the active application theme (issue #263).
+    return UBKeyboardColors::keyLabelColor();
 }
 
 QSize  UBKeyboardPalette::sizeHint () const
@@ -494,6 +502,10 @@ void UBKeyboardButton::paintEvent(QPaintEvent*)
     }
 
     //--------------------------
+
+    // Force a dark glyph pen so key labels stay readable on the light-grey key
+    // faces, independent of the app-wide (dark) stylesheet color (issue #263).
+    painter.setPen(UBKeyboardPalette::keyLabelColor());
 
     this->paintContent(painter);
 

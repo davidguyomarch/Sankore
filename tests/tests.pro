@@ -39,7 +39,9 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            tst_UBGraphicsScene.h \
            tst_UBVisualRegression.h \
            tst_UBRecognition.h \
-           tst_UBSmoothStrokeItem.h
+           tst_UBSmoothStrokeItem.h \
+           tst_UBKeyboardPaletteColors.h \
+           ../src/gui/UBKeyboardPaletteColors.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -135,6 +137,7 @@ SOURCES += main.cpp \
            tst_UBVisualRegression.cpp \
            tst_UBRecognition.cpp \
            tst_UBSmoothStrokeItem.cpp \
+           tst_UBKeyboardPaletteColors.cpp \
            stubs/UBSmoothStrokeItem_testable.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
