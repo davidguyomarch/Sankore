@@ -39,6 +39,7 @@ public slots:
     void addPage();
     void duplicatePage();
     void deletePage();
+    void importPage();
     void goToPage(int index);
 
 signals:

@@ -69,6 +69,14 @@ void UBPageController::deletePage()
         UBApplication::boardController->activeSceneIndex());
 }
 
+void UBPageController::importPage()
+{
+    // Adds pages from a file (image/PDF/document) into the current document
+    // and navigates to the first imported page. UBBoardController::importPage()
+    // already opens the file dialog via UBDocumentController::addFileToDocument.
+    UBApplication::boardController->importPage();
+}
+
 void UBPageController::goToPage(int index)
 {
     UBApplication::boardController->setActiveDocumentScene(index);
