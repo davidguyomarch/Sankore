@@ -22,60 +22,55 @@ jobs:
       - name: Checkout (for gh CLI context)
         uses: actions/checkout@v7
 
-      - name: Find or trigger builds
+      - name: Build release artifacts on the tag
         id: find-runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COMMIT_SHA="${{ github.sha }}"
           TAG_REF="${{ github.ref_name }}"
-          echo "Looking for build artifacts on commit $COMMIT_SHA (tag $TAG_REF)"
+          echo "Building release artifacts on tag $TAG_REF"
 
-          find_or_trigger() {
+          # Always build ON THE TAG. The build workflows derive the version from
+          # GITHUB_REF_NAME (the tag), so building on the tag is what guarantees
+          # the artifacts (.deb/.rpm/.exe metadata) carry the release version.
+          # We deliberately do NOT reuse branch/PR/master builds: those ran with
+          # a non-tag ref and would embed the 0.0.0-dev fallback version.
+          build_on_tag() {
             local workflow="$1"
             local var_name="$2"
 
-            # Look for existing successful run on this commit
-            local run_id
-            run_id=$(gh run list --workflow="$workflow" --commit "$COMMIT_SHA" --status success --limit 1 --json databaseId -q '.[0].databaseId')
+            echo "$workflow: dispatching on $TAG_REF..."
+            gh workflow run "$workflow" --ref "$TAG_REF"
 
-            if [ -n "$run_id" ]; then
-              echo "$workflow: found existing run $run_id"
-              echo "${var_name}=$run_id" >> $GITHUB_OUTPUT
+            # Wait for the run to appear, then watch it to completion.
+            local run_id=""
+            for i in $(seq 1 24); do
+              sleep 5
+              run_id=$(gh run list --workflow="$workflow" --branch "$TAG_REF" --event workflow_dispatch --limit 1 --json databaseId -q '.[0].databaseId')
+              [ -n "$run_id" ] && break
+            done
+
+            if [ -z "$run_id" ]; then
+              echo "$workflow: could not find triggered run"
+              echo "${var_name}=" >> $GITHUB_OUTPUT
               return
             fi
 
-            # No existing run — trigger one and wait
-            echo "$workflow: no existing build found, triggering on $TAG_REF..."
-            gh workflow run "$workflow" --ref "$TAG_REF"
-
-            # Wait for the run to appear (up to 60s)
-            for i in $(seq 1 12); do
-              sleep 5
-              run_id=$(gh run list --workflow="$workflow" --branch "$TAG_REF" --limit 1 --json databaseId,status -q '.[0].databaseId')
-              if [ -n "$run_id" ]; then
-                echo "$workflow: triggered run $run_id, waiting for completion..."
-                gh run watch "$run_id" --exit-status || true
-                # Re-fetch to confirm success
-                local status
-                status=$(gh run view "$run_id" --json conclusion -q '.conclusion')
-                if [ "$status" = "success" ]; then
-                  echo "${var_name}=$run_id" >> $GITHUB_OUTPUT
-                else
-                  echo "$workflow: run $run_id finished with status=$status"
-                  echo "${var_name}=" >> $GITHUB_OUTPUT
-                fi
-                return
-              fi
-            done
-
-            echo "$workflow: could not find triggered run"
-            echo "${var_name}=" >> $GITHUB_OUTPUT
+            echo "$workflow: triggered run $run_id, waiting for completion..."
+            gh run watch "$run_id" --exit-status || true
+            local status
+            status=$(gh run view "$run_id" --json conclusion -q '.conclusion')
+            if [ "$status" = "success" ]; then
+              echo "${var_name}=$run_id" >> $GITHUB_OUTPUT
+            else
+              echo "$workflow: run $run_id finished with status=$status"
+              echo "${var_name}=" >> $GITHUB_OUTPUT
+            fi
           }
 
-          find_or_trigger "build-windows.yml" "win_run"
-          find_or_trigger "build-linux.yml" "linux_run"
-          find_or_trigger "build-linux-arm64.yml" "arm64_run"
+          build_on_tag "build-windows.yml" "win_run"
+          build_on_tag "build-linux.yml" "linux_run"
+          build_on_tag "build-linux-arm64.yml" "arm64_run"
 
       - name: Download Windows artifacts
         if: steps.find-runs.outputs.win_run != ''
@@ -125,11 +120,14 @@ jobs:
             tar czf "Open-Sankore-${VERSION}-linux-arm64.tar.gz" -C artifacts/arm64 .
           fi
 
-      - name: Validate and stage SBOM
+      - name: Stamp version and validate SBOM
         run: |
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
-          python3 scripts/check-sbom.py
+          # The tag is the single source of truth: stamp it into OpenSankore.pro
+          # and sbom.spdx.json (in the runner checkout only — never committed),
+          # then validate. The repo carries a 0.0.0-dev fallback between releases.
+          python3 scripts/check-sbom.py --set-version "$VERSION"
           cp sbom.spdx.json "Open-Sankore-${VERSION}-sbom.spdx.json"
 
       - name: List release assets
