@@ -211,8 +211,16 @@ if $BUILD_TESTS; then
             ../src/web/UBOEmbedParser.h \
             -o premoc/moc_UBOEmbedParser.cpp
 
+        # UBDisplayManager + its UBBlackoutWidget shim (QObjects under test, #244)
+        $MOC_BIN $MOC_COMMON_FLAGS \
+            ../src/core/UBDisplayManager.h \
+            -o premoc/moc_UBDisplayManager.cpp
+        $MOC_BIN $MOC_COMMON_FLAGS \
+            gui/UBBlackoutWidget.h \
+            -o premoc/moc_UBBlackoutWidget.cpp
+
         # Test class headers that moc fails to process with moc_predefs.h
-        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors; do
+        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBDisplayManager; do
             $MOC_BIN $MOC_COMMON_FLAGS \
                 ${HEADER}.h \
                 -o premoc/moc_${HEADER}.cpp

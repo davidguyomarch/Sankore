@@ -76,6 +76,11 @@ class UBDisplayManager : public QObject
 
         void setUseMultiScreen(bool pUse);
 
+        bool useMultiScreen() const
+        {
+            return mUseMultiScreen;
+        }
+
         int controleScreenIndex()
         {
             return mControlScreenIndex;

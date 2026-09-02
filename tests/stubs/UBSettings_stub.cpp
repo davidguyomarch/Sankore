@@ -40,11 +40,17 @@ UBSettings::UBSettings(QObject *parent)
     : QObject(parent)
 {
     pageSize = new UBSetting(this, "Board", "PageSize", QVariant(QSize(1380, 1080)));
+
+    // Issue #244: multi-screen must default to single-screen (false).
+    swapControlAndDisplayScreens = new UBSetting(this, "App", "SwapControlAndDisplayScreens", QVariant(false));
+    appUseMultiscreen = new UBSetting(this, "App", "UseMultiscreenMode", QVariant(false));
 }
 
 UBSettings::~UBSettings()
 {
     delete pageSize;
+    delete swapControlAndDisplayScreens;
+    delete appUseMultiscreen;
 }
 
 QString UBSettings::userDataDirectory()

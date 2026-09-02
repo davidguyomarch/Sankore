@@ -49,9 +49,12 @@ UBDisplayManager::UBDisplayManager(QObject *parent)
     , mDesktopWidget(0)
 {
     mSettings = UBSettings::settings();
-    
 
-    mUseMultiScreen = true;
+    // Issue #244: honour the user preference instead of always spanning every
+    // display. The setting defaults to single-screen (false), so on a
+    // multi-display setup the app no longer spreads across all screens at
+    // startup — multi-screen is opt-in.
+    mUseMultiScreen = mSettings->appUseMultiscreen->get().toBool();
 
     initScreenIndexes();
 

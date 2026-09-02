@@ -38,6 +38,7 @@
 #include "tst_UBRecognition.h"
 #include "tst_UBSmoothStrokeItem.h"
 #include "tst_UBKeyboardPaletteColors.h"
+#include "tst_UBDisplayManager.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
@@ -145,6 +146,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBKeyboardPaletteColors test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBDisplayManager test;
         status |= QTest::qExec(&test, argc, argv);
     }
 

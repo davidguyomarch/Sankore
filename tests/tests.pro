@@ -107,6 +107,20 @@ SOURCES += stubs/UBSettings_stub.cpp \
 # UBPlatformUtils stub
 SOURCES += stubs/UBPlatformUtils_stub.cpp
 
+# UBDisplayManager (issue #244) — compile the real source via a testable wrapper
+# that shadows its heavy deps with lightweight shims (tests/core, tests/board,
+# tests/gui, tests/frameworks, tests/ui_blackoutWidget.h).
+# UBDisplayManager and the UBBlackoutWidget shim are QObjects; their moc is
+# pre-generated into premoc/ on Linux (moc bug) and auto-moc'd on MSVC.
+SOURCES += stubs/UBDisplayManager_testable.cpp
+win32-msvc* {
+    HEADERS += ../src/core/UBDisplayManager.h \
+               gui/UBBlackoutWidget.h
+} else {
+    SOURCES += premoc/moc_UBDisplayManager.cpp \
+               premoc/moc_UBBlackoutWidget.cpp
+}
+
 # Test headers — simple ones that moc can handle directly
 # NOTE: moved to premoc/ due to moc bug on Linux CI (cannot parse system C++ headers)
 
@@ -138,6 +152,7 @@ SOURCES += main.cpp \
            tst_UBRecognition.cpp \
            tst_UBSmoothStrokeItem.cpp \
            tst_UBKeyboardPaletteColors.cpp \
+           tst_UBDisplayManager.cpp \
            stubs/UBSmoothStrokeItem_testable.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
@@ -155,7 +170,8 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBTextTools.cpp \
            premoc/moc_tst_UBStrokeProperty.cpp \
            premoc/moc_tst_UBWidgetUtils.cpp \
-           premoc/moc_tst_UBGraphicsStroke.cpp
+           premoc/moc_tst_UBGraphicsStroke.cpp \
+           premoc/moc_tst_UBDisplayManager.cpp
 
 
 # Build output
