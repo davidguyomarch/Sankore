@@ -81,11 +81,13 @@ jobs:
           echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
           echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
           cat src/core/git_version.h
-          # Extract version from git tag (v4.1.0 -> 4.1.0) or fall back to .pro
-          GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
-          if [[ "$GIT_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+          # The git tag is the single source of truth. On a tag push (or dispatch
+          # on a tag) GITHUB_REF_NAME is the tag name (v4.3.0), reliable under a
+          # shallow clone unlike `git describe`. Fall back to .pro (dev build).
+          REF_NAME="${GITHUB_REF_NAME:-}"
+          if [[ "$REF_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
-            echo "Updating version to $MAJ.$MIN.$PATCH from tag $GIT_TAG"
+            echo "Updating version to $MAJ.$MIN.$PATCH from tag $REF_NAME"
             sed -i "s/VERSION_MAJ = .*/VERSION_MAJ = $MAJ/" OpenSankore.pro
             sed -i "s/VERSION_MIN = .*/VERSION_MIN = $MIN/" OpenSankore.pro
             sed -i "s/VERSION_PATCH = .*/VERSION_PATCH = $PATCH/" OpenSankore.pro

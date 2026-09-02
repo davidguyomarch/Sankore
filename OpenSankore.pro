@@ -10,13 +10,24 @@ CONFIG += debug_and_release \
           c++20
 
 
-VERSION_MAJ = 4
-VERSION_MIN = 2
+# The git tag is the single source of truth for the release version.
+# These values are only a DEV FALLBACK for untagged builds (PRs, master).
+# On a tagged build the CI workflows overwrite VERSION_MAJ/MIN/PATCH from the
+# tag (vX.Y.Z) before running qmake, and release.yml runs
+# `check-sbom.py --set-version X.Y.Z` to stamp the SBOM too. Do NOT hand-bump
+# these for a release — just push the tag. See .kiro/steering/dev-workflow.md.
+VERSION_MAJ = 0
+VERSION_MIN = 0
 VERSION_TYPE = r # a = alpha, b = beta, r = release, other => error
 VERSION_PATCH = 0
 
 VERSION = "$${VERSION_MAJ}.$${VERSION_MIN}.$${VERSION_TYPE}.$${VERSION_PATCH}"
 VERSION = $$replace(VERSION, "\\.r", "")
+
+# Untagged builds report themselves as a dev build in the human-readable
+# version string (UBVERSION). This does not touch VERSION_RC, which must stay a
+# 4-integer tuple for the Windows resource compiler (resources/win/sankore.rc).
+equals(VERSION, "0.0.0"): VERSION = "0.0.0-dev"
 
 LONG_VERSION = "$${VERSION}.$${SVN_VERSION}"
 macx:OSX_VERSION = "$${VERSION} (r$${SVN_VERSION})"

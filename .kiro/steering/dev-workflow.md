@@ -113,6 +113,64 @@ git branch -d <branche-locale>
 
 ---
 
+## Publier une release (piloté par le tag)
+
+**Le tag git `vX.Y.Z` est la seule source de vérité pour la version.** On ne
+bump aucun numéro de version à la main, on ne fait aucun commit de préparation :
+poser le tag suffit.
+
+### Poser une release
+
+Sur le commit de master à publier :
+
+```bash
+git tag v4.3.0 <commit-de-master>   # ou juste `git tag v4.3.0` sur HEAD
+git push origin v4.3.0
+```
+
+Le push du tag déclenche `release.yml`, qui fait tout :
+
+1. Dérive la version `4.3.0` du nom du tag.
+2. Dispatche `build-windows.yml`, `build-linux.yml`, `build-linux-arm64.yml`
+   **sur le tag** (`gh workflow run --ref v4.3.0`), attend leur succès, et
+   récupère les artefacts. On ne réutilise jamais un build de branche/master :
+   il porterait la version dev `0.0.0`.
+3. Lance `scripts/check-sbom.py --set-version 4.3.0`, qui écrit la version dans
+   `OpenSankore.pro` et `sbom.spdx.json` **dans le checkout du runner
+   uniquement** (jamais commité).
+4. Publie la GitHub Release avec les `.exe`/`.zip`/`.deb`/`.rpm`/`.tar.gz` +
+   le SBOM, tous étiquetés `4.3.0`.
+
+### D'où vient la version à chaque étage
+
+| Consommateur | Source de la version |
+|--------------|----------------------|
+| Binaire (`UBVERSION`, `.deb`/`.rpm`/`.exe`) | `GITHUB_REF_NAME` (le tag) → patché dans `OpenSankore.pro` par chaque workflow de build |
+| Installer Windows (`installer.iss`) | Réécrit depuis le tag par `build-windows.yml` |
+| SBOM (`sbom.spdx.json`) | `check-sbom.py --set-version` dans `release.yml` |
+| Nom des assets de la release | `github.ref_name` dans `release.yml` |
+
+### Fallback dev (builds non taggés)
+
+Entre deux releases, `OpenSankore.pro` et `sbom.spdx.json` portent `0.0.0`
+(affiché `0.0.0-dev`). C'est volontaire : un build de PR/master n'est pas une
+release officielle. `UBBoardController` affiche d'ailleurs l'avertissement
+« This is not a final release » dans ce cas. **Ne jamais hand-bumper ces
+valeurs pour une release** — pousser le tag suffit.
+
+### Règles pour Kiro
+
+- **Ne jamais** modifier un numéro de version dans les fichiers du repo pour
+  faire une release. La version vient du tag.
+- Poser/pousser un tag `v*` est une opération de release : ne le faire que sur
+  **demande explicite** du développeur (même règle que le merge).
+- Le SBOM commité doit rester cohérent avec `OpenSankore.pro` (le CI
+  `sbom-check.yml` le vérifie). Après un changement de version du `.pro`,
+  resynchroniser avec `python3 scripts/check-sbom.py --set-version X.Y.Z`.
+- Tests de la mécanique de version : `python3 scripts/test_check_sbom.py`.
+
+---
+
 ## Boucle de développement (Build → Test → Validate → Push)
 
 Le développeur travaille sur **macOS ARM (M4 Pro)**. Il n'y a **pas de compilation locale Windows**.

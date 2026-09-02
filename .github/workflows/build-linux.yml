@@ -138,11 +138,13 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
           echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
-          # Extract version from git tag (v4.1.0 -> 4.1.0) or fall back to .pro
-          GIT_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "")
-          if [[ "$GIT_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+          # The git tag is the single source of truth. On a tag push (or dispatch
+          # on a tag) GITHUB_REF_NAME is the tag name (v4.3.0), reliable under a
+          # shallow clone unlike `git describe`. Fall back to .pro (dev build).
+          REF_NAME="${GITHUB_REF_NAME:-}"
+          if [[ "$REF_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
-            echo "Updating version to $MAJ.$MIN.$PATCH from tag $GIT_TAG"
+            echo "Updating version to $MAJ.$MIN.$PATCH from tag $REF_NAME"
             sed -i "s/VERSION_MAJ = .*/VERSION_MAJ = $MAJ/" OpenSankore.pro
             sed -i "s/VERSION_MIN = .*/VERSION_MIN = $MIN/" OpenSankore.pro
             sed -i "s/VERSION_PATCH = .*/VERSION_PATCH = $PATCH/" OpenSankore.pro
@@ -351,12 +353,12 @@ jobs:
           python3 ../scripts/update_coverage_badge.py /tmp/coverage.json
 
       - name: Package .deb and .rpm
-        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         run: |
           ./scripts/package-linux.sh amd64 "${{ env.APP_VERSION }}"
 
       - name: Upload binary artifact
-        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64
@@ -372,7 +374,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload .deb package
-        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-deb
@@ -380,7 +382,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload .rpm package
-        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-rpm
@@ -388,7 +390,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Build AppImage
-        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         run: |
           # Create AppDir structure
           mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
@@ -472,7 +474,7 @@ jobs:
           fi
 
       - name: Upload AppImage
-        if: success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-appimage

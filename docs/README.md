@@ -26,7 +26,7 @@ operating systems.
 
 | Field | Value |
 |-------|-------|
-| Version | 4.2.0 |
+| Version | See [latest release](https://github.com/davidguyomarch/Sankore/releases/latest) |
 | License | GPL-3.0 (with OpenSSL linking exception on original files) |
 | Original copyright | © 2010–2013 GIP ENA |
 | Community Edition copyright | © 2026 David Guyomarch |

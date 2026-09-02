@@ -132,9 +132,12 @@ jobs:
         shell: pwsh
         run: |
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
-          # Determine version from git tag (v4.1.0 -> 4.1.0) or fall back to .pro
-          $gitTag = git describe --tags --exact-match 2>$null
-          if ($gitTag -match '^v(\d+\.\d+\.\d+)') {
+          # The git tag is the single source of truth. When this workflow runs
+          # for a tag push (or is dispatched on a tag), GITHUB_REF_NAME is the
+          # tag name (v4.3.0). This is reliable under a shallow clone, unlike
+          # `git describe`, which needs tags fetched. Fall back to .pro (dev).
+          $refName = "$env:GITHUB_REF_NAME"
+          if ($refName -match '^v(\d+\.\d+\.\d+)') {
             $version = $Matches[1]
           } else {
             # Extract version from .pro file

@@ -8,7 +8,12 @@
 ; Builds the Windows installer from the windeployqt output
 
 #define MyAppName "Open-Sankoré"
-#define MyAppVersion "4.2.0"
+; MyAppVersion is a dev-fallback placeholder. The Windows CI overwrites it from
+; the git tag (build-windows.yml) before running ISCC, so the released installer
+; always carries the tag version. Do not hand-bump this for a release.
+#ifndef MyAppVersion
+  #define MyAppVersion "0.0.0-dev"
+#endif
 #define MyAppPublisher "Open-Sankoré Project"
 #define MyAppURL "https://github.com/davidguyomarch/Sankore"
 #define MyAppExeName "Open-Sankore.exe"
