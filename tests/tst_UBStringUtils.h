@@ -28,6 +28,13 @@ private slots:
     void testToUtcIsoDateTime();
     void testFromUtcIsoDate();
     void testFromUtcIsoDate_roundtrip();
+    // #236 — version shown in Preferences must be a clean number
+    void testCleanVersion_stripsLeadingV();
+    void testCleanVersion_stripsTrailingDot();
+    void testCleanVersion_tagAndTrailingDot();
+    void testCleanVersion_devFallback();
+    void testCleanVersion_alreadyClean();
+    void testCleanVersion_commitHashUnchanged();
 };
 
 #endif // TST_UBSTRINGUTILS_H

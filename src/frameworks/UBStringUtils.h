@@ -47,6 +47,12 @@ class UBStringUtils
         static QString toUtcIsoDateTime(const QDateTime& dateTime);
         static QDateTime fromUtcIsoDate(const QString& dateString);
 
+        /// Normalise a raw build version into the clean number shown to users:
+        /// strips a leading "v" (git-describe style, e.g. "v4.3.0") and any
+        /// trailing dots left by an empty SVN_VERSION in LONG_VERSION
+        /// (e.g. "4.3.0." -> "4.3.0", "0.0.0-dev." -> "0.0.0-dev").
+        static QString cleanVersion(const QString& rawVersion);
+
 
 };
 

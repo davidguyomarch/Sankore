@@ -162,7 +162,11 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     setOrganizationDomain("sankore.org");
     setApplicationName("Open-Sankore");
 
-    setApplicationVersion(QString(GIT_VERSION).isEmpty() ? UBVERSION : GIT_VERSION);
+    // The git tag is the single source of truth for the version. UBVERSION is
+    // derived from OpenSankore.pro (which the CI patches from the tag), so it is
+    // the clean release number — unlike GIT_VERSION (git describe), which is
+    // "v4.3.0" (leading v) on a tag or a bare commit hash under a shallow clone.
+    setApplicationVersion(UBStringUtils::cleanVersion(QStringLiteral(UBVERSION)));
 
 #if defined(Q_OS_MACOS) && !defined(QT_NO_DEBUG)
     CFStringRef shortVersion = (CFStringRef)CFBundleGetValueForInfoDictionaryKey(CFBundleGetMainBundle(), CFSTR("CFBundleShortVersionString"));

@@ -85,3 +85,17 @@ QDateTime UBStringUtils::fromUtcIsoDate(const QString& dateString)
 
 
 
+
+
+QString UBStringUtils::cleanVersion(const QString& rawVersion)
+{
+    QString v = rawVersion.trimmed();
+    // git-describe style tags carry a leading "v" (e.g. "v4.3.0").
+    if (v.startsWith(QLatin1Char('v')) || v.startsWith(QLatin1Char('V')))
+        v.remove(0, 1);
+    // LONG_VERSION is "VERSION.SVN_VERSION"; with an empty SVN_VERSION this
+    // leaves a trailing dot (e.g. "4.3.0." or "0.0.0-dev.").
+    while (v.endsWith(QLatin1Char('.')))
+        v.chop(1);
+    return v;
+}
