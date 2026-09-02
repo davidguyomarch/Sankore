@@ -157,7 +157,7 @@ Rectangle {
 
                 SidebarButton { icon: "plus-circle"; tooltip: "Ajouter page"; onClicked: pageController.addPage() }
                 SidebarButton { icon: "trash"; tooltip: "Supprimer page"; onClicked: pageController.deletePage() }
-                SidebarButton { icon: "upload-simple"; tooltip: "Importer"; onClicked: { /* TODO */ } }
+                SidebarButton { icon: "upload-simple"; tooltip: "Importer"; onClicked: pageController.importPage() }
             }
         }
     }
