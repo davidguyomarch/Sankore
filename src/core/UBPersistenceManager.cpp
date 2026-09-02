@@ -448,8 +448,9 @@ UBDocumentProxy* UBPersistenceManager::createDocument(const QString& pGroupName
     doc->setMetaData(UBSettingsData::documentDate,currentDate);
 
     //Issue N/C - NNE - 20140526
+    // applicationVersion() is already the clean number (see UBApplication);
+    // no trailing dot to chop off anymore.
     QString version = UBApplication::applicationVersion();
-    version.chop(1);
     doc->setMetaData(UBSettingsData::documentTagVersion, version);
     //Issue N/C - NNE - 20140526 : END
 
@@ -605,8 +606,9 @@ UBDocumentProxy* UBPersistenceManager::duplicateDocument(UBDocumentProxy* pDocum
     copy->setUuid(QUuid::createUuid());
 
     //Issue N/C - NNE - 20140526
+    // applicationVersion() is already the clean number (see UBApplication);
+    // no trailing dot to chop off anymore.
     QString version = UBApplication::applicationVersion();
-    version.chop(1);
     copy->setMetaData(UBSettingsData::documentTagVersion, version);
     //Issue N/C - NNE - 20140526 : END
 

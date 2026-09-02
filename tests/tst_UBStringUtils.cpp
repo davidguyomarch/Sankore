@@ -116,3 +116,45 @@ void TestUBStringUtils::testFromUtcIsoDate_roundtrip()
 
     QCOMPARE(restored.toUTC(), original);
 }
+
+
+// #236 — the version displayed in Preferences comes from
+// UBApplication::applicationVersion(), which now normalises the raw build
+// version via UBStringUtils::cleanVersion. These cases pin the expected output.
+
+void TestUBStringUtils::testCleanVersion_stripsLeadingV()
+{
+    // git describe on an exact tag returns "v4.3.0"; the user must see "4.3.0".
+    QCOMPARE(UBStringUtils::cleanVersion("v4.3.0"), QString("4.3.0"));
+}
+
+void TestUBStringUtils::testCleanVersion_stripsTrailingDot()
+{
+    // LONG_VERSION with an empty SVN_VERSION yields a trailing dot.
+    QCOMPARE(UBStringUtils::cleanVersion("4.3.0."), QString("4.3.0"));
+}
+
+void TestUBStringUtils::testCleanVersion_tagAndTrailingDot()
+{
+    QCOMPARE(UBStringUtils::cleanVersion("v4.3.0."), QString("4.3.0"));
+}
+
+void TestUBStringUtils::testCleanVersion_devFallback()
+{
+    // Untagged/dev builds: the "-dev" suffix must survive, only the dot goes.
+    QCOMPARE(UBStringUtils::cleanVersion("0.0.0-dev."), QString("0.0.0-dev"));
+}
+
+void TestUBStringUtils::testCleanVersion_alreadyClean()
+{
+    QCOMPARE(UBStringUtils::cleanVersion("4.3.0"), QString("4.3.0"));
+}
+
+void TestUBStringUtils::testCleanVersion_commitHashUnchanged()
+{
+    // A bare commit hash (git describe --always fallback) has no leading v and
+    // no trailing dot, so it passes through unchanged. cleanVersion cannot
+    // recover a number here — that is prevented upstream by deriving from
+    // UBVERSION (the .pro/tag) rather than git describe.
+    QCOMPARE(UBStringUtils::cleanVersion("8764929e"), QString("8764929e"));
+}
