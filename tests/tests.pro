@@ -128,6 +128,10 @@ win32-msvc* {
 
 # UBBoardSubControllers — stub with static methods only (no app deps)
 
+# UBExportSelection (#262) — pure export-adaptor selection logic, no app deps.
+# UBExportAdaptor is only forward-declared, so no heavy header is pulled in.
+SOURCES += ../src/document/UBExportSelection.cpp
+
 # Test sources
 SOURCES += main.cpp \
            tst_UBStringUtils.cpp \
@@ -153,6 +157,7 @@ SOURCES += main.cpp \
            tst_UBSmoothStrokeItem.cpp \
            tst_UBKeyboardPaletteColors.cpp \
            tst_UBDisplayManager.cpp \
+           tst_UBExportSelection.cpp \
            stubs/UBSmoothStrokeItem_testable.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
@@ -172,6 +177,13 @@ SOURCES += main.cpp \
            premoc/moc_tst_UBWidgetUtils.cpp \
            premoc/moc_tst_UBGraphicsStroke.cpp \
            premoc/moc_tst_UBDisplayManager.cpp
+
+# tst_UBExportSelection moc (#262): premoc on Linux (moc bug), auto-moc on MSVC
+win32-msvc* {
+    HEADERS += tst_UBExportSelection.h
+} else {
+    SOURCES += premoc/moc_tst_UBExportSelection.cpp
+}
 
 
 # Build output

@@ -220,7 +220,7 @@ if $BUILD_TESTS; then
             -o premoc/moc_UBBlackoutWidget.cpp
 
         # Test class headers that moc fails to process with moc_predefs.h
-        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBDisplayManager; do
+        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBDisplayManager tst_UBExportSelection; do
             $MOC_BIN $MOC_COMMON_FLAGS \
                 ${HEADER}.h \
                 -o premoc/moc_${HEADER}.cpp

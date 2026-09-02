@@ -66,6 +66,7 @@
 #include "core/UBForeignObjectsHandler.h"
 
 #include "adaptors/UBExportPDF.h"
+#include "document/UBExportSelection.h"
 #include "adaptors/UBThumbnailAdaptor.h"
 
 #include "adaptors/UBMetadataDcSubsetAdaptor.h"
@@ -2024,7 +2025,9 @@ void UBDocumentController::setupViews()
             UBExportAdaptor* adaptor = documentManager->supportedExportAdaptors()[i];
             QAction *currentExportAction = exportMenu->addAction(adaptor->exportName());
             currentExportAction->setData(i);
-            connect(currentExportAction, &QAction::triggered, this, [this]() { exportDocument(); });
+            // Capture the adaptor index in the lambda: exportDocument() cannot
+            // recover it from sender() when triggered through a lambda (#262).
+            connect(currentExportAction, &QAction::triggered, this, [this, i]() { exportDocumentAt(i); });
             exportMenu->addAction(currentExportAction);
             adaptor->setAssociatedAction(currentExportAction);
         }
@@ -2590,15 +2593,27 @@ void UBDocumentController::deleteIndexAndAssociatedData(const QModelIndex &pInde
 
 void UBDocumentController::exportDocument()
 {
+    // Kept for direct QAction::triggered connections. When triggered through a
+    // lambda, sender() is not the QAction, so guard against a null cast (#262).
     QAction *currentExportAction = qobject_cast<QAction *>(sender());
-    QVariant actionData = currentExportAction->data();
-    UBExportAdaptor* selectedExportAdaptor = UBDocumentManager::documentManager()->supportedExportAdaptors()[actionData.toInt()];
+    if (!currentExportAction)
+        return;
+
+    exportDocumentAt(currentExportAction->data().toInt());
+}
+
+void UBDocumentController::exportDocumentAt(int index)
+{
+    UBExportAdaptor* selectedExportAdaptor = UBExportSelection::adaptorForIndex(
+        UBDocumentManager::documentManager()->supportedExportAdaptors(), index);
+
+    if (!selectedExportAdaptor)
+        return;
 
     UBDocumentProxy* proxy = firstSelectedTreeProxy();
 
     selectedExportAdaptor->persist(proxy);
     emit exportDone();
-
 }
 
 void UBDocumentController::exportDocumentSet()
