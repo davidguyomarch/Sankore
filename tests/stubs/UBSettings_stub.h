@@ -96,6 +96,10 @@ public:
     // UBSetting members used by UBDocumentProxy
     UBSetting* pageSize;
 
+    // UBSetting members used by UBDisplayManager (issue #244)
+    UBSetting* swapControlAndDisplayScreens;
+    UBSetting* appUseMultiscreen;
+
     // Directory path methods
     static QString userDataDirectory();
     static QString userDocumentDirectory();

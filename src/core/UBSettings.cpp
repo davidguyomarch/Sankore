@@ -275,7 +275,21 @@ void UBSettings::init()
     appIsInSoftwareUpdateProcess = new UBSetting(this, "App", "IsInSoftwareUpdateProcess", false);
     appLastSessionDocumentUUID = new UBSetting(this, "App", "LastSessionDocumentUUID", "");
     appLastSessionPageIndex = new UBSetting(this, "App", "LastSessionPageIndex", 0);
-    appUseMultiscreen = new UBSetting(this, "App", "UseMusliscreenMode", true);
+    // Issue #244: multi-screen must default to single-screen (opt-in), and the
+    // storage key had a long-standing typo ("UseMusliscreenMode"). Migrate any
+    // value stored under the old key to the corrected one before creating the
+    // setting, so users who had previously toggled it keep their choice.
+    {
+        const QString oldMultiscreenKey = "App/UseMusliscreenMode";
+        const QString newMultiscreenKey = "App/UseMultiscreenMode";
+        if (mUserSettings->contains(oldMultiscreenKey))
+        {
+            if (!mUserSettings->contains(newMultiscreenKey))
+                mUserSettings->setValue(newMultiscreenKey, mUserSettings->value(oldMultiscreenKey));
+            mUserSettings->remove(oldMultiscreenKey);
+        }
+    }
+    appUseMultiscreen = new UBSetting(this, "App", "UseMultiscreenMode", false);
 
     appStartupHintsEnabled = new UBSetting(this,"App","EnableStartupHints",true);
 
