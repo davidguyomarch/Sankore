@@ -35,7 +35,8 @@ private slots:
     void testRenderedGlyphReadability();
 
 private:
-    // Fraction of glyph-area pixels that are visibly distinct from the key face.
+    // Peak WCAG contrast ratio of any rendered glyph pixel against the key face.
+    // Font-metric independent, so it is portable across platforms.
     double glyphVisibility(const QColor& penColor);
 };
 

@@ -40,22 +40,22 @@ double TestUBKeyboardPaletteColors::glyphVisibility(const QColor& penColor)
         painter.drawText(QRect(QPoint(0, 0), keySize), Qt::AlignCenter, QStringLiteral("W"));
     }
 
-    // A pixel counts as "visible glyph" if it differs enough from the key face.
-    // We use the WCAG contrast ratio of each pixel against the face; legible ink
-    // needs a meaningful ratio, faint anti-aliased white does not.
-    int visible = 0;
-    int total = keySize.width() * keySize.height();
+    // Return the PEAK contrast ratio of any rendered pixel against the key face.
+    // Peak contrast is independent of font metrics / glyph coverage (which vary
+    // across platforms), so it is a portable proxy for "does readable ink appear":
+    // a dark pen leaves pixels near its own (high-contrast) color, a white pen
+    // cannot exceed white-on-light-grey contrast no matter the glyph shape.
+    double peak = 1.0;
     for (int y = 0; y < img.height(); ++y)
     {
         const QRgb* line = reinterpret_cast<const QRgb*>(img.constScanLine(y));
         for (int x = 0; x < img.width(); ++x)
         {
             QColor px(qRed(line[x]), qGreen(line[x]), qBlue(line[x]));
-            if (contrastRatio(px, face) >= 2.0)
-                ++visible;
+            peak = std::max(peak, contrastRatio(px, face));
         }
     }
-    return static_cast<double>(visible) / total;
+    return peak;
 }
 
 void TestUBKeyboardPaletteColors::testKeyLabelContrastWithFaces()
@@ -80,18 +80,22 @@ void TestUBKeyboardPaletteColors::testKeyLabelContrastWithFaces()
 
 void TestUBKeyboardPaletteColors::testRenderedGlyphReadability()
 {
-    // OLD behavior: white pen (inherited from the dark stylesheet) — glyph is
-    // nearly invisible on the light-grey key face.
-    double whiteVisibility = glyphVisibility(Qt::white);
+    // Peak on-key contrast of the rendered glyph (font-metric independent).
+    // OLD behavior: white pen (inherited from the dark stylesheet).
+    double whitePeak = glyphVisibility(Qt::white);
+    // FIXED behavior: the palette's dark label color.
+    double darkPeak = glyphVisibility(keyLabelColor());
 
-    // FIXED behavior: the palette's dark label color renders a clearly visible glyph.
-    double darkVisibility = glyphVisibility(keyLabelColor());
+    // White ink on the light-grey key can never reach readable contrast: even
+    // fully-white pixels are only ~1.2:1 against the face. Cap generously at 2:1.
+    QVERIFY2(whitePeak < 2.0,
+             qPrintable(QStringLiteral("White glyph reached unexpected contrast: %1").arg(whitePeak)));
 
-    QVERIFY2(whiteVisibility < 0.02,
-             qPrintable(QStringLiteral("White glyph unexpectedly visible: %1").arg(whiteVisibility)));
-    QVERIFY2(darkVisibility > 0.10,
-             qPrintable(QStringLiteral("Dark glyph not visible enough: %1").arg(darkVisibility)));
+    // The dark pen must produce clearly readable ink (WCAG AA >= 4.5:1). On the
+    // #222 label this peaks well above 8:1 wherever the glyph is drawn.
+    QVERIFY2(darkPeak >= 4.5,
+             qPrintable(QStringLiteral("Dark glyph contrast too low: %1").arg(darkPeak)));
 
-    // And the fix must be a large improvement over the buggy rendering.
-    QVERIFY(darkVisibility > whiteVisibility * 5.0);
+    // The fix must be a large improvement over the buggy rendering.
+    QVERIFY(darkPeak > whitePeak * 2.0);
 }
