@@ -31,6 +31,7 @@
 #include <QPainter>
 #include <QMenu>
 #include <QIcon>
+#include <QColor>
 
 #include "frameworks/UBPlatformUtils.h"
 
@@ -97,6 +98,12 @@ friend class UBKeyButton;
 public:
     UBKeyboardPalette(QWidget *parent);
     ~UBKeyboardPalette();
+
+    // Fixed dark color used to draw key glyphs/labels. The key face images are
+    // always light-grey (~RGB 235 passive / ~188 active), so the label color must
+    // stay dark and theme-independent — otherwise the app-wide dark stylesheet
+    // (onSurface = white) makes the glyphs unreadable (issue #263).
+    static QColor keyLabelColor();
 
     BTNImages *currBtnImages;
 
