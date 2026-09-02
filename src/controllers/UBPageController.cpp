@@ -63,10 +63,25 @@ void UBPageController::duplicatePage()
     UBApplication::boardController->duplicateScene();
 }
 
+void UBPageController::duplicatePageAt(int index)
+{
+    // Clone a specific page (from its thumbnail context menu). The copy is
+    // inserted right after `index` and becomes the active scene.
+    UBApplication::boardController->duplicateScene(index);
+}
+
 void UBPageController::deletePage()
 {
     UBApplication::boardController->deleteScene(
         UBApplication::boardController->activeSceneIndex());
+}
+
+void UBPageController::deletePageAt(int index)
+{
+    // Delete a specific page (from its thumbnail context menu), not just the
+    // active one — otherwise right-clicking a non-active thumbnail would delete
+    // the wrong page.
+    UBApplication::boardController->deleteScene(index);
 }
 
 void UBPageController::importPage()

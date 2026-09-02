@@ -127,7 +127,29 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: pageController.goToPage(index)
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onClicked: (mouse) => {
+                        if (mouse.button === Qt.RightButton)
+                            pageMenu.popup()
+                        else
+                            pageController.goToPage(index)
+                    }
+                    // Touch: long-press opens the same context menu
+                    onPressAndHold: pageMenu.popup()
+                }
+
+                // Right-click / long-press context menu for this page
+                Menu {
+                    id: pageMenu
+
+                    MenuItem {
+                        text: "Dupliquer la page"
+                        onTriggered: pageController.duplicatePageAt(index)
+                    }
+                    MenuItem {
+                        text: "Supprimer la page"
+                        onTriggered: pageController.deletePageAt(index)
+                    }
                 }
             }
 
