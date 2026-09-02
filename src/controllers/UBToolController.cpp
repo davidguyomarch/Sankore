@@ -526,6 +526,22 @@ void UBToolController::alignSelection()
     mgr.horizontalAlign();
 }
 
+// --- Eraser options (issue #249) ---
+
+void UBToolController::eraseAllInk()
+{
+    // Erase all strokes/annotations on the current page, keeping other items.
+    if (UBApplication::boardController)
+        UBApplication::boardController->clearSceneAnnotation();
+}
+
+void UBToolController::eraseWholePage()
+{
+    // Erase the entire page content (annotations + items).
+    if (UBApplication::boardController)
+        UBApplication::boardController->clearScene();
+}
+
 // --- Actions ---
 
 void UBToolController::undo()
