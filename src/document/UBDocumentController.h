@@ -517,6 +517,7 @@ protected:
         void documentZoomSliderValueChanged (int value);
         void itemSelectionChanged(LastSelectedElementType newSelection);
         void exportDocument();
+        void exportDocumentAt(int index);
         void exportDocumentSet();
 
         void thumbnailViewResized();
