@@ -53,6 +53,25 @@
 
 #include "gui/UBResources.h"
 
+// #243 diagnostic — see UBGraphicsItemDelegate.cpp. Crash-safe flushed log.
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+namespace {
+void ub243Log(const QString& msg)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+        out << "[STROKE-SEL] " << msg << "\n";
+        out.flush();
+        logFile.flush();
+        logFile.close();
+    }
+}
+}
+
 
 UBGraphicsDelegateFrame::UBGraphicsDelegateFrame(UBGraphicsItemDelegate* pDelegate, QRectF pRect, qreal pFrameWidth, bool respectRatio)
     : QGraphicsRectItem(), QObject(pDelegate)
@@ -835,8 +854,22 @@ void UBGraphicsDelegateFrame::setVisible(bool visible)
 
 void UBGraphicsDelegateFrame::positionHandles()
 {
-    QRectF itemRect = delegated()->boundingRect();
+    ub243Log(QString("Frame::positionHandles ENTER this=%1 mDelegate=%2")
+                 .arg(reinterpret_cast<quintptr>(this))
+                 .arg(reinterpret_cast<quintptr>(mDelegate)));
 
+    QGraphicsItem* dbg_d = delegated();
+    ub243Log(QString("  Frame delegated() -> %1 type=%2")
+                 .arg(reinterpret_cast<quintptr>(dbg_d))
+                 .arg(dbg_d ? dbg_d->type() : -1));
+
+    ub243Log("  Frame about to call delegated()->boundingRect()");
+    QRectF itemRect = delegated()->boundingRect();
+    ub243Log(QString("  Frame boundingRect OK = (%1,%2 %3x%4)")
+                 .arg(itemRect.x()).arg(itemRect.y()).arg(itemRect.width()).arg(itemRect.height()));
+
+    ub243Log(QString("  Frame getToolBarItem() -> %1")
+                 .arg(reinterpret_cast<quintptr>(mDelegate->getToolBarItem())));
     if (mDelegate->getToolBarItem() && mDelegate->getToolBarItem()->isVisibleOnBoard()
         && mDelegate->getToolBarItem()->isShifting())
     {
@@ -844,7 +877,9 @@ void UBGraphicsDelegateFrame::positionHandles()
         itemRect.setTopLeft(graphicsItemPosition-QPointF(0,mDelegate->getToolBarItem()->boundingRect().height()* mDelegate->antiScaleRatio()));
     }
 
+    ub243Log("  Frame about to call delegated()->sceneTransform()");
     QTransform itemTransform = delegated()->sceneTransform();
+    ub243Log("  Frame sceneTransform OK");
     QPointF topLeft = itemTransform.map(itemRect.topLeft());
     QPointF topRight = itemTransform.map(itemRect.topRight());
     QPointF bottomLeft = itemTransform.map(itemRect.bottomLeft());
@@ -889,10 +924,21 @@ void UBGraphicsDelegateFrame::positionHandles()
         setRect(center.x() - width / 2, center.y() - h / 2, width, h);
     }
 
+    ub243Log(QString("  Frame geometry computed: width=%1 height=%2 angle=%3 mVisible=%4")
+                 .arg(width).arg(height).arg(angle).arg(mVisible ? 1 : 0));
+
     resetTransform();
     setTransform(QTransform().translate(center.x(), center.y()), true);
     setRotation(rotation() + -angle);
     setTransform(QTransform().translate(-center.x(), -center.y()), true);
+
+    ub243Log(QString("  Frame reparenting grips: br=%1 b=%2 l=%3 r=%4 t=%5 rotate=%6")
+                 .arg(reinterpret_cast<quintptr>(mBottomRightResizeGripSvgItem))
+                 .arg(reinterpret_cast<quintptr>(mBottomResizeGripSvgItem))
+                 .arg(reinterpret_cast<quintptr>(mLeftResizeGripSvgItem))
+                 .arg(reinterpret_cast<quintptr>(mRightResizeGripSvgItem))
+                 .arg(reinterpret_cast<quintptr>(mTopResizeGripSvgItem))
+                 .arg(reinterpret_cast<quintptr>(mRotateButton)));
 
     mBottomRightResizeGripSvgItem->setParentItem(this);
     mBottomResizeGripSvgItem->setParentItem(this);
@@ -959,6 +1005,7 @@ void UBGraphicsDelegateFrame::positionHandles()
 
     //make frame interact like delegated item when selected. Maybe should be deleted if selection logic will change
     setZValue(delegated()->zValue());
+    ub243Log("Frame::positionHandles EXIT OK");
 }
 
 
