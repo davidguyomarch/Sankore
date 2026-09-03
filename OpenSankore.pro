@@ -120,6 +120,19 @@ UB_LIBRARY.files = resources/library
 UB_FONTS.files = resources/fonts
 UB_THIRDPARTY_INTERACTIVE.files = thirdparty/interactive
 
+# --- Translations (issue #250) ---------------------------------------------
+# The app loads resources/i18n/sankore_<lang>.qm at runtime. Those .qm files
+# were never generated (no lrelease step), so every tr() string fell back to
+# English regardless of the selected language.
+#
+# TRANSLATIONS lists the source catalogs (used by `lupdate` to refresh strings).
+# The .qm are compiled from these .ts by an explicit lrelease build step wired
+# into every build path (scripts/docker-build.sh and the CI workflows) and then
+# deployed next to the executable, where UBPlatformUtils::translationPath()
+# looks for them. We do it explicitly rather than via QMAKE_EXTRA_COMPILERS so
+# it behaves identically under make, nmake and jom -f Makefile.Release.
+TRANSLATIONS = $$files(resources/i18n/sankore_*.ts)
+
 DEFINES += NO_THIRD_PARTY_WARNINGS
 DEFINES += VERSION_TYPE=\"\\\"$${VERSION_TYPE}\"\\\"
 DEFINES += VERSION_PATCH=\"\\\"$${VERSION_PATCH}\"\\\"

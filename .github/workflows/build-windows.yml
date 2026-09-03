@@ -234,7 +234,12 @@ jobs:
           copy C:\zlib\bin\zlib.dll build\win32\release\product\
           copy C:\vcpkg\installed\x64-windows\bin\libssl-3-x64.dll build\win32\release\product\
           copy C:\vcpkg\installed\x64-windows\bin\libcrypto-3-x64.dll build\win32\release\product\
+          rem Translations (#250): compile .ts -> .qm and deploy next to the exe
+          for %%f in (resources\i18n\sankore_*.ts) do lrelease -silent "%%f" -qm "%%~dpnf.qm"
+          mkdir build\win32\release\product\i18n
+          copy resources\i18n\*.qm build\win32\release\product\i18n\
           dir build\win32\release\product\
+          dir build\win32\release\product\i18n\
 
       - name: Build OCR test tool
         if: success()

@@ -148,6 +148,13 @@ if $BUILD_APP; then
 
     BUILD_CMD="$BUILD_CMD && make -j\$(nproc)"
 
+    # Translations (issue #250): compile .ts -> .qm and deploy them next to the
+    # binary so the app can load them at runtime. `make` (no install) does not
+    # populate the product dir, so we generate and copy the .qm explicitly.
+    BUILD_CMD="$BUILD_CMD && export PATH=/usr/lib/qt6/bin:\$PATH"
+    BUILD_CMD="$BUILD_CMD && for ts in resources/i18n/sankore_*.ts; do lrelease -silent \"\$ts\" -qm \"\${ts%.ts}.qm\"; done"
+    BUILD_CMD="$BUILD_CMD && mkdir -p build/linux/release/product/i18n && cp -f resources/i18n/*.qm build/linux/release/product/i18n/"
+
     docker_run "$BUILD_CMD"
 
     APP_TIME=$SECONDS

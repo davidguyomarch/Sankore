@@ -166,6 +166,18 @@ jobs:
         run: |
           make -j$(nproc)
 
+      - name: Compile & deploy translations (#250)
+        run: |
+          # Compile .ts -> .qm and place them next to the binary (the app loads
+          # <applicationDirPath>/i18n/sankore_<lang>.qm at runtime).
+          export PATH="/opt/qt/6.8.2/gcc_64/bin:$PATH"
+          for ts in resources/i18n/sankore_*.ts; do
+            lrelease -silent "$ts" -qm "${ts%.ts}.qm"
+          done
+          mkdir -p build/linux/release/product/i18n
+          cp -f resources/i18n/*.qm build/linux/release/product/i18n/
+          ls -la build/linux/release/product/i18n/ | head
+
       - name: List build output
         if: always()
         run: |
@@ -397,6 +409,10 @@ jobs:
 
           # Copy binary
           cp build/linux/release/product/Open-Sankore AppDir/usr/bin/
+
+          # Translations next to the binary (#250)
+          mkdir -p AppDir/usr/bin/i18n
+          cp -f build/linux/release/product/i18n/*.qm AppDir/usr/bin/i18n/ 2>/dev/null || true
 
           # Copy Qt libraries and dependencies
           cp /opt/qt/6.8.2/gcc_64/lib/libQt6Core.so.6 AppDir/usr/lib/
