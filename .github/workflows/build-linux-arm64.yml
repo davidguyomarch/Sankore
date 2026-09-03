@@ -111,6 +111,19 @@ jobs:
           export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH:-}
           make -j$(nproc)
 
+      - name: Compile & deploy translations (#250)
+        run: |
+          # Compile .ts -> .qm next to the binary (app loads
+          # <applicationDirPath>/i18n/sankore_<lang>.qm at runtime).
+          export PATH="/usr/lib/qt6/bin:$PATH"
+          LRELEASE=$(command -v lrelease || command -v lrelease-qt6 || echo /usr/lib/qt6/bin/lrelease)
+          for ts in resources/i18n/sankore_*.ts; do
+            "$LRELEASE" -silent "$ts" -qm "${ts%.ts}.qm"
+          done
+          mkdir -p build/linux/release/product/i18n
+          cp -f resources/i18n/*.qm build/linux/release/product/i18n/
+          ls -la build/linux/release/product/i18n/ | head
+
       - name: List build output
         if: always()
         run: |

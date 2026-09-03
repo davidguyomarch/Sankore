@@ -68,6 +68,13 @@ mkdir -p "$DEB_ROOT/DEBIAN"
 cp "$PRODUCT_DIR/Open-Sankore" "$DEB_ROOT/usr/bin/open-sankore"
 chmod 755 "$DEB_ROOT/usr/bin/open-sankore"
 
+# Translations (#250): the app loads <applicationDirPath>/i18n/*.qm, i.e. next
+# to the binary in /usr/bin. Ship the compiled catalogs there.
+if [ -d "$PRODUCT_DIR/i18n" ]; then
+    mkdir -p "$DEB_ROOT/usr/bin/i18n"
+    cp -f "$PRODUCT_DIR"/i18n/*.qm "$DEB_ROOT/usr/bin/i18n/" 2>/dev/null || true
+fi
+
 # Copy resources (if available)
 if [ -d "$PROJECT_DIR/resources/etc" ]; then
     cp -r "$PROJECT_DIR/resources/etc" "$DEB_ROOT/usr/share/open-sankore/"
@@ -139,6 +146,11 @@ if command -v rpmbuild &> /dev/null; then
     cp "$PRODUCT_DIR/Open-Sankore" "$PKG_DIR/$TARBALL_DIR/usr/bin/open-sankore"
     chmod 755 "$PKG_DIR/$TARBALL_DIR/usr/bin/open-sankore"
     cp "$DEB_ROOT/usr/share/applications/open-sankore.desktop" "$PKG_DIR/$TARBALL_DIR/usr/share/applications/"
+    # Translations (#250) next to the binary
+    if [ -d "$PRODUCT_DIR/i18n" ]; then
+        mkdir -p "$PKG_DIR/$TARBALL_DIR/usr/bin/i18n"
+        cp -f "$PRODUCT_DIR"/i18n/*.qm "$PKG_DIR/$TARBALL_DIR/usr/bin/i18n/" 2>/dev/null || true
+    fi
 
     tar -czf "$RPM_BUILD_DIR/SOURCES/open-sankore-$VERSION.tar.gz" -C "$PKG_DIR" "$TARBALL_DIR"
 
@@ -174,10 +186,15 @@ mkdir -p %{buildroot}/usr/bin
 mkdir -p %{buildroot}/usr/share/applications
 cp usr/bin/open-sankore %{buildroot}/usr/bin/
 cp usr/share/applications/open-sankore.desktop %{buildroot}/usr/share/applications/
+if [ -d usr/bin/i18n ]; then
+  mkdir -p %{buildroot}/usr/bin/i18n
+  cp usr/bin/i18n/*.qm %{buildroot}/usr/bin/i18n/ || true
+fi
 
 %files
 %attr(755, root, root) /usr/bin/open-sankore
 /usr/share/applications/open-sankore.desktop
+/usr/bin/i18n
 EOF
 
     rpmbuild --define "_topdir $RPM_BUILD_DIR" -bb "$RPM_BUILD_DIR/SPECS/open-sankore.spec"
