@@ -19,6 +19,26 @@
 #include "gui/UBMainWindow.h"
 #include "UBGraphicsScene.h"
 
+// #248 diagnostic — shapes-tool tracing. Writes a tagged checkpoint to
+// startup.log and flushes immediately. Remove once the break point is found.
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+namespace {
+void ub248Log(const QString& msg)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+        out << "[SHAPE] " << msg << "\n";
+        out.flush();
+        logFile.flush();
+        logFile.close();
+    }
+}
+}
+
 UBShapeFactory::UBShapeFactory():
     mCurrentShape(nullptr),
     mBoardView(nullptr),
@@ -192,6 +212,8 @@ void UBShapeFactory::init()
     connect(mBoardView, &UBBoardView::mouseRelease, this, &UBShapeFactory::onMouseRelease);
     connect(mBoardView, &UBBoardView::mousePress, this, &UBShapeFactory::onMousePress);
 
+    ub248Log(QString("init(): connected to board mouse signals, mBoardView=%1")
+                 .arg(reinterpret_cast<quintptr>(mBoardView)));
 }
 
 
@@ -293,6 +315,7 @@ void UBShapeFactory::createEllipse(bool create)
         mIsRegularShape = true;
         mIsCreating = true;
         mShapeType = Ellipse;
+        ub248Log(QString("createEllipse done: mIsCreating=%1 mShapeType=%2").arg(mIsCreating?1:0).arg((int)mShapeType));
     }
 }
 
@@ -361,11 +384,13 @@ void UBShapeFactory::createPen(bool create)
 
 void UBShapeFactory::createRegularPolygon(int nVertices)
 {
+    ub248Log(QString("createRegularPolygon(%1): calling setStylusTool(Drawing)").arg(nVertices));
     mDrawingController->setStylusTool(UBStylusTool::Drawing);
     mIsRegularShape = false;
     mIsCreating = true;
     mShapeType = RegularPolygon;
     mNVertices = nVertices;
+    ub248Log(QString("createRegularPolygon done: mIsCreating=%1 mShapeType=%2").arg(mIsCreating?1:0).arg((int)mShapeType));
 }
 
 void UBShapeFactory::createPolygon(bool create)
@@ -461,7 +486,13 @@ void UBShapeFactory::onMouseMove(QMouseEvent *event)
 
 void UBShapeFactory::onMousePress(QMouseEvent *event)
 {
+    ub248Log(QString("onMousePress: mIsCreating=%1 mShapeType=%2 mIsRegularShape=%3 activeTool=%4")
+                 .arg(mIsCreating ? 1 : 0)
+                 .arg((int)mShapeType)
+                 .arg(mIsRegularShape ? 1 : 0)
+                 .arg(mDrawingController ? mDrawingController->stylusTool() : -1));
     if(mIsCreating){
+        ub248Log("onMousePress: entering creation branch, instantiating shape");
         mCursorMoved = false;
         mIsPress = true;
 
@@ -675,6 +706,8 @@ QRectF UBShapeFactory::reverseRect(const QRectF& rect)
 
 void UBShapeFactory::desactivate()
 {
+    ub248Log(QString("desactivate() called (was mIsCreating=%1 mShapeType=%2) — resets creation state")
+                 .arg(mIsCreating ? 1 : 0).arg((int)mShapeType));
     mIsPress = false;
     mIsCreating = false;
     mCurrentShape = nullptr;
