@@ -38,7 +38,9 @@ public slots:
     void previousPage();
     void addPage();
     void duplicatePage();
+    void duplicatePageAt(int index);
     void deletePage();
+    void deletePageAt(int index);
     void importPage();
     void goToPage(int index);
 
