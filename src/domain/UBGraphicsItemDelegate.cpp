@@ -79,6 +79,30 @@
 
 #include "customWidgets/UBGraphicsItemAction.h"
 
+// ---------------------------------------------------------------------------
+// #243 diagnostic — stroke-selection crash tracing.
+// Writes a tagged checkpoint to startup.log and FLUSHES immediately so the
+// last line survives a subsequent crash. Remove once the faulting line is
+// identified. See .kiro/steering/dev-workflow.md ("startup.log").
+// ---------------------------------------------------------------------------
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+namespace {
+void ub243Log(const QString& msg)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+        out << "[STROKE-SEL] " << msg << "\n";
+        out.flush();
+        logFile.flush();
+        logFile.close();
+    }
+}
+}
+
 
 DelegateButton *DelegateButton::Spacer = 0;
 
@@ -337,16 +361,29 @@ UBGraphicsItemDelegate::~UBGraphicsItemDelegate()
 QVariant UBGraphicsItemDelegate::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
 {
     if (change == QGraphicsItem::ItemSelectedHasChanged) {
+        // #243 diagnostic
+        ub243Log(QString("itemChange ItemSelectedHasChanged: mDelegated=%1 type=%2 scene=%3 boardController=%4")
+                     .arg(reinterpret_cast<quintptr>(mDelegated))
+                     .arg(mDelegated ? mDelegated->type() : -1)
+                     .arg(mDelegated && mDelegated->scene() ? 1 : 0)
+                     .arg(UBApplication::boardController ? 1 : 0));
+
         bool ok;
         bool selected = value.toUInt(&ok);
         if (ok) {
             UBGraphicsScene *ubScene = castUBGraphicsScene();
+            ub243Log(QString("  castUBGraphicsScene -> %1, selected=%2")
+                         .arg(reinterpret_cast<quintptr>(ubScene)).arg(selected ? 1 : 0));
             if (ubScene) {
+                QGraphicsItem* d = delegated();
+                ub243Log(QString("  delegated() -> %1 type=%2 (about to set Z level)")
+                             .arg(reinterpret_cast<quintptr>(d)).arg(d ? d->type() : -1));
                 if (selected) {
-                    ubScene->setSelectedZLevel(delegated());
+                    ubScene->setSelectedZLevel(d);
                 } else {
-                    ubScene->setOwnZlevel(delegated());
+                    ubScene->setOwnZlevel(d);
                 }
+                ub243Log("  Z level set OK");
             }
         }
     }
@@ -357,8 +394,13 @@ QVariant UBGraphicsItemDelegate::itemChange(QGraphicsItem::GraphicsItemChange ch
             && mDelegated->scene()
             && UBApplication::boardController)
     {
+        ub243Log(QString("  computing antiScaleRatio: sysScale=%1 zoom=%2")
+                     .arg(UBApplication::boardController->systemScaleFactor())
+                     .arg(UBApplication::boardController->currentZoom()));
         mAntiScaleRatio = 1 / (UBApplication::boardController->systemScaleFactor() * UBApplication::boardController->currentZoom());
+        ub243Log("  calling positionHandles() from itemChange");
         positionHandles();
+        ub243Log("  positionHandles() returned OK from itemChange");
     }
 
     if (change == QGraphicsItem::ItemPositionHasChanged
@@ -482,19 +524,30 @@ QGraphicsItem *UBGraphicsItemDelegate::delegated()
 
 void UBGraphicsItemDelegate::positionHandles()
 {
+    ub243Log(QString("Delegate::positionHandles ENTER mDelegated=%1 type=%2 selected=%3 mFrame=%4 mToolBarItem=%5")
+                 .arg(reinterpret_cast<quintptr>(mDelegated))
+                 .arg(mDelegated ? mDelegated->type() : -1)
+                 .arg(mDelegated && mDelegated->isSelected() ? 1 : 0)
+                 .arg(reinterpret_cast<quintptr>(mFrame))
+                 .arg(reinterpret_cast<quintptr>(mToolBarItem)));
+
     if (mDelegated->isSelected()) {
         bool shownOnDisplay = mDelegated->data(UBGraphicsItemData::ItemLayerType).toInt() != UBItemLayerType::Control;
+        ub243Log("  calling showHide()");
         showHide(shownOnDisplay);
         mDelegated->setData(UBGraphicsItemData::ItemLocked, QVariant(isLocked()));
+        ub243Log("  calling updateFrame()");
         updateFrame();
 
         if (UBStylusTool::Play != UBToolController::toolController()->stylusTool())
             mFrame->show();
 
+        ub243Log("  calling updateButtons()");
         updateButtons(true);
 
         if (mToolBarItem && mToolBarItem->isVisibleOnBoard())
         {
+            ub243Log("  positioning toolbar item");
             mToolBarItem->positionHandles();
             mToolBarItem->update();
             mToolBarItem->show();
@@ -507,6 +560,7 @@ void UBGraphicsItemDelegate::positionHandles()
         if (mToolBarItem)
             mToolBarItem->hide();
     }
+    ub243Log("Delegate::positionHandles EXIT OK");
 }
 
 void UBGraphicsItemDelegate::setZOrderButtonsVisible(bool visible)
@@ -634,6 +688,9 @@ void UBGraphicsItemDelegate::showHideRecurs(const QVariant &pShow, QGraphicsItem
 
 void UBGraphicsItemDelegate::showHide(bool show)
 {
+    ub243Log(QString("  showHide ENTER mDelegated=%1 childCount=%2")
+                 .arg(reinterpret_cast<quintptr>(mDelegated))
+                 .arg(mDelegated ? mDelegated->childItems().size() : -1));
     QVariant showFlag = QVariant(show ? UBItemLayerType::Object : UBItemLayerType::Control);
     showHideRecurs(showFlag, mDelegated);
     mDelegated->update();
@@ -905,13 +962,19 @@ bool UBGraphicsItemDelegate::isFlippable()
 
 void UBGraphicsItemDelegate::updateFrame()
 {
+    ub243Log(QString("  updateFrame ENTER mFrame=%1 frameScene=%2 delegatedScene=%3")
+                 .arg(reinterpret_cast<quintptr>(mFrame))
+                 .arg(reinterpret_cast<quintptr>(mFrame ? mFrame->scene() : nullptr))
+                 .arg(reinterpret_cast<quintptr>(mDelegated ? mDelegated->scene() : nullptr)));
     if (mFrame && !mFrame->scene() && mDelegated->scene())
     {
         mDelegated->scene()->addItem(mFrame);
     }
 
     mFrame->setAntiScale(mAntiScaleRatio);
+    ub243Log("  updateFrame calling mFrame->positionHandles()");
     mFrame->positionHandles();
+    ub243Log("  updateFrame EXIT OK");
 }
 
 void UBGraphicsItemDelegate::updateButtons(bool showUpdated)

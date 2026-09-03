@@ -35,6 +35,25 @@
 #include "frameworks/UBFileSystemUtils.h"
 #include "core/UBPersistenceManager.h"
 
+// #243 diagnostic — see UBGraphicsItemDelegate.cpp. Crash-safe flushed log.
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+namespace {
+void ub243Log(const QString& msg)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+        out << "[STROKE-SEL] " << msg << "\n";
+        out.flush();
+        logFile.flush();
+        logFile.close();
+    }
+}
+}
+
 
 UBGraphicsStrokesGroup::UBGraphicsStrokesGroup(QGraphicsItem *parent)
     :QGraphicsItemGroup(parent), UBGraphicsItem()
@@ -201,8 +220,20 @@ void UBGraphicsStrokesGroup::paint(QPainter *painter, const QStyleOptionGraphics
 
 QVariant UBGraphicsStrokesGroup::itemChange(GraphicsItemChange change, const QVariant &value)
 {
+    if (change == QGraphicsItem::ItemSelectedHasChanged)
+        ub243Log(QString("StrokesGroup::itemChange SELECTED changed this=%1 Delegate=%2 childCount=%3")
+                     .arg(reinterpret_cast<quintptr>(this))
+                     .arg(reinterpret_cast<quintptr>(Delegate()))
+                     .arg(childItems().size()));
+
     QVariant newValue = Delegate()->itemChange(change, value);
-    return QGraphicsItemGroup::itemChange(change, newValue);
+
+    if (change == QGraphicsItem::ItemSelectedHasChanged)
+        ub243Log("StrokesGroup::itemChange calling QGraphicsItemGroup::itemChange");
+    QVariant result = QGraphicsItemGroup::itemChange(change, newValue);
+    if (change == QGraphicsItem::ItemSelectedHasChanged)
+        ub243Log("StrokesGroup::itemChange EXIT OK");
+    return result;
 }
 
 
