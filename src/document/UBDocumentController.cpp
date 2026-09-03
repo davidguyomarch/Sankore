@@ -505,12 +505,27 @@ QVariant UBDocumentTreeModel::data(const QModelIndex &index, int role) const
     }
 
     if(role == Qt::BackgroundRole){
+        // Highlighted row takes precedence: dark background needs light text (below).
+        if (mHighLighted.isValid() && index == mHighLighted) {
+            return QBrush(0x6682B5);
+        }
+
         if (isConstant(index) || dataNode->nodeType() == UBDocumentTreeNode::Catalog) {
             return QBrush(0xD9DFEB);
         }
+    }
 
+    if(role == Qt::ForegroundRole){
+        // Keep text readable against the background set above (issue #260).
+        // Highlighted row = dark background -> light text.
         if (mHighLighted.isValid() && index == mHighLighted) {
-            return QBrush(0x6682B5);
+            return QVariant::fromValue(QColor(Qt::white));
+        }
+        // Constant nodes and folders sit on the light 0xD9DFEB background;
+        // force a dark text color so they don't inherit a light theme color
+        // (which produced white-on-light-grey, unreadable folder labels).
+        if (isConstant(index) || dataNode->nodeType() == UBDocumentTreeNode::Catalog) {
+            return QVariant::fromValue(QColor(0x2B2B2B));
         }
     }
 
@@ -544,11 +559,7 @@ QVariant UBDocumentTreeModel::data(const QModelIndex &index, int role) const
                 return font;
             }
             break;
-        case (Qt::ForegroundRole) :
-            if (isConstant(index)) {
-                return QVariant::fromValue(QColor(Qt::darkGray));
-            }
-            break;
+        // Qt::ForegroundRole is handled row-wide above (issue #260).
         }
     }
 
