@@ -281,12 +281,18 @@ qreal UBZLayerController::changeZLevelTo(QGraphicsItem *item, moveDestination de
     }
 
 
-    //clear selection of the item and then select it again to activate selectionChangeProcessing()
-    item->scene()->clearSelection();
-    item->setSelected(true);
+    // Issue #273: previously we did clearSelection() + setSelected(true) here to
+    // refresh the selection. But re-selecting re-triggers setSelectedZLevel(),
+    // which floats the item back to the SelectedItem z-level and MASKS the
+    // reorder we just applied — so the new stacking only appeared after the
+    // user deselected the item. Instead, keep the current selection and make
+    // the item's live z reflect its new own-z immediately, so the bring
+    // to front / send to back is visible right away, while selected.
+    qreal newOwnZ = item->data(UBGraphicsItemData::ItemOwnZValue).toReal();
+    item->setZValue(newOwnZ);
 
     //Return new z value assigned to item
-    return item->data(UBGraphicsItemData::ItemOwnZValue).toReal();
+    return newOwnZ;
 
 }
 
