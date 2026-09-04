@@ -23,6 +23,10 @@
 
 #include <QScreen>
 #include <QGuiApplication>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+#include <QImage>
 
 #include "UBDesktopAnnotationController.h"
 
@@ -53,6 +57,20 @@
 
 #include "gui/UBKeyboardPalette.h"
 #include "gui/UBResources.h"
+
+
+// --- Temporary diagnostics for #241 / #243 (Desktop mode white surface + dead toolbar).
+//     Writes to startup.log next to the executable. Remove once the bug is fixed.
+static void ubDesktopDiag(const QString &line)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text))
+    {
+        QTextStream out(&logFile);
+        out << "[DESKTOP] " << line << "\n";
+        logFile.close();
+    }
+}
 
 
 UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
@@ -332,11 +350,28 @@ void UBDesktopAnnotationController::showWindow()
     // relying on window transparency.
     {
         QPixmap desktopPixmap = getScreenPixmap();
+        ubDesktopDiag(QString("showWindow WIN: desktopPixmap null=%1 %2x%3 -> used as background brush=%4")
+                          .arg(desktopPixmap.isNull() ? 1 : 0)
+                          .arg(desktopPixmap.width()).arg(desktopPixmap.height())
+                          .arg(!desktopPixmap.isNull() ? 1 : 0));
         if (!desktopPixmap.isNull())
         {
             mTransparentDrawingView->setStyleSheet(QString());
             mTransparentDrawingScene->setBackgroundBrush(QBrush(desktopPixmap));
         }
+    }
+    // --- Diagnostics #243: is the board control view disabled (mitigation #135)
+    //     at the point where the desktop overlay is shown? A disabled board view
+    //     is why the palette actions (actionPen->trigger()) have no visible effect.
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+    {
+        ubDesktopDiag(QString("showWindow WIN: boardController->controlView enabled=%1 visible=%2")
+                          .arg(UBApplication::boardController->controlView()->isEnabled() ? 1 : 0)
+                          .arg(UBApplication::boardController->controlView()->isVisible() ? 1 : 0));
+    }
+    else
+    {
+        ubDesktopDiag(QStringLiteral("showWindow WIN: boardController or controlView is NULL"));
     }
     mTransparentDrawingView->showFullScreen();
 #elif defined(Q_OS_LINUX)
@@ -517,7 +552,41 @@ QPixmap UBDesktopAnnotationController::getScreenPixmap()
     const QRect screenRect = screen->geometry();
     // processEvents() removed: it caused re-entrancy during Desktop mode transition,
     // dispatching stale mouse events to the board view and crashing in viewportEvent (#135)
-    return screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
+    QPixmap grabbed = screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
+
+    // --- Diagnostics #243: is the grabbed desktop pixmap null / all-white?
+    {
+        ubDesktopDiag(QString("getScreenPixmap screen=%1 rect=%2,%3 %4x%5 pixmap=%6x%7 null=%8 devicePixelRatio=%9")
+                          .arg(screen->name())
+                          .arg(screenRect.x()).arg(screenRect.y())
+                          .arg(screenRect.width()).arg(screenRect.height())
+                          .arg(grabbed.width()).arg(grabbed.height())
+                          .arg(grabbed.isNull() ? 1 : 0)
+                          .arg(grabbed.devicePixelRatio()));
+
+        if (!grabbed.isNull())
+        {
+            const QImage img = grabbed.toImage();
+            auto sample = [&img](int x, int y) -> QString {
+                if (x < 0 || y < 0 || x >= img.width() || y >= img.height())
+                    return QStringLiteral("--");
+                const QRgb p = img.pixel(x, y);
+                return QString("#%1%2%3%4")
+                    .arg(qAlpha(p), 2, 16, QLatin1Char('0'))
+                    .arg(qRed(p),   2, 16, QLatin1Char('0'))
+                    .arg(qGreen(p), 2, 16, QLatin1Char('0'))
+                    .arg(qBlue(p),  2, 16, QLatin1Char('0'));
+            };
+            ubDesktopDiag(QString("  samples center=%1 topLeft=%2 topRight=%3 bottomLeft=%4 bottomRight=%5")
+                              .arg(sample(img.width() / 2, img.height() / 2))
+                              .arg(sample(1, 1))
+                              .arg(sample(img.width() - 2, 1))
+                              .arg(sample(1, img.height() - 2))
+                              .arg(sample(img.width() - 2, img.height() - 2)));
+        }
+    }
+
+    return grabbed;
 
 
 
@@ -582,6 +651,14 @@ void UBDesktopAnnotationController::penActionPressed()
  */
 void UBDesktopAnnotationController::penActionReleased()
 {
+    // --- Diagnostics #243: confirm palette clicks reach the handler, and log the
+    //     board view state that would swallow the resulting action.
+    ubDesktopDiag(QString("penActionReleased: pending=%1 arrowClicked=%2 controlViewEnabled=%3")
+                      .arg(mPendingPenButtonPressed ? 1 : 0)
+                      .arg(mbArrowClicked ? 1 : 0)
+                      .arg((UBApplication::boardController && UBApplication::boardController->controlView())
+                               ? (UBApplication::boardController->controlView()->isEnabled() ? 1 : 0)
+                               : -1));
     mHoldTimerPen.stop();
     if(mPendingPenButtonPressed)
     {
