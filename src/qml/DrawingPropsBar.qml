@@ -175,6 +175,7 @@ Rectangle {
             onClicked: parent.clicked()
         }
         ToolTip {
+            enabled: false  // #247: informational only — must not intercept clicks
             visible: eaMouse.containsMouse
             delay: 500
             text: parent.tooltip
