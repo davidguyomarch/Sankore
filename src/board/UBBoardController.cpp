@@ -1589,6 +1589,12 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
     int sceneCount = pDocumentProxy->pageCount();
     if (index >= sceneCount && sceneCount > 0)
         index = sceneCount - 1;
+    // #276: also clamp negative indexes. A negative index reaches here when a
+    // caller computes an out-of-range target (e.g. deleting the first page);
+    // without this, loadDocumentScene returns null and mActiveScene is left
+    // dangling, crashing later dereferences and QML bindings.
+    if (index < 0)
+        index = 0;
 
     UBGraphicsScene* targetScene = UBPersistenceManager::persistenceManager()->loadDocumentScene(pDocumentProxy, index);
 
@@ -1631,8 +1637,13 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
 
     selectionChanged();
 
-    updateBackgroundActionsState(mActiveScene->isDarkBackground(), mActiveScene->isCrossedBackground());
-    updateBackgroundState();
+    // #276: mActiveScene can still be null here if targetScene failed to load
+    // (invalid index, missing scene). Guard the dereference instead of crashing.
+    if (mActiveScene)
+    {
+        updateBackgroundActionsState(mActiveScene->isDarkBackground(), mActiveScene->isCrossedBackground());
+        updateBackgroundState();
+    }
 
     if(documentChange)
     {

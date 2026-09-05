@@ -19,6 +19,7 @@
 #include "UBBoardNavigationController.h"
 #include "UBBoardController.h"
 #include "UBBoardView.h"
+#include "UBPageDeletionMath.h"
 
 #include <QApplication>
 #include <QCursor>
@@ -217,7 +218,12 @@ void UBBoardNavigationController::deleteScene(int nIndex)
 
         if (nIndex >= mBoardController->pageCount())
             nIndex = mBoardController->pageCount() - 1;
-        mBoardController->setActiveDocumentScene(nIndex - 1);
+        // #276: pick a valid active-scene index. The old code used nIndex-1,
+        // which is -1 when deleting the first page — an unclamped negative index
+        // left the active scene dangling and crashed on QML re-evaluation
+        // (especially with shapes/strokes present). Clamp to [0, newLast].
+        mBoardController->setActiveDocumentScene(
+            ubActiveIndexAfterPageDeletion(nIndex, mBoardController->pageCount()));
         mBoardController->deletePages(scIndexes);
         mBoardController->reloadThumbnails();
         mBoardController->emitPageChanged();
