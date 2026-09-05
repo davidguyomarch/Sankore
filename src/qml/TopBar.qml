@@ -183,6 +183,7 @@ Rectangle {
             onClicked: if (parent.enabled) parent.clicked()
         }
         ToolTip {
+            enabled: false  // #247: informational only — must not intercept clicks
             visible: btnMa.containsMouse && parent.tooltip !== ""
             delay: 600
             text: parent.tooltip

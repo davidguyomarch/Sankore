@@ -19,6 +19,22 @@
 #include "domain/UBEditableGraphicsPolygonItem.h"
 
 #include <QAction>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+// --- Temporary diagnostics for #248 (Shapes tool: cannot create a shape).
+//     Appends to startup.log next to the executable. Remove once fixed.
+static void ubShapesDiag(const QString &line)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text))
+    {
+        QTextStream out(&logFile);
+        out << "[SHAPES] " << line << "\n";
+        logFile.close();
+    }
+}
 
 // --- Singleton ---
 
@@ -491,6 +507,10 @@ void UBToolController::toggleShapes()
 
 void UBToolController::createShape(const QString& shape)
 {
+    ubShapesDiag(QString("UBToolController::createShape('%1') boardController=%2")
+                     .arg(shape)
+                     .arg(UBApplication::boardController ? 1 : 0));
+
     auto& factory = UBApplication::boardController->shapeFactory();
 
     if (shape == "ellipse")         factory.createEllipse(true);
