@@ -23,6 +23,7 @@
 
 
 #include "UBGraphicsDelegateFrame.h"
+#include "UBResizeGripGeometry.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneHoverEvent>
 #include <QMenu>
@@ -1011,33 +1012,39 @@ UBGraphicsDelegateFrame::FrameTool UBGraphicsDelegateFrame::toolFromPos(QPointF 
 }
 
 
+// #277: the clickable resize zones now span the full length of each edge and
+// use a thicker band (see UBResizeGripGeometry.h). Previously each edge grip was
+// only mFrameWidth thick and cut back by mFrameWidth at each end, so the edge
+// extremities didn't resize and the thin band was hard to hit (only the middle,
+// where the icon sits, felt draggable). The bottom-right corner keeps its own
+// square and toolFromPos tests it first, so the wider edges don't steal it.
 QRectF UBGraphicsDelegateFrame::bottomRightResizeGripRect() const
 {
-    return QRectF(rect().right() - mFrameWidth, rect().bottom() - mFrameWidth, mFrameWidth, mFrameWidth);
+    return UBResizeGrip::bottomRightRect(rect(), mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::bottomResizeGripRect() const
 {
-    return QRectF(rect().left() + mFrameWidth, rect().bottom() - mFrameWidth, rect().width() - 2 * mFrameWidth, mFrameWidth);
+    return UBResizeGrip::bottomRect(rect(), mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::leftResizeGripRect() const
 {
-    return QRectF(rect().left(), rect().top() + mFrameWidth, mFrameWidth, rect().height() - 2 * mFrameWidth);
+    return UBResizeGrip::leftRect(rect(), mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::rightResizeGripRect() const
 {
-    return QRectF(rect().right() - mFrameWidth, rect().top() + mFrameWidth, mFrameWidth, rect().height() - 2 * mFrameWidth);
+    return UBResizeGrip::rightRect(rect(), mFrameWidth);
 }
 
 
 QRectF UBGraphicsDelegateFrame::topResizeGripRect() const
 {
-    return QRectF(rect().left() + mFrameWidth, rect().top(), rect().width() - 2 * mFrameWidth, mFrameWidth);
+    return UBResizeGrip::topRect(rect(), mFrameWidth);
 }
 
 
