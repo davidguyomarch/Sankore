@@ -43,6 +43,10 @@
 
 #include "controllers/UBToolController.h"
 
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
 #include "frameworks/UBGeometryUtils.h"
 #include "frameworks/UBPlatformUtils.h"
 
@@ -879,7 +883,7 @@ void UBBoardView::handleItemMousePress(QMouseEvent *event)
         if (movingItem)
         {
             UBGraphicsItem *graphicsItem = dynamic_cast<UBGraphicsItem*>(movingItem);
-            if (graphicsItem)
+            if (graphicsItem && graphicsItem->Delegate())  // #243: guard null delegate
                 graphicsItem->Delegate()->startUndoStep();
 
             movingItem->clearFocus();
@@ -1074,6 +1078,21 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
     //EV-7 - NNE - 20131231
     emit mousePress(event);
 
+    // --- Diagnostics #248 (Shapes): only when a shape is being created (tool
+    //     Drawing), log whether this board view actually receives the click.
+    //     If a QML overlay swallows it, this line never appears in startup.log.
+    if ((UBStylusTool::Enum)UBToolController::toolController()->stylusTool() == UBStylusTool::Drawing)
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text))
+        {
+            QTextStream out(&logFile);
+            out << "[SHAPES] UBBoardView::mousePressEvent reached: bIsControl="
+                << (bIsControl ? 1 : 0) << " bIsDesktop=" << (bIsDesktop ? 1 : 0)
+                << " interactive=" << (isInteractive() ? 1 : 0) << "\n";
+            logFile.close();
+        }
+    }
 
     if (!bIsControl && !bIsDesktop) {
         event->ignore();
@@ -1408,7 +1427,7 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
       }
 
       UBGraphicsItem *graphicsItem = dynamic_cast<UBGraphicsItem*>(movingItem);
-      if (graphicsItem)
+      if (graphicsItem && graphicsItem->Delegate())  // #243: guard null delegate
           graphicsItem->Delegate()->commitUndoStep();
 
       bool bReleaseIsNeed = true;
@@ -1480,7 +1499,7 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
 
       //Issue 1541 - AOU - 20131002
       UBGraphicsItem *graphicsItem = dynamic_cast<UBGraphicsItem*>(movingItem);
-      if (graphicsItem)
+      if (graphicsItem && graphicsItem->Delegate())  // #243: guard null delegate
           graphicsItem->Delegate()->commitUndoStep();
       //Issue 1541 - AOU - 20131002 : Fin
 

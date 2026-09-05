@@ -285,3 +285,18 @@ void TestUBSmoothStrokeItem::testType()
     UBSmoothStrokeItem item;
     QCOMPARE(item.type(), static_cast<int>(UBGraphicsItemType::SmoothStrokeItemType));
 }
+
+// --- #243 regression: the item must own a delegate ---
+
+void TestUBSmoothStrokeItem::testHasDelegate_regression243()
+{
+    // Before the fix, the constructor never called setDelegate(), so Delegate()
+    // returned nullptr. Selecting the stroke then ran, in UBBoardView,
+    //   dynamic_cast<UBGraphicsItem*>(item)->Delegate()->startUndoStep();
+    // which crashed on the null delegate. Text items didn't crash because they
+    // create a delegate. This pins the invariant: a stroke owns a delegate.
+    UBSmoothStrokeItem item;
+    UBGraphicsItem* asUbItem = dynamic_cast<UBGraphicsItem*>(&item);
+    QVERIFY(asUbItem != nullptr);            // the cast that UBBoardView performs
+    QVERIFY(asUbItem->Delegate() != nullptr); // the pointer it then dereferences
+}
