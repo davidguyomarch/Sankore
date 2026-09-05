@@ -40,6 +40,7 @@
 #include "tst_UBKeyboardPaletteColors.h"
 #include "tst_UBDisplayManager.h"
 #include "tst_UBExportSelection.h"
+#include "tst_UBResizeGrip.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
@@ -155,6 +156,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBExportSelection test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBResizeGrip test;
         status |= QTest::qExec(&test, argc, argv);
     }
 
