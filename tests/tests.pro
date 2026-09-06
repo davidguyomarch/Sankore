@@ -40,6 +40,7 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            tst_UBVisualRegression.h \
            tst_UBRecognition.h \
            tst_UBSmoothStrokeItem.h \
+           tst_UBPageDeletion.h \
            tst_UBKeyboardPaletteColors.h \
            ../src/gui/UBKeyboardPaletteColors.h
 
@@ -158,6 +159,7 @@ SOURCES += main.cpp \
            tst_UBKeyboardPaletteColors.cpp \
            tst_UBDisplayManager.cpp \
            tst_UBExportSelection.cpp \
+           tst_UBPageDeletion.cpp \
            stubs/UBSmoothStrokeItem_testable.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \

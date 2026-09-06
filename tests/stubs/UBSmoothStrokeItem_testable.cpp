@@ -12,8 +12,29 @@
 // Pre-define the include guard to prevent the real UBGraphicsScene.h from loading
 #define UBGRAPHICSSCENE_H_
 
+// Prevent the real UBGraphicsItemDelegate.h (huge dependency tree) from loading;
+// UBSmoothStrokeItem.cpp only needs a minimal delegate for #243 (own a delegate
+// so Delegate() is non-null). We provide a lightweight stand-in below.
+#define UBGRAPHICSITEMDELEGATE_H_
+
 #include <QGraphicsScene>
 #include "core/UB.h"
+
+// Minimal UBGraphicsItemDelegate stub — just the methods the UBSmoothStrokeItem
+// constructor calls (#243). No frame, no scene wiring: enough to verify the item
+// owns a non-null delegate after construction. Must be a complete type BEFORE
+// UBItem.h is included, since UBItem.h holds a UBGraphicsItemDelegate* member.
+class UBGraphicsItemDelegate
+{
+public:
+    UBGraphicsItemDelegate(QGraphicsItem*, QObject* = nullptr, bool = true,
+                           bool = false, bool = true, bool = false) {}
+    void init() {}
+    void setFlippable(bool) {}
+    void setRotatable(bool) {}
+    void setCanTrigAnAction(bool) {}
+};
+
 #include "domain/UBItem.h"
 
 // Minimal UBGraphicsScene stub — just enough for UBSmoothStrokeItem::scene()
@@ -28,9 +49,14 @@ public:
 UBItem::UBItem() : mUuid(QUuid()), mRenderingQuality(UBItem::RenderingQualityNormal) {}
 UBItem::~UBItem() {}
 
+void UBGraphicsItem::setDelegate(UBGraphicsItemDelegate* delegate)
+{
+    mDelegate = delegate;
+}
+
 UBGraphicsItem::~UBGraphicsItem()
 {
-    // No delegate in test context
+    delete mDelegate;
 }
 
 void UBGraphicsItem::assignZValue(QGraphicsItem *item, qreal value)

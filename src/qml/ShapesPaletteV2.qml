@@ -89,6 +89,7 @@ Rectangle {
                         }
                     }
                     ToolTip {
+                        enabled: false  // #247: informational only — must not intercept clicks
                         visible: shapeMouse.containsMouse
                         delay: 500
                         text: modelData.tooltip
@@ -152,6 +153,7 @@ Rectangle {
                         }
                     }
                     ToolTip {
+                        enabled: false  // #247: informational only — must not intercept clicks
                         visible: propMouse.containsMouse
                         delay: 500
                         text: modelData.tooltip

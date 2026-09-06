@@ -215,6 +215,7 @@ Rectangle {
             onClicked: parent.clicked()
         }
         ToolTip {
+            enabled: false  // #247: informational only — must not intercept clicks
             visible: sbMouse.containsMouse
             delay: 600
             text: parent.tooltip

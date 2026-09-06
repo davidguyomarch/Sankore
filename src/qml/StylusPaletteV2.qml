@@ -148,6 +148,7 @@ Rectangle {
             }
 
             ToolTip {
+                enabled: false  // #247: informational only — must not intercept clicks on the button below
                 visible: btnMouse.containsMouse
                 delay: 600
                 text: toolData.tooltip

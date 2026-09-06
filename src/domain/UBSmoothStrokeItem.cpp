@@ -29,6 +29,7 @@
 
 #include "UBSmoothStrokeItem.h"
 #include "UBGraphicsScene.h"
+#include "UBGraphicsItemDelegate.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -37,8 +38,22 @@
 UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     : QGraphicsPathItem(parent)
 {
+    // #243: a drawn stroke must own a delegate, otherwise selecting it with the
+    // Selector tool dereferences a null Delegate() in UBBoardView and crashes.
+    // The legacy UBGraphicsStrokesGroup did this; the smooth-stroke pipeline
+    // that replaced it forgot to. Mirror the strokes-group delegate setup.
+    setDelegate(new UBGraphicsItemDelegate(this, 0, true, true, false));
+    Delegate()->init();
+    Delegate()->setFlippable(true);
+    Delegate()->setRotatable(true);
+    Delegate()->setCanTrigAnAction(true);
+
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
     setUuid(QUuid::createUuid());
+
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 }
 
 UBSmoothStrokeItem::~UBSmoothStrokeItem()

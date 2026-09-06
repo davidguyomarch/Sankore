@@ -26,9 +26,26 @@
 #include <QDesktopServices>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+#include <QElapsedTimer>
 
 #include "frameworks/UBPlatformUtils.h"
 #include "frameworks/UBVersion.h"
+
+// --- Temporary diagnostics for #259 (brief display flash when opening Documents).
+//     Appends to startup.log next to the executable. Remove once the bug is fixed.
+static void ubDocFlashDiag(const QString &line)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text))
+    {
+        QTextStream out(&logFile);
+        out << "[DOCFLASH] " << line << "\n";
+        logFile.close();
+    }
+}
 
 #include "core/UBApplication.h"
 #include "core/UBPersistenceManager.h"
@@ -439,7 +456,15 @@ void UBApplicationController::showDocument()
 
     mirroringEnabled(false);
 
+    // --- Diagnostics #259: time each transition step so we can tell which one
+    //     causes the brief flash (double switch / late hide / re-show). Elapsed
+    //     ms are cumulative from the start of showDocument().
+    QElapsedTimer docFlashTimer;
+    docFlashTimer.start();
+    ubDocFlashDiag(QString("showDocument BEGIN (t=0ms)"));
+
     mMainWindow->switchToDocumentsWidget();
+    ubDocFlashDiag(QString("after switchToDocumentsWidget t=%1ms").arg(docFlashTimer.elapsed()));
 
     if (UBApplication::boardController)
     {
@@ -447,19 +472,24 @@ void UBApplicationController::showDocument()
         {
 //            UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::NonScreen);
             UBApplication::boardController->persistCurrentScene();
+            ubDocFlashDiag(QString("after persistCurrentScene t=%1ms").arg(docFlashTimer.elapsed()));
         }
         UBApplication::boardController->hide();
+        ubDocFlashDiag(QString("after boardController->hide t=%1ms").arg(docFlashTimer.elapsed()));
     }
 
     UBDocumentController *docCtrl = UBApplication::documentController;
     if (docCtrl) {
         docCtrl->show();
+        ubDocFlashDiag(QString("after docCtrl->show t=%1ms").arg(docFlashTimer.elapsed()));
         if (docCtrl->firstSelectedTreeProxy()) {
             docCtrl->setDocument(docCtrl->firstSelectedTreeProxy(), true);
+            ubDocFlashDiag(QString("after setDocument(reload) t=%1ms").arg(docFlashTimer.elapsed()));
         }
     }
 
     mMainWindow->show();
+    ubDocFlashDiag(QString("after mainWindow->show END t=%1ms").arg(docFlashTimer.elapsed()));
 
     mUninoteController->hideWindow();
 

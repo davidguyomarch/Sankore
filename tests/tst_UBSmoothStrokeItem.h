@@ -47,6 +47,10 @@ private slots:
 
     // type
     void testType();
+
+    // #243 — a drawn stroke must own a delegate, otherwise selecting it
+    // dereferences a null Delegate() in UBBoardView and crashes.
+    void testHasDelegate_regression243();
 };
 
 #endif // TST_UBSMOOTHSTROKEITEM_H
