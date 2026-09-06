@@ -31,6 +31,7 @@
 #include "UBItem.h"
 #include "core/UB.h"
 #include "UBResizableGraphicsItem.h"
+#include "UBTextVerticalAlign.h"
 
 class UBGraphicsItemDelegate;
 class UBGraphicsScene;
@@ -116,6 +117,20 @@ class UBGraphicsTextItem : public QGraphicsTextItem, public UBItem, public UBRes
             return mBackgroundColor;
         }
 
+        // #278: vertical alignment of the text content within the box.
+        UBTextVAlign::Mode verticalAlignment() const
+        {
+            return mVerticalAlignment;
+        }
+
+        void setVerticalAlignment(UBTextVAlign::Mode mode)
+        {
+            if (mVerticalAlignment == mode)
+                return;
+            mVerticalAlignment = mode;
+            update();
+        }
+
         virtual void clearSource(){;}
         virtual void setUuid(const QUuid &pUuid);
 
@@ -163,6 +178,9 @@ class UBGraphicsTextItem : public QGraphicsTextItem, public UBItem, public UBRes
         QColor mColorOnDarkBackground;
         QColor mColorOnLightBackground;
         QColor mBackgroundColor;
+
+        // #278: vertical alignment of the content within the box (default Top).
+        UBTextVAlign::Mode mVerticalAlignment = UBTextVAlign::Top;
 
         //issue 1554
         bool isActivatedTextEditor;

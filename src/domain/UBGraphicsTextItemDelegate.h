@@ -109,6 +109,9 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         DelegateButton* mLeftAlignmentButton;
         DelegateButton* mCenterAlignmentButton;
         DelegateButton* mRightAlignmentButton;
+        DelegateButton* mVAlignTopButton;      // #278
+        DelegateButton* mVAlignMiddleButton;   // #278
+        DelegateButton* mVAlignBottomButton;   // #278
         DelegateButton* mCodeButton;
         DelegateButton* mUnorderedListButton;
         DelegateButton* mOrderedListButton;
@@ -159,6 +162,9 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         void setAlignmentToLeft();
         void setAlignmentToCenter();
         void setAlignmentToRight();
+        void setVerticalAlignmentTop();     // #278
+        void setVerticalAlignmentMiddle();  // #278
+        void setVerticalAlignmentBottom();  // #278
         void addLink();
         void insertLink();
         void insertColumnOnRight();

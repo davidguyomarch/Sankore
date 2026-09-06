@@ -460,7 +460,29 @@ void UBGraphicsTextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
     styleOption.state &= ~QStyle::State_Selected;
     styleOption.state &= ~QStyle::State_HasFocus;
 
-    QGraphicsTextItem::paint(painter, &styleOption, widget);
+    // #278: shift the content vertically (middle/bottom) only when NOT editing.
+    // During edition we keep the content top-anchored so the caret hit-test
+    // (handled by QGraphicsTextItem on the untranslated document) stays correct.
+    const bool applyVAlign =
+        (mVerticalAlignment != UBTextVAlign::Top) && !isActivatedTextEditor;
+    double vOffset = 0.0;
+    if (applyVAlign)
+    {
+        const double contentHeight = document()->documentLayout()->documentSize().height();
+        vOffset = UBTextVAlign::verticalOffset(mVerticalAlignment, textHeight(), contentHeight);
+    }
+
+    if (vOffset > 0.0)
+    {
+        painter->save();
+        painter->translate(0.0, vOffset);
+        QGraphicsTextItem::paint(painter, &styleOption, widget);
+        painter->restore();
+    }
+    else
+    {
+        QGraphicsTextItem::paint(painter, &styleOption, widget);
+    }
 
     if (widget == UBApplication::boardController->controlView()->viewport() &&
             !isSelected() && toPlainText().isEmpty())
@@ -527,6 +549,8 @@ void UBGraphicsTextItem::copyItemParameters(UBItem *copy) const
 
         if(mBackgroundColor != Qt::transparent)
             cp->setBackgroundColor(mBackgroundColor);
+
+        cp->setVerticalAlignment(mVerticalAlignment); // #278
 
         if(Delegate()->action()){
             if(Delegate()->action()->linkType() == eLinkToAudio){

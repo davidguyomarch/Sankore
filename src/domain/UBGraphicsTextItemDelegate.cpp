@@ -152,6 +152,9 @@ void UBGraphicsTextItemDelegate::buildButtons()
     mLeftAlignmentButton = new DelegateButton(":/icons/phosphor/text-align-left.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
     mCenterAlignmentButton = new DelegateButton(":/icons/phosphor/text-align-center.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
     mRightAlignmentButton = new DelegateButton(":/icons/phosphor/text-align-right.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mVAlignTopButton = new DelegateButton(":/icons/phosphor/align-top.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mVAlignMiddleButton = new DelegateButton(":/icons/phosphor/align-center-vertical.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
+    mVAlignBottomButton = new DelegateButton(":/icons/phosphor/align-bottom.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
     mHyperLinkButton = new DelegateButton(":/icons/phosphor/link.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
     mTableButton = new DelegateButton(":/icons/phosphor/table.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
     mOverflowButton = new DelegateButton(":/icons/phosphor/dots-three.svg", mDelegated, mToolBarItem, Qt::TitleBarArea);
@@ -181,6 +184,9 @@ void UBGraphicsTextItemDelegate::buildButtons()
     connect(mLeftAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToLeft(); });
     connect(mCenterAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToCenter(); });
     connect(mRightAlignmentButton, &DelegateButton::clicked, this, [this]() { setAlignmentToRight(); });
+    connect(mVAlignTopButton, &DelegateButton::clicked, this, [this]() { setVerticalAlignmentTop(); });
+    connect(mVAlignMiddleButton, &DelegateButton::clicked, this, [this]() { setVerticalAlignmentMiddle(); });
+    connect(mVAlignBottomButton, &DelegateButton::clicked, this, [this]() { setVerticalAlignmentBottom(); });
     connect(mHyperLinkButton, &DelegateButton::clicked, this, [this]() { addLink(); });
     connect(mTableButton, &DelegateButton::clicked, this, [this]() { showMenuTable(); });
     connect(mOverflowButton, &DelegateButton::clicked, this, [this]() { showOverflowMenu(); });
@@ -241,6 +247,8 @@ void UBGraphicsTextItemDelegate::buildButtons()
                    << mFontButton << mColorButton << mDecreaseSizeButton << mIncreaseSizeButton
                    << DelegateButton::Spacer
                    << mLeftAlignmentButton << mCenterAlignmentButton << mRightAlignmentButton
+                   << DelegateButton::Spacer
+                   << mVAlignTopButton << mVAlignMiddleButton << mVAlignBottomButton
                    << DelegateButton::Spacer
                    << mHyperLinkButton << mTableButton
                    << DelegateButton::Spacer
@@ -770,6 +778,31 @@ void UBGraphicsTextItemDelegate::setAlignmentToRight()
     }
 
     delegated()->setFocus();
+}
+
+// #278: vertical alignment of the whole text block within the box. Unlike the
+// horizontal alignment (a paragraph property in the document), this is an item
+// property applied at paint time (see UBGraphicsTextItem::paint). We leave edit
+// mode so the shift is visible immediately (it only applies out of edition).
+void UBGraphicsTextItemDelegate::setVerticalAlignmentTop()
+{
+    delegated()->setVerticalAlignment(UBTextVAlign::Top);
+    delegated()->activateTextEditor(false);
+    delegated()->update();
+}
+
+void UBGraphicsTextItemDelegate::setVerticalAlignmentMiddle()
+{
+    delegated()->setVerticalAlignment(UBTextVAlign::Middle);
+    delegated()->activateTextEditor(false);
+    delegated()->update();
+}
+
+void UBGraphicsTextItemDelegate::setVerticalAlignmentBottom()
+{
+    delegated()->setVerticalAlignment(UBTextVAlign::Bottom);
+    delegated()->activateTextEditor(false);
+    delegated()->update();
 }
 
 void UBGraphicsTextItemDelegate::addLink()
