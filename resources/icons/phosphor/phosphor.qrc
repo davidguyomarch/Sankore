@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/icons/phosphor">
+        <file>align-bottom.svg</file>
         <file>align-center-horizontal.svg</file>
+        <file>align-center-vertical.svg</file>
+        <file>align-top.svg</file>
         <file>arrow-clockwise.svg</file>
         <file>arrow-counter-clockwise.svg</file>
         <file>arrow-down.svg</file>

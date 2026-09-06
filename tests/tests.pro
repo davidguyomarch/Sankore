@@ -43,6 +43,7 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            tst_UBPageDeletion.h \
            tst_UBResizeGrip.h \
            tst_UBTextDrag.h \
+           tst_UBTextVerticalAlign.h \
            tst_UBKeyboardPaletteColors.h \
            ../src/gui/UBKeyboardPaletteColors.h
 
@@ -160,6 +161,7 @@ SOURCES += main.cpp \
            tst_UBSmoothStrokeItem.cpp \
            tst_UBResizeGrip.cpp \
            tst_UBTextDrag.cpp \
+           tst_UBTextVerticalAlign.cpp \
            tst_UBKeyboardPaletteColors.cpp \
            tst_UBDisplayManager.cpp \
            tst_UBExportSelection.cpp \

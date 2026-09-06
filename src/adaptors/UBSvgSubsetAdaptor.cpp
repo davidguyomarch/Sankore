@@ -3283,6 +3283,11 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::textItemToSvg(UBGraphicsTextItem* it
     if(item->backgroundColor() != Qt::transparent)
         mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "backgroundColor", item->backgroundColor().name());
 
+    // #278: vertical alignment (0=top default, 1=middle, 2=bottom). Optional.
+    if(item->verticalAlignment() != UBTextVAlign::Top)
+        mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "verticalAlignment",
+                                  QString::number((int)item->verticalAlignment()));
+
     QColor colorDarkBg = item->colorOnDarkBackground();
     QColor colorLightBg = item->colorOnLightBackground();
 
@@ -3355,6 +3360,11 @@ UBGraphicsTextItem* UBSvgSubsetAdaptor::UBSvgSubsetReader::textItemFromSvg()
         if (color.isValid())
             textItem->setBackgroundColor(color);
     }
+
+    // #278: vertical alignment (optional; absent in older .ubz -> Top).
+    QStringView ubVerticalAlignment = mXmlReader.attributes().value(mNamespaceUri, "verticalAlignment");
+    if(!ubVerticalAlignment.isNull())
+        textItem->setVerticalAlignment(UBTextVAlign::fromInt(ubVerticalAlignment.toInt()));
 
     QString text;
 
