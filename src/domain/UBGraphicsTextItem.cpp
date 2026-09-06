@@ -30,6 +30,7 @@
 #include <QAbstractTextDocumentLayout>
 #include "UBGraphicsGroupContainerItem.h"
 #include "UBGraphicsTextItem.h"
+#include "UBTextDragMath.h"
 
 #include <QTextTable>
 #include "UBGraphicsTextItemDelegate.h"
@@ -285,6 +286,11 @@ void UBGraphicsTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
+    // #279: remember where the press started so a subsequent drag (from
+    // anywhere in the box, including empty area) can move the whole box.
+    mBoxDragStartScenePos = event->scenePos();
+    mDraggingBox = false;
+
     if (Delegate())
     {
         Delegate()->mousePressEvent(event);
@@ -357,6 +363,38 @@ void UBGraphicsTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void UBGraphicsTextItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    // #279: dragging with the Selector tool moves the whole box (from anywhere
+    // inside it), instead of extending the text selection. A plain click (no
+    // drag past the threshold) still edits — see mousePressEvent/Release.
+    const UBStylusTool::Enum currentTool =
+        (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
+    const bool editable = data(UBGraphicsItemData::ItemEditable).toBool();
+    const bool locked = data(UBGraphicsItemData::ItemLocked).toBool();
+
+    if (currentTool == UBStylusTool::Selector && editable && !locked
+        && (event->buttons() & Qt::LeftButton))
+    {
+        if (UBTextDrag::shouldDragBox(mBoxDragStartScenePos, event->scenePos(),
+                                      QApplication::startDragDistance(), mDraggingBox))
+        {
+            if (!mDraggingBox)
+            {
+                // Starting the box drag: leave text-edit mode so the caret /
+                // selection isn't affected, and take over the gesture.
+                mDraggingBox = true;
+                activateTextEditor(false);
+                clearFocus();
+            }
+            moveBy(event->scenePos().x() - mBoxDragStartScenePos.x(),
+                   event->scenePos().y() - mBoxDragStartScenePos.y());
+            mBoxDragStartScenePos = event->scenePos();
+            if (Delegate())
+                Delegate()->positionHandles();
+            event->accept();
+            return;
+        }
+    }
+
     if (!Delegate() || !Delegate()->mouseMoveEvent(event))
     {
         QGraphicsTextItem::mouseMoveEvent(event);
@@ -378,6 +416,17 @@ void UBGraphicsTextItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
         event->accept();
         clearFocus();
+        return;
+    }
+
+    // #279: if we just dragged the whole box, finish the move (commit undo)
+    // and don't treat the gesture as an editing click.
+    if (mDraggingBox)
+    {
+        mDraggingBox = false;
+        if (Delegate())
+            Delegate()->commitUndoStep();
+        event->accept();
         return;
     }
 

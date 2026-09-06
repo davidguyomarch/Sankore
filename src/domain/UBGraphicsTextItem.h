@@ -171,6 +171,13 @@ class UBGraphicsTextItem : public QGraphicsTextItem, public UBItem, public UBRes
 
         QString mCurrentLinkUrl;
 
+        // #279: drag-to-move the whole text box from anywhere inside it.
+        // A plain click still edits; dragging past the drag threshold moves
+        // the box. mBoxDragStartScenePos records the press point, mDraggingBox
+        // latches the move gesture.
+        QPointF mBoxDragStartScenePos;
+        bool mDraggingBox = false;
+
     protected:
          //issue 1539 - NNE - 20131018
          /**
