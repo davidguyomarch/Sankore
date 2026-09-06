@@ -136,7 +136,20 @@ Rectangle {
         // === Background ===
         ToolbarButton { icon: "sun"; tooltip: "Fond clair"; active: !appController.isDarkBackground; onClicked: appController.setBackgroundLight() }
         ToolbarButton { icon: "moon"; tooltip: "Fond sombre"; active: appController.isDarkBackground; onClicked: appController.setBackgroundDark() }
-        ToolbarButton { icon: "grid-four"; tooltip: "Quadrillage"; active: appController.isCrossedBackground; onClicked: appController.toggleGrid() }
+
+        // Ruling type selector (#289): dropdown with the square grid + French
+        // school rulings (Séyès, enlarged Séyès, double 3 mm).
+        ToolbarButton {
+            id: gridButton
+            icon: "grid-four"
+            tooltip: "Quadrillage / réglures"
+            active: appController.gridType !== 0
+            onClicked: gridMenu.open()
+        }
+        GridTypeMenu {
+            id: gridMenu
+            anchorItem: gridButton
+        }
 
         // === Spacer ===
         Item { Layout.fillWidth: true }
@@ -196,5 +209,109 @@ Rectangle {
         Layout.preferredHeight: 28
         Layout.alignment: Qt.AlignVCenter
         color: themeManager.border
+    }
+
+    // === Ruling type dropdown (#289) ===
+    component GridTypeMenu: Popup {
+        id: menuRoot
+        // The button this popup drops down from.
+        property Item anchorItem: null
+
+        // 0=Plain(none), 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm — matches
+        // UBBackgroundGrid::Type / UBAppController.gridType.
+        readonly property var items: [
+            { type: 0, icon: "circle",     label: "Aucun" },
+            { type: 1, icon: "grid-four",  label: "Quadrillage" },
+            { type: 2, icon: "rows-plus-top", label: "Séyès" },
+            { type: 3, icon: "rows-plus-bottom", label: "Séyès agrandi" },
+            { type: 4, icon: "list",       label: "Double lignage 3 mm" }
+        ]
+
+        width: 220
+        padding: 6
+        // Drop just below the anchor button, right-aligned to it.
+        x: anchorItem ? anchorItem.x + anchorItem.width - width : 0
+        y: anchorItem ? anchorItem.y + anchorItem.height + 4 : 40
+        parent: anchorItem ? anchorItem.parent : undefined
+
+        background: Rectangle {
+            color: themeManager.surface
+            border.color: themeManager.border
+            border.width: 1
+            radius: 8
+        }
+
+        contentItem: Column {
+            spacing: 2
+            Repeater {
+                model: menuRoot.items
+                Rectangle {
+                    width: menuRoot.width - 12
+                    height: 34
+                    radius: 6
+                    property bool selected: appController.gridType === modelData.type
+                    color: selected ? themeManager.primary
+                         : rowMa.containsMouse ? themeManager.surfaceHover
+                         : "transparent"
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
+
+                        Image {
+                            id: rowIcon
+                            width: 18; height: 18
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: "qrc:/icons/phosphor/" + modelData.icon + ".svg"
+                            sourceSize: Qt.size(18, 18)
+                            visible: false
+                        }
+                        ColorOverlay {
+                            width: 18; height: 18
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: rowIcon
+                            color: parent.parent.selected ? themeManager.onPrimary : themeManager.onSurface
+                        }
+                        Text {
+                            text: modelData.label
+                            font.pixelSize: 13
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: parent.parent.selected ? themeManager.onPrimary : themeManager.onSurface
+                        }
+                    }
+
+                    // Trailing check mark for the active ruling.
+                    Image {
+                        id: checkIcon
+                        width: 16; height: 16
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "qrc:/icons/phosphor/check.svg"
+                        sourceSize: Qt.size(16, 16)
+                        visible: false
+                    }
+                    ColorOverlay {
+                        anchors.fill: checkIcon
+                        source: checkIcon
+                        color: themeManager.onPrimary
+                        visible: parent.selected
+                    }
+
+                    MouseArea {
+                        id: rowMa
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            appController.setGridType(modelData.type)
+                            menuRoot.close()
+                        }
+                    }
+                }
+            }
+        }
     }
 }

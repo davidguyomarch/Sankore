@@ -403,6 +403,11 @@ bool UBGraphicsScene::isCrossedBackground() const
     return mBackgroundRenderer->isCrossedBackground();
 }
 
+UBBackgroundGrid::Type UBGraphicsScene::gridType() const
+{
+    return mBackgroundRenderer->gridType();
+}
+
 const QPointF& UBGraphicsScene::previousPoint()
 {
     return mDrawingHandler->previousPoint();
@@ -507,6 +512,12 @@ void UBGraphicsScene::setBackground(bool pIsDark, bool pIsCrossed)
         setModified(true);
 }
 
+void UBGraphicsScene::setBackgroundType(bool pIsDark, UBBackgroundGrid::Type pGridType)
+{
+    if (mBackgroundRenderer->setBackgroundType(pIsDark, pGridType))
+        setModified(true);
+}
+
 void UBGraphicsScene::setBackgroundZoomFactor(qreal zoom)
 {
     mBackgroundRenderer->setZoomFactor(zoom);
@@ -537,7 +548,7 @@ UBGraphicsScene* UBGraphicsScene::sceneDeepCopy() const
 {
     UBGraphicsScene* copy = new UBGraphicsScene(this->document(), this->mUndoRedoStackEnabled);
 
-    copy->setBackground(this->isDarkBackground(), this->isCrossedBackground());
+    copy->setBackgroundType(this->isDarkBackground(), this->gridType());
     copy->setSceneRect(this->sceneRect());
 
     if (this->mNominalSize.isValid())

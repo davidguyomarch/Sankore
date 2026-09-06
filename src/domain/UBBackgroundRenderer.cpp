@@ -24,6 +24,22 @@ UBBackgroundRenderer::UBBackgroundRenderer(QGraphicsScene* scene,
 
 bool UBBackgroundRenderer::setBackground(bool isDark, bool isCrossed)
 {
+    // Legacy entry point: crossed maps to the uniform square Grid, otherwise
+    // Plain. Ruling types go through setBackgroundType() (#289). To avoid
+    // clobbering a finer ruling with a plain "crossed=true" toggle, keep the
+    // current ruling when it is already ruled and the caller asks for crossed.
+    UBBackgroundGrid::Type target;
+    if (isCrossed)
+        target = UBBackgroundGrid::isRuled(mGridType) ? mGridType
+                                                      : UBBackgroundGrid::Type::Grid;
+    else
+        target = UBBackgroundGrid::Type::Plain;
+
+    return setBackgroundType(isDark, target);
+}
+
+bool UBBackgroundRenderer::setBackgroundType(bool isDark, UBBackgroundGrid::Type gridType)
+{
     bool needRepaint = false;
 
     if (mDarkBackground != isDark)
@@ -38,9 +54,9 @@ bool UBBackgroundRenderer::setBackground(bool isDark, bool isCrossed)
         needRepaint = true;
     }
 
-    if (mCrossedBackground != isCrossed)
+    if (mGridType != gridType)
     {
-        mCrossedBackground = isCrossed;
+        mGridType = gridType;
         needRepaint = true;
     }
 
@@ -118,20 +134,34 @@ void UBBackgroundRenderer::paintBackground(QPainter* painter, const QRectF& rect
             bgCrossColor.setAlpha(alpha);
         }
 
-        painter->setPen(bgCrossColor);
-
-        if (mCrossedBackground)
+        if (UBBackgroundGrid::isRuled(mGridType))
         {
-            qreal firstY = ((int)(rect.y() / UBSettings::crossSize)) * UBSettings::crossSize;
-            for (qreal yPos = firstY; yPos < rect.y() + rect.height(); yPos += UBSettings::crossSize)
-            {
-                painter->drawLine(rect.x(), yPos, rect.x() + rect.width(), yPos);
-            }
+            // Minor (interline) colour: same hue as the major grid, fainter.
+            QColor minorColor = bgCrossColor;
+            minorColor.setAlpha(minorColor.alpha() * 0.5);
 
-            qreal firstX = ((int)(rect.x() / UBSettings::crossSize)) * UBSettings::crossSize;
-            for (qreal xPos = firstX; xPos < rect.x() + rect.width(); xPos += UBSettings::crossSize)
+            // Red margin line (Séyès), kept readable on both backgrounds.
+            QColor marginColor = mDarkBackground ? QColor(255, 110, 110)
+                                                 : QColor(210, 40, 40);
+            if (mZoomFactor < 1.0)
+                marginColor.setAlpha(255 * mZoomFactor / 2);
+
+            const auto lines = UBBackgroundGrid::generateLines(mGridType, rect);
+            for (const auto& line : lines)
             {
-                painter->drawLine(xPos, rect.y(), xPos, rect.y() + rect.height());
+                switch (line.weight)
+                {
+                case UBBackgroundGrid::Weight::Major:  painter->setPen(bgCrossColor); break;
+                case UBBackgroundGrid::Weight::Minor:  painter->setPen(minorColor);   break;
+                case UBBackgroundGrid::Weight::Margin: painter->setPen(marginColor);  break;
+                }
+
+                if (line.orientation == UBBackgroundGrid::Orientation::Horizontal)
+                    painter->drawLine(QPointF(rect.x(), line.pos),
+                                      QPointF(rect.x() + rect.width(), line.pos));
+                else
+                    painter->drawLine(QPointF(line.pos, rect.y()),
+                                      QPointF(line.pos, rect.y() + rect.height()));
             }
         }
     }

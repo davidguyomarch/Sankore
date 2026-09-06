@@ -490,10 +490,23 @@ UBGraphicsScene* UBSvgSubsetAdaptor::UBSvgSubsetReader::loadScene()
 
                 QStringView ubCrossedBackground = mXmlReader.attributes().value(mNamespaceUri, "crossed-background");
 
-                if (!ubDarkBackground.isNull())
+                // #289: fixed null-guard (was testing ubDarkBackground here).
+                if (!ubCrossedBackground.isNull())
                     crossedBackground = (ubCrossedBackground.toString() == xmlTrue);
 
-                mScene->setBackground(darkBackground, crossedBackground);
+                // #289: the new attribute, when present, carries the exact
+                // ruling and wins; otherwise derive from the legacy boolean.
+                QStringView ubGridType = mXmlReader.attributes().value(mNamespaceUri, "background-grid-type");
+                if (!ubGridType.isNull())
+                {
+                    UBBackgroundGrid::Type gridType =
+                        UBBackgroundGrid::fromToken(ubGridType.toString());
+                    mScene->setBackgroundType(darkBackground, gridType);
+                }
+                else
+                {
+                    mScene->setBackground(darkBackground, crossedBackground);
+                }
 
                 QStringView pageNominalSize = mXmlReader.attributes().value(mNamespaceUri, "nominal-size");
                 if (!pageNominalSize.isNull())
@@ -1319,7 +1332,10 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::writeSvgElement()
     }
 
     mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "dark-background", mScene->isDarkBackground() ? xmlTrue : xmlFalse);
+    // Keep writing the legacy boolean so older builds still show a grid for any
+    // ruled type; the new attribute carries the exact ruling (#289).
     mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "crossed-background", mScene->isCrossedBackground() ? xmlTrue : xmlFalse);
+    mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "background-grid-type", QString::fromLatin1(UBBackgroundGrid::toToken(mScene->gridType())));
 
     QScreen* desktop = QGuiApplication::primaryScreen();
     mXmlWriter.writeAttribute("pageDpi", QString("%1").arg((desktop->physicalDotsPerInchX() + desktop->physicalDotsPerInchY()) / 2));

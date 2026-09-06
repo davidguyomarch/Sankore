@@ -32,6 +32,7 @@
 #include "UBFeaturesController.h"
 #include "gui/UBActionPalette.h"
 #include "domain/UBShapeFactory.h"
+#include "domain/UBBackgroundGrid.h"
 #include "IUBBoardContext.h"
 
 
@@ -230,6 +231,7 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
                                  QByteArray pData, QPointF pPos, QSize pSize,
                                  bool isSyncOperation = true, bool isBackground = false, bool internalData = false, eItemActionType actionType = eItemActionType_Default, UBFeatureBackgroundDisposition disposition = Center);
         void changeBackground(bool isDark, bool isCrossed);
+        void changeBackgroundType(bool isDark, UBBackgroundGrid::Type gridType);
         void setToolCursor(int tool);
         void showMessage(const QString& message, bool showSpinningWheel = false);
         void hideMessage();

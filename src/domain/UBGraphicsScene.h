@@ -35,6 +35,7 @@
 
 #include "UBItem.h"
 #include "UBSceneContext.h"
+#include "UBBackgroundGrid.h"
 #include "tools/UBGraphicsCurtainItem.h"
 #include "core/UBTypes.h"
 
@@ -243,6 +244,7 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         bool isDarkBackground() const;
         bool isLightBackground() const;
         bool isCrossedBackground() const;
+        UBBackgroundGrid::Type gridType() const;
 
         bool hasBackground()
         {
@@ -361,6 +363,7 @@ public slots:
         void hideEraser();
 
         void setBackground(bool pIsDark, bool pIsCrossed);
+        void setBackgroundType(bool pIsDark, UBBackgroundGrid::Type pGridType);
         void setBackgroundZoomFactor(qreal zoom);
         void setDrawingMode(bool bModeDesktop);
         void deselectAllItems();
