@@ -34,6 +34,11 @@
 #include <QVector>
 #include <QComboBox>
 #include <QMenu>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
 #include "core/UBApplication.h"
 #include "UBGraphicsGroupContainerItem.h"
@@ -48,6 +53,7 @@
 #include "domain/UBGraphicsTextItem.h"
 #include "domain/UBGraphicsDelegateFrame.h"
 #include "domain/UBGraphicsProxyWidget.h"
+#include "domain/UBHyperlinkUtils.h"
 
 #include "core/UBSettings.h"
 
@@ -807,56 +813,97 @@ void UBGraphicsTextItemDelegate::setVerticalAlignmentBottom()
 
 void UBGraphicsTextItemDelegate::addLink()
 {
-    QString selectedText = delegated()->textCursor().selectedText();
-    mLinkPalette->setText(selectedText);
-    mLinkPalette->setLink("");
-    mLinkPalette->show();
-    mLinkPalette->setFocus();
-}
+    // #280: modern dialog to enter the link. Replaces the legacy floating
+    // UBCreateHyperLinkPalette, which no longer displayed under Qt6/QML.
+    QWidget* parent = nullptr;
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        parent = UBApplication::boardController->controlView();
 
-void UBGraphicsTextItemDelegate::insertLink()
-{
-    if (!(mLinkPalette->text().isEmpty() || mLinkPalette->link().isEmpty()))
+    QDialog dialog(parent);
+    dialog.setWindowTitle(tr("Insert hyperlink"));
+    dialog.setModal(true);
+
+    QFormLayout* form = new QFormLayout(&dialog);
+
+    QLineEdit* textEdit = new QLineEdit(&dialog);
+    textEdit->setText(delegated()->textCursor().selectedText());
+    textEdit->setPlaceholderText(tr("Text to display"));
+
+    QLineEdit* urlEdit = new QLineEdit(&dialog);
+    urlEdit->setPlaceholderText(tr("https://example.com"));
+
+    form->addRow(tr("Text:"), textEdit);
+    form->addRow(tr("Link (URL):"), urlEdit);
+
+    QDialogButtonBox* buttons = new QDialogButtonBox(
+        QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    // Focus the URL field if some text is already selected, else the text field.
+    if (!textEdit->text().isEmpty())
+        urlEdit->setFocus();
+    else
+        textEdit->setFocus();
+
+    if (dialog.exec() == QDialog::Accepted)
     {
-        QString link = mLinkPalette->link();
-        if (!link.startsWith("http://"))
-            link = "http://" + link;
-
-        int oldPosCursor = delegated()->textCursor().position();
-
-        // Create a Format for the link :
-        QTextCharFormat linkFormat;
-        linkFormat.setAnchor(true);
-        linkFormat.setAnchorHref(link);
-        delegated()->textCursor().mergeCharFormat(linkFormat);
-
-        // Insert the Link text :
-        delegated()->textCursor().insertText(mLinkPalette->text());
-        int newPosCursor = delegated()->textCursor().position();
-
-        // Apply the "Link Format" to the "Link Text" :
-        QTextCursor cursor = delegated()->textCursor();
-        cursor.setPosition(oldPosCursor);
-        cursor.setPosition(newPosCursor, QTextCursor::KeepAnchor);
-        cursor.mergeCharFormat(linkFormat);
-
-        // Trick to refresh text. Without this, the link is not displayed.
-        alternHtmlMode();
-        alternHtmlMode();
-
-        // Restore cursor position to the end of the link :
-        cursor.setPosition(newPosCursor);
-
-        // Apply the new QTextCursor to the text :
-        delegated()->setTextCursor(cursor);
-
-        // Add a non-breakable space, so user will be able to enter text without "link format"
-        delegated()->textCursor().insertHtml("&nbsp");
+        QString text = textEdit->text();
+        QString url = urlEdit->text().trimmed();
+        // If no display text was given, show the URL itself.
+        if (text.isEmpty())
+            text = url;
+        insertHyperlink(text, url);
     }
 
-    mLinkPalette->hide();
-
     delegated()->setFocus();
+}
+
+// Legacy slot kept for the (now unused) palette signal connection. The modern
+// path goes through addLink() -> insertHyperlink().
+void UBGraphicsTextItemDelegate::insertLink()
+{
+    insertHyperlink(mLinkPalette->text(), mLinkPalette->link());
+    mLinkPalette->hide();
+    delegated()->setFocus();
+}
+
+void UBGraphicsTextItemDelegate::insertHyperlink(const QString& text, const QString& url)
+{
+    if (text.isEmpty() || url.isEmpty())
+        return;
+
+    const QString link = UBHyperlink::normalizeUrl(url);
+
+    int oldPosCursor = delegated()->textCursor().position();
+
+    // Create a format for the link (anchor).
+    QTextCharFormat linkFormat;
+    linkFormat.setAnchor(true);
+    linkFormat.setAnchorHref(link);
+    delegated()->textCursor().mergeCharFormat(linkFormat);
+
+    // Insert the link text.
+    delegated()->textCursor().insertText(text);
+    int newPosCursor = delegated()->textCursor().position();
+
+    // Apply the link format to the inserted text.
+    QTextCursor cursor = delegated()->textCursor();
+    cursor.setPosition(oldPosCursor);
+    cursor.setPosition(newPosCursor, QTextCursor::KeepAnchor);
+    cursor.mergeCharFormat(linkFormat);
+
+    // Trick to refresh text. Without this, the link is not displayed.
+    alternHtmlMode();
+    alternHtmlMode();
+
+    // Restore cursor position to the end of the link.
+    cursor.setPosition(newPosCursor);
+    delegated()->setTextCursor(cursor);
+
+    // Add a non-breakable space so the user can keep typing without link format.
+    delegated()->textCursor().insertHtml("&nbsp");
 }
 
 void UBGraphicsTextItemDelegate::alternHtmlMode()

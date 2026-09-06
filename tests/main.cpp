@@ -44,6 +44,7 @@
 #include "tst_UBResizeGrip.h"
 #include "tst_UBTextDrag.h"
 #include "tst_UBTextVerticalAlign.h"
+#include "tst_UBHyperlink.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
@@ -175,6 +176,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBTextVerticalAlign test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBHyperlink test;
         status |= QTest::qExec(&test, argc, argv);
     }
 

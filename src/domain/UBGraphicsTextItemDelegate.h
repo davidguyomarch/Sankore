@@ -167,6 +167,9 @@ class UBGraphicsTextItemDelegate : public UBGraphicsItemDelegate
         void setVerticalAlignmentBottom();  // #278
         void addLink();
         void insertLink();
+        // #280: modern-dialog hyperlink insertion (replaces the legacy floating
+        // UBCreateHyperLinkPalette that didn't show under Qt6/QML).
+        void insertHyperlink(const QString& text, const QString& url);
         void insertColumnOnRight();
         void insertColumnOnLeft();
         void insertRowOnBottom();
