@@ -61,6 +61,7 @@
 #include "core/UBSettingsData.h"
 #include "controllers/UBDocumentActionController.h"
 #include "qml/UBThemeManager.h"
+#include "gui/UBIconUtils.h"
 #include "core/UBSetting.h"
 #include "core/UBMimeData.h"
 #include "core/UBForeignObjectsHandler.h"
@@ -207,19 +208,22 @@ void UBDocumentReplaceDialog::reactOnTextChanged(const QString &pStr)
 {
 //     if !mFileNameList.contains(pStr.trimmed(), Qt::CaseSensitive)
 
+    // #285: warning states keep dark text for readability; the neutral state
+    // clears the override so the field inherits the theme QSS (was forced white,
+    // unreadable in the dark theme, cf #260).
     if (!validString(pStr)) {
         acceptButton->setEnabled(false);
-        mLineEdit->setStyleSheet("background:#FFB3C8;");
+        mLineEdit->setStyleSheet("background:#FFB3C8; color:#1A1A1A;");
         acceptButton->setEnabled(false);
 
     } else if (mFileNameList.contains(pStr.trimmed(), Qt::CaseSensitive)) {
         acceptButton->setEnabled(true);
-        mLineEdit->setStyleSheet("background:#FFB3C8;");
+        mLineEdit->setStyleSheet("background:#FFB3C8; color:#1A1A1A;");
         acceptButton->setText(replaceText);
 
     } else {
         acceptButton->setEnabled(true);
-        mLineEdit->setStyleSheet("background:white;");
+        mLineEdit->setStyleSheet(QString());
         acceptButton->setText(acceptText);
     }
 }
@@ -536,22 +540,28 @@ QVariant UBDocumentTreeModel::data(const QModelIndex &index, int role) const
     if (index.column() == 0) {
         switch (role) {
         case (Qt::DecorationRole) :
+        {
+            // #285: Phosphor icons tinted with the theme content colour, instead
+            // of the legacy bitmap icons.
+            const QColor iconColor = UBThemeManager::instance()->onSurface();
             if (mCurrentNode && mCurrentNode == dataNode) {
-                return QIcon(":images/currentDocument.png");
+                // The currently-open document is highlighted with the accent colour.
+                return UBIconUtils::phosphorIcon("file-text", UBThemeManager::instance()->primary());
             } else {
                 if (index == trashIndex()) {
-                    return QIcon(":images/trash.png");
+                    return UBIconUtils::phosphorIcon("trash", iconColor);
                 } else if (isConstant(index)) {
-                    return QIcon(":images/libpalette/ApplicationsCategory.svg");
+                    return UBIconUtils::phosphorIcon("folders", iconColor);
                 }
                 switch (static_cast<int>(dataNode->nodeType())) {
                 case UBDocumentTreeNode::Catalog :
-                    return QIcon(":images/folder.png");
+                    return UBIconUtils::phosphorIcon("folder", iconColor);
                 case UBDocumentTreeNode::Document :
-                    return QIcon(":images/toolbar/board.png");
+                    return UBIconUtils::phosphorIcon("file-text", iconColor);
                 }
             }
             break;
+        }
         case (Qt::FontRole) :
             if (isConstant(index)) {
                 QFont font;
@@ -1625,9 +1635,13 @@ void UBDocumentTreeItemDelegate::processChangedText(const QString &str) const
     }
 
     if (!validateString(str)) {
-        editor->setStyleSheet("background-color: #FFB3C8;");
+        // #285: invalid name — warning background with dark text so it stays
+        // readable regardless of the active theme.
+        editor->setStyleSheet("background-color: #FFB3C8; color: #1A1A1A;");
     } else {
-        editor->setStyleSheet("background-color: #FFFFFF;");
+        // Valid — clear the override so the editor inherits the theme QSS
+        // (forcing white here made text unreadable in the dark theme, cf #260).
+        editor->setStyleSheet(QString());
     }
 }
 
@@ -2097,6 +2111,23 @@ void UBDocumentController::setupViews()
 
         connect(mDocumentUI->expandAll, &QPushButton::clicked, this, [this]() { expandAll(); });
 
+        // #285: object names so the tree sub-toolbar controls pick up dedicated
+        // themed QSS rules (they had none and fell back to the platform style).
+        mDocumentUI->collapseAll->setObjectName("ubDocSubToolButton");
+        mDocumentUI->expandAll->setObjectName("ubDocSubToolButton");
+        mDocumentUI->sortKind->setObjectName("ubDocSortCombo");
+        mDocumentUI->sortOrder->setObjectName("ubDocSortCombo");
+
+        // #285: Phosphor icons on the tree sub-toolbar buttons, tinted with the
+        // theme, and refreshed live on theme change (tree decorations repaint
+        // on their own via data()/viewport update).
+        applyThemedIcons();
+        connect(UBThemeManager::instance(), &UBThemeManager::themeChanged, this, [this]() {
+            applyThemedIcons();
+            if (mDocumentUI && mDocumentUI->documentTreeView)
+                mDocumentUI->documentTreeView->viewport()->update();
+        });
+
         connect(mDocumentUI->documentTreeView->itemDelegate(), &QAbstractItemDelegate::closeEditor, mDocumentUI->documentTreeView->viewport(), [this]() { mDocumentUI->documentTreeView->viewport()->update(); });
         connect(mDocumentUI->documentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, qOverload<const QItemSelection&, const QItemSelection&>(&UBDocumentController::TreeViewSelectionChanged));
         connect(UBPersistenceManager::persistenceManager()->mDocumentTreeStructureModel, &UBDocumentTreeModel::indexChanged,
@@ -2114,7 +2145,9 @@ void UBDocumentController::setupViews()
         connect(UBPersistenceManager::persistenceManager(), &UBPersistenceManager::documentSceneCreated, this, &UBDocumentController::documentSceneChanged);
         connect(UBPersistenceManager::persistenceManager(), &UBPersistenceManager::documentSceneWillBeDeleted, this, &UBDocumentController::documentSceneChanged);
 
-        mDocumentUI->thumbnailWidget->setBackgroundBrush(UBTheme::documentViewLight());
+        // #285: thumbnail panel background from the theme (set + live-refreshed
+        // in applyThemedIcons() on theme change), instead of the legacy UBTheme.
+        mDocumentUI->thumbnailWidget->setBackgroundBrush(UBThemeManager::instance()->surface());
 
         #ifdef Q_OS_MACOSX
             mMessageWindow = new UBMessageWindow(nullptr);
@@ -2125,6 +2158,25 @@ void UBDocumentController::setupViews()
         mMessageWindow->setCustomPosition(true);
         mMessageWindow->hide();
     }
+}
+
+void UBDocumentController::applyThemedIcons()
+{
+    if (!mDocumentUI)
+        return;
+
+    const QColor iconColor = UBThemeManager::instance()->onSurface();
+
+    if (mDocumentUI->collapseAll)
+        mDocumentUI->collapseAll->setIcon(
+            UBIconUtils::phosphorIcon("arrows-in-line-vertical", iconColor));
+    if (mDocumentUI->expandAll)
+        mDocumentUI->expandAll->setIcon(
+            UBIconUtils::phosphorIcon("arrows-out-line-vertical", iconColor));
+
+    // #285: keep the thumbnail panel background in sync with the theme.
+    if (mDocumentUI->thumbnailWidget)
+        mDocumentUI->thumbnailWidget->setBackgroundBrush(UBThemeManager::instance()->surface());
 }
 
 //N/C - NNE - 20140403
@@ -3190,22 +3242,24 @@ void UBDocumentController::updateActions()
     DeletionType deletionForSelection = deletionTypeForSelection(mSelectionType, selectedIndex, docModel);
     mMainWindow->actionDelete->setEnabled(deletionForSelection != NoDeletion);
 
+    // #285: Phosphor trash icon tinted with the theme content colour.
+    const QColor deleteIconColor = UBThemeManager::instance()->onSurface();
     switch (static_cast<int>(deletionForSelection)) {
     case MoveToTrash :
     case DeletePage :
-        mMainWindow->actionDelete->setIcon(QIcon(":/images/svg/trash.svg"));
+        mMainWindow->actionDelete->setIcon(UBIconUtils::phosphorIcon("trash", deleteIconColor));
         mMainWindow->actionDelete->setText(tr("Trash"));
         break;
     case CompleteDelete :
-        mMainWindow->actionDelete->setIcon(QIcon(":/images/toolbar/deleteDocument.png"));
+        mMainWindow->actionDelete->setIcon(UBIconUtils::phosphorIcon("trash", deleteIconColor));
         mMainWindow->actionDelete->setText(tr("Delete"));
         break;
     case EmptyFolder :
-        mMainWindow->actionDelete->setIcon(QIcon(":/images/svg/trash.svg"));
+        mMainWindow->actionDelete->setIcon(UBIconUtils::phosphorIcon("trash", deleteIconColor));
         mMainWindow->actionDelete->setText(tr("Empty"));
         break;
     case EmptyTrash :
-        mMainWindow->actionDelete->setIcon(QIcon(":/images/toolbar/deleteDocument.png"));
+        mMainWindow->actionDelete->setIcon(UBIconUtils::phosphorIcon("trash", deleteIconColor));
         mMainWindow->actionDelete->setText(tr("Empty"));
         break;
     }

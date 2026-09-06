@@ -467,6 +467,10 @@ class UBDocumentController : public UBDocumentContainer
 protected:
         virtual void setupViews();
         virtual void setupToolbar();
+
+        // #285: (re)apply Phosphor theme-tinted icons on the tree sub-toolbar
+        // buttons; called at setup and on theme change.
+        void applyThemedIcons();
         void setupPalettes();
         bool isOKToOpenDocument(UBDocumentProxy* proxy);
         UBDocumentProxy* selectedDocumentProxy();
