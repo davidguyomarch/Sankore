@@ -384,6 +384,19 @@ void UBGraphicsTextItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 mDraggingBox = true;
                 activateTextEditor(false);
                 clearFocus();
+                // #279 refinements:
+                //  - hide the selection frame/handles so they don't linger
+                //    visually underneath the box while it is being dragged;
+                //  - show a closed-hand cursor to signal the move gesture.
+                if (Delegate())
+                    Delegate()->showFrame(false);
+                if (UBApplication::boardController
+                    && UBApplication::boardController->controlView()
+                    && UBApplication::boardController->controlView()->viewport())
+                {
+                    UBApplication::boardController->controlView()->viewport()
+                        ->setCursor(Qt::ClosedHandCursor);
+                }
             }
             moveBy(event->scenePos().x() - mBoxDragStartScenePos.x(),
                    event->scenePos().y() - mBoxDragStartScenePos.y());
@@ -424,8 +437,20 @@ void UBGraphicsTextItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (mDraggingBox)
     {
         mDraggingBox = false;
+        // #279 refinements: restore the selection frame/handles and the cursor
+        // that were changed when the drag started.
         if (Delegate())
+        {
+            Delegate()->showFrame(true);
+            Delegate()->positionHandles();
             Delegate()->commitUndoStep();
+        }
+        if (UBApplication::boardController
+            && UBApplication::boardController->controlView()
+            && UBApplication::boardController->controlView()->viewport())
+        {
+            UBApplication::boardController->controlView()->viewport()->unsetCursor();
+        }
         event->accept();
         return;
     }
