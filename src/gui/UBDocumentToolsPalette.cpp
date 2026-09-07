@@ -28,20 +28,17 @@
 #include <QApplication>
 #include <QPainter>
 
-#include "frameworks/UBPlatformUtils.h"
-
-#include "core/UBApplication.h"
-#include "gui/UBMainWindow.h"
-
-
 
 UBDocumentToolsPalette::UBDocumentToolsPalette(QWidget *parent)
     : UBActionPalette(Qt::TopRightCorner, parent)
 {
+    // #284: the virtual keyboard was removed from the Documents view. It relies
+    // on a legacy X11 key-injection backend that is unreliable under Qt6, and a
+    // virtual keyboard has no clear use in a document-management view. It is kept
+    // on the board and desktop modes (UBBoardController / UBDesktopPalette).
+    // This palette now holds no actions, so isEmpty() is true and the
+    // "Document Tools" button is hidden by UBDocumentController::setupPalettes().
     QList<QAction*> actions;
-
-    if (UBPlatformUtils::hasVirtualKeyboard())
-        actions << UBApplication::mainWindow->actionVirtualKeyboard;
 
     setActions(actions);
     setButtonIconSize(QSize(42, 42));
