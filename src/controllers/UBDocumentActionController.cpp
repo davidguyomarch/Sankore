@@ -35,12 +35,16 @@ void UBDocumentActionController::setActiveMode(int mode)
 
 bool UBDocumentActionController::hasSelection() const
 {
+    if (UBApplication::isClosing())
+        return false;
     auto* dc = UBApplication::documentController;
     return dc && dc->firstSelectedTreeProxy() != nullptr;
 }
 
 QString UBDocumentActionController::documentTitle() const
 {
+    if (UBApplication::isClosing())
+        return QString();
     auto* dc = UBApplication::documentController;
     if (dc && dc->firstSelectedTreeProxy())
         return dc->firstSelectedTreeProxy()->metaData(UBSettings::documentName).toString();

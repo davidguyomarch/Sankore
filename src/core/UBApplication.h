@@ -85,6 +85,15 @@ class UBApplication : public QtSingleApplication
         static void showMessage(const QString& message, bool showSpinningWheel = false);
         static void setDisabled(bool disable);
 
+        /**
+         * True once application shutdown has begun (closing() entered).
+         *
+         * Used by QML-facing controllers to short-circuit property getters and
+         * signal emissions so QML bindings do not re-evaluate against C++ board
+         * state that is being torn down during quit (#293).
+         */
+        static bool isClosing() { return sIsClosing; }
+
         static QObject* staticMemoryCleaner;
 
         void decorateActionMenu(QAction* action);
@@ -140,6 +149,8 @@ class UBApplication : public QtSingleApplication
         QList<QMenu*> mProtoMenus;
         bool mIsVerbose;
         QString checkLanguageAvailabilityForSankore(QString& language);
+
+        static bool sIsClosing;
     protected:
 
 #if defined(Q_OS_MACOSX) && !defined(QT_MAC_USE_COCOA)
