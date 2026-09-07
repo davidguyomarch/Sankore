@@ -105,19 +105,18 @@ void UBToolController::setActiveTool(int tool)
     if (m_activeTool == tool)
         return;
 
-    // Delegate to setStylusTool which handles all side-effects
+    // Delegate to setStylusTool, which is the single place that mutates
+    // m_activeTool and now emits activeToolChanged (+ derived property
+    // signals) whenever the tool actually changes — see below (#291).
     setStylusTool(tool);
-
-    emit activeToolChanged();
-    emit currentColorsChanged();
-    emit currentColorIndexChanged();
-    emit currentWidthIndexChanged();
 }
 
 void UBToolController::setStylusTool(int tool)
 {
     if (tool == m_activeTool && tool != (int)UBStylusTool::Drawing)
         return;
+
+    const int previousTool = m_activeTool;
 
     // Side-effect: deselect items or deactivate shape edition
     if (tool != UBStylusTool::Drawing)
@@ -183,6 +182,20 @@ void UBToolController::setStylusTool(int tool)
 
     emit stylusToolChanged(tool);
     emit colorPaletteChanged();
+
+    // Keep the QML palette highlight in sync with the effective tool, no matter
+    // which entry point changed it (setActiveTool OR a direct setStylusTool call
+    // from a mode transition, color change, desktop mode, etc.). Previously only
+    // setActiveTool emitted activeToolChanged, so direct setStylusTool() calls
+    // (e.g. forcing Pen when returning to the board) left the palette highlighting
+    // the old tool while a different tool was actually active (#291).
+    if (m_activeTool != previousTool)
+    {
+        emit activeToolChanged();
+        emit currentColorsChanged();
+        emit currentColorIndexChanged();
+        emit currentWidthIndexChanged();
+    }
 
     deactivateCreationModeForGraphicsPathItems();
 }
