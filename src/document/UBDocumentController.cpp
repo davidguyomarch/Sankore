@@ -2168,12 +2168,14 @@ void UBDocumentController::applyThemedIcons()
     auto* theme = UBThemeManager::instance();
     const QColor iconColor = theme->onSurface();
 
+    // Double carets are the conventional "collapse all / expand all" metaphor
+    // for a tree, clearer than the previous vertical in/out arrows (#285).
     if (mDocumentUI->collapseAll)
         mDocumentUI->collapseAll->setIcon(
-            UBIconUtils::phosphorIcon("arrows-in-line-vertical", iconColor));
+            UBIconUtils::phosphorIcon("caret-double-up", iconColor));
     if (mDocumentUI->expandAll)
         mDocumentUI->expandAll->setIcon(
-            UBIconUtils::phosphorIcon("arrows-out-line-vertical", iconColor));
+            UBIconUtils::phosphorIcon("caret-double-down", iconColor));
 
     // #285: keep the thumbnail panel background in sync with the theme.
     if (mDocumentUI->thumbnailWidget)
