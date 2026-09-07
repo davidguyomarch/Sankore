@@ -715,7 +715,7 @@ void UBApplication::reloadThemeIcons(const QString& theme)
         {"actionCapture", "capture.svg"},
         {"actionPlay", "play.svg"},
         {"actionDrawing", "drawing.svg"},
-        {"actionVirtualKeyboard", "hand.svg"},
+        {"actionVirtualKeyboard", "keyboard.svg"},
         {"actionOcr", "text.svg"},
     };
 
