@@ -13,6 +13,11 @@
 #include "document/UBDocumentController.h"
 #include "gui/UBMainWindow.h"
 
+#include <QCoreApplication>
+#include <QFile>
+#include <QTextStream>
+#include <QTimer>
+
 UBDocumentActionController::UBDocumentActionController(QObject* parent)
     : QObject(parent)
 {
@@ -101,5 +106,24 @@ void UBDocumentActionController::openInBoard()
 
 void UBDocumentActionController::quit()
 {
-    UBApplication::app()->closeAllWindows();
+    // The Documents top-bar quit button previously called closeAllWindows(),
+    // but UBMainWindow::closeEvent() calls event->ignore(), so the window
+    // never closed and nothing happened (#281). Use the same shutdown path as
+    // the board top bar (UBAppController::quit): closing() saves state and
+    // defers the real quit via QApplication::quit(), letting cleanup() tear
+    // down controllers/QML in order.
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "\n[QUIT] quit() called (Documents top bar)\n";
+            logFile.close();
+        }
+    }
+
+    UBApplication::app()->closing();
+
+    // Watchdog only: force-exit as a last resort if the deferred quit does not
+    // unwind the event loop. Kept long so it never races normal shutdown (#293).
+    QTimer::singleShot(5000, []() { ::exit(0); });
 }
