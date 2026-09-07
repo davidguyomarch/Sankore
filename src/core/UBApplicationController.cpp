@@ -463,19 +463,17 @@ void UBApplicationController::showDocument()
     docFlashTimer.start();
     ubDocFlashDiag(QString("showDocument BEGIN (t=0ms)"));
 
-    mMainWindow->switchToDocumentsWidget();
-    ubDocFlashDiag(QString("after switchToDocumentsWidget t=%1ms").arg(docFlashTimer.elapsed()));
-
-    if (UBApplication::boardController)
+    // #259: avoid the brief flash of a half-built Documents view.
+    // Populate the Documents view *before* switching the stacked layout to it,
+    // so the switch happens only once the tree/thumbnails/top bar are ready.
+    // While we build it, the board is still the visible page (no intermediate
+    // paint of a partially-constructed Documents view).
+    if (UBApplication::boardController
+        && UBApplication::boardController->activeScene()
+        && UBApplication::boardController->activeScene()->isModified())
     {
-        if (UBApplication::boardController->activeScene()->isModified())
-        {
-//            UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::NonScreen);
-            UBApplication::boardController->persistCurrentScene();
-            ubDocFlashDiag(QString("after persistCurrentScene t=%1ms").arg(docFlashTimer.elapsed()));
-        }
-        UBApplication::boardController->hide();
-        ubDocFlashDiag(QString("after boardController->hide t=%1ms").arg(docFlashTimer.elapsed()));
+        UBApplication::boardController->persistCurrentScene();
+        ubDocFlashDiag(QString("after persistCurrentScene t=%1ms").arg(docFlashTimer.elapsed()));
     }
 
     UBDocumentController *docCtrl = UBApplication::documentController;
@@ -487,6 +485,14 @@ void UBApplicationController::showDocument()
             ubDocFlashDiag(QString("after setDocument(reload) t=%1ms").arg(docFlashTimer.elapsed()));
         }
     }
+
+    // Now the Documents view is fully populated: switch to it and hide the
+    // board in one go, producing a single visible transition.
+    mMainWindow->switchToDocumentsWidget();
+    ubDocFlashDiag(QString("after switchToDocumentsWidget t=%1ms").arg(docFlashTimer.elapsed()));
+
+    if (UBApplication::boardController)
+        UBApplication::boardController->hide();
 
     mMainWindow->show();
     ubDocFlashDiag(QString("after mainWindow->show END t=%1ms").arg(docFlashTimer.elapsed()));
