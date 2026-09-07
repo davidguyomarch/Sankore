@@ -509,27 +509,27 @@ QVariant UBDocumentTreeModel::data(const QModelIndex &index, int role) const
     }
 
     if(role == Qt::BackgroundRole){
-        // Highlighted row takes precedence: dark background needs light text (below).
+        // #285: derive row backgrounds from the theme so they follow dark/light
+        // mode, instead of the legacy hard-coded light-grey (0xD9DFEB) that
+        // clashed with the dark tree background.
+        // Highlighted (currently-open) row uses the accent colour.
         if (mHighLighted.isValid() && index == mHighLighted) {
-            return QBrush(0x6682B5);
+            return QBrush(UBThemeManager::instance()->primary());
         }
-
+        // Folders and constant nodes sit on a subtle surface variant.
         if (isConstant(index) || dataNode->nodeType() == UBDocumentTreeNode::Catalog) {
-            return QBrush(0xD9DFEB);
+            return QBrush(UBThemeManager::instance()->surfaceVariant());
         }
     }
 
     if(role == Qt::ForegroundRole){
-        // Keep text readable against the background set above (issue #260).
-        // Highlighted row = dark background -> light text.
+        // #285: text colours paired with the themed backgrounds above so they
+        // stay readable in both light and dark mode (issue #260).
         if (mHighLighted.isValid() && index == mHighLighted) {
-            return QVariant::fromValue(QColor(Qt::white));
+            return QVariant::fromValue(UBThemeManager::instance()->onPrimary());
         }
-        // Constant nodes and folders sit on the light 0xD9DFEB background;
-        // force a dark text color so they don't inherit a light theme color
-        // (which produced white-on-light-grey, unreadable folder labels).
         if (isConstant(index) || dataNode->nodeType() == UBDocumentTreeNode::Catalog) {
-            return QVariant::fromValue(QColor(0x2B2B2B));
+            return QVariant::fromValue(UBThemeManager::instance()->onSurface());
         }
     }
 
@@ -2165,7 +2165,8 @@ void UBDocumentController::applyThemedIcons()
     if (!mDocumentUI)
         return;
 
-    const QColor iconColor = UBThemeManager::instance()->onSurface();
+    auto* theme = UBThemeManager::instance();
+    const QColor iconColor = theme->onSurface();
 
     if (mDocumentUI->collapseAll)
         mDocumentUI->collapseAll->setIcon(
@@ -2176,7 +2177,32 @@ void UBDocumentController::applyThemedIcons()
 
     // #285: keep the thumbnail panel background in sync with the theme.
     if (mDocumentUI->thumbnailWidget)
-        mDocumentUI->thumbnailWidget->setBackgroundBrush(UBThemeManager::instance()->surface());
+        mDocumentUI->thumbnailWidget->setBackgroundBrush(theme->surface());
+
+    // #285: theme the left panel (tree, sort combos, collapse/expand buttons)
+    // so nothing falls back to the default light-grey that clashed with the
+    // dark tree background. Derived from the theme, refreshed on theme change.
+    if (mDocumentUI->topLeftWidget)
+    {
+        const QString surface   = theme->surface().name();
+        const QString surfaceV  = theme->surfaceVariant().name();
+        const QString onSurface = theme->onSurface().name();
+        const QString border    = theme->border().name();
+        const QString primary   = theme->primary().name();
+        const QString onPrimary = theme->onPrimary().name();
+
+        mDocumentUI->topLeftWidget->setStyleSheet(QString(
+            "QWidget#topLeftWidget { background: %1; }"
+            "QTreeView { background: %1; color: %2; border: none; }"
+            "QTreeView::item:selected { background: %5; color: %6; }"
+            "QComboBox { background: %3; color: %2; border: 1px solid %4;"
+            " border-radius: 4px; padding: 2px 6px; }"
+            "QComboBox QAbstractItemView { background: %3; color: %2;"
+            " selection-background-color: %5; selection-color: %6; }"
+            "QPushButton { background: transparent; border: none; }"
+            "QPushButton:hover { background: %3; border-radius: 4px; }")
+            .arg(surface, onSurface, surfaceV, border, primary, onPrimary));
+    }
 }
 
 //N/C - NNE - 20140403
