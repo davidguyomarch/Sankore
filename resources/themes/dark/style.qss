@@ -372,3 +372,45 @@ UBTGAdaptableText#UBTGPresentationPageTitle
     font-weight: bold;
     border: none;
 }
+
+/* === #285: Documents view — tree sub-toolbar (collapse/expand + sort) === */
+
+QPushButton#ubDocSubToolButton
+{
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+QPushButton#ubDocSubToolButton:hover
+{
+    background: #3A3A3A;
+}
+
+QPushButton#ubDocSubToolButton:pressed
+{
+    background: #454545;
+}
+
+QComboBox#ubDocSortCombo
+{
+    background: #2A2A2A;
+    color: #FFFFFF;
+    border: 1px solid #3A3A3A;
+    border-radius: 6px;
+    padding: 3px 8px;
+}
+
+QComboBox#ubDocSortCombo:hover
+{
+    background: #333333;
+}
+
+QComboBox#ubDocSortCombo QAbstractItemView
+{
+    background: #2A2A2A;
+    color: #FFFFFF;
+    selection-background-color: #2563EB;
+    selection-color: #FFFFFF;
+}

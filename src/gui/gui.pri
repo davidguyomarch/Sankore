@@ -3,6 +3,7 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBFloatingPalette.h \
     src/gui/UBToolbarButtonGroup.h \
     src/gui/UBIconButton.h \
+    src/gui/UBIconUtils.h \
     src/gui/UBThumbnailWidget.h \
     src/gui/UBCircleFrame.h \
     src/gui/UBColorPicker.h \
