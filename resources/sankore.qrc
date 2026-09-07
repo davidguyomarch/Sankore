@@ -169,6 +169,7 @@
         <file>themes/dark/icons/hide.svg</file>
         <file>themes/dark/icons/home.svg</file>
         <file>themes/dark/icons/import.svg</file>
+        <file>themes/dark/icons/keyboard.svg</file>
         <file>themes/dark/icons/largeEraser.svg</file>
         <file>themes/dark/icons/largePen.svg</file>
         <file>themes/dark/icons/library.svg</file>
@@ -266,6 +267,7 @@
         <file>themes/classic/icons/home.svg</file>
         <file>themes/classic/icons/import.png</file>
         <file>themes/classic/icons/import.svg</file>
+        <file>themes/classic/icons/keyboard.svg</file>
         <file>themes/classic/icons/largeEraser.png</file>
         <file>themes/classic/icons/largeEraser.svg</file>
         <file>themes/classic/icons/largePen.png</file>
@@ -366,6 +368,7 @@
         <file>themes/light/icons/hide.svg</file>
         <file>themes/light/icons/home.svg</file>
         <file>themes/light/icons/import.svg</file>
+        <file>themes/light/icons/keyboard.svg</file>
         <file>themes/light/icons/largeEraser.svg</file>
         <file>themes/light/icons/largePen.svg</file>
         <file>themes/light/icons/library.svg</file>
