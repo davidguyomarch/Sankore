@@ -117,6 +117,7 @@ UBBoardController* UBApplication::boardController = 0;
 UBWebController* UBApplication::webController = 0;
 UBDocumentController* UBApplication::documentController = 0;
 UBMainWindow* UBApplication::mainWindow = 0;
+bool UBApplication::sIsClosing = false;
 
 const QString UBApplication::mimeTypeUniboardDocument = QString("application/vnd.mnemis-uniboard-document");
 const QString UBApplication::mimeTypeUniboardPage = QString("application/vnd.mnemis-uniboard-page");
@@ -793,6 +794,11 @@ void UBApplication::closing()
     if (alreadyClosing)
         return;
     alreadyClosing = true;
+
+    // Mark shutdown in progress BEFORE mutating any board/scene/undo state.
+    // QML-facing controllers (UBAppController, ...) check this to avoid
+    // re-evaluating bindings against half-destroyed C++ objects (#293).
+    sIsClosing = true;
 
     if (boardController)
         boardController->closing();

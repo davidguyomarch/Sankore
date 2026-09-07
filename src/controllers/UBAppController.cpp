@@ -93,12 +93,16 @@ void UBAppController::syncMode(int mode)
 
 bool UBAppController::isDarkBackground() const
 {
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
     auto* scene = UBApplication::boardController->activeScene();
     return scene ? scene->isDarkBackground() : false;
 }
 
 bool UBAppController::isCrossedBackground() const
 {
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
     auto* scene = UBApplication::boardController->activeScene();
     return scene ? scene->isCrossedBackground() : false;
 }
@@ -141,6 +145,8 @@ void UBAppController::setBackgroundPlainDark()
 
 void UBAppController::toggleGrid()
 {
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return;
     auto* scene = UBApplication::boardController->activeScene();
     if (scene)
     {
@@ -155,11 +161,15 @@ void UBAppController::toggleGrid()
 
 bool UBAppController::canUndo() const
 {
+    if (UBApplication::isClosing())
+        return false;
     return UBApplication::undoStack ? UBApplication::undoStack->canUndo() : false;
 }
 
 bool UBAppController::canRedo() const
 {
+    if (UBApplication::isClosing())
+        return false;
     return UBApplication::undoStack ? UBApplication::undoStack->canRedo() : false;
 }
 
@@ -193,21 +203,35 @@ void UBAppController::quit()
         }
     }
     // UBMainWindow::closeEvent ignores QCloseEvent, so QApplication::quit() alone
-    // won't close the window. We must call closing() to save state, then exit directly.
+    // won't close the window. closing() saves state and defers the real quit via
+    // QTimer::singleShot(0, qApp, &QApplication::quit), which unwinds app.exec()
+    // and lets UBApplication::cleanup() destroy controllers/QML in the right order.
     UBApplication::app()->closing();
-    // closing() defers quit via singleShot, but the static guard blocks subsequent calls.
-    // Force exit in case closing() was already called once.
-    QTimer::singleShot(500, []() { ::exit(0); });
+
+    // Watchdog only: if the deferred quit somehow does not unwind the event loop,
+    // force-exit as a last resort. Kept long so it never races the normal
+    // shutdown path (which previously used ::exit(0) at 500ms and killed the
+    // process mid QML-binding-evaluation — see #293).
+    QTimer::singleShot(5000, []() { ::exit(0); });
 }
 
 // --- Private slots ---
 
 void UBAppController::onActiveSceneChanged()
 {
+    // During shutdown the board/scene state is being torn down; re-emitting
+    // would make QML bindings re-evaluate against dangling objects (#293).
+    if (UBApplication::isClosing())
+        return;
     emit backgroundChanged();
 }
 
 void UBAppController::onUndoChanged(bool)
 {
+    // boardController->closing() calls ClearUndoStack(), which fires
+    // canUndo/canRedoChanged. Swallow it during shutdown so QML does not
+    // re-evaluate appController.canUndo/canRedo bindings mid-teardown (#293).
+    if (UBApplication::isClosing())
+        return;
     emit undoStateChanged();
 }
