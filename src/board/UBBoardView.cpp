@@ -102,6 +102,7 @@
 
 
 #include "domain/UBShapeFactory.h"
+#include "domain/UBBackgroundGrid.h"
 
 UBBoardView::UBBoardView (UBBoardController* pController, QWidget* pParent, bool isControl, bool isDesktop)
 : QGraphicsView (pParent)
@@ -1898,22 +1899,34 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
           bgCrossColor.setAlpha (alpha); // fade the crossing on small zooms
         }
 
-      painter->setPen (bgCrossColor);
-
-      if (scene()->isCrossedBackground())
+      // #289: draw whatever ruling the scene uses, mirroring
+      // UBBackgroundRenderer::paintBackground so both paint paths agree.
+      if (UBBackgroundGrid::isRuled (scene()->gridType ()))
         {
-          qreal firstY = ((int) (rect.y () / UBSettings::crossSize)) * UBSettings::crossSize;
+          QColor minorColor = bgCrossColor;
+          minorColor.setAlpha (minorColor.alpha () * 0.5);
 
-          for (qreal yPos = firstY; yPos < rect.y () + rect.height (); yPos += UBSettings::crossSize)
+          QColor marginColor = darkBackground ? QColor (255, 110, 110)
+                                              : QColor (210, 40, 40);
+          if (transform ().m11 () < 1.0)
+            marginColor.setAlpha (255 * transform ().m11 () / 2);
+
+          const auto lines = UBBackgroundGrid::generateLines (scene()->gridType (), rect);
+          for (const auto &line : lines)
             {
-              painter->drawLine (rect.x (), yPos, rect.x () + rect.width (), yPos);
-            }
+              switch (line.weight)
+                {
+                case UBBackgroundGrid::Weight::Major:  painter->setPen (bgCrossColor); break;
+                case UBBackgroundGrid::Weight::Minor:  painter->setPen (minorColor);   break;
+                case UBBackgroundGrid::Weight::Margin: painter->setPen (marginColor);  break;
+                }
 
-          qreal firstX = ((int) (rect.x () / UBSettings::crossSize)) * UBSettings::crossSize;
-
-          for (qreal xPos = firstX; xPos < rect.x () + rect.width (); xPos += UBSettings::crossSize)
-            {
-              painter->drawLine (xPos, rect.y (), xPos, rect.y () + rect.height ());
+              if (line.orientation == UBBackgroundGrid::Orientation::Horizontal)
+                painter->drawLine (QPointF (rect.x (), line.pos),
+                                   QPointF (rect.x () + rect.width (), line.pos));
+              else
+                painter->drawLine (QPointF (line.pos, rect.y ()),
+                                   QPointF (line.pos, rect.y () + rect.height ()));
             }
         }
     }

@@ -11,6 +11,8 @@
 #include <QRectF>
 #include <functional>
 
+#include "UBBackgroundGrid.h"
+
 class QPainter;
 class QGraphicsScene;
 class QGraphicsView;
@@ -43,17 +45,26 @@ public:
 
     bool isDarkBackground()    const { return mDarkBackground; }
     bool isLightBackground()   const { return !mDarkBackground; }
-    bool isCrossedBackground() const { return mCrossedBackground; }
+    /// Legacy compatibility shim: "crossed" == any ruled background (#289).
+    bool isCrossedBackground() const { return UBBackgroundGrid::isRuled(mGridType); }
+    /// The full ruling type (#289).
+    UBBackgroundGrid::Type gridType() const { return mGridType; }
     bool isDesktopMode()       const { return mIsDesktopMode; }
 
     // --- Mutators (called by scene facades) ---
 
     /**
      * Toggle dark/light and crossed background.
+     * `isCrossed` maps to Grid (true) or Plain (false) for backward
+     * compatibility; use setBackgroundType() for the finer rulings (#289).
      * Recolors eraser, recolors all stroke items, invalidates views.
      * Returns true if a repaint was triggered.
      */
     bool setBackground(bool isDark, bool isCrossed);
+
+    /// Set dark/light plus the full ruling type (#289). Returns true if a
+    /// repaint was triggered.
+    bool setBackgroundType(bool isDark, UBBackgroundGrid::Type gridType);
 
     void setZoomFactor(qreal zoom);
     void setDesktopMode(bool desktopMode);
@@ -69,7 +80,7 @@ private:
     std::function<void(bool)> mOnEraserRecolor;
 
     bool  mDarkBackground    = false;
-    bool  mCrossedBackground = false;
+    UBBackgroundGrid::Type mGridType = UBBackgroundGrid::Type::Plain;
     bool  mIsDesktopMode     = false;
     qreal mZoomFactor        = 1.0;
 };

@@ -136,7 +136,25 @@ Rectangle {
         // === Background ===
         ToolbarButton { icon: "sun"; tooltip: "Fond clair"; active: !appController.isDarkBackground; onClicked: appController.setBackgroundLight() }
         ToolbarButton { icon: "moon"; tooltip: "Fond sombre"; active: appController.isDarkBackground; onClicked: appController.setBackgroundDark() }
-        ToolbarButton { icon: "grid-four"; tooltip: "Quadrillage"; active: appController.isCrossedBackground; onClicked: appController.toggleGrid() }
+
+        // Ruling type selector (#289): dropdown with the square grid + French
+        // school rulings (Séyès, enlarged Séyès, double 3 mm).
+        ToolbarButton {
+            id: gridButton
+            icon: "grid-four"
+            tooltip: "Quadrillage / réglures"
+            active: appController.gridType !== 0
+            // Use a native QtQuick Menu (its own popup window) rather than a
+            // Popup: the TopBar is a 48px-tall QQuickWidget and a Popup is
+            // clipped to that widget's surface, so the dropdown rendered
+            // entirely off-screen and nothing appeared (#292). A Menu creates
+            // a separate popup that overflows the widget — same pattern as
+            // PageNavigator's context menu.
+            onClicked: gridMenu.popup(gridButton, 0, gridButton.height + 4)
+        }
+        GridTypeMenu {
+            id: gridMenu
+        }
 
         // === Spacer ===
         Item { Layout.fillWidth: true }
@@ -196,5 +214,86 @@ Rectangle {
         Layout.preferredHeight: 28
         Layout.alignment: Qt.AlignVCenter
         color: themeManager.border
+    }
+
+    // === Ruling type dropdown (#289) ===
+    // Native QtQuick Menu so the dropdown renders in its own popup window and
+    // is not clipped to the 48px TopBar QQuickWidget (#292).
+    component GridTypeMenu: Menu {
+        id: menuRoot
+
+        // 0=Plain(none), 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm — matches
+        // UBBackgroundGrid::Type / UBAppController.gridType.
+        readonly property var items: [
+            { type: 0, icon: "circle",     label: "Aucun" },
+            { type: 1, icon: "grid-four",  label: "Quadrillage" },
+            { type: 2, icon: "rows-plus-top", label: "Séyès" },
+            { type: 3, icon: "rows-plus-bottom", label: "Séyès agrandi" },
+            { type: 4, icon: "list",       label: "Double lignage 3 mm" }
+        ]
+
+        width: 240
+
+        background: Rectangle {
+            color: themeManager.surface
+            border.color: themeManager.border
+            border.width: 1
+            radius: 8
+        }
+
+        Repeater {
+            model: menuRoot.items
+            MenuItem {
+                required property var modelData
+                text: modelData.label
+                height: 34
+
+                onTriggered: appController.setGridType(modelData.type)
+
+                contentItem: Row {
+                    leftPadding: 8
+                    spacing: 8
+
+                    Image {
+                        id: rowIcon
+                        width: 18; height: 18
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "qrc:/icons/phosphor/" + modelData.icon + ".svg"
+                        sourceSize: Qt.size(18, 18)
+                        visible: false
+                    }
+                    ColorOverlay {
+                        width: 18; height: 18
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: rowIcon
+                        color: themeManager.onSurface
+                    }
+                    Text {
+                        text: modelData.label
+                        font.pixelSize: 13
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: themeManager.onSurface
+                    }
+                }
+
+                // Trailing check mark for the active ruling.
+                Image {
+                    id: checkIcon
+                    width: 16; height: 16
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "qrc:/icons/phosphor/check.svg"
+                    sourceSize: Qt.size(16, 16)
+                    visible: false
+                }
+                ColorOverlay {
+                    anchors.fill: checkIcon
+                    source: checkIcon
+                    color: themeManager.onSurface
+                    visible: appController.gridType === modelData.type
+                }
+            }
+        }
     }
 }

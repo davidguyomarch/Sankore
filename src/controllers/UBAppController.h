@@ -26,6 +26,8 @@ class UBAppController : public QObject
     // Background state
     Q_PROPERTY(bool isDarkBackground READ isDarkBackground NOTIFY backgroundChanged)
     Q_PROPERTY(bool isCrossedBackground READ isCrossedBackground NOTIFY backgroundChanged)
+    // #289: full ruling type (0=Plain,1=Grid,2=Seyes,3=SeyesLarge,4=Double3mm)
+    Q_PROPERTY(int gridType READ gridType NOTIFY backgroundChanged)
 
     // Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
@@ -46,6 +48,7 @@ public:
 
     bool isDarkBackground() const;
     bool isCrossedBackground() const;
+    int gridType() const;
 
     bool canUndo() const;
     bool canRedo() const;
@@ -64,6 +67,8 @@ public slots:
     void setBackgroundPlainLight();
     void setBackgroundPlainDark();
     void toggleGrid();
+    /// #289: set the ruling type (keeps the current dark/light).
+    void setGridType(int gridType);
 
 signals:
     void activeModeChanged();

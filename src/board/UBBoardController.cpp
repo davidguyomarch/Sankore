@@ -1737,15 +1737,30 @@ void UBBoardController::adjustDisplayViews()
 
 void UBBoardController::changeBackground(bool isDark, bool isCrossed)
 {
-    bool currentIsDark = mActiveScene->isDarkBackground();
-    bool currentIsCrossed = mActiveScene->isCrossedBackground();
+    // Legacy entry: crossed toggles the uniform square Grid, but preserve a
+    // finer ruling if one is already active (#289).
+    UBBackgroundGrid::Type target;
+    if (isCrossed)
+        target = UBBackgroundGrid::isRuled(mActiveScene->gridType())
+                     ? mActiveScene->gridType()
+                     : UBBackgroundGrid::Type::Grid;
+    else
+        target = UBBackgroundGrid::Type::Plain;
 
-    if ((isDark != currentIsDark) || (currentIsCrossed != isCrossed))
+    changeBackgroundType(isDark, target);
+}
+
+void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type gridType)
+{
+    bool currentIsDark = mActiveScene->isDarkBackground();
+    UBBackgroundGrid::Type currentType = mActiveScene->gridType();
+
+    if ((isDark != currentIsDark) || (currentType != gridType))
     {
         mSettings->setDarkBackground(isDark);
-        mSettings->setCrossedBackground(isCrossed);
+        mSettings->setCrossedBackground(UBBackgroundGrid::isRuled(gridType));
 
-        mActiveScene->setBackground(isDark, isCrossed);
+        mActiveScene->setBackgroundType(isDark, gridType);
 
         updateBackgroundState();
 

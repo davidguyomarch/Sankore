@@ -45,6 +45,7 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            tst_UBTextDrag.h \
            tst_UBTextVerticalAlign.h \
            tst_UBHyperlink.h \
+           tst_UBBackgroundGrid.h \
            tst_UBKeyboardPaletteColors.h \
            ../src/gui/UBKeyboardPaletteColors.h
 
@@ -164,6 +165,7 @@ SOURCES += main.cpp \
            tst_UBTextDrag.cpp \
            tst_UBTextVerticalAlign.cpp \
            tst_UBHyperlink.cpp \
+           tst_UBBackgroundGrid.cpp \
            tst_UBKeyboardPaletteColors.cpp \
            tst_UBDisplayManager.cpp \
            tst_UBExportSelection.cpp \

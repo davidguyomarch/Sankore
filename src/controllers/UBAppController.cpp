@@ -107,6 +107,23 @@ bool UBAppController::isCrossedBackground() const
     return scene ? scene->isCrossedBackground() : false;
 }
 
+int UBAppController::gridType() const
+{
+    auto* scene = UBApplication::boardController->activeScene();
+    return scene ? UBBackgroundGrid::toInt(scene->gridType())
+                 : UBBackgroundGrid::toInt(UBBackgroundGrid::Type::Plain);
+}
+
+void UBAppController::setGridType(int gridType)
+{
+    auto* scene = UBApplication::boardController->activeScene();
+    if (!scene)
+        return;
+    UBApplication::boardController->changeBackgroundType(
+        scene->isDarkBackground(), UBBackgroundGrid::fromInt(gridType));
+    emit backgroundChanged();
+}
+
 void UBAppController::setBackgroundLight()
 {
     UBApplication::boardController->changeBackground(false, false);
