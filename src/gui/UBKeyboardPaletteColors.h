@@ -25,15 +25,6 @@
  */
 namespace UBKeyboardColors
 {
-    /** Approximate face color of a passive (unpressed) key. */
-    inline QColor passiveKeyFace() { return QColor(235, 236, 237); }
-
-    /** Approximate face color of an active (pressed) key. */
-    inline QColor activeKeyFace() { return QColor(188, 189, 189); }
-
-    /** Dark near-black color used to paint every key glyph/label. */
-    inline QColor keyLabelColor() { return QColor(0x22, 0x22, 0x22); }
-
     /**
      * WCAG relative luminance of a color (0.0 = black, 1.0 = white).
      */
@@ -57,6 +48,31 @@ namespace UBKeyboardColors
         double lo = std::min(la, lb);
         return (hi + 0.05) / (lo + 0.05);
     }
+
+    /**
+     * Glyph/label color for a given key face: near-black on light faces, near-white
+     * on dark faces. This keeps labels readable whatever the theme paints the key
+     * faces (issue #263), now that the keyboard is drawn with theme colors instead
+     * of fixed light-grey PNGs.
+     */
+    inline QColor keyLabelColorFor(const QColor& face)
+    {
+        static const QColor darkGlyph(0x22, 0x22, 0x22);
+        static const QColor lightGlyph(0xF2, 0xF2, 0xF2);
+        return relativeLuminance(face) >= 0.5 ? darkGlyph : lightGlyph;
+    }
+
+    /** Default (light-theme) face color of a passive (unpressed) key. */
+    inline QColor passiveKeyFace() { return QColor(235, 236, 237); }
+
+    /** Default (light-theme) face color of an active (pressed/hover) key. */
+    inline QColor activeKeyFace() { return QColor(188, 189, 189); }
+
+    /**
+     * Backward-compatible label color for the default light faces.
+     * Prefer keyLabelColorFor(face) when the face comes from the theme.
+     */
+    inline QColor keyLabelColor() { return keyLabelColorFor(passiveKeyFace()); }
 }
 
 #endif // UBKEYBOARDPALETTECOLORS_H

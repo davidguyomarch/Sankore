@@ -25,6 +25,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QPainterPath>
 #include <QList>
 #include <QSize>
 
@@ -34,6 +35,29 @@
 
 #include "core/UBApplication.h"
 #include "gui/UBMainWindow.h"
+#include "qml/UBThemeManager.h"
+
+// --- #284: modern themed key rendering -----------------------------------
+// The keyboard used to blit fixed light-grey PNG slices for every key. It now
+// paints rounded, theme-derived key faces so it matches the QML V2 UI and
+// follows light/dark mode. The key-injection backend and key layout are
+// untouched. Helpers below derive the key colors from UBThemeManager.
+namespace
+{
+    QColor ubKbPassiveFace()
+    {
+        return UBThemeManager::instance()->surfaceVariant();
+    }
+    QColor ubKbActiveFace()
+    {
+        // Pressed/hover face: the theme's hover surface, nudged toward primary.
+        return UBThemeManager::instance()->surfaceHover();
+    }
+    QColor ubKbBorderColor()
+    {
+        return UBThemeManager::instance()->border();
+    }
+}
 
 
 /*
@@ -468,8 +492,24 @@ bool UBKeyboardButton::isPressed()
 
 void UBKeyboardButton::paintEvent(QPaintEvent*)
 {
-
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+
+    // #284: draw a modern rounded key face derived from the theme, instead of
+    // blitting the legacy light-grey PNG slices. Pressed/hover keys use a
+    // distinct face; the border and radius match the QML V2 look.
+    const bool pressed = isPressed();
+    QColor face = pressed ? ubKbActiveFace()
+                          : (bFocused ? ubKbActiveFace() : ubKbPassiveFace());
+
+    QRectF keyRect = QRectF(rect()).adjusted(1.0, 1.0, -1.0, -1.0);
+    const qreal radius = 6.0;
+
+    QPainterPath path;
+    path.addRoundedRect(keyRect, radius, radius);
+    painter.fillPath(path, face);
+    painter.setPen(QPen(ubKbBorderColor(), 1.0));
+    painter.drawPath(path);
 
     //--------------------------
 
@@ -488,24 +528,15 @@ void UBKeyboardButton::paintEvent(QPaintEvent*)
 
     //--------------------------
 
-    if (isPressed())
-    {
-        painter.drawImage( 0,0, m_parent->currBtnImages->m_btnLeftActive, 0,0, m_parent->currBtnImages->m_btnLeftActive.width(), m_parent->currBtnImages->m_btnLeftActive.height() );
-        painter.drawImage( QRect(m_parent->currBtnImages->m_btnLeftActive.width(), 0, width() - m_parent->currBtnImages->m_btnLeftActive.width() - m_parent->currBtnImages->m_btnRightActive.width(), height()), m_parent->currBtnImages->m_btnCenterActive );
-        painter.drawImage( width() - m_parent->currBtnImages->m_btnRightActive.width(), 0, m_parent->currBtnImages->m_btnRightActive, 0,0, m_parent->currBtnImages->m_btnRightActive.width(), m_parent->currBtnImages->m_btnRightActive.height() );
-    }
-    else
-    {
-        painter.drawImage( 0,0, m_parent->currBtnImages->m_btnLeftPassive, 0,0, m_parent->currBtnImages->m_btnLeftPassive.width(), m_parent->currBtnImages->m_btnLeftPassive.height() );
-        painter.drawImage( QRect(m_parent->currBtnImages->m_btnLeftPassive.width(), 0, width() - m_parent->currBtnImages->m_btnLeftPassive.width() - m_parent->currBtnImages->m_btnRightPassive.width(), height()), m_parent->currBtnImages->m_btnCenterPassive );
-        painter.drawImage( width() - m_parent->currBtnImages->m_btnRightPassive.width(), 0, m_parent->currBtnImages->m_btnRightPassive, 0,0, m_parent->currBtnImages->m_btnRightPassive.width(), m_parent->currBtnImages->m_btnRightPassive.height() );
-    }
+    // Glyph/label pen auto-contrasted against the (themed) key face so labels
+    // stay readable in both light and dark themes (issue #263).
+    painter.setPen(UBKeyboardColors::keyLabelColorFor(face));
 
-    //--------------------------
-
-    // Force a dark glyph pen so key labels stay readable on the light-grey key
-    // faces, independent of the app-wide (dark) stylesheet color (issue #263).
-    painter.setPen(UBKeyboardPalette::keyLabelColor());
+    // Slightly larger, medium-weight glyphs read better than the widget default.
+    QFont glyphFont = painter.font();
+    glyphFont.setPixelSize(qMax(11, int(height() * 0.42)));
+    glyphFont.setWeight(QFont::Medium);
+    painter.setFont(glyphFont);
 
     this->paintContent(painter);
 

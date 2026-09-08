@@ -99,3 +99,27 @@ void TestUBKeyboardPaletteColors::testRenderedGlyphReadability()
     // The fix must be a large improvement over the buggy rendering.
     QVERIFY(darkPeak > whitePeak * 2.0);
 }
+
+void TestUBKeyboardPaletteColors::testAutoContrastLabelForThemedFaces()
+{
+    // #284: the keyboard now derives key faces from the theme, so the label
+    // color must adapt per face. keyLabelColorFor() picks a dark or light glyph
+    // and must keep WCAG AA (>= 4.5:1) contrast in both cases.
+
+    // Light faces (light theme) -> dark glyph, readable.
+    const QColor lightFace(235, 236, 237);
+    const QColor darkFace(45, 45, 48); // typical dark-theme surface variant
+
+    QColor labelOnLight = keyLabelColorFor(lightFace);
+    QColor labelOnDark  = keyLabelColorFor(darkFace);
+
+    QVERIFY2(contrastRatio(labelOnLight, lightFace) >= 4.5,
+             qPrintable(QStringLiteral("Label/light-face contrast too low: %1")
+                            .arg(contrastRatio(labelOnLight, lightFace))));
+    QVERIFY2(contrastRatio(labelOnDark, darkFace) >= 4.5,
+             qPrintable(QStringLiteral("Label/dark-face contrast too low: %1")
+                            .arg(contrastRatio(labelOnDark, darkFace))));
+
+    // The two labels must differ: a light face gets a dark glyph and vice versa.
+    QVERIFY(relativeLuminance(labelOnLight) < relativeLuminance(labelOnDark));
+}
