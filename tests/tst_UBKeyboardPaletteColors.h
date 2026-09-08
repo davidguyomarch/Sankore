@@ -34,6 +34,10 @@ private slots:
     // light key face, while the fixed dark pen renders a readable glyph.
     void testRenderedGlyphReadability();
 
+    // #284: keyLabelColorFor() auto-contrasts against the (themed) key face —
+    // dark glyph on light faces, light glyph on dark faces, always >= WCAG AA.
+    void testAutoContrastLabelForThemedFaces();
+
 private:
     // Peak WCAG contrast ratio of any rendered glyph pixel against the key face.
     // Font-metric independent, so it is portable across platforms.
