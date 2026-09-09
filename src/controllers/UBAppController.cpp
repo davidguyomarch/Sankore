@@ -225,11 +225,22 @@ void UBAppController::quit()
     // and lets UBApplication::cleanup() destroy controllers/QML in the right order.
     UBApplication::app()->closing();
 
-    // Watchdog only: if the deferred quit somehow does not unwind the event loop,
-    // force-exit as a last resort. Kept long so it never races the normal
-    // shutdown path (which previously used ::exit(0) at 500ms and killed the
-    // process mid QML-binding-evaluation — see #293).
-    QTimer::singleShot(5000, []() { ::exit(0); });
+    // Watchdog: if the deferred QApplication::quit() somehow does not unwind the
+    // event loop, force-exit as a last resort. 1.5s bounds the worst-case
+    // perceived delay (#309) while still leaving the normal ordered shutdown
+    // (closing() -> quit() -> cleanup()) time to complete; we do NOT go back to
+    // the old 500ms ::exit(0) that killed the process mid-teardown (#293).
+    // Reaching this timer is abnormal — log it so a VM run reveals it.
+    QTimer::singleShot(1500, []() {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[QUIT] WATCHDOG fired at 1500ms — clean shutdown did not "
+                   "finish, forcing exit(0)\n";
+            logFile.close();
+        }
+        ::exit(0);
+    });
 }
 
 // --- Private slots ---
