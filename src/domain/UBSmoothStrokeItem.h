@@ -79,6 +79,16 @@ public:
     QColor colorOnDarkBackground() const { return mColorOnDark; }
     QColor colorOnLightBackground() const { return mColorOnLight; }
 
+    /**
+     * Apply the stored color that matches the given background (#307).
+     * Used by the day/night recolor pass so the stroke stays visible after a
+     * light/dark switch.
+     */
+    void applyBackgroundColor(bool isDark)
+    {
+        setStrokeColor(isDark ? mColorOnDark : mColorOnLight);
+    }
+
     qreal nominalWidth() const { return mNominalWidth; }
 
     // --- UBItem interface ---

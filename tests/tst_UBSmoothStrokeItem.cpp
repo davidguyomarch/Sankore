@@ -288,6 +288,30 @@ void TestUBSmoothStrokeItem::testType()
 
 // --- #243 regression: the item must own a delegate ---
 
+void TestUBSmoothStrokeItem::testDayNightRecolor_regression307()
+{
+    // #307: a stroke drawn in black on a light background must become white
+    // (its dark-background color) when the background flips to dark, otherwise
+    // it is invisible (black on black). The day/night recolor pass calls
+    // applyBackgroundColor() on every stroke; this pins that contract for the
+    // standalone UBSmoothStrokeItem, which was previously skipped.
+    UBSmoothStrokeItem item;
+    item.setColorOnLightBackground(Qt::black);
+    item.setColorOnDarkBackground(Qt::white);
+
+    // Drawn on a light background.
+    item.applyBackgroundColor(false);
+    QCOMPARE(item.pen().color(), QColor(Qt::black));
+
+    // Switch to dark → the stroke must adopt its dark-background color.
+    item.applyBackgroundColor(true);
+    QCOMPARE(item.pen().color(), QColor(Qt::white));
+
+    // And back to light.
+    item.applyBackgroundColor(false);
+    QCOMPARE(item.pen().color(), QColor(Qt::black));
+}
+
 void TestUBSmoothStrokeItem::testHasDelegate_regression243()
 {
     // Before the fix, the constructor never called setDelegate(), so Delegate()
