@@ -132,6 +132,16 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         , clearBackground
     };
 
+    /**
+     * Pure classification used by clearContent(): should an item of the given
+     * QGraphicsItem type be removed for this clear case? Static and free of
+     * scene state, isolating the decision that #308 fixes. "Ink" = legacy
+     * stroke groups (UBGraphicsStrokesGroup) AND modern standalone smooth
+     * strokes (UBSmoothStrokeItem).
+     */
+    static bool shouldClearItemForCase(clearCase pCase, int itemType,
+                                       bool isGroup, bool isBackground);
+
     //        tmp stub for divide addings scene objects from undo mechanism implementation
         void enableUndoRedoStack(){mUndoRedoStackEnabled = true;}
         void setURStackEnable(bool enable){mUndoRedoStackEnabled = enable;}

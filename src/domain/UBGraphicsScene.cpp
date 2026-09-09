@@ -617,6 +617,28 @@ UBItem* UBGraphicsScene::deepCopy() const
     return sceneDeepCopy();
 }
 
+bool UBGraphicsScene::shouldClearItemForCase(clearCase pCase, int itemType,
+                                             bool isGroup, bool isBackground)
+{
+    const bool isStrokesGroup = (itemType == UBGraphicsStrokesGroup::Type);
+    // #308: modern freehand strokes are standalone UBSmoothStrokeItem, not
+    // wrapped in a UBGraphicsStrokesGroup. Treat them as ink too, otherwise
+    // "Erase all ink" (clearAnnotations) skipped them.
+    const bool isSmoothStroke = (itemType == UBSmoothStrokeItem::Type);
+    const bool isInk = isStrokesGroup || isSmoothStroke;
+
+    switch (static_cast<int>(pCase)) {
+    case clearAnnotations:
+        return isInk;
+    case clearItems:
+        return !isGroup && !isBackground && !isInk;
+    case clearItemsAndAnnotations:
+        return !isGroup && !isBackground;
+    default:
+        return false;
+    }
+}
+
 void UBGraphicsScene::clearContent(clearCase pCase)
 {
     QSet<QGraphicsItem*> removedItems;
@@ -641,7 +663,6 @@ void UBGraphicsScene::clearContent(clearCase pCase)
         for (QGraphicsItem* item : items()) {
 
             bool isGroup = item->type() == UBGraphicsGroupContainerItem::Type;
-            bool isStrokesGroup = item->type() == UBGraphicsStrokesGroup::Type;
 
             UBGraphicsGroupContainerItem *itemGroup = item->parentItem()
                                                       ? qgraphicsitem_cast<UBGraphicsGroupContainerItem*>(item->parentItem())
@@ -651,19 +672,8 @@ void UBGraphicsScene::clearContent(clearCase pCase)
                 continue;
             }
 
-            bool shouldDelete = false;
-
-            switch (static_cast<int>(pCase)) {
-            case clearAnnotations :
-                shouldDelete = isStrokesGroup;
-                break;
-            case clearItems :
-                shouldDelete = !isGroup && !isBackgroundObject(item) && !isStrokesGroup;
-                break;
-            case clearItemsAndAnnotations:
-                shouldDelete = !isGroup && !isBackgroundObject(item);
-                break;
-            }
+            bool shouldDelete = shouldClearItemForCase(
+                pCase, item->type(), isGroup, isBackgroundObject(item));
 
             if(shouldDelete) {
                 if (itemGroup) {
