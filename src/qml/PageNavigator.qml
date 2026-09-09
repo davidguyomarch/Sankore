@@ -186,6 +186,7 @@ Rectangle {
 
     // === Reusable Sidebar Button ===
     component SidebarButton: Rectangle {
+        id: sbBtn
         property string icon
         property string tooltip
         signal clicked()
@@ -214,11 +215,12 @@ Rectangle {
             cursorShape: Qt.PointingHandCursor
             onClicked: parent.clicked()
         }
-        ToolTip {
-            enabled: false  // #247: informational only — must not intercept clicks
-            visible: sbMouse.containsMouse
-            delay: 600
-            text: parent.tooltip
+        // #247: mouse-transparent tooltip above the footer button.
+        TooltipLabel {
+            anchor: sbBtn
+            text: sbBtn.tooltip
+            show: sbMouse.containsMouse && sbBtn.tooltip !== ""
+            placeBelow: false
         }
     }
 }

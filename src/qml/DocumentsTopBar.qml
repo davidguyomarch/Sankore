@@ -139,6 +139,7 @@ Rectangle {
 
     // === Reusable ToolbarButton ===
     component ToolbarButton: Rectangle {
+        id: parentBtn
         property string icon
         property string tooltip
         property bool active: false
@@ -173,11 +174,11 @@ Rectangle {
             cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: if (parent.enabled) parent.clicked()
         }
-        ToolTip {
-            enabled: false  // #247: informational only — must not intercept clicks
-            visible: btnMa.containsMouse && parent.tooltip !== ""
-            delay: 600
-            text: parent.tooltip
+        // #247: mouse-transparent tooltip label (no ToolTip Popup that blocks clicks).
+        TooltipLabel {
+            text: parentBtn.tooltip
+            show: btnMa.containsMouse && parentBtn.tooltip !== ""
+            placeBelow: true
         }
     }
 

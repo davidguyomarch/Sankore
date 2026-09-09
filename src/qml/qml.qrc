@@ -6,5 +6,6 @@
         <file>DrawingPropsBar.qml</file>
         <file>ShapesPaletteV2.qml</file>
         <file>DocumentsTopBar.qml</file>
+        <file>TooltipLabel.qml</file>
     </qresource>
 </RCC>

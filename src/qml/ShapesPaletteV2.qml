@@ -62,6 +62,7 @@ Rectangle {
                 ]
 
                 Rectangle {
+                    id: shapeBtn
                     width: 42; height: 42
                     radius: 6
                     color: shapeMouse.containsMouse ? themeManager.surfaceHover : "transparent"
@@ -88,11 +89,11 @@ Rectangle {
                             toolController.createShape(modelData.action)
                         }
                     }
-                    ToolTip {
-                        enabled: false  // #247: informational only — must not intercept clicks
-                        visible: shapeMouse.containsMouse
-                        delay: 500
+                    TooltipLabel {
+                        anchor: shapeBtn
                         text: modelData.tooltip
+                        show: shapeMouse.containsMouse && modelData.tooltip !== ""
+                        placeBelow: false
                     }
                 }
             }
@@ -121,6 +122,7 @@ Rectangle {
                 ]
 
                 Rectangle {
+                    id: propBtn
                     width: 42; height: 42
                     radius: 6
                     color: propMouse.containsMouse ? themeManager.surfaceHover : "transparent"
@@ -152,11 +154,11 @@ Rectangle {
                                 toolController.alignSelection()
                         }
                     }
-                    ToolTip {
-                        enabled: false  // #247: informational only — must not intercept clicks
-                        visible: propMouse.containsMouse
-                        delay: 500
+                    TooltipLabel {
+                        anchor: propBtn
                         text: modelData.tooltip
+                        show: propMouse.containsMouse && modelData.tooltip !== ""
+                        placeBelow: false
                     }
                 }
             }
