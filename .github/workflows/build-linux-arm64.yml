@@ -8,7 +8,7 @@ name: Build Linux ARM64
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, integration ]
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
