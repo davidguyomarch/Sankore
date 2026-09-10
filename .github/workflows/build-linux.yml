@@ -366,12 +366,12 @@ jobs:
           python3 ../scripts/update_coverage_badge.py /tmp/coverage.json
 
       - name: Package .deb and .rpm
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         run: |
           ./scripts/package-linux.sh amd64 "${{ env.APP_VERSION }}"
 
       - name: Upload binary artifact
-        if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64
@@ -379,7 +379,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload coverage report
-        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: coverage-report-linux
@@ -387,7 +387,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload .deb package
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-deb
@@ -395,7 +395,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload .rpm package
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-rpm
@@ -403,7 +403,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Build AppImage
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         run: |
           # Create AppDir structure
           mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
@@ -491,7 +491,7 @@ jobs:
           fi
 
       - name: Upload AppImage
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-linux-x64-appimage
