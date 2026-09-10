@@ -227,7 +227,7 @@ jobs:
           fail_on_failure: false
 
       - name: Deploy Qt DLLs
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         shell: cmd
         run: |
           windeployqt --release --no-translations --compiler-runtime --qmldir src\qml build\win32\release\product\Open-Sankore.exe
@@ -249,7 +249,7 @@ jobs:
           if exist build\win32\release\product\test-ocr-winrt.exe echo OCR test tool built successfully
 
       - name: Smoke test (launch and verify no crash)
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         shell: pwsh
         run: |
           $exe = "build\win32\release\product\Open-Sankore.exe"
@@ -281,14 +281,14 @@ jobs:
           Write-Host "Process terminated. Smoke test passed!"
 
       - name: Build installer
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         shell: cmd
         run: |
           choco install innosetup -y --no-progress
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" scripts\installer.iss
 
       - name: Upload artifact
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-windows-x64
@@ -296,7 +296,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload installer
-        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6
         with:
           name: open-sankore-windows-x64-installer
