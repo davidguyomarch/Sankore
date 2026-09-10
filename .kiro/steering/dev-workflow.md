@@ -43,13 +43,25 @@ git checkout -b fix/135-desktop-crash
 git push -u origin fix/135-desktop-crash
 ```
 
-### 3. Vérification de branche
+### 3. Vérification de branche — une branche neuve par sujet, toujours
 
-À chaque reprise de travail, Kiro vérifie qu'il est sur la bonne branche :
+**Règle : dès qu'on commence à travailler sur un sujet (fix ou feat), on crée une
+branche neuve depuis le dernier `master`. On ne réutilise JAMAIS une branche
+existante et on ne code JAMAIS sur une autre branche de travail en cours.**
+
+À chaque début/reprise de travail, Kiro :
 ```bash
 git branch --show-current
 ```
-Si la branche ne correspond pas à l'issue en cours, switcher avant de faire quoi que ce soit.
+- Si on démarre un nouveau sujet : `git checkout master && git pull --ff-only`
+  puis `git checkout -b fix/<id>-<desc>` (ou `feat/`), **avant toute modification**.
+- Si des modifications non commitées traînent d'un autre sujet, les mettre de côté
+  (`git stash`) ou les committer sur leur propre branche d'abord — ne jamais les
+  mélanger au nouveau sujet.
+- Si la branche courante ne correspond pas au sujet en cours, créer/rebasculer sur
+  la bonne branche avant de faire quoi que ce soit.
+
+Ne jamais empiler deux sujets sur la même branche : un sujet = une branche = une PR.
 
 ### 4. Commits
 
@@ -110,6 +122,51 @@ Cela fait automatiquement :
 git checkout master && git pull
 git branch -d <branche-locale>
 ```
+
+### 8. Branche d'intégration pour test groupé (option A)
+
+Quand plusieurs PR sont prêtes en même temps (CI vert, en attente de test VM),
+on ne les teste pas une par une : on prépare une **branche d'intégration
+jetable** qui empile toutes les PR prêtes, pour que le développeur teste **un
+seul build** représentatif de ce que sera `master`.
+
+**Principe (option A) :** la branche `integration` sert UNIQUEMENT à tester.
+`master` continue de recevoir les PR **une par une en squash** après validation
+(1 PR = 1 commit = 1 issue). La branche `integration` n'est jamais mergée dans
+`master` et est jetable/recréée à chaque vague.
+
+Création (recréée depuis le dernier master à chaque vague) :
+```bash
+git checkout master && git pull --ff-only
+git branch -D integration 2>/dev/null || true          # jeter l'ancienne
+git checkout -b integration
+# Empiler chaque branche de PR prête (merge no-ff pour garder la trace) :
+git merge --no-ff origin/fix/247b-tooltips-block-clicks -m "integ: #247 tooltips"
+git merge --no-ff origin/feat/257-reorder-pages        -m "integ: #257 reorder"
+# ... une ligne par PR prête ...
+git push -u origin integration --force-with-lease
+```
+
+En cas de conflit d'intégration : le résoudre **sur `integration` seulement**
+(jamais rétroporté à la va-vite sur les branches de PR). Si un conflit révèle un
+vrai problème entre deux PR, le corriger dans la branche de PR concernée, puis
+recréer `integration`.
+
+Le développeur teste `integration` (build CI ou VM). Deux issues :
+- **OK** → Kiro merge les PR concernées **une par une en squash** sur `master`
+  (section 6, sur demande explicite), puis **recrée `integration`** depuis le
+  nouveau `master` avec les PR restantes non encore mergées.
+- **KO sur une PR** → on corrige dans la branche de cette PR, on repousse, et on
+  recrée `integration`.
+
+Règles pour Kiro :
+- **Ne jamais merger `integration` dans `master`.** Master ne reçoit que des
+  squash-merges de PR individuelles.
+- `integration` est jetable : `--force`/`-D` assumés, aucune PR ne la cible.
+- Après chaque vague de merges sur master, recréer `integration` proprement
+  depuis le nouveau master avec ce qui reste à tester.
+- Ne créer/mettre à jour `integration` que sur demande, ou quand ≥2 PR prêtes
+  attendent un test groupé.
 
 ---
 
