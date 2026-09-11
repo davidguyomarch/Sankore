@@ -832,10 +832,16 @@ void UBApplication::closing()
     mSettings->closing();
 
     mSettings->appToolBarPositionedAtTop->set(mainWindow->toolBarArea(mainWindow->boardToolBar) == Qt::TopToolBarArea);
-    ubLogQuitTiming(QString("closing() END t=%1ms — deferring QApplication::quit").arg(quitTimer.elapsed()));
+    ubLogQuitTiming(QString("closing() END t=%1ms — requesting exit(0)").arg(quitTimer.elapsed()));
 
-    // Defer quit to let any pending menu/widget events finish
-    QTimer::singleShot(0, qApp, &QApplication::quit);
+    // #309: use QCoreApplication::exit(0) instead of QApplication::quit().
+    // The VM shutdown log showed cleanup() was NEVER reached and the 1500ms
+    // watchdog always fired: with top-level windows still alive (e.g. the
+    // virtual keyboard) and UBMainWindow::closeEvent ignoring the close event,
+    // QApplication::quit() did not unwind the main event loop. exit(0) forces
+    // QApplication::exec() (main.cpp) to return, so cleanup() runs and the app
+    // exits cleanly and fast. Deferred so any pending events finish first.
+    QTimer::singleShot(0, qApp, []() { QCoreApplication::exit(0); });
 }
 
 
