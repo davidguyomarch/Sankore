@@ -123,7 +123,17 @@ void UBDocumentActionController::quit()
 
     UBApplication::app()->closing();
 
-    // Watchdog only: force-exit as a last resort if the deferred quit does not
-    // unwind the event loop. Kept long so it never races normal shutdown (#293).
-    QTimer::singleShot(5000, []() { ::exit(0); });
+    // Watchdog: force-exit only if the deferred quit does not unwind the event
+    // loop. 1.5s bounds the worst-case perceived delay (#309) without racing the
+    // normal ordered shutdown, and without returning to the old 500ms ::exit(0)
+    // that caused #293. Reaching it is abnormal — log it.
+    QTimer::singleShot(1500, []() {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            QTextStream out(&logFile);
+            out << "[QUIT] WATCHDOG fired at 1500ms (Documents) — forcing exit(0)\n";
+            logFile.close();
+        }
+        ::exit(0);
+    });
 }
