@@ -104,18 +104,23 @@ Rectangle {
                 width: pageList.width
                 height: width * 9 / 16  // 16:9 aspect ratio
 
-                // Drop indicator line shown between items during a drag.
+                // #257: drop indicator — a thick accent line showing where the
+                // dragged page will land (above the hovered slot, or below it for
+                // the lower half). Kept on top of the thumbnail (high z) so it is
+                // always visible during a drag.
                 Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: 2
-                    radius: 1
+                    anchors.leftMargin: 2
+                    anchors.rightMargin: 2
+                    height: 4
+                    radius: 2
                     color: themeManager.primary
-                    // Show above this slot when a drag hovers its top half, or at
-                    // the very bottom for the last slot's lower half.
-                    visible: pageList.draggedIndex !== -1 && dropArea.containsDrag
+                    visible: pageList.draggedIndex !== -1
+                             && pageList.draggedIndex !== index
+                             && dropArea.containsDrag
                     anchors.verticalCenter: dropArea.dropAfter ? parent.bottom : parent.top
-                    z: 10
+                    z: 100
                 }
 
                 DropArea {
@@ -177,7 +182,9 @@ Rectangle {
                         id: thumbMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                        // #257: open hand on hover, closed (grabbing) hand while
+                        // dragging a page — the conventional reorder affordance.
+                        cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                         drag.target: thumb
