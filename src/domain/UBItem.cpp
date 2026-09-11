@@ -30,6 +30,7 @@
 #include "domain/UBGraphicsSvgItem.h"
 #include "domain/UBGraphicsMediaItem.h"
 #include "domain/UBGraphicsStrokesGroup.h"
+#include "domain/UBSmoothStrokeItem.h"
 #include "domain/UBGraphicsGroupContainerItem.h"
 #include "domain/UBGraphicsWidgetItem.h"
 #include "domain/UBEditableGraphicsPolygonItem.h"
@@ -124,6 +125,13 @@ UBGraphicsItemDelegate *UBGraphicsItem::Delegate(QGraphicsItem *pItem)
         break;
     case UBGraphicsStrokesGroup::Type :
         result = (static_cast<UBGraphicsStrokesGroup*>(pItem))->Delegate();
+        break;
+    case UBSmoothStrokeItem::Type :
+        // #308: modern freehand strokes own a real delegate (#243) but were
+        // missing from this type-switch, so Delegate(item) returned null — which
+        // made clearContent()'s `if (!curDelegate) continue;` skip them (erase
+        // all ink / erase page did nothing on pen strokes).
+        result = (static_cast<UBSmoothStrokeItem*>(pItem))->Delegate();
         break;
     case UBGraphicsGroupContainerItem::Type :
         result = (static_cast<UBGraphicsGroupContainerItem*>(pItem))->Delegate();
