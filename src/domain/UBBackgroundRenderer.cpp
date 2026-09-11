@@ -11,6 +11,7 @@
 #include <QGraphicsView>
 
 #include "UBGraphicsStrokesGroup.h"
+#include "UBSmoothStrokeItem.h"
 #include "core/UBSettings.h"
 
 UBBackgroundRenderer::UBBackgroundRenderer(QGraphicsScene* scene,
@@ -100,6 +101,16 @@ void UBBackgroundRenderer::recolorAllItems()
                 currentIsLight ? UBGraphicsStrokesGroup::colorOnLightBackground
                                : UBGraphicsStrokesGroup::colorOnDarkBackground;
             curGroup->setColor(curGroup->color(reqCol));
+        }
+        else if (item->type() == UBSmoothStrokeItem::Type)
+        {
+            // #307: modern freehand pen/marker strokes are standalone
+            // UBSmoothStrokeItem (never wrapped in a UBGraphicsStrokesGroup),
+            // so they were skipped by the recolor loop and stayed black on a
+            // dark background (invisible). Repaint them from their stored
+            // light/dark color pair, like grouped strokes.
+            UBSmoothStrokeItem* stroke = static_cast<UBSmoothStrokeItem*>(item);
+            stroke->applyBackgroundColor(!currentIsLight);
         }
     }
 

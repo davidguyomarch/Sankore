@@ -51,6 +51,10 @@ private slots:
     // #243 — a drawn stroke must own a delegate, otherwise selecting it
     // dereferences a null Delegate() in UBBoardView and crashes.
     void testHasDelegate_regression243();
+
+    // #307 — day/night switch must recolor a smooth stroke from its stored
+    // light/dark color pair so it stays visible after the background flips.
+    void testDayNightRecolor_regression307();
 };
 
 #endif // TST_UBSMOOTHSTROKEITEM_H
