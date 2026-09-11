@@ -229,6 +229,12 @@ Rectangle {
     component GridTypeMenu: Menu {
         id: menuRoot
 
+        // Open in a real top-level popup window (Qt 6.8+), so the menu is not
+        // clipped to the 48px TopBar QQuickWidget. Without this the default
+        // Popup.Item renders in the host window overlay, capping the menu to the
+        // widget height and forcing scroll arrows (#292 follow-up).
+        popupType: Popup.Window
+
         // 0=Plain(none), 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm — matches
         // UBBackgroundGrid::Type / UBAppController.gridType.
         width: 240
