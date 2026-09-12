@@ -91,13 +91,34 @@ Rectangle {
             Layout.margins: 8
             spacing: 6
             clip: true
-            model: pageController.pageCount
+            // #321: fold `revision` into the model so a reorder (which leaves
+            // pageCount unchanged) still rebuilds the delegates. Reading
+            // pageController.revision makes this binding re-evaluate on every
+            // page mutation; the actual model value stays the page count.
+            model: (pageController.revision, pageController.pageCount)
             currentIndex: pageController.currentPage - 1
 
             // #257: drag-and-drop reordering. `moving` is the source index while
             // a thumbnail is being dragged; the delegate under the cursor shows a
             // drop indicator.
             property int draggedIndex: -1
+
+            // #321: background drop target covering the whole viewport, BEHIND the
+            // per-thumbnail DropAreas. It catches drops that land in the empty
+            // space below the last thumbnail and moves the page to the end.
+            // Per-delegate DropAreas sit on top, so dropping on a thumbnail still
+            // reorders relative to it; only drops outside any thumbnail fall here.
+            DropArea {
+                id: endDropArea
+                anchors.fill: parent
+                z: -1
+                onDropped: (drop) => {
+                    var from = pageList.draggedIndex
+                    if (from < 0) return
+                    // Move to last position.
+                    pageController.moveSceneToIndex(from, pageController.pageCount - 1)
+                }
+            }
 
             delegate: Item {
                 id: pageSlot
