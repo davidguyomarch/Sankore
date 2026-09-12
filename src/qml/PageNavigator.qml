@@ -91,7 +91,11 @@ Rectangle {
             Layout.margins: 8
             spacing: 6
             clip: true
-            model: pageController.pageCount
+            // #321: fold `revision` into the model so a reorder (which leaves
+            // pageCount unchanged) still rebuilds the delegates. Reading
+            // pageController.revision makes this binding re-evaluate on every
+            // page mutation; the actual model value stays the page count.
+            model: (pageController.revision, pageController.pageCount)
             currentIndex: pageController.currentPage - 1
 
             // #257: drag-and-drop reordering. `moving` is the source index while
