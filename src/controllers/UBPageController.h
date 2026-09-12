@@ -43,6 +43,8 @@ public slots:
     void deletePageAt(int index);
     void importPage();
     void goToPage(int index);
+    // Reorder pages: move the page at `source` to `target` (0-based indices).
+    void moveSceneToIndex(int source, int target);
 
 signals:
     void currentPageChanged();

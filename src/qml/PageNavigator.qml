@@ -94,54 +94,140 @@ Rectangle {
             model: pageController.pageCount
             currentIndex: pageController.currentPage - 1
 
-            delegate: Rectangle {
+            // #257: drag-and-drop reordering. `moving` is the source index while
+            // a thumbnail is being dragged; the delegate under the cursor shows a
+            // drop indicator.
+            property int draggedIndex: -1
+
+            delegate: Item {
+                id: pageSlot
                 width: pageList.width
                 height: width * 9 / 16  // 16:9 aspect ratio
-                radius: 4
-                color: "white"
-                border.width: 2
-                border.color: (index === pageList.currentIndex) ? themeManager.primary : (thumbMouse.containsMouse ? themeManager.onSurface : "transparent")
-                opacity: (index === pageList.currentIndex) ? 1.0 : (thumbMouse.containsMouse ? 0.9 : 0.75)
 
-                // Page number badge
+                // #257: drop indicator — a thick accent line showing where the
+                // dragged page will land (above the hovered slot, or below it for
+                // the lower half). Kept on top of the thumbnail (high z) so it is
+                // always visible during a drag.
                 Rectangle {
-                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.margins: 4
-                    width: pageNumText.contentWidth + 6
-                    height: pageNumText.contentHeight + 2
+                    anchors.leftMargin: 2
+                    anchors.rightMargin: 2
+                    height: 4
                     radius: 2
-                    color: Qt.rgba(1, 1, 1, 0.8)
+                    color: themeManager.primary
+                    visible: pageList.draggedIndex !== -1
+                             && pageList.draggedIndex !== index
+                             && dropArea.containsDrag
+                    anchors.verticalCenter: dropArea.dropAfter ? parent.bottom : parent.top
+                    z: 100
+                }
 
-                    Text {
-                        id: pageNumText
-                        anchors.centerIn: parent
-                        text: (index + 1)
-                        font.pixelSize: 10
-                        color: "#666"
+                DropArea {
+                    id: dropArea
+                    anchors.fill: parent
+                    property bool dropAfter: false
+                    onPositionChanged: (drag) => { dropAfter = drag.y > height / 2 }
+                    onDropped: (drop) => {
+                        var from = pageList.draggedIndex
+                        if (from < 0) return
+                        var to = index + (dropAfter ? 1 : 0)
+                        if (to > from) to -= 1   // account for removal of the source
+                        pageController.moveSceneToIndex(from, to)
                     }
                 }
 
-                MouseArea {
-                    id: thumbMouse
+                Rectangle {
+                    id: thumb
                     anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    onClicked: (mouse) => {
-                        if (mouse.button === Qt.RightButton)
-                            pageMenu.popup()
-                        else
-                            pageController.goToPage(index)
+                    radius: 4
+                    color: "white"
+                    border.width: 2
+                    border.color: (index === pageList.currentIndex) ? themeManager.primary : (thumbMouse.containsMouse ? themeManager.onSurface : "transparent")
+                    opacity: dragActive ? 0.6 : ((index === pageList.currentIndex) ? 1.0 : (thumbMouse.containsMouse ? 0.9 : 0.75))
+
+                    property bool dragActive: pageList.draggedIndex === index
+
+                    // Page number badge
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.margins: 4
+                        width: pageNumText.contentWidth + 6
+                        height: pageNumText.contentHeight + 2
+                        radius: 2
+                        color: Qt.rgba(1, 1, 1, 0.8)
+
+                        Text {
+                            id: pageNumText
+                            anchors.centerIn: parent
+                            text: (index + 1)
+                            font.pixelSize: 10
+                            color: "#666"
+                        }
                     }
-                    // Touch: long-press opens the same context menu
-                    onPressAndHold: pageMenu.popup()
+
+                    // Drag payload: a Drag.active target follows the cursor.
+                    Drag.active: thumbMouse.drag.active
+                    Drag.hotSpot.x: width / 2
+                    Drag.hotSpot.y: height / 2
+
+                    states: State {
+                        when: thumbMouse.drag.active
+                        ParentChange { target: thumb; parent: pageList }
+                        AnchorChanges { target: thumb; anchors.horizontalCenter: undefined; anchors.verticalCenter: undefined }
+                    }
+
+                    MouseArea {
+                        id: thumbMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        // #257: open hand on hover, closed (grabbing) hand while
+                        // dragging a page — the conventional reorder affordance.
+                        cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                        drag.target: thumb
+                        drag.axis: Drag.YAxis
+
+                        onPressed: (mouse) => {
+                            if (mouse.button === Qt.LeftButton)
+                                pageList.draggedIndex = index
+                        }
+                        onReleased: {
+                            if (thumb.Drag.active)
+                                thumb.Drag.drop()
+                            pageList.draggedIndex = -1
+                            // Snap the visual back into the list layout.
+                            thumb.parent = pageSlot
+                            thumb.anchors.fill = pageSlot
+                        }
+                        onClicked: (mouse) => {
+                            if (mouse.button === Qt.RightButton)
+                                pageMenu.popup()
+                            else
+                                pageController.goToPage(index)
+                        }
+                        // Touch: long-press opens the same context menu
+                        onPressAndHold: pageMenu.popup()
+                    }
                 }
 
                 // Right-click / long-press context menu for this page
                 Menu {
                     id: pageMenu
 
+                    MenuItem {
+                        text: "Monter la page"
+                        enabled: index > 0
+                        onTriggered: pageController.moveSceneToIndex(index, index - 1)
+                    }
+                    MenuItem {
+                        text: "Descendre la page"
+                        enabled: index < pageController.pageCount - 1
+                        onTriggered: pageController.moveSceneToIndex(index, index + 1)
+                    }
+                    MenuSeparator {}
                     MenuItem {
                         text: "Dupliquer la page"
                         onTriggered: pageController.duplicatePageAt(index)

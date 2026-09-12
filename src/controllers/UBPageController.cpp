@@ -97,6 +97,22 @@ void UBPageController::goToPage(int index)
     UBApplication::boardController->setActiveDocumentScene(index);
 }
 
+void UBPageController::moveSceneToIndex(int source, int target)
+{
+    // Reorder pages (#257). No-op for an unchanged position or out-of-range
+    // indices; the board controller persists and reloads the thumbnails.
+    if (source == target || source < 0 || target < 0)
+        return;
+
+    auto* doc = UBApplication::boardController->selectedDocument();
+    if (!doc || source >= doc->pageCount() || target >= doc->pageCount())
+        return;
+
+    UBApplication::boardController->moveSceneToIndex(source, target);
+    emit currentPageChanged();
+    emit pageCountChanged();
+}
+
 void UBPageController::onActiveSceneChanged()
 {
     emit currentPageChanged();
