@@ -18,6 +18,7 @@
 #include "controllers/UBToolController.h"
 #include "gui/UBMainWindow.h"
 #include "UBGraphicsScene.h"
+#include "UBInkColorUtils.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -290,7 +291,16 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
         }
     }
 
-    mCurrentShape->setStrokeColor(mCurrentStrokeColor);
+    // #317: shapes are created with a single default ink (Qt::black). On a dark
+    // background that makes them black-on-black (invisible), and unlike pen
+    // strokes they carry no light/dark color pair to recover from. So when the
+    // stroke color is the default ink, adapt it to the current background:
+    // black on light, white on dark. A user-chosen color is left untouched.
+    QColor strokeColor = mCurrentStrokeColor;
+    if (mBoardView && mBoardView->scene())
+        strokeColor = UBInkColors::recoloredDefaultInk(
+            mCurrentStrokeColor, mBoardView->scene()->isLightBackground());
+    mCurrentShape->setStrokeColor(strokeColor);
 
     mCurrentShape->setStrokeSize(mThickness);
 
