@@ -297,12 +297,21 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
     // stroke color is the default ink, adapt it to the current background:
     // black on light, white on dark. A user-chosen color is left untouched.
     QColor strokeColor = mCurrentStrokeColor;
+    const bool lightBg = (mBoardView && mBoardView->scene())
+                             ? mBoardView->scene()->isLightBackground() : true;
     if (mBoardView && mBoardView->scene())
-        strokeColor = UBInkColors::recoloredDefaultInk(
-            mCurrentStrokeColor, mBoardView->scene()->isLightBackground());
+        strokeColor = UBInkColors::recoloredDefaultInk(mCurrentStrokeColor, lightBg);
     mCurrentShape->setStrokeColor(strokeColor);
 
     mCurrentShape->setStrokeSize(mThickness);
+
+    ubShapesDiag(QString("instanciateCurrentShape: mCurrentStrokeColor=%1 lightBg=%2 -> strokeColor=%3 pen.color=%4 hasStroke=%5 thickness=%6")
+                     .arg(mCurrentStrokeColor.name(QColor::HexArgb))
+                     .arg(lightBg ? 1 : 0)
+                     .arg(strokeColor.name(QColor::HexArgb))
+                     .arg(mCurrentShape->pen().color().name(QColor::HexArgb))
+                     .arg(mCurrentShape->hasStrokeProperty() ? 1 : 0)
+                     .arg(mThickness));
 
     UBAbstractGraphicsPathItem * abstractGraphicsPathItem  = dynamic_cast<UBAbstractGraphicsPathItem*>(mCurrentShape);
     if (abstractGraphicsPathItem)

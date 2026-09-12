@@ -9,6 +9,9 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 #include "UBGraphicsStrokesGroup.h"
 #include "UBSmoothStrokeItem.h"
@@ -119,10 +122,36 @@ void UBBackgroundRenderer::recolorAllItems()
             // #317: shapes store a single color (no light/dark pair), so flip
             // only the DEFAULT ink (black<->white) and preserve user-chosen
             // colors. Applies to both stroke and (non-transparent) fill.
+            const QColor before = shape->pen().color();
+            const QColor after = UBInkColors::recoloredDefaultInk(before, currentIsLight);
+            {
+                QFile lf(QCoreApplication::applicationDirPath() + "/startup.log");
+                if (lf.open(QIODevice::Append | QIODevice::Text)) {
+                    QTextStream o(&lf);
+                    o << "[SHAPES] recolorAllItems shape type=" << item->type()
+                      << " hasStroke=" << (shape->hasStrokeProperty() ? 1 : 0)
+                      << " lightBg=" << (currentIsLight ? 1 : 0)
+                      << " penBefore=" << before.name(QColor::HexArgb)
+                      << " penAfter=" << after.name(QColor::HexArgb) << "\n";
+                    lf.close();
+                }
+            }
             if (shape->hasStrokeProperty())
-                shape->setStrokeColor(UBInkColors::recoloredDefaultInk(shape->pen().color(), currentIsLight));
+                shape->setStrokeColor(after);
             if (shape->hasFillingProperty())
                 shape->setFillColor(UBInkColors::recoloredDefaultInk(shape->brush().color(), currentIsLight));
+        }
+        else
+        {
+            // #317 diag: log items that are NOT recognized as shapes, to see if
+            // a drawn shape is wrapped in something else (group) or has an
+            // unexpected type() and thus escapes the recolor branch.
+            QFile lf(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (lf.open(QIODevice::Append | QIODevice::Text)) {
+                QTextStream o(&lf);
+                o << "[SHAPES] recolorAllItems OTHER item type=" << item->type() << "\n";
+                lf.close();
+            }
         }
     }
 
