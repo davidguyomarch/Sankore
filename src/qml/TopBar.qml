@@ -225,19 +225,24 @@ Rectangle {
     // === Ruling type dropdown (#289) ===
     // Native QtQuick Menu so the dropdown renders in its own popup window and
     // is not clipped to the 48px TopBar QQuickWidget (#292).
+    // Native QtQuick Menu so the dropdown renders in its own popup window and
+    // is not clipped to the 48px TopBar QQuickWidget (#292).
+    //
+    // The 5 rulings are listed as explicit MenuItems (not a Repeater): a
+    // Repeater is not a Menu content child and does not get laid out in the
+    // menu's vertical column, which made the entries render on a single line
+    // (#292 follow-up). Each item is a reusable RulingMenuItem.
     component GridTypeMenu: Menu {
         id: menuRoot
 
+        // Open in a real top-level popup window (Qt 6.8+), so the menu is not
+        // clipped to the 48px TopBar QQuickWidget. Without this the default
+        // Popup.Item renders in the host window overlay, capping the menu to the
+        // widget height and forcing scroll arrows (#292 follow-up).
+        popupType: Popup.Window
+
         // 0=Plain(none), 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm — matches
         // UBBackgroundGrid::Type / UBAppController.gridType.
-        readonly property var items: [
-            { type: 0, icon: "circle",     label: "Aucun" },
-            { type: 1, icon: "grid-four",  label: "Quadrillage" },
-            { type: 2, icon: "rows-plus-top", label: "Séyès" },
-            { type: 3, icon: "rows-plus-bottom", label: "Séyès agrandi" },
-            { type: 4, icon: "list",       label: "Double lignage 3 mm" }
-        ]
-
         width: 240
 
         background: Rectangle {
@@ -247,58 +252,67 @@ Rectangle {
             radius: 8
         }
 
-        Repeater {
-            model: menuRoot.items
-            MenuItem {
-                required property var modelData
-                text: modelData.label
-                height: 34
+        RulingMenuItem { rulingType: 0; rulingIcon: "circle";           rulingLabel: "Aucun" }
+        RulingMenuItem { rulingType: 1; rulingIcon: "grid-four";        rulingLabel: "Quadrillage" }
+        RulingMenuItem { rulingType: 2; rulingIcon: "rows-plus-top";    rulingLabel: "Séyès" }
+        RulingMenuItem { rulingType: 3; rulingIcon: "rows-plus-bottom"; rulingLabel: "Séyès agrandi" }
+        RulingMenuItem { rulingType: 4; rulingIcon: "list";             rulingLabel: "Double lignage 3 mm" }
+    }
 
-                onTriggered: appController.setGridType(modelData.type)
+    // One row of the ruling dropdown: leading themed icon, label, trailing
+    // check mark when it is the active ruling.
+    component RulingMenuItem: MenuItem {
+        id: item
+        property int rulingType: 0
+        property string rulingIcon: ""
+        property string rulingLabel: ""
 
-                contentItem: Row {
-                    leftPadding: 8
-                    spacing: 8
+        text: rulingLabel
+        implicitHeight: 34
 
-                    Image {
-                        id: rowIcon
-                        width: 18; height: 18
-                        anchors.verticalCenter: parent.verticalCenter
-                        source: "qrc:/icons/phosphor/" + modelData.icon + ".svg"
-                        sourceSize: Qt.size(18, 18)
-                        visible: false
-                    }
-                    ColorOverlay {
-                        width: 18; height: 18
-                        anchors.verticalCenter: parent.verticalCenter
-                        source: rowIcon
-                        color: themeManager.onSurface
-                    }
-                    Text {
-                        text: modelData.label
-                        font.pixelSize: 13
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: themeManager.onSurface
-                    }
-                }
+        onTriggered: appController.setGridType(rulingType)
 
-                // Trailing check mark for the active ruling.
-                Image {
-                    id: checkIcon
-                    width: 16; height: 16
-                    anchors.right: parent.right
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: "qrc:/icons/phosphor/check.svg"
-                    sourceSize: Qt.size(16, 16)
-                    visible: false
-                }
-                ColorOverlay {
-                    anchors.fill: checkIcon
-                    source: checkIcon
-                    color: themeManager.onSurface
-                    visible: appController.gridType === modelData.type
-                }
+        contentItem: Item {
+            Image {
+                id: rowIcon
+                x: 8
+                width: 18; height: 18
+                anchors.verticalCenter: parent.verticalCenter
+                source: "qrc:/icons/phosphor/" + item.rulingIcon + ".svg"
+                sourceSize: Qt.size(18, 18)
+                visible: false
+            }
+            ColorOverlay {
+                width: 18; height: 18
+                x: 8
+                anchors.verticalCenter: parent.verticalCenter
+                source: rowIcon
+                color: themeManager.onSurface
+            }
+            Text {
+                x: 34
+                anchors.verticalCenter: parent.verticalCenter
+                text: item.rulingLabel
+                font.pixelSize: 13
+                color: themeManager.onSurface
+            }
+
+            // Trailing check mark for the active ruling.
+            Image {
+                id: checkIcon
+                width: 16; height: 16
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                source: "qrc:/icons/phosphor/check.svg"
+                sourceSize: Qt.size(16, 16)
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: checkIcon
+                source: checkIcon
+                color: themeManager.onSurface
+                visible: appController.gridType === item.rulingType
             }
         }
     }
