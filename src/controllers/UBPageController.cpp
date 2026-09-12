@@ -19,6 +19,17 @@ UBPageController::UBPageController(QObject* parent)
             this, &UBPageController::onActiveSceneChanged);
     connect(UBApplication::boardController, &UBBoardController::pageChanged,
             this, &UBPageController::onActiveSceneChanged);
+    // #321: any thumbnail mutation (add/delete/duplicate/reorder/reload) bumps
+    // the revision so the QML thumbnail list rebuilds, even when the page count
+    // is unchanged (e.g. a reorder).
+    connect(UBApplication::boardController, &UBBoardController::documentThumbnailsUpdated,
+            this, [this]() { bumpRevision(); });
+}
+
+void UBPageController::bumpRevision()
+{
+    ++m_revision;
+    emit revisionChanged();
 }
 
 int UBPageController::currentPage() const
