@@ -166,6 +166,7 @@ Rectangle {
 
     // === Reusable ToolbarButton ===
     component ToolbarButton: Rectangle {
+        id: parentBtn
         property string icon
         property string tooltip
         property bool active: false
@@ -200,11 +201,14 @@ Rectangle {
             cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: if (parent.enabled) parent.clicked()
         }
-        ToolTip {
-            enabled: false  // #247: informational only — must not intercept clicks
-            visible: btnMa.containsMouse && parent.tooltip !== ""
-            delay: 600
-            text: parent.tooltip
+        // #247: a QtQuick ToolTip is a Popup that draws over the button and
+        // swallows the click inside a QQuickWidget (enabled:false was not
+        // enough). Use a plain label with NO MouseArea instead — mouse-
+        // transparent by construction — positioned below the top bar button.
+        TooltipLabel {
+            text: parentBtn.tooltip
+            show: btnMa.containsMouse && parentBtn.tooltip !== ""
+            placeBelow: true
         }
     }
 
@@ -215,6 +219,8 @@ Rectangle {
         Layout.alignment: Qt.AlignVCenter
         color: themeManager.border
     }
+
+
 
     // === Ruling type dropdown (#289) ===
     // Native QtQuick Menu so the dropdown renders in its own popup window and

@@ -147,11 +147,13 @@ Rectangle {
                 }
             }
 
-            ToolTip {
-                enabled: false  // #247: informational only — must not intercept clicks on the button below
-                visible: btnMouse.containsMouse
-                delay: 600
+            // #247: mouse-transparent tooltip above the button (bottom bar), so
+            // it never intercepts the click like the QtQuick ToolTip Popup did.
+            TooltipLabel {
+                anchor: btn
                 text: toolData.tooltip
+                show: btnMouse.containsMouse && toolData.tooltip !== ""
+                placeBelow: false
             }
         }
     }

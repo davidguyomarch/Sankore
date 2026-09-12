@@ -146,6 +146,7 @@ Rectangle {
 
     // === Reusable eraser action button ===
     component EraserActionButton: Rectangle {
+        id: eaBtn
         property string icon
         property string tooltip
         signal clicked()
@@ -174,11 +175,12 @@ Rectangle {
             cursorShape: Qt.PointingHandCursor
             onClicked: parent.clicked()
         }
-        ToolTip {
-            enabled: false  // #247: informational only — must not intercept clicks
-            visible: eaMouse.containsMouse
-            delay: 500
-            text: parent.tooltip
+        // #247: mouse-transparent tooltip above the button.
+        TooltipLabel {
+            anchor: eaBtn
+            text: eaBtn.tooltip
+            show: eaMouse.containsMouse && eaBtn.tooltip !== ""
+            placeBelow: false
         }
     }
 }
