@@ -433,11 +433,14 @@ QList<QColor> UBToolController::currentColors() const
 {
     if (m_activeTool == Marker)
         return markerColors();
+    // #319: shapes reuse the pen color palette.
     return penColors();
 }
 
 int UBToolController::currentColorIndex() const
 {
+    if (m_activeTool == Drawing)   // #319: shape stroke color
+        return m_shapeColorIndex;
     if (m_activeTool == Marker)
         return markerColorIndex();
     return penColorIndex();
@@ -445,6 +448,25 @@ int UBToolController::currentColorIndex() const
 
 void UBToolController::setCurrentColorIndex(int index)
 {
+    if (m_activeTool == Drawing)
+    {
+        // #319: apply the chosen palette color as the shape stroke color, both
+        // to new shapes and to the current selection.
+        m_shapeColorIndex = index;
+        const QList<QColor> palette = penColors();
+        if (index >= 0 && index < palette.size()
+            && UBApplication::boardController)
+        {
+            ubShapesDiag(QString("setCurrentColorIndex(Drawing) index=%1 color=%2")
+                             .arg(index)
+                             .arg(palette.at(index).name(QColor::HexArgb)));
+            UBApplication::boardController->shapeFactory().setStrokeColor(palette.at(index));
+        }
+        emit currentColorIndexChanged();
+        emit currentColorsChanged();
+        return;
+    }
+
     if (m_activeTool == Marker)
         setMarkerColorIndex(index);
     else
@@ -457,6 +479,8 @@ void UBToolController::setCurrentColorIndex(int index)
 
 int UBToolController::currentWidthIndex() const
 {
+    if (m_activeTool == Drawing)   // #319: shape stroke width
+        return m_shapeWidthIndex;
     if (m_activeTool == Eraser)
         return eraserWidthIndex();
     if (m_activeTool == Marker)
@@ -466,6 +490,19 @@ int UBToolController::currentWidthIndex() const
 
 void UBToolController::setCurrentWidthIndex(int index)
 {
+    if (m_activeTool == Drawing)
+    {
+        // #319: map the 3 width slots (0/1/2) to concrete shape stroke sizes,
+        // applied to new shapes and the current selection.
+        m_shapeWidthIndex = index;
+        static const int kShapeWidths[3] = { 2, 5, 10 };
+        const int w = kShapeWidths[qBound(0, index, 2)];
+        if (UBApplication::boardController)
+            UBApplication::boardController->shapeFactory().setThickness(w);
+        emit currentWidthIndexChanged();
+        return;
+    }
+
     if (m_activeTool == Eraser)
         setEraserWidthIndex(index);
     else if (m_activeTool == Marker)
@@ -494,8 +531,11 @@ void UBToolController::setEraserWidthIndex(int index)
 
 bool UBToolController::showDrawingProps() const
 {
+    // #319: also show the color/width bar while a shape is being drawn (Drawing),
+    // so shapes get the same stroke color + width controls as the Pen.
     return (m_activeTool == Pen || m_activeTool == Marker
-         || m_activeTool == Line || m_activeTool == Eraser);
+         || m_activeTool == Line || m_activeTool == Eraser
+         || m_activeTool == Drawing);
 }
 
 // --- Shapes ---
@@ -536,9 +576,20 @@ void UBToolController::createShape(const QString& shape)
     else if (shape == "square")     factory.createSquare(true);
     else if (shape == "line")       factory.createLine(true);
 
+    // #319: apply the current shape stroke color/width to the factory so a new
+    // shape starts with the user's chosen settings, and refresh the props bar.
+    const QList<QColor> palette = penColors();
+    if (m_shapeColorIndex >= 0 && m_shapeColorIndex < palette.size())
+        factory.setStrokeColor(palette.at(m_shapeColorIndex));
+    static const int kShapeWidths[3] = { 2, 5, 10 };
+    factory.setThickness(kShapeWidths[qBound(0, m_shapeWidthIndex, 2)]);
+
     m_activeTool = Drawing;
     emit activeToolChanged();
     emit stylusToolChanged(Drawing);
+    emit currentColorsChanged();
+    emit currentColorIndexChanged();
+    emit currentWidthIndexChanged();
 }
 
 void UBToolController::activateFillTool()

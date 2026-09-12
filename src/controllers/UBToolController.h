@@ -183,6 +183,11 @@ private:
     bool m_isDesktopMode;
     UBSettings* mSettings;
 
+    // #319: shape tool stroke color/width (the shape factory stores the color
+    // and width but not the palette indices the DrawingPropsBar binds to).
+    int m_shapeColorIndex = 0;
+    int m_shapeWidthIndex = 1;
+
     static UBToolController* sToolController;
 };
 

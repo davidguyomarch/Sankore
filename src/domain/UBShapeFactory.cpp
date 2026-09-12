@@ -18,6 +18,7 @@
 #include "controllers/UBToolController.h"
 #include "gui/UBMainWindow.h"
 #include "UBGraphicsScene.h"
+#include "UBInkColorUtils.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -290,9 +291,27 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
         }
     }
 
-    mCurrentShape->setStrokeColor(mCurrentStrokeColor);
+    // #317: shapes are created with a single default ink (Qt::black). On a dark
+    // background that makes them black-on-black (invisible), and unlike pen
+    // strokes they carry no light/dark color pair to recover from. So when the
+    // stroke color is the default ink, adapt it to the current background:
+    // black on light, white on dark. A user-chosen color is left untouched.
+    QColor strokeColor = mCurrentStrokeColor;
+    const bool lightBg = (mBoardView && mBoardView->scene())
+                             ? mBoardView->scene()->isLightBackground() : true;
+    if (mBoardView && mBoardView->scene())
+        strokeColor = UBInkColors::recoloredDefaultInk(mCurrentStrokeColor, lightBg);
+    mCurrentShape->setStrokeColor(strokeColor);
 
     mCurrentShape->setStrokeSize(mThickness);
+
+    ubShapesDiag(QString("instanciateCurrentShape: mCurrentStrokeColor=%1 lightBg=%2 -> strokeColor=%3 pen.color=%4 hasStroke=%5 thickness=%6")
+                     .arg(mCurrentStrokeColor.name(QColor::HexArgb))
+                     .arg(lightBg ? 1 : 0)
+                     .arg(strokeColor.name(QColor::HexArgb))
+                     .arg(mCurrentShape->pen().color().name(QColor::HexArgb))
+                     .arg(mCurrentShape->hasStrokeProperty() ? 1 : 0)
+                     .arg(mThickness));
 
     UBAbstractGraphicsPathItem * abstractGraphicsPathItem  = dynamic_cast<UBAbstractGraphicsPathItem*>(mCurrentShape);
     if (abstractGraphicsPathItem)
@@ -663,7 +682,17 @@ void UBShapeFactory::onMouseRelease(QMouseEvent *event)
     }
 
     if (!mCursorMoved && mCurrentShape && mShapeType != Polygon)
+    {
         mBoardView->scene()->removeItem(mCurrentShape);
+        if (mLastCreatedShape == mCurrentShape)
+            mLastCreatedShape = nullptr;
+    }
+    else if (mCurrentShape && mShapeType != Polygon)
+    {
+        // #319: remember the finalized shape so a subsequent color/width change
+        // from the props bar applies to it.
+        mLastCreatedShape = mCurrentShape;
+    }
 
     if (mShapeType != Polygon)
         mCurrentShape = nullptr;
@@ -756,6 +785,18 @@ void UBShapeFactory::setStrokeStyle(Qt::PenStyle penStyle)
     }
 }
 
+UBAbstractGraphicsItem* UBShapeFactory::liveLastCreatedShape() const
+{
+    // #319: return the last finalized shape only if it is still a live item of
+    // the current scene. Guards against a dangling pointer if the shape was
+    // deleted meanwhile (undo, page change, erase) — see crash #327.
+    if (!mLastCreatedShape || !mBoardView || !mBoardView->scene())
+        return nullptr;
+    if (!mBoardView->scene()->items().contains(mLastCreatedShape))
+        return nullptr;
+    return mLastCreatedShape;
+}
+
 void UBShapeFactory::setThickness(int thickness)
 {
     mThickness = thickness;
@@ -772,6 +813,17 @@ void UBShapeFactory::setThickness(int thickness)
         }
 
         items.at(i)->update();
+    }
+
+    // #319: with no selection (typical right after drawing), also resize the
+    // last shape the user just drew, so the props bar feels live.
+    if (items.isEmpty())
+    {
+        if (UBAbstractGraphicsItem* last = liveLastCreatedShape())
+        {
+            last->setStrokeSize(mThickness);
+            last->update();
+        }
     }
 }
 
@@ -792,6 +844,17 @@ void UBShapeFactory::setStrokeColor(QColor color)
         }
 
         items.at(i)->update();
+    }
+
+    // #319: with no selection (typical right after drawing), also recolor the
+    // last shape the user just drew, so the props bar feels live.
+    if (items.isEmpty())
+    {
+        if (UBAbstractGraphicsItem* last = liveLastCreatedShape())
+        {
+            last->setStrokeColor(mCurrentStrokeColor);
+            last->update();
+        }
     }
 }
 

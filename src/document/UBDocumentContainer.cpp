@@ -70,11 +70,16 @@ void UBDocumentContainer::duplicatePages(QList<int>& pageIndexes)
 
 bool UBDocumentContainer::movePageToIndex(int source, int target)
 {
-    if (source==0)
-    {
-        // Title page - cant be moved
+    // #321: the legacy "title page (index 0) can't be moved" lock was removed —
+    // pages can now be reordered freely, including the first one. Guard against
+    // out-of-range/no-op moves instead.
+    if (!mCurrentDocument)
         return false;
-    }
+    const int count = mCurrentDocument->pageCount();
+    if (source == target || source < 0 || target < 0
+        || source >= count || target >= count)
+        return false;
+
     UBPersistenceManager::persistenceManager()->moveSceneToIndex(mCurrentDocument, source, target);
     deleteThumbPage(source);
     insertThumbPage(target);

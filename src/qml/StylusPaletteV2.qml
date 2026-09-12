@@ -85,14 +85,27 @@ Rectangle {
             height: root.buttonSize
             radius: 8
 
+            // #318 regression: the Shapes button is a toggle (opens the shapes
+            // palette), but it must also read as "selected" (blue) while the
+            // shape tool is the active tool — activeTool === Drawing (14) — so
+            // the user sees which tool is in use, like every other tool button.
+            readonly property bool shapeToolActive:
+                toolData.isToggle && toolController.activeTool === 14
+
             property bool isActive: {
                 if (toolData.isToggle)
-                    return toolController.shapesVisible
+                    return toolController.shapesVisible || shapeToolActive
                 return toolController.activeTool === toolData.id
             }
+            // Blue (primary) highlight when this is the active tool. For the
+            // Shapes toggle that means the shape tool is active; merely having
+            // the palette open (without drawing) keeps the softer hover tint.
+            readonly property bool primaryHighlight:
+                toolData.isToggle ? shapeToolActive : isActive
             property bool isHovered: btnMouse.containsMouse
 
-            color: isActive ? (toolData.isToggle ? themeManager.surfaceHover : themeManager.primary)
+            color: primaryHighlight ? themeManager.primary
+                 : isActive ? themeManager.surfaceHover
                  : isHovered ? themeManager.surfaceHover
                  : "transparent"
 
@@ -113,13 +126,13 @@ Rectangle {
             ColorOverlay {
                 anchors.fill: iconImg
                 source: iconImg
-                color: (btn.isActive && !toolData.isToggle) ? themeManager.onPrimary : themeManager.onSurface
+                color: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
                 opacity: btn.isActive ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
             }
 
             // Active indicator bar
             Rectangle {
-                visible: btn.isActive && !toolData.isToggle
+                visible: btn.primaryHighlight
                 color: themeManager.onPrimary
                 radius: 1.5
                 width: root.isVertical ? 3 : parent.width * 0.45
