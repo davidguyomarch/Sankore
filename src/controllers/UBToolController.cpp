@@ -587,8 +587,6 @@ void UBToolController::createShape(const QString& shape)
     emit currentColorsChanged();
     emit currentColorIndexChanged();
     emit currentWidthIndexChanged();
-    ubShapesDiag(QString("createShape done: m_activeTool=%1 shapesVisible=%2")
-                     .arg(m_activeTool).arg(m_shapesVisible ? 1 : 0));
 }
 
 void UBToolController::activateFillTool()

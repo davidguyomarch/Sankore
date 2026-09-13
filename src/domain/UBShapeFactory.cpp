@@ -676,14 +676,17 @@ void UBShapeFactory::onMouseRelease(QMouseEvent *event)
     if (!mCursorMoved && mCurrentShape && mShapeType != Polygon)
     {
         mBoardView->scene()->removeItem(mCurrentShape);
-        if (mLastCreatedShape == mCurrentShape)
-            mLastCreatedShape = nullptr;
     }
     else if (mCurrentShape && mShapeType != Polygon)
     {
-        // #319: remember the finalized shape so a subsequent color/width change
-        // from the props bar applies to it.
-        mLastCreatedShape = mCurrentShape;
+        // #319: deselect the just-drawn shape. Otherwise it stays selected, and
+        // changing color/width from the props bar — meant to prepare the NEXT
+        // shape — would silently recolor/resize this one too (it was in
+        // selectedItems()). With no selection, a color/width change only affects
+        // the next shape (via mCurrentStrokeColor/mThickness read in
+        // instanciateCurrentShape). Modifying an existing shape stays an
+        // explicit action: reselect it with the Selection tool.
+        mCurrentShape->setSelected(false);
     }
 
     if (mShapeType != Polygon)
@@ -777,20 +780,11 @@ void UBShapeFactory::setStrokeStyle(Qt::PenStyle penStyle)
     }
 }
 
-UBAbstractGraphicsItem* UBShapeFactory::liveLastCreatedShape() const
-{
-    // #319: return the last finalized shape only if it is still a live item of
-    // the current scene. Guards against a dangling pointer if the shape was
-    // deleted meanwhile (undo, page change, erase) — see crash #327.
-    if (!mLastCreatedShape || !mBoardView || !mBoardView->scene())
-        return nullptr;
-    if (!mBoardView->scene()->items().contains(mLastCreatedShape))
-        return nullptr;
-    return mLastCreatedShape;
-}
-
 void UBShapeFactory::setThickness(int thickness)
 {
+    // #319: store for the NEXT shape (read back in instanciateCurrentShape), and
+    // apply to the current explicit selection only. The just-drawn shape is
+    // deselected in onMouseRelease, so this no longer silently resizes it.
     mThickness = thickness;
 
     UBGraphicsScene* scene = mBoardView->scene();
@@ -806,21 +800,13 @@ void UBShapeFactory::setThickness(int thickness)
 
         items.at(i)->update();
     }
-
-    // #319: with no selection (typical right after drawing), also resize the
-    // last shape the user just drew, so the props bar feels live.
-    if (items.isEmpty())
-    {
-        if (UBAbstractGraphicsItem* last = liveLastCreatedShape())
-        {
-            last->setStrokeSize(mThickness);
-            last->update();
-        }
-    }
 }
 
 void UBShapeFactory::setStrokeColor(QColor color)
 {
+    // #319: store for the NEXT shape (read back in instanciateCurrentShape), and
+    // apply to the current explicit selection only. The just-drawn shape is
+    // deselected in onMouseRelease, so this no longer silently recolors it.
     mCurrentStrokeColor = color;
 
     UBGraphicsScene* scene = mBoardView->scene();
@@ -836,17 +822,6 @@ void UBShapeFactory::setStrokeColor(QColor color)
         }
 
         items.at(i)->update();
-    }
-
-    // #319: with no selection (typical right after drawing), also recolor the
-    // last shape the user just drew, so the props bar feels live.
-    if (items.isEmpty())
-    {
-        if (UBAbstractGraphicsItem* last = liveLastCreatedShape())
-        {
-            last->setStrokeColor(mCurrentStrokeColor);
-            last->update();
-        }
     }
 }
 

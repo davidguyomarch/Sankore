@@ -96,11 +96,6 @@ public slots:
 
 private:
     UBAbstractGraphicsItem* mCurrentShape;
-    // #319: last finalized shape, so changing stroke color/width from the props
-    // bar right after drawing recolors/resizes that shape (not only the next
-    // one). Only used when it is still present in the scene (guarded), to avoid
-    // dereferencing a deleted item.
-    UBAbstractGraphicsItem* mLastCreatedShape = nullptr;
     UBBoardView* mBoardView;
 
     bool mIsCreating;
@@ -135,10 +130,6 @@ private:
 
 protected:
     UBAbstractGraphicsItem *instanciateCurrentShape();
-
-private:
-    // #319: last finalized shape if still live in the scene, else nullptr.
-    UBAbstractGraphicsItem* liveLastCreatedShape() const;
 
 };
 
