@@ -14,7 +14,10 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Group by the source branch (head_ref for PRs, ref for pushes) so that a push
+  # and its PR "synchronize" event for the same branch don't run two identical
+  # builds — the older one is cancelled.
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
