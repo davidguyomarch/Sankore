@@ -10,7 +10,7 @@ TEMPLATE = app
 CONFIG += testcase console c++20
 CONFIG -= app_bundle
 
-QT += core gui widgets testlib xml network svg svgwidgets
+QT += core gui widgets testlib xml network svg svgwidgets qml
 
 # Paths — tests/ shims take priority over ../src for stubbed headers
 INCLUDEPATH += .
@@ -49,7 +49,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            tst_UBInkColorUtils.h \
            ../src/domain/UBInkColorUtils.h \
            tst_UBKeyboardPaletteColors.h \
-           ../src/gui/UBKeyboardPaletteColors.h
+           ../src/gui/UBKeyboardPaletteColors.h \
+           tst_UBThemeManager.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -140,6 +141,15 @@ win32-msvc* {
 # UBExportAdaptor is only forward-declared, so no heavy header is pulled in.
 SOURCES += ../src/document/UBExportSelection.cpp
 
+# UBThemeManager (#297) — themed color roles + css() helper. QObject, so its moc
+# is pre-generated into premoc/ on Linux (moc bug) and auto-moc'd on MSVC.
+SOURCES += ../src/qml/UBThemeManager.cpp
+win32-msvc* {
+    HEADERS += ../src/qml/UBThemeManager.h
+} else {
+    SOURCES += premoc/moc_UBThemeManager.cpp
+}
+
 # Test sources
 SOURCES += main.cpp \
            tst_UBStringUtils.cpp \
@@ -170,6 +180,7 @@ SOURCES += main.cpp \
            tst_UBBackgroundGrid.cpp \
            tst_UBInkColorUtils.cpp \
            tst_UBKeyboardPaletteColors.cpp \
+           tst_UBThemeManager.cpp \
            tst_UBDisplayManager.cpp \
            tst_UBExportSelection.cpp \
            tst_UBPageDeletion.cpp \

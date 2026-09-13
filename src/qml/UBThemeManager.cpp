@@ -50,6 +50,12 @@ void UBThemeManager::applyDarkTheme()
     mPrimary = QColor(74, 144, 217);           // #4A90D9
     mOnPrimary = QColor(255, 255, 255);        // white
     mBorder = QColor(255, 255, 255, 40);       // subtle white
+    // #297: semantic roles
+    mDisabled = QColor(136, 136, 136);         // #888888 muted foreground
+    mError = QColor(120, 40, 60);              // desaturated red bg (dark)
+    mOnError = QColor(255, 210, 220);          // light pink text on error
+    mTooltipBase = QColor(58, 58, 58);         // dark tooltip bg
+    mOnTooltip = QColor(255, 255, 255);        // white tooltip text
 }
 
 void UBThemeManager::applyLightTheme()
@@ -62,4 +68,20 @@ void UBThemeManager::applyLightTheme()
     mPrimary = QColor(37, 99, 235);            // #2563EB
     mOnPrimary = QColor(255, 255, 255);        // white
     mBorder = QColor(224, 224, 224);           // #E0E0E0
+    // #297: semantic roles
+    mDisabled = QColor(153, 153, 153);         // #999999 muted foreground
+    mError = QColor(255, 179, 200);            // #FFB3C8 validation bg (kept)
+    mOnError = QColor(85, 85, 85);             // #555555 text on error
+    mTooltipBase = QColor(255, 255, 220);      // #FFFFDC classic tooltip (kept)
+    mOnTooltip = QColor(0, 0, 0);              // black tooltip text
+}
+
+QString UBThemeManager::css(const QColor& c)
+{
+    // Qt stylesheets accept rgba(r,g,b,a) with a 0..255 alpha via rgba() only in
+    // the 0..1 float form for the alpha; use #AARRGGBB when translucent, #RRGGBB
+    // otherwise, both accepted by Qt Style Sheets.
+    if (c.alpha() == 255)
+        return c.name(QColor::HexRgb);       // #RRGGBB
+    return c.name(QColor::HexArgb);          // #AARRGGBB
 }

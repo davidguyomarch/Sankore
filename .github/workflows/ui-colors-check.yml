@@ -1,0 +1,48 @@
+# Open-Sankoré Community Edition
+#
+# Copyright (C) 2026 David Guyomarch
+#
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# #297 guard: fail the build if NEW hard-coded UI color literals are introduced
+# under src/{gui,qml,board,document}. This is a ratchet against a committed
+# baseline — it does not require the existing literals to be migrated at once,
+# only that the count never grows. Lower the baseline as lots migrate to
+# UBThemeManager (scripts/check-ui-colors.py --update-baseline).
+
+name: UI colors check
+
+on:
+  push:
+    paths:
+      - 'src/gui/**'
+      - 'src/qml/**'
+      - 'src/board/**'
+      - 'src/document/**'
+      - 'scripts/check-ui-colors.py'
+      - 'scripts/ui-colors-baseline.json'
+      - '.github/workflows/ui-colors-check.yml'
+  pull_request:
+    paths:
+      - 'src/gui/**'
+      - 'src/qml/**'
+      - 'src/board/**'
+      - 'src/document/**'
+      - 'scripts/check-ui-colors.py'
+      - 'scripts/ui-colors-baseline.json'
+      - '.github/workflows/ui-colors-check.yml'
+
+jobs:
+  ui-colors-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check for new hard-coded UI colors
+        run: python3 scripts/check-ui-colors.py
