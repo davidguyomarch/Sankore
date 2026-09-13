@@ -305,14 +305,6 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
 
     mCurrentShape->setStrokeSize(mThickness);
 
-    ubShapesDiag(QString("instanciateCurrentShape: mCurrentStrokeColor=%1 lightBg=%2 -> strokeColor=%3 pen.color=%4 hasStroke=%5 thickness=%6")
-                     .arg(mCurrentStrokeColor.name(QColor::HexArgb))
-                     .arg(lightBg ? 1 : 0)
-                     .arg(strokeColor.name(QColor::HexArgb))
-                     .arg(mCurrentShape->pen().color().name(QColor::HexArgb))
-                     .arg(mCurrentShape->hasStrokeProperty() ? 1 : 0)
-                     .arg(mThickness));
-
     UBAbstractGraphicsPathItem * abstractGraphicsPathItem  = dynamic_cast<UBAbstractGraphicsPathItem*>(mCurrentShape);
     if (abstractGraphicsPathItem)
     {

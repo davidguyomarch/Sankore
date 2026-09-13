@@ -221,6 +221,7 @@ void UBAbstractGraphicsItem::initializeStrokeProperty()
     p.setWidth(1);
     p.setColor(Qt::black);
     setPen(p);
+    mHasStrokeProperty = true;
 }
 
 void UBAbstractGraphicsItem::initializeFillingProperty()
@@ -228,6 +229,7 @@ void UBAbstractGraphicsItem::initializeFillingProperty()
     QBrush b(Qt::SolidPattern);
     b.setColor(Qt::black);
     setBrush(b);
+    mHasFillingProperty = true;
 }
 
 QRectF UBAbstractGraphicsItem::adjustBoundingRect(QRectF rect) const
@@ -243,12 +245,12 @@ QRectF UBAbstractGraphicsItem::adjustBoundingRect(QRectF rect) const
 
 bool UBAbstractGraphicsItem::hasFillingProperty() const
 {
-    return brush() != QBrush();
+    return mHasFillingProperty;
 }
 
 bool UBAbstractGraphicsItem::hasStrokeProperty() const
 {
-    return pen() != QPen();
+    return mHasStrokeProperty;
 }
 
 bool UBAbstractGraphicsItem::hasGradient() const
@@ -281,4 +283,8 @@ void UBAbstractGraphicsItem::copyItemParameters(UBItem *copy) const
 
     cp->setBrush(brush());
     cp->setPen(pen());
+    // #317/#319: carry the capability flags over to the clone, otherwise a
+    // duplicated shape would report no stroke/fill and become unrecolorable.
+    cp->setHasStrokeProperty(hasStrokeProperty());
+    cp->setHasFillingProperty(hasFillingProperty());
 }

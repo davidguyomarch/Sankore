@@ -457,9 +457,6 @@ void UBToolController::setCurrentColorIndex(int index)
         if (index >= 0 && index < palette.size()
             && UBApplication::boardController)
         {
-            ubShapesDiag(QString("setCurrentColorIndex(Drawing) index=%1 color=%2")
-                             .arg(index)
-                             .arg(palette.at(index).name(QColor::HexArgb)));
             UBApplication::boardController->shapeFactory().setStrokeColor(palette.at(index));
         }
         emit currentColorIndexChanged();
