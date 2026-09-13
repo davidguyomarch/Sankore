@@ -7,16 +7,18 @@
 name: Build Windows
 
 on:
+  # Only master builds on push. Feature/integration branches build via their PR
+  # (pull_request) — this avoids running two identical builds (a push build AND
+  # a PR build) for the same commit on a branch that has an open PR.
   push:
-    branches: [ master, main, integration ]
+    branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
 
 concurrency:
-  # Group by the source branch (head_ref for PRs, ref for pushes) so that a push
-  # and its PR "synchronize" event for the same branch don't run two identical
-  # builds — the older one is cancelled.
+  # Collapse successive builds of the same PR (or the same branch push) so a
+  # rapid series of pushes cancels older, superseded runs.
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 

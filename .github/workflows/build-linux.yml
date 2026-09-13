@@ -7,15 +7,16 @@
 name: Build Linux x64
 
 on:
+  # Only master builds on push; feature/integration branches build via their PR.
+  # This avoids two identical builds (push + PR) for the same commit.
   push:
-    branches: [ master, main, integration ]
+    branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
 
 concurrency:
-  # Group by source branch so a push and its PR synchronize event don't run two
-  # identical builds; the older run is cancelled.
+  # Collapse successive builds of the same PR/branch; older runs are cancelled.
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
