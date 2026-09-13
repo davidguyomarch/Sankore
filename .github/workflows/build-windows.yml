@@ -7,14 +7,19 @@
 name: Build Windows
 
 on:
+  # Only master builds on push. Feature/integration branches build via their PR
+  # (pull_request) — this avoids running two identical builds (a push build AND
+  # a PR build) for the same commit on a branch that has an open PR.
   push:
-    branches: [ master, main, integration ]
+    branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Collapse successive builds of the same PR (or the same branch push) so a
+  # rapid series of pushes cancels older, superseded runs.
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -163,8 +168,14 @@ jobs:
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion ""$version"""
           Set-Content scripts\installer.iss $issContent
 
-          # Generate git version header
-          $commit = git rev-parse --short HEAD
+          # Generate git version header.
+          # On a pull_request, actions/checkout builds an ephemeral MERGE commit,
+          # so `git rev-parse HEAD` would stamp the binary with a SHA that does
+          # not exist in the branch/repo (confusing when matching a deployed
+          # build to a commit). Use the PR head SHA instead; fall back to HEAD
+          # for push/tag builds.
+          $prHead = "${{ github.event.pull_request.head.sha }}"
+          if ($prHead) { $commit = $prHead.Substring(0,7) } else { $commit = git rev-parse --short HEAD }
           $desc = git describe --tags --always
           "#define GIT_COMMIT ""$commit""" | Out-File -FilePath src\core\git_version.h -Encoding utf8
           "#define GIT_VERSION ""$desc""" | Out-File -FilePath src\core\git_version.h -Encoding utf8 -Append

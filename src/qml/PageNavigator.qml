@@ -91,13 +91,34 @@ Rectangle {
             Layout.margins: 8
             spacing: 6
             clip: true
-            model: pageController.pageCount
+            // #321: fold `revision` into the model so a reorder (which leaves
+            // pageCount unchanged) still rebuilds the delegates. Reading
+            // pageController.revision makes this binding re-evaluate on every
+            // page mutation; the actual model value stays the page count.
+            model: (pageController.revision, pageController.pageCount)
             currentIndex: pageController.currentPage - 1
 
             // #257: drag-and-drop reordering. `moving` is the source index while
             // a thumbnail is being dragged; the delegate under the cursor shows a
             // drop indicator.
             property int draggedIndex: -1
+
+            // #321: background drop target covering the whole viewport, BEHIND the
+            // per-thumbnail DropAreas. It catches drops that land in the empty
+            // space below the last thumbnail and moves the page to the end.
+            // Per-delegate DropAreas sit on top, so dropping on a thumbnail still
+            // reorders relative to it; only drops outside any thumbnail fall here.
+            DropArea {
+                id: endDropArea
+                anchors.fill: parent
+                z: -1
+                onDropped: (drop) => {
+                    var from = pageList.draggedIndex
+                    if (from < 0) return
+                    // Move to last position.
+                    pageController.moveSceneToIndex(from, pageController.pageCount - 1)
+                }
+            }
 
             delegate: Item {
                 id: pageSlot
@@ -164,6 +185,52 @@ Rectangle {
                             text: (index + 1)
                             font.pixelSize: 10
                             color: "#666"
+                        }
+                    }
+
+                    // #318: hover action bar at the top of the thumbnail:
+                    // move up, move down, duplicate, delete. Shown while the
+                    // thumbnail (or the bar itself) is hovered. Its own MouseAreas
+                    // sit above the thumbnail's, so clicking an action does not
+                    // navigate/drag. Hidden during a drag.
+                    Rectangle {
+                        id: actionBar
+                        anchors.top: parent.top
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.topMargin: 3
+                        width: actionRow.width + 8
+                        height: 22
+                        radius: 6
+                        z: 50
+                        color: Qt.rgba(0.16, 0.16, 0.18, 0.92)
+                        visible: (thumbMouse.containsMouse || barHover.hovered)
+                                 && pageList.draggedIndex === -1
+
+                        HoverHandler { id: barHover }
+
+                        Row {
+                            id: actionRow
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            PageAction {
+                                icon: "arrow-up"; tip: "Monter"
+                                enabled: index > 0
+                                onTriggered: pageController.moveSceneToIndex(index, index - 1)
+                            }
+                            PageAction {
+                                icon: "arrow-down"; tip: "Descendre"
+                                enabled: index < pageController.pageCount - 1
+                                onTriggered: pageController.moveSceneToIndex(index, index + 1)
+                            }
+                            PageAction {
+                                icon: "copy"; tip: "Dupliquer"
+                                onTriggered: pageController.duplicatePageAt(index)
+                            }
+                            PageAction {
+                                icon: "trash"; tip: "Supprimer"
+                                onTriggered: pageController.deletePageAt(index)
+                            }
                         }
                     }
 
@@ -307,6 +374,50 @@ Rectangle {
             text: sbBtn.tooltip
             show: sbMouse.containsMouse && sbBtn.tooltip !== ""
             placeBelow: false
+        }
+    }
+
+    // === #318: Reusable thumbnail hover action ===
+    // A small icon button used inside the per-thumbnail action bar. White
+    // Phosphor icon on the dark bar; dims when disabled. Emits triggered()
+    // on click (only when enabled). Tooltip is shown below the bar.
+    component PageAction: Rectangle {
+        id: paBtn
+        property string icon
+        property string tip
+        property bool enabled: true
+        signal triggered()
+
+        width: 20; height: 20
+        radius: 4
+        color: enabled && paMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : "transparent"
+
+        Image {
+            id: paIcon
+            anchors.centerIn: parent
+            width: 14; height: 14
+            source: "qrc:/icons/phosphor/" + parent.icon + ".svg"
+            sourceSize: Qt.size(14, 14)
+            visible: false
+        }
+        ColorOverlay {
+            anchors.fill: paIcon
+            source: paIcon
+            color: "white"
+            opacity: paBtn.enabled ? 1.0 : 0.35
+        }
+        MouseArea {
+            id: paMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: paBtn.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: { if (paBtn.enabled) paBtn.triggered() }
+        }
+        TooltipLabel {
+            anchor: paBtn
+            text: paBtn.tip
+            show: paMouse.containsMouse && paBtn.tip !== ""
+            placeBelow: true
         }
     }
 }

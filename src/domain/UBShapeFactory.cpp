@@ -18,6 +18,7 @@
 #include "controllers/UBToolController.h"
 #include "gui/UBMainWindow.h"
 #include "UBGraphicsScene.h"
+#include "UBInkColorUtils.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -290,7 +291,17 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
         }
     }
 
-    mCurrentShape->setStrokeColor(mCurrentStrokeColor);
+    // #317: shapes are created with a single default ink (Qt::black). On a dark
+    // background that makes them black-on-black (invisible), and unlike pen
+    // strokes they carry no light/dark color pair to recover from. So when the
+    // stroke color is the default ink, adapt it to the current background:
+    // black on light, white on dark. A user-chosen color is left untouched.
+    QColor strokeColor = mCurrentStrokeColor;
+    const bool lightBg = (mBoardView && mBoardView->scene())
+                             ? mBoardView->scene()->isLightBackground() : true;
+    if (mBoardView && mBoardView->scene())
+        strokeColor = UBInkColors::recoloredDefaultInk(mCurrentStrokeColor, lightBg);
+    mCurrentShape->setStrokeColor(strokeColor);
 
     mCurrentShape->setStrokeSize(mThickness);
 
@@ -663,7 +674,20 @@ void UBShapeFactory::onMouseRelease(QMouseEvent *event)
     }
 
     if (!mCursorMoved && mCurrentShape && mShapeType != Polygon)
+    {
         mBoardView->scene()->removeItem(mCurrentShape);
+    }
+    else if (mCurrentShape && mShapeType != Polygon)
+    {
+        // #319: deselect the just-drawn shape. Otherwise it stays selected, and
+        // changing color/width from the props bar — meant to prepare the NEXT
+        // shape — would silently recolor/resize this one too (it was in
+        // selectedItems()). With no selection, a color/width change only affects
+        // the next shape (via mCurrentStrokeColor/mThickness read in
+        // instanciateCurrentShape). Modifying an existing shape stays an
+        // explicit action: reselect it with the Selection tool.
+        mCurrentShape->setSelected(false);
+    }
 
     if (mShapeType != Polygon)
         mCurrentShape = nullptr;
@@ -758,6 +782,9 @@ void UBShapeFactory::setStrokeStyle(Qt::PenStyle penStyle)
 
 void UBShapeFactory::setThickness(int thickness)
 {
+    // #319: store for the NEXT shape (read back in instanciateCurrentShape), and
+    // apply to the current explicit selection only. The just-drawn shape is
+    // deselected in onMouseRelease, so this no longer silently resizes it.
     mThickness = thickness;
 
     UBGraphicsScene* scene = mBoardView->scene();
@@ -777,6 +804,9 @@ void UBShapeFactory::setThickness(int thickness)
 
 void UBShapeFactory::setStrokeColor(QColor color)
 {
+    // #319: store for the NEXT shape (read back in instanciateCurrentShape), and
+    // apply to the current explicit selection only. The just-drawn shape is
+    // deselected in onMouseRelease, so this no longer silently recolors it.
     mCurrentStrokeColor = color;
 
     UBGraphicsScene* scene = mBoardView->scene();

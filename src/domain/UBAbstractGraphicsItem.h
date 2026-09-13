@@ -47,6 +47,11 @@ public:
 
     void initializeStrokeProperty();
 
+    // #317/#319: force the stroke/fill capability flags. Used when copying an
+    // item's parameters so a clone keeps the same capabilities as the source.
+    void setHasStrokeProperty(bool has) { mHasStrokeProperty = has; }
+    void setHasFillingProperty(bool has) { mHasFillingProperty = has; }
+
     //disambiguation from UBGraphicsItem and QabstractGraphicsShapeItem
     virtual int type() const = 0;
 
@@ -64,6 +69,14 @@ protected:
 
 private:
     FillPattern mFillPatern;
+    // #317/#319: explicit capability flags. The old test `pen() != QPen()` was
+    // broken: a plain black 1px stroke equals the default QPen sentinel, so a
+    // freshly created shape reported hasStrokeProperty()==false and every
+    // setStrokeColor/setStrokeSize (and the day/night recolor) was silently
+    // skipped. The flags are set true by initializeStrokeProperty()/
+    // initializeFillingProperty(), which shapes call in their constructors.
+    bool mHasStrokeProperty = false;
+    bool mHasFillingProperty = false;
     QBitmap patternPoint();
     QBitmap patternDiag();
 };

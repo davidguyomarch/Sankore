@@ -7,14 +7,17 @@
 name: Build Linux x64
 
 on:
+  # Only master builds on push; feature/integration branches build via their PR.
+  # This avoids two identical builds (push + PR) for the same commit.
   push:
-    branches: [ master, main, integration ]
+    branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Collapse successive builds of the same PR/branch; older runs are cancelled.
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -137,7 +140,11 @@ jobs:
         shell: bash
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
+          # On a pull_request, checkout builds an ephemeral merge commit; use the
+          # PR head SHA so the binary is stamped with a real branch commit.
+          COMMIT="${{ github.event.pull_request.head.sha }}"
+          if [ -n "$COMMIT" ]; then COMMIT="${COMMIT:0:7}"; else COMMIT="$(git rev-parse --short HEAD)"; fi
+          echo "#define GIT_COMMIT \"$COMMIT\"" > src/core/git_version.h
           echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
           # The git tag is the single source of truth. On a tag push (or dispatch
           # on a tag) GITHUB_REF_NAME is the tag name (v4.3.0), reliable under a

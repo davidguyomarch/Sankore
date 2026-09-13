@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QRectF>
+#include <QColor>
 #include <functional>
 
 #include "UBBackgroundGrid.h"

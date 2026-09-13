@@ -12,6 +12,8 @@
 
 #include "UBGraphicsStrokesGroup.h"
 #include "UBSmoothStrokeItem.h"
+#include "UBAbstractGraphicsItem.h"
+#include "UBInkColorUtils.h"
 #include "core/UBSettings.h"
 
 UBBackgroundRenderer::UBBackgroundRenderer(QGraphicsScene* scene,
@@ -111,6 +113,16 @@ void UBBackgroundRenderer::recolorAllItems()
             // light/dark color pair, like grouped strokes.
             UBSmoothStrokeItem* stroke = static_cast<UBSmoothStrokeItem*>(item);
             stroke->applyBackgroundColor(!currentIsLight);
+        }
+        else if (UBAbstractGraphicsItem* shape = dynamic_cast<UBAbstractGraphicsItem*>(item))
+        {
+            // #317: shapes store a single color (no light/dark pair), so flip
+            // only the DEFAULT ink (black<->white) and preserve user-chosen
+            // colors. Applies to both stroke and (non-transparent) fill.
+            if (shape->hasStrokeProperty())
+                shape->setStrokeColor(UBInkColors::recoloredDefaultInk(shape->pen().color(), currentIsLight));
+            if (shape->hasFillingProperty())
+                shape->setFillColor(UBInkColors::recoloredDefaultInk(shape->brush().color(), currentIsLight));
         }
     }
 

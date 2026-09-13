@@ -210,7 +210,13 @@ void UBBoardNavigationController::deleteScene(int nIndex)
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         mBoardController->persistCurrentScene();
-        mBoardController->showMessage(tr("Delete page %1 from document").arg(nIndex + 1), true);
+
+        // #318: keep the page's 1-based human number for both user messages.
+        // `nIndex` is reassigned below (active-scene clamp), so the original
+        // index must be captured now — otherwise the "deleted" message showed a
+        // wrong, 0-based number (e.g. "Page 0 deleted" for the first page).
+        const int deletedPageNumber = nIndex + 1;
+        mBoardController->showMessage(tr("Delete page %1 from document").arg(deletedPageNumber), true);
 
         QList<int> scIndexes;
         scIndexes << nIndex;
@@ -227,7 +233,7 @@ void UBBoardNavigationController::deleteScene(int nIndex)
         mBoardController->deletePages(scIndexes);
         mBoardController->reloadThumbnails();
         mBoardController->emitPageChanged();
-        mBoardController->showMessage(tr("Page %1 deleted").arg(nIndex));
+        mBoardController->showMessage(tr("Page %1 deleted").arg(deletedPageNumber));
         QApplication::restoreOverrideCursor();
     }
 }

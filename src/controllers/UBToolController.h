@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QColor>
 #include <QList>
+#include <QString>
 #include "core/UB.h"  // UBStylusTool::Enum
 
 class UBAbstractDrawRuler;
@@ -56,6 +57,9 @@ class UBToolController : public QObject
 
     // Shapes palette
     Q_PROPERTY(bool shapesVisible READ shapesVisible WRITE setShapesVisible NOTIFY shapesVisibleChanged)
+    // #318: the currently selected shape action ("ellipse", "rectangle", ...),
+    // so ShapesPaletteV2 can highlight it in blue. Empty when no shape is active.
+    Q_PROPERTY(QString currentShape READ currentShape NOTIFY currentShapeChanged)
 
 public:
     // Mirror UBStylusTool::Enum for QML access
@@ -130,6 +134,7 @@ public:
     // --- Shapes palette ---
     bool shapesVisible() const;
     void setShapesVisible(bool visible);
+    QString currentShape() const { return m_currentShape; }
     Q_INVOKABLE void createShape(const QString& shape);
     Q_INVOKABLE void activateFillTool();
     Q_INVOKABLE void applyStrokeToSelection();
@@ -170,6 +175,7 @@ signals:
     void markerColorsChanged();
     void eraserWidthChanged();
     void shapesVisibleChanged();
+    void currentShapeChanged();
     void currentColorsChanged();
     void currentColorIndexChanged();
     void currentWidthIndexChanged();
@@ -182,6 +188,14 @@ private:
     bool m_shapesVisible;
     bool m_isDesktopMode;
     UBSettings* mSettings;
+
+    // #319: shape tool stroke color/width (the shape factory stores the color
+    // and width but not the palette indices the DrawingPropsBar binds to).
+    int m_shapeColorIndex = 0;
+    int m_shapeWidthIndex = 1;
+
+    // #318: currently selected shape action, for the palette highlight.
+    QString m_currentShape;
 
     static UBToolController* sToolController;
 };
