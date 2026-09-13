@@ -178,6 +178,12 @@ void UBToolController::setStylusTool(int tool)
     {
         if (UBApplication::boardController)
             UBApplication::boardController->shapeFactory().desactivate();
+        // #318: no shape is active anymore — clear the palette highlight.
+        if (!m_currentShape.isEmpty())
+        {
+            m_currentShape.clear();
+            emit currentShapeChanged();
+        }
     }
 
     emit stylusToolChanged(tool);
@@ -552,7 +558,15 @@ void UBToolController::setShapesVisible(bool visible)
 
 void UBToolController::toggleShapes()
 {
-    setShapesVisible(!m_shapesVisible);
+    const bool opening = !m_shapesVisible;
+    setShapesVisible(opening);
+
+    // #318: opening the shapes palette should immediately activate the shape
+    // tool with a sensible default (the ellipse/round), so the Shapes button
+    // turns blue and the round is shown selected — without forcing the user to
+    // pick a shape first. Closing leaves the current tool as-is.
+    if (opening)
+        createShape("ellipse");
 }
 
 void UBToolController::createShape(const QString& shape)
@@ -582,7 +596,9 @@ void UBToolController::createShape(const QString& shape)
     factory.setThickness(kShapeWidths[qBound(0, m_shapeWidthIndex, 2)]);
 
     m_activeTool = Drawing;
+    m_currentShape = shape;   // #318: for the palette highlight
     emit activeToolChanged();
+    emit currentShapeChanged();
     emit stylusToolChanged(Drawing);
     emit currentColorsChanged();
     emit currentColorIndexChanged();

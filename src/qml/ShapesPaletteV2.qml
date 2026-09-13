@@ -65,7 +65,14 @@ Rectangle {
                     id: shapeBtn
                     width: 42; height: 42
                     radius: 6
-                    color: shapeMouse.containsMouse ? themeManager.surfaceHover : "transparent"
+                    // #318: blue highlight for the currently selected shape, so
+                    // the active shape is visible (the round is selected by
+                    // default when the palette opens).
+                    readonly property bool selected:
+                        toolController.currentShape === modelData.action
+                    color: selected ? themeManager.primary
+                         : shapeMouse.containsMouse ? themeManager.surfaceHover
+                         : "transparent"
 
                     Image {
                         id: shapeIcon
@@ -78,7 +85,7 @@ Rectangle {
                     ColorOverlay {
                         anchors.fill: shapeIcon
                         source: shapeIcon
-                        color: themeManager.onSurface
+                        color: shapeBtn.selected ? themeManager.onPrimary : themeManager.onSurface
                     }
                     MouseArea {
                         id: shapeMouse
