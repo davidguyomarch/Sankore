@@ -163,8 +163,14 @@ jobs:
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion ""$version"""
           Set-Content scripts\installer.iss $issContent
 
-          # Generate git version header
-          $commit = git rev-parse --short HEAD
+          # Generate git version header.
+          # On a pull_request, actions/checkout builds an ephemeral MERGE commit,
+          # so `git rev-parse HEAD` would stamp the binary with a SHA that does
+          # not exist in the branch/repo (confusing when matching a deployed
+          # build to a commit). Use the PR head SHA instead; fall back to HEAD
+          # for push/tag builds.
+          $prHead = "${{ github.event.pull_request.head.sha }}"
+          if ($prHead) { $commit = $prHead.Substring(0,7) } else { $commit = git rev-parse --short HEAD }
           $desc = git describe --tags --always
           "#define GIT_COMMIT ""$commit""" | Out-File -FilePath src\core\git_version.h -Encoding utf8
           "#define GIT_VERSION ""$desc""" | Out-File -FilePath src\core\git_version.h -Encoding utf8 -Append

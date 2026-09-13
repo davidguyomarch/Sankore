@@ -78,7 +78,11 @@ jobs:
         shell: bash
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          echo "#define GIT_COMMIT \"$(git rev-parse --short HEAD)\"" > src/core/git_version.h
+          # On a pull_request, checkout builds an ephemeral merge commit; use the
+          # PR head SHA so the binary is stamped with a real branch commit.
+          COMMIT="${{ github.event.pull_request.head.sha }}"
+          if [ -n "$COMMIT" ]; then COMMIT="${COMMIT:0:7}"; else COMMIT="$(git rev-parse --short HEAD)"; fi
+          echo "#define GIT_COMMIT \"$COMMIT\"" > src/core/git_version.h
           echo "#define GIT_VERSION \"$(git describe --tags --always)\"" >> src/core/git_version.h
           cat src/core/git_version.h
           # The git tag is the single source of truth. On a tag push (or dispatch
