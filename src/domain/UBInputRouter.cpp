@@ -26,6 +26,10 @@
 #include "tools/UBAbstractDrawRuler.h"
 #include "frameworks/UBCoreGraphicsScene.h"
 
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
 UBInputRouter::UBInputRouter(UBGraphicsScene* scene)
     : mScene(scene)
 {
@@ -103,6 +107,27 @@ bool UBInputRouter::inputDevicePress(const QPointF& scenePos, qreal pressure)
                     mCurrentSmoothStroke->setStrokeColor(colorOnDarkBG);
                 else
                     mCurrentSmoothStroke->setStrokeColor(colorOnLightBG);
+
+                // #241 diag: is the stroke visible? Log width/zoom/scale, the
+                // scene's dark flag, and the chosen color. A width ~0 or a color
+                // matching the (captured) background = invisible stroke.
+                {
+                    QFile lf(QCoreApplication::applicationDirPath() + "/startup.log");
+                    if (lf.open(QIODevice::Append | QIODevice::Text)) {
+                        QTextStream o(&lf);
+                        o << "[DESKTOP] stroke: tool=" << (int)currentTool
+                          << " width=" << width
+                          << " rawToolWidth=" << ctx.drawingController->currentToolWidth()
+                          << " scale=" << ctx.systemScaleFactor()
+                          << " zoom=" << ctx.currentZoom()
+                          << " isDark=" << (mScene->isDarkBackground() ? 1 : 0)
+                          << " colorDark=" << colorOnDarkBG.name(QColor::HexArgb)
+                          << " colorLight=" << colorOnLightBG.name(QColor::HexArgb)
+                          << " chosen=" << mCurrentSmoothStroke->pen().color().name(QColor::HexArgb)
+                          << "\n";
+                        lf.close();
+                    }
+                }
 
                 mCurrentSmoothStroke->setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
 

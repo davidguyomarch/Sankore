@@ -384,6 +384,13 @@ void UBDesktopAnnotationController::showWindow()
 
     mDesktopPalette->appear();
 
+    // #241: on the FIRST desktop entry, the ctor called onDesktopPaletteMaximized()
+    // before the palette buttons existed (getButtonFromAction returned null → the
+    // pen/eraser/... signals were never connected, so the toolbar looked dead and
+    // the palette had the wrong size). Re-wire now that appear()/maximizeMe() has
+    // populated the buttons. (Log showed pen=0.. on first entry, pen=1.. on second.)
+    onDesktopPaletteMaximized();
+
     // #241 diag: final state of the desktop overlay + palette after show.
     ubDesktopDiag(QString("showWindow END: drawingView visible=%1 enabled=%2 geom=%3x%4 translucentAttr=%5 | palette visible=%6 geom=%7,%8 %9x%10")
                       .arg(mTransparentDrawingView->isVisible() ? 1 : 0)
@@ -857,44 +864,46 @@ void UBDesktopAnnotationController::switchCursor(const int tool)
  */
 void UBDesktopAnnotationController::onDesktopPaletteMaximized()
 {
+    // #241: Qt::UniqueConnection so re-invoking this (ctor + showWindow) does not
+    // stack duplicate connections (which would fire pen/eraser/... twice).
     // Pen
     UBActionPaletteButton* pPenButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPen);
     if(nullptr != pPenButton)
     {
-        connect(pPenButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::penActionPressed);
-        connect(pPenButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::penActionReleased);
+        connect(pPenButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::penActionPressed, Qt::UniqueConnection);
+        connect(pPenButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::penActionReleased, Qt::UniqueConnection);
     }
 
     // Eraser
     UBActionPaletteButton* pEraserButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionEraser);
     if(nullptr != pEraserButton)
     {
-        connect(pEraserButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::eraserActionPressed);
-        connect(pEraserButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::eraserActionReleased);
+        connect(pEraserButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::eraserActionPressed, Qt::UniqueConnection);
+        connect(pEraserButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::eraserActionReleased, Qt::UniqueConnection);
     }
 
     // Marker
     UBActionPaletteButton* pMarkerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionMarker);
     if(nullptr != pMarkerButton)
     {
-        connect(pMarkerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::markerActionPressed);
-        connect(pMarkerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::markerActionReleased);
+        connect(pMarkerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::markerActionPressed, Qt::UniqueConnection);
+        connect(pMarkerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::markerActionReleased, Qt::UniqueConnection);
     }
 
-    // Pointer
+    // Selector
     UBActionPaletteButton* pSelectorButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionSelector);
     if(nullptr != pSelectorButton)
     {
-        connect(pSelectorButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::selectorActionPressed);
-        connect(pSelectorButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::selectorActionReleased);
+        connect(pSelectorButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::selectorActionPressed, Qt::UniqueConnection);
+        connect(pSelectorButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::selectorActionReleased, Qt::UniqueConnection);
     }
 
     // Pointer
     UBActionPaletteButton* pPointerButton = mDesktopPalette->getButtonFromAction(UBApplication::mainWindow->actionPointer);
     if(nullptr != pPointerButton)
     {
-        connect(pPointerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::pointerActionPressed);
-        connect(pPointerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::pointerActionReleased);
+        connect(pPointerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::pointerActionPressed, Qt::UniqueConnection);
+        connect(pPointerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::pointerActionReleased, Qt::UniqueConnection);
     }
 
     // #241 diag: which toolbar buttons were found (and thus connected). If any is
