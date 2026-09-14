@@ -345,21 +345,19 @@ void UBDesktopAnnotationController::showWindow()
     UBToolController::toolController()->setStylusTool(mDesktopStylusTool);
 
 #ifdef Q_OS_WIN
-    // On Windows, WA_TranslucentBackground may not work reliably with DWM.
-    // Capture the desktop screenshot and use it as background instead of
-    // relying on window transparency.
-    {
-        QPixmap desktopPixmap = getScreenPixmap();
-        ubDesktopDiag(QString("showWindow WIN: desktopPixmap null=%1 %2x%3 -> used as background brush=%4")
-                          .arg(desktopPixmap.isNull() ? 1 : 0)
-                          .arg(desktopPixmap.width()).arg(desktopPixmap.height())
-                          .arg(!desktopPixmap.isNull() ? 1 : 0));
-        if (!desktopPixmap.isNull())
-        {
-            mTransparentDrawingView->setStyleSheet(QString());
-            mTransparentDrawingScene->setBackgroundBrush(QBrush(desktopPixmap));
-        }
-    }
+    // #241: try REAL transparency (show the live desktop through the overlay)
+    // instead of painting a frozen desktop screenshot. The old capture approach
+    // pasted a static QPixmap as the scene backgroundBrush — but a tiled texture
+    // brush in scene coordinates never lined up, and (more importantly)
+    // UBBoardView::drawBackground filled the viewport opaque white before it,
+    // so the user only saw white. Now UBBoardView::drawBackground defers to
+    // QGraphicsView::drawBackground for the desktop overlay, and a transparent
+    // scene brush + WA_TranslucentBackground lets the real desktop show through.
+    mTransparentDrawingView->setStyleSheet(QString());
+    mTransparentDrawingView->setAttribute(Qt::WA_TranslucentBackground, true);
+    mTransparentDrawingView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
+    mTransparentDrawingView->viewport()->setAutoFillBackground(false);
+    mTransparentDrawingScene->setBackgroundBrush(QBrush(Qt::transparent));
     // --- Diagnostics #243: is the board control view disabled (mitigation #135)
     //     at the point where the desktop overlay is shown? A disabled board view
     //     is why the palette actions (actionPen->trigger()) have no visible effect.
