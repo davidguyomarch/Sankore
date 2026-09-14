@@ -51,20 +51,30 @@ EXCLUDE_SUBPATHS = [
 PATTERNS = [
     re.compile(r"#[0-9a-fA-F]{6}\b"),        # #RRGGBB
     re.compile(r"#[0-9a-fA-F]{3}\b"),        # #RGB
-    re.compile(r"\brgba?\s*\(", re.IGNORECASE),  # rgb( / rgba(
+    # rgb()/rgba() CSS functions, but NOT a Qt method call like
+    # QColor(...).rgba() or color.rgb() — require the token not to be preceded
+    # by '.'. (?<![.\w]) keeps `background-color: rgba(...)` while dropping
+    # `QColor(Qt::transparent).rgba()`.
+    re.compile(r"(?<![.\w])rgba?\s*\(", re.IGNORECASE),
 ]
 
 # Strip line/inline comments so color literals mentioned in comments (issue refs
 # like "#297", or "was #FFB3C8") are not counted as real UI color literals.
 _LINE_COMMENT = re.compile(r"//.*$")
 
+# Explicit per-line opt-out for genuine non-theme colors (overlays on variable
+# content, etc.). Keep these RARE and justified with a nearby comment.
+_ALLOW_MARKER = "ui-color-allow"
+
 def strip_comment(line: str) -> str:
+    # Lines explicitly marked as an allowed non-theme color are ignored.
+    if _ALLOW_MARKER in line:
+        return ""
     # Drop C++/JS line comments and QML/C comment bodies. This is a heuristic
     # (does not track multi-line /* */ state) but is enough: color literals we
     # care about live in real code (setStyleSheet, QColor, QML color: ...).
     line = _LINE_COMMENT.sub("", line)
-    # Also drop the body after a leading '*' (inside /* ... */ blocks) or '#'
-    # markdown-ish comment lines are not code files, so ignore.
+    # Also drop the body after a leading '*' (inside /* ... */ blocks).
     stripped = line.lstrip()
     if stripped.startswith("*"):
         return ""

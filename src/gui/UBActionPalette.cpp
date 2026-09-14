@@ -23,6 +23,8 @@
 
 
 #include "UBActionPalette.h"
+#include "qml/UBThemeManager.h"
+
 #include <QAction>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -279,9 +281,15 @@ UBActionPaletteButton::UBActionPaletteButton(QAction* action, QWidget * parent)
 {
     setIconSize(QSize(32, 32));
     setDefaultAction(action);
+    // #297: themed button (was color:white, rgba white hovers, #4A90D9 checked).
+    // Hover/pressed are translucent tints of onSurface so the floating palette
+    // keeps its glassy look on any background; checked uses the primary accent.
+    auto* tm = UBThemeManager::instance();
+    QColor hover = tm->onSurface();   hover.setAlpha(30);
+    QColor pressed = tm->onSurface(); pressed.setAlpha(50);
     setStyleSheet(QString(
         "QToolButton {"
-        "  color: white;"
+        "  color: %1;"
         "  font-weight: bold;"
         "  font-family: Arial;"
         "  background-color: transparent;"
@@ -290,15 +298,18 @@ UBActionPaletteButton::UBActionPaletteButton(QAction* action, QWidget * parent)
         "  padding: 4px;"
         "}"
         "QToolButton:hover {"
-        "  background-color: rgba(255, 255, 255, 30);"
+        "  background-color: %2;"
         "}"
         "QToolButton:pressed {"
-        "  background-color: rgba(255, 255, 255, 50);"
+        "  background-color: %3;"
         "}"
         "QToolButton:checked {"
-        "  background-color: #4A90D9;"
+        "  background-color: %4;"
         "}"
-    ));
+        ).arg(UBThemeManager::css(tm->onSurface()),
+              UBThemeManager::css(hover),
+              UBThemeManager::css(pressed),
+              UBThemeManager::css(tm->primary())));
 
     setFocusPolicy(Qt::NoFocus);
 

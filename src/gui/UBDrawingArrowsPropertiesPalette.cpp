@@ -30,30 +30,30 @@ UBDrawingArrowsPropertiesPalette::UBDrawingArrowsPropertiesPalette(Qt::Orientati
     }
 
     UBActionPaletteButton* btnStartArrowStyleNone = new UBActionPaletteButton(UBApplication::mainWindow->actionStartArrowStyleNone, this);
-    btnStartArrowStyleNone->setStyleSheet(styleSheetLeftGroupedButton);
+    btnStartArrowStyleNone->setStyleSheet(styleSheetLeftGroupedButton());
     layoutStartArrowStyle->addWidget(btnStartArrowStyleNone);
     UBApplication::mainWindow->actionStartArrowStyleNone->setChecked(true);
 
     UBActionPaletteButton* btnStartArrowStyleArrow = new UBActionPaletteButton(UBApplication::mainWindow->actionStartArrowStyleArrow, this);
-    btnStartArrowStyleArrow->setStyleSheet(styleSheetCenterGroupedButton);
+    btnStartArrowStyleArrow->setStyleSheet(styleSheetCenterGroupedButton());
     layoutStartArrowStyle->addWidget(btnStartArrowStyleArrow);
 
     UBActionPaletteButton* btnStartArrowStyleRound = new UBActionPaletteButton(UBApplication::mainWindow->actionStartArrowStyleRound, this);
-    btnStartArrowStyleRound->setStyleSheet(styleSheetRightGroupedButton);
+    btnStartArrowStyleRound->setStyleSheet(styleSheetRightGroupedButton());
     layoutStartArrowStyle->addWidget(btnStartArrowStyleRound);
 
 
     UBActionPaletteButton* btnEndArrowStyleNone = new UBActionPaletteButton(UBApplication::mainWindow->actionEndArrowStyleNone, this);
-    btnEndArrowStyleNone->setStyleSheet(styleSheetLeftGroupedButton);
+    btnEndArrowStyleNone->setStyleSheet(styleSheetLeftGroupedButton());
     layoutEndArrowStyle->addWidget(btnEndArrowStyleNone);
     UBApplication::mainWindow->actionEndArrowStyleNone->setChecked(true);
 
     UBActionPaletteButton* btnEndArrowStyleArrow = new UBActionPaletteButton(UBApplication::mainWindow->actionEndArrowStyleArrow, this);
-    btnEndArrowStyleArrow->setStyleSheet(styleSheetCenterGroupedButton);
+    btnEndArrowStyleArrow->setStyleSheet(styleSheetCenterGroupedButton());
     layoutEndArrowStyle->addWidget(btnEndArrowStyleArrow);
 
     UBActionPaletteButton* btnEndArrowStyleRound = new UBActionPaletteButton(UBApplication::mainWindow->actionEndArrowStyleRound, this);
-    btnEndArrowStyleRound->setStyleSheet(styleSheetRightGroupedButton);
+    btnEndArrowStyleRound->setStyleSheet(styleSheetRightGroupedButton());
     layoutEndArrowStyle->addWidget(btnEndArrowStyleRound);
 
     // Group buttons

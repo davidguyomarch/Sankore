@@ -169,7 +169,10 @@ Rectangle {
 
                     property bool dragActive: pageList.draggedIndex === index
 
-                    // Page number badge
+                    // Page number badge. Overlaid on the page thumbnail image
+                    // (variable content), so it uses a fixed translucent white
+                    // chip with grey text for legibility on any preview — not a
+                    // theme surface. ui-color-allow
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.right: parent.right
@@ -177,14 +180,14 @@ Rectangle {
                         width: pageNumText.contentWidth + 6
                         height: pageNumText.contentHeight + 2
                         radius: 2
-                        color: Qt.rgba(1, 1, 1, 0.8)
+                        color: Qt.rgba(1, 1, 1, 0.8)   // ui-color-allow (overlay on thumbnail)
 
                         Text {
                             id: pageNumText
                             anchors.centerIn: parent
                             text: (index + 1)
                             font.pixelSize: 10
-                            color: "#666"
+                            color: "#666"   // ui-color-allow (on the white chip above)
                         }
                     }
 
@@ -202,7 +205,9 @@ Rectangle {
                         height: 22
                         radius: 6
                         z: 50
-                        color: Qt.rgba(0.16, 0.16, 0.18, 0.92)
+                        // Dark translucent bar overlaid on the thumbnail image,
+                        // deliberately fixed for contrast over any preview.
+                        color: Qt.rgba(0.16, 0.16, 0.18, 0.92)   // ui-color-allow (overlay on thumbnail)
                         visible: (thumbMouse.containsMouse || barHover.hovered)
                                  && pageList.draggedIndex === -1
 
@@ -390,7 +395,8 @@ Rectangle {
 
         width: 20; height: 20
         radius: 4
-        color: enabled && paMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : "transparent"
+        // Hover tint for an action button sitting on the dark action bar overlay. ui-color-allow
+        color: enabled && paMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : "transparent"   // ui-color-allow
 
         Image {
             id: paIcon

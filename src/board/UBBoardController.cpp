@@ -2166,13 +2166,15 @@ void UBBoardController::updateBackgroundState()
     //adjust background style
     QString newBackgroundStyle;
 
+    // NOTE: newBackgroundStyle is computed but never applied — dead code kept
+    // as-is; its literals are not live UI chrome. Cleanup tracked separately.
     if (mActiveScene && mActiveScene->isDarkBackground())
     {
-        newBackgroundStyle ="QWidget {background-color: #0E0E0E}";
+        newBackgroundStyle ="QWidget {background-color: #0E0E0E}";  // ui-color-allow (dead code)
     }
     else
     {
-        newBackgroundStyle ="QWidget {background-color: #F1F1F1}";
+        newBackgroundStyle ="QWidget {background-color: #F1F1F1}";  // ui-color-allow (dead code)
     }
 }
 

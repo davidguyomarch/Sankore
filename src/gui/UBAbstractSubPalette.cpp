@@ -1,38 +1,49 @@
 #include "UBAbstractSubPalette.h"
+#include "qml/UBThemeManager.h"
 
+// #297: grouped-button stylesheets built from the theme (were fixed light-grey
+// gradients: #d3d3d3/#c4c4c4 normal, #c3c3c3/#b4b4b4 checked, #444444 border).
+// Normal = surfaceVariant->surfaceHover gradient; checked = surfaceHover->surface
+// (a touch different so the pressed state reads); border = theme border.
+namespace
+{
+    QString groupedButtonQss(const QString& sideRules)
+    {
+        auto* tm = UBThemeManager::instance();
+        const QString c1 = UBThemeManager::css(tm->surfaceVariant());
+        const QString c2 = UBThemeManager::css(tm->surfaceHover());
+        const QString k1 = UBThemeManager::css(tm->surfaceHover());
+        const QString k2 = UBThemeManager::css(tm->surface());
+        const QString brd = UBThemeManager::css(tm->border());
+        return QString(
+            "QToolButton{background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, "
+            "stop: 0 %1, stop: 1 %2); margin-top: 1px; border: 1px solid %5; "
+            "height: 24px; %6}"
+            "QToolButton:checked{background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, "
+            "stop: 0 %3, stop: 1 %4); border: 1px solid %5;}")
+            .arg(c1, c2, k1, k2, brd, sideRules);
+    }
+}
 
-const QString UBAbstractSubPalette::styleSheetLeftGroupedButton =   "QToolButton{background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5,"
-                                                                                "stop: 0 #d3d3d3, stop: 1  #c4c4c4);margin-top: 1px;margin-right: 0px;"
-                                                                                "border: 1px solid #444444;border-right: 1px solid transparent;"
-                                                                                "border-top-left-radius : 3px;border-bottom-left-radius : 3px;height: 24px;}"
-                                                                                "QToolButton:checked { background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, stop: 0 #c3c3c3, stop: 1  #b4b4b4);"
-                                                                                "border-right: 1px solid #444444;"
-                                                                                " }";
+QString UBAbstractSubPalette::styleSheetLeftGroupedButton()
+{
+    return groupedButtonQss(
+        "border-right: 1px solid transparent; "
+        "border-top-left-radius: 3px; border-bottom-left-radius: 3px;");
+}
 
-const QString UBAbstractSubPalette::styleSheetCenterGroupedButton =     "QToolButton{background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, stop: 0 #d3d3d3, stop: 1  #c4c4c4);"
-                                                                                    "margin-top: 1px;"
-                                                                                    "margin-right: 0px;"
-                                                                                    "margin-left: 0px;"
-                                                                                    "border: 1px solid #444444;"
-                                                                                    "border-right: 1px solid transparent;"
-                                                                                    "border-left: 1px solid transparent;"
-                                                                                    "height: 24px;}"
-                                                                                    "QToolButton:checked { background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, stop: 0 #c3c3c3, stop: 1  #b4b4b4);"
-                                                                                    "border-left: 1px solid #444444;"
-                                                                                    "border-right: 1px solid #444444;"
-                                                                                    "}";
+QString UBAbstractSubPalette::styleSheetCenterGroupedButton()
+{
+    return groupedButtonQss(
+        "border-right: 1px solid transparent; border-left: 1px solid transparent;");
+}
 
-const QString UBAbstractSubPalette::styleSheetRightGroupedButton =  "QToolButton{background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, stop: 0 #d3d3d3, stop: 1  #c4c4c4);"
-                                                                                "margin-top: 1px;"
-                                                                                "margin-left: 0px;"
-                                                                                "border: 1px solid #444444;"
-                                                                                "border-left: 1px solid transparent;"
-                                                                                "border-top-right-radius : 3px;"
-                                                                                "border-bottom-right-radius : 3px;"
-                                                                                "height: 24px;}"
-                                                                                "QToolButton:checked { background: qlineargradient(x1: 0, y1: 0.49, x2: 0, y2: 0.5, stop: 0 #c3c3c3, stop: 1  #b4b4b4);"
-                                                                                "border-left: 1px solid #444444;"
-                                                                                "}";
+QString UBAbstractSubPalette::styleSheetRightGroupedButton()
+{
+    return groupedButtonQss(
+        "border-left: 1px solid transparent; "
+        "border-top-right-radius: 3px; border-bottom-right-radius: 3px;");
+}
 
 UBAbstractSubPalette::UBAbstractSubPalette(QWidget *parent, Qt::Orientation orient) :
     UBActionPalette(Qt::TopLeftCorner, parent, orient)

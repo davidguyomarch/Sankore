@@ -54,10 +54,12 @@ void TestUBThemeManager::testThemeSwitchChangesRoles()
 
     tm->setCurrentTheme("light");
     const QColor lightSurface = tm->surface();
-    const QColor lightTooltip = tm->tooltipBase();
+    const QColor lightOnSurface = tm->onSurface();
 
     tm->setCurrentTheme("dark");
     QVERIFY(tm->surface() != lightSurface);
-    QVERIFY(tm->tooltipBase() != lightTooltip);
+    QVERIFY(tm->onSurface() != lightOnSurface);
     QVERIFY(tm->isDark());
+    // Note: tooltip is intentionally a dark modern look in BOTH themes (#297),
+    // so it is not asserted to differ across themes here.
 }

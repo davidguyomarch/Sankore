@@ -72,8 +72,9 @@ void UBThemeManager::applyLightTheme()
     mDisabled = QColor(153, 153, 153);         // #999999 muted foreground
     mError = QColor(255, 179, 200);            // #FFB3C8 validation bg (kept)
     mOnError = QColor(85, 85, 85);             // #555555 text on error
-    mTooltipBase = QColor(255, 255, 220);      // #FFFFDC classic tooltip (kept)
-    mOnTooltip = QColor(0, 0, 0);              // black tooltip text
+    // Modern dark tooltip in both themes (matches the QML V2 tooltip look, #297).
+    mTooltipBase = QColor(42, 42, 46);         // #2A2A2E
+    mOnTooltip = QColor(242, 242, 242);        // #F2F2F2
 }
 
 QString UBThemeManager::css(const QColor& c)

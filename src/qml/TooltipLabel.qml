@@ -47,11 +47,11 @@ ToolTip {
     contentItem: Text {
         text: tip.text
         font.pixelSize: 12
-        color: "#F2F2F2"
+        color: themeManager.onTooltip   // #297 (was #F2F2F2)
     }
 
     background: Rectangle {
-        color: "#2A2A2E"
+        color: themeManager.tooltipBase  // #297 (was #2A2A2E)
         border.color: themeManager.border
         border.width: 1
         radius: 6

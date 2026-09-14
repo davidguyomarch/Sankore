@@ -23,6 +23,8 @@
 
 
 #include "UBCreateLinkPalette.h"
+#include "qml/UBThemeManager.h"
+
 #include <QVBoxLayout>
 #include <QStackedWidget>
 #include <QToolButton>
@@ -55,7 +57,9 @@ UBCreateLinkLabel::UBCreateLinkLabel(QString labelText, QWidget *parent) :
     setMinimumSize(200, 200);
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setAlignment(Qt::AlignCenter);
-    setStyleSheet("border-style: dashed; border-color:#999999;border-radius: 10px; border-width: 2px ");
+    // #297: themed dashed border (was #999999).
+    setStyleSheet(QString("border-style: dashed; border-color:%1; border-radius: 10px; border-width: 2px;")
+                      .arg(UBThemeManager::css(UBThemeManager::instance()->border())));
 }
 
 void UBCreateLinkLabel::dragEnterEvent(QDragEnterEvent *event)
@@ -114,7 +118,15 @@ UBCreateLinkPalette::UBCreateLinkPalette(QWidget *parent) :
     setLayout(mLayout);
     mStackedWidget = new QStackedWidget(this);
     mStackedWidget->setObjectName("UBCreateLinkPaletteStackedWidget");
-    mStackedWidget->setStyleSheet("QWidget#UBCreateLinkPaletteStackedWidget{background-color:#eeeeee; border-width: 2px; border-style: solid; border-radius: 10px; border-color:#999999;}");
+    // #297: themed panel (was #eeeeee background / #999999 border).
+    {
+        auto* tm = UBThemeManager::instance();
+        mStackedWidget->setStyleSheet(
+            QString("QWidget#UBCreateLinkPaletteStackedWidget{background-color:%1; "
+                    "border-width: 2px; border-style: solid; border-radius: 10px; border-color:%2;}")
+                .arg(UBThemeManager::css(tm->surfaceVariant()),
+                     UBThemeManager::css(tm->border())));
+    }
     mLayout->addWidget(mStackedWidget);
     init();
     hide();

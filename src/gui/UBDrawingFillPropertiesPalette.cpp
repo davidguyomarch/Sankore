@@ -51,20 +51,20 @@ UBDrawingFillPropertiesPalette::UBDrawingFillPropertiesPalette(Qt::Orientation o
 
     // ColorType buttons
     UBActionPaletteButton* btnFullColor = new UBActionPaletteButton(UBApplication::mainWindow->actionColorStyleFull, this);
-    btnFullColor->setStyleSheet(styleSheetLeftGroupedButton);
+    btnFullColor->setStyleSheet(styleSheetLeftGroupedButton());
     colorStyleLayout->addWidget(btnFullColor);
     UBApplication::mainWindow->actionColorStyleFull->setChecked(true);
 
     UBActionPaletteButton* btnFillStyleDense = new UBActionPaletteButton(UBApplication::mainWindow->actionFillStyleDense, this);
-    btnFillStyleDense->setStyleSheet(styleSheetCenterGroupedButton);
+    btnFillStyleDense->setStyleSheet(styleSheetCenterGroupedButton());
     colorStyleLayout->addWidget(btnFillStyleDense);
 
     UBActionPaletteButton* btnFillStyleDiag = new UBActionPaletteButton(UBApplication::mainWindow->actionFillStyleDiag, this);
-    btnFillStyleDiag->setStyleSheet(styleSheetCenterGroupedButton);
+    btnFillStyleDiag->setStyleSheet(styleSheetCenterGroupedButton());
     colorStyleLayout->addWidget(btnFillStyleDiag);
 
     UBActionPaletteButton* btnGradientColor = new UBActionPaletteButton(UBApplication::mainWindow->actionColorStyleGradient, this);
-    btnGradientColor->setStyleSheet(styleSheetRightGroupedButton);
+    btnGradientColor->setStyleSheet(styleSheetRightGroupedButton());
     colorStyleLayout->addWidget(btnGradientColor);
 
     //group color style buttons

@@ -1,4 +1,4 @@
 {
-  "count": 43,
+  "count": 0,
   "note": "#297 ratchet: hard-coded UI color literals under src/{gui,qml,board,document}. Never increase; lower as lots migrate to UBThemeManager."
 }
