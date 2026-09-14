@@ -384,6 +384,16 @@ void UBDesktopAnnotationController::showWindow()
 
     mDesktopPalette->appear();
 
+    // #241 diag: final state of the desktop overlay + palette after show.
+    ubDesktopDiag(QString("showWindow END: drawingView visible=%1 enabled=%2 geom=%3x%4 translucentAttr=%5 | palette visible=%6 geom=%7,%8 %9x%10")
+                      .arg(mTransparentDrawingView->isVisible() ? 1 : 0)
+                      .arg(mTransparentDrawingView->isEnabled() ? 1 : 0)
+                      .arg(mTransparentDrawingView->width()).arg(mTransparentDrawingView->height())
+                      .arg(mTransparentDrawingView->testAttribute(Qt::WA_TranslucentBackground) ? 1 : 0)
+                      .arg(mDesktopPalette->isVisible() ? 1 : 0)
+                      .arg(mDesktopPalette->x()).arg(mDesktopPalette->y())
+                      .arg(mDesktopPalette->width()).arg(mDesktopPalette->height()));
+
 #ifdef Q_OS_LINUX
     updateMask(true);
 #endif
@@ -886,6 +896,14 @@ void UBDesktopAnnotationController::onDesktopPaletteMaximized()
         connect(pPointerButton, &QAbstractButton::pressed, this, &UBDesktopAnnotationController::pointerActionPressed);
         connect(pPointerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::pointerActionReleased);
     }
+
+    // #241 diag: which toolbar buttons were found (and thus connected). If any is
+    // 0, that button is dead because getButtonFromAction returned null at wiring
+    // time (palette not populated yet).
+    ubDesktopDiag(QString("onDesktopPaletteMaximized: pen=%1 eraser=%2 marker=%3 selector=%4 pointer=%5")
+                      .arg(pPenButton ? 1 : 0).arg(pEraserButton ? 1 : 0)
+                      .arg(pMarkerButton ? 1 : 0).arg(pSelectorButton ? 1 : 0)
+                      .arg(pPointerButton ? 1 : 0));
 }
 
 /**

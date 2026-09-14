@@ -1115,6 +1115,22 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
     //EV-7 - NNE - 20131231
     emit mousePress(event);
 
+    // #241 diag: does the transparent desktop view receive board clicks (drawing
+    // on the desktop overlay)? Logs the view role + guard flags.
+    if (bIsDesktop)
+    {
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text))
+        {
+            QTextStream out(&logFile);
+            out << "[DESKTOP] UBBoardView::mousePressEvent bIsDesktop=1 bIsControl="
+                << (bIsControl ? 1 : 0) << " enabled=" << (isEnabled() ? 1 : 0)
+                << " interactive=" << (isInteractive() ? 1 : 0)
+                << " tool=" << (int)UBToolController::toolController()->stylusTool() << "\n";
+            logFile.close();
+        }
+    }
+
     // --- Diagnostics #248 (Shapes): only when a shape is being created (tool
     //     Drawing), log whether this board view actually receives the click.
     //     If a QML overlay swallows it, this line never appears in startup.log.
