@@ -189,11 +189,12 @@ en #319).
 
 Le comportement de dessin (souris, rendu, sélection) n'est pas reproductible en test
 unitaire — les classes de forme tirent tout le graphe UI (delegate + frame). Pour
-déboguer, écrire des logs `[SHAPES]` dans `startup.log` (helper `ubShapesDiag` déjà
-présent dans `UBShapeFactory.cpp` et `UBToolController.cpp`), pousser une branche,
-et lire le log renvoyé de la VM Windows. Retirer ces logs une fois le bug corrigé
-(garder les logs structurels permanents). Voir `dev-workflow.md` → diagnostics
-`startup.log`.
+déboguer, ajouter au besoin un helper temporaire qui écrit des logs `[SHAPES]` dans
+`startup.log` (motif : `QFile(QCoreApplication::applicationDirPath()+"/startup.log")`
+en `Append`, voir le pattern décrit dans `dev-workflow.md`), pousser une branche, et
+lire le log renvoyé de la VM Windows. **Retirer ces diagnostics temporaires une fois
+le bug corrigé** (les diags #248 ont été nettoyés dans `chore/remove-shapes-diagnostics`).
+Voir `dev-workflow.md` → diagnostics `startup.log`.
 
 ## Ce qui EST testable en unitaire
 
