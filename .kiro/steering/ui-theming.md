@@ -85,8 +85,13 @@ recalculer.
 Ne pas « thémifier » ni compter comme dette : magic numbers de type de fichier
 (`0x5542647A` dans `UBExportDocument*`), gardes de version Qt (`0x040600`…),
 contenu de document exporté en SVG (`stop-color:rgb(...)` — c'est du contenu,
-pas du chrome). Ces cas sont hors des dossiers scannés ou exclus dans
-`check-ui-colors.py`.
+pas du chrome), et le **fond de scène/page** noir/blanc piloté par
+`isDarkBackground()` (`QColor(Qt::black/white)` dans `UBBoardView`/
+`UBThumbnailView` — c'est du contenu de scène, il suit déjà le mode). Marquer ces
+cas ligne à ligne avec `ui-color-allow` (le check les ignore alors) et les
+justifier en commentaire. Le check `check-ui-colors.py` détecte aussi les
+couleurs Qt nommées `QColor(Qt::...)` (hors `Qt::transparent`), pas seulement les
+`#hex`/`rgb()`.
 
 ## Règle pour Kiro
 

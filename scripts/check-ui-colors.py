@@ -56,6 +56,9 @@ PATTERNS = [
     # by '.'. (?<![.\w]) keeps `background-color: rgba(...)` while dropping
     # `QColor(Qt::transparent).rgba()`.
     re.compile(r"(?<![.\w])rgba?\s*\(", re.IGNORECASE),
+    # Named Qt colors used as a hard-coded UI color, e.g. QColor(Qt::white).
+    # Qt::transparent is not a color choice (it is "no color"), so it is allowed.
+    re.compile(r"QColor\s*\(\s*Qt::(?!transparent)[A-Za-z]+"),
 ]
 
 # Strip line/inline comments so color literals mentioned in comments (issue refs
