@@ -45,11 +45,30 @@ EXCLUDE_SUBPATHS = [
 ]
 
 # Color literal patterns. Word-ish boundaries keep it simple and predictable.
+# Hex requires 3 or 6 digits with at least one letter a-f OR being a plausible
+# color, but to keep it robust we simply strip comments first (see strip_comment)
+# so issue refs like "#297" or "was #FFB3C8" in comments are never counted.
 PATTERNS = [
     re.compile(r"#[0-9a-fA-F]{6}\b"),        # #RRGGBB
     re.compile(r"#[0-9a-fA-F]{3}\b"),        # #RGB
     re.compile(r"\brgba?\s*\(", re.IGNORECASE),  # rgb( / rgba(
 ]
+
+# Strip line/inline comments so color literals mentioned in comments (issue refs
+# like "#297", or "was #FFB3C8") are not counted as real UI color literals.
+_LINE_COMMENT = re.compile(r"//.*$")
+
+def strip_comment(line: str) -> str:
+    # Drop C++/JS line comments and QML/C comment bodies. This is a heuristic
+    # (does not track multi-line /* */ state) but is enough: color literals we
+    # care about live in real code (setStyleSheet, QColor, QML color: ...).
+    line = _LINE_COMMENT.sub("", line)
+    # Also drop the body after a leading '*' (inside /* ... */ blocks) or '#'
+    # markdown-ish comment lines are not code files, so ignore.
+    stripped = line.lstrip()
+    if stripped.startswith("*"):
+        return ""
+    return line
 
 
 def is_excluded(path: str) -> bool:
@@ -71,7 +90,8 @@ def count_matches(list_mode: bool = False) -> int:
                 try:
                     with open(full, "r", encoding="utf-8", errors="ignore") as fh:
                         for lineno, line in enumerate(fh, 1):
-                            hits = sum(len(p.findall(line)) for p in PATTERNS)
+                            code = strip_comment(line)
+                            hits = sum(len(p.findall(code)) for p in PATTERNS)
                             if hits:
                                 total += hits
                                 if list_mode:
