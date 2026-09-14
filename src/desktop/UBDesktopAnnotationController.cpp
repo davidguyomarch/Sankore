@@ -23,10 +23,6 @@
 
 #include <QScreen>
 #include <QGuiApplication>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
-#include <QImage>
 
 #include "UBDesktopAnnotationController.h"
 
@@ -57,20 +53,6 @@
 
 #include "gui/UBKeyboardPalette.h"
 #include "gui/UBResources.h"
-
-
-// --- Temporary diagnostics for #241 / #243 (Desktop mode white surface + dead toolbar).
-//     Writes to startup.log next to the executable. Remove once the bug is fixed.
-static void ubDesktopDiag(const QString &line)
-{
-    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-    if (logFile.open(QIODevice::Append | QIODevice::Text))
-    {
-        QTextStream out(&logFile);
-        out << "[DESKTOP] " << line << "\n";
-        logFile.close();
-    }
-}
 
 
 UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
@@ -365,19 +347,6 @@ void UBDesktopAnnotationController::showWindow()
     mTransparentDrawingView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
     mTransparentDrawingView->viewport()->setAutoFillBackground(false);
     mTransparentDrawingScene->setBackgroundBrush(QBrush(Qt::transparent));
-    // --- Diagnostics #243: is the board control view disabled (mitigation #135)
-    //     at the point where the desktop overlay is shown? A disabled board view
-    //     is why the palette actions (actionPen->trigger()) have no visible effect.
-    if (UBApplication::boardController && UBApplication::boardController->controlView())
-    {
-        ubDesktopDiag(QString("showWindow WIN: boardController->controlView enabled=%1 visible=%2")
-                          .arg(UBApplication::boardController->controlView()->isEnabled() ? 1 : 0)
-                          .arg(UBApplication::boardController->controlView()->isVisible() ? 1 : 0));
-    }
-    else
-    {
-        ubDesktopDiag(QStringLiteral("showWindow WIN: boardController or controlView is NULL"));
-    }
     mTransparentDrawingView->showFullScreen();
 #elif defined(Q_OS_LINUX)
     // this is necessary to avoid unity to hide the panels
@@ -388,16 +357,6 @@ void UBDesktopAnnotationController::showWindow()
     UBPlatformUtils::setDesktopMode(true);
 
     mDesktopPalette->appear();
-
-    // #241 diag: final state of the desktop overlay + palette after show.
-    ubDesktopDiag(QString("showWindow END: drawingView visible=%1 enabled=%2 geom=%3x%4 translucentAttr=%5 | palette visible=%6 geom=%7,%8 %9x%10")
-                      .arg(mTransparentDrawingView->isVisible() ? 1 : 0)
-                      .arg(mTransparentDrawingView->isEnabled() ? 1 : 0)
-                      .arg(mTransparentDrawingView->width()).arg(mTransparentDrawingView->height())
-                      .arg(mTransparentDrawingView->testAttribute(Qt::WA_TranslucentBackground) ? 1 : 0)
-                      .arg(mDesktopPalette->isVisible() ? 1 : 0)
-                      .arg(mDesktopPalette->x()).arg(mDesktopPalette->y())
-                      .arg(mDesktopPalette->width()).arg(mDesktopPalette->height()));
 
 #ifdef Q_OS_LINUX
     updateMask(true);
@@ -569,44 +528,7 @@ QPixmap UBDesktopAnnotationController::getScreenPixmap()
     // dispatching stale mouse events to the board view and crashing in viewportEvent (#135)
     QPixmap grabbed = screen->grabWindow(0, screenRect.x(), screenRect.y(), screenRect.width(), screenRect.height());
 
-    // --- Diagnostics #243: is the grabbed desktop pixmap null / all-white?
-    {
-        ubDesktopDiag(QString("getScreenPixmap screen=%1 rect=%2,%3 %4x%5 pixmap=%6x%7 null=%8 devicePixelRatio=%9")
-                          .arg(screen->name())
-                          .arg(screenRect.x()).arg(screenRect.y())
-                          .arg(screenRect.width()).arg(screenRect.height())
-                          .arg(grabbed.width()).arg(grabbed.height())
-                          .arg(grabbed.isNull() ? 1 : 0)
-                          .arg(grabbed.devicePixelRatio()));
-
-        if (!grabbed.isNull())
-        {
-            const QImage img = grabbed.toImage();
-            auto sample = [&img](int x, int y) -> QString {
-                if (x < 0 || y < 0 || x >= img.width() || y >= img.height())
-                    return QStringLiteral("--");
-                const QRgb p = img.pixel(x, y);
-                return QString("#%1%2%3%4")
-                    .arg(qAlpha(p), 2, 16, QLatin1Char('0'))
-                    .arg(qRed(p),   2, 16, QLatin1Char('0'))
-                    .arg(qGreen(p), 2, 16, QLatin1Char('0'))
-                    .arg(qBlue(p),  2, 16, QLatin1Char('0'));
-            };
-            ubDesktopDiag(QString("  samples center=%1 topLeft=%2 topRight=%3 bottomLeft=%4 bottomRight=%5")
-                              .arg(sample(img.width() / 2, img.height() / 2))
-                              .arg(sample(1, 1))
-                              .arg(sample(img.width() - 2, 1))
-                              .arg(sample(1, img.height() - 2))
-                              .arg(sample(img.width() - 2, img.height() - 2)));
-        }
-    }
-
     return grabbed;
-
-
-
-
-
 }
 
 
@@ -666,14 +588,6 @@ void UBDesktopAnnotationController::penActionPressed()
  */
 void UBDesktopAnnotationController::penActionReleased()
 {
-    // --- Diagnostics #243: confirm palette clicks reach the handler, and log the
-    //     board view state that would swallow the resulting action.
-    ubDesktopDiag(QString("penActionReleased: pending=%1 arrowClicked=%2 controlViewEnabled=%3")
-                      .arg(mPendingPenButtonPressed ? 1 : 0)
-                      .arg(mbArrowClicked ? 1 : 0)
-                      .arg((UBApplication::boardController && UBApplication::boardController->controlView())
-                               ? (UBApplication::boardController->controlView()->isEnabled() ? 1 : 0)
-                               : -1));
     mHoldTimerPen.stop();
     if(mPendingPenButtonPressed)
     {
@@ -904,13 +818,6 @@ void UBDesktopAnnotationController::onDesktopPaletteMaximized()
         connect(pPointerButton, &QAbstractButton::released, this, &UBDesktopAnnotationController::pointerActionReleased, Qt::UniqueConnection);
     }
 
-    // #241 diag: which toolbar buttons were found (and thus connected). If any is
-    // 0, that button is dead because getButtonFromAction returned null at wiring
-    // time (palette not populated yet).
-    ubDesktopDiag(QString("onDesktopPaletteMaximized: pen=%1 eraser=%2 marker=%3 selector=%4 pointer=%5")
-                      .arg(pPenButton ? 1 : 0).arg(pEraserButton ? 1 : 0)
-                      .arg(pMarkerButton ? 1 : 0).arg(pSelectorButton ? 1 : 0)
-                      .arg(pPointerButton ? 1 : 0));
 }
 
 /**
