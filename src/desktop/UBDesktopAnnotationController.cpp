@@ -335,8 +335,15 @@ void UBDesktopAnnotationController::showWindow()
         mDesktopPalette->move(5, desktopRect.top() + 150);
 
         mWindowPositionInitialized = true;
-        mDesktopPalette->maximizeMe();
     }
+
+    // #241: always maximize the palette on entry so its real tool buttons
+    // (pen/eraser/...) exist, then wire them synchronously. maximizeMe() calls
+    // setActions() synchronously, so getButtonFromAction() returns the buttons
+    // immediately after — no need to wait for the async `maximized` signal
+    // (which arrived too late, leaving the toolbar dead on the first entry).
+    mDesktopPalette->maximizeMe();
+    onDesktopPaletteMaximized();
 
     updateBackground();
 
@@ -381,13 +388,6 @@ void UBDesktopAnnotationController::showWindow()
     UBPlatformUtils::setDesktopMode(true);
 
     mDesktopPalette->appear();
-
-    // #241: on the FIRST desktop entry, the ctor called onDesktopPaletteMaximized()
-    // before the palette buttons existed (getButtonFromAction returned null → the
-    // pen/eraser/... signals were never connected, so the toolbar looked dead and
-    // the palette had the wrong size). Re-wire now that appear()/maximizeMe() has
-    // populated the buttons. (Log showed pen=0.. on first entry, pen=1.. on second.)
-    onDesktopPaletteMaximized();
 
     // #241 diag: final state of the desktop overlay + palette after show.
     ubDesktopDiag(QString("showWindow END: drawingView visible=%1 enabled=%2 geom=%3x%4 translucentAttr=%5 | palette visible=%6 geom=%7,%8 %9x%10")
