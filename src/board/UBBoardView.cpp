@@ -1873,6 +1873,19 @@ UBBoardView::resizeEvent (QResizeEvent * event)
 void
 UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
 {
+  // #241: in Desktop annotation mode the overlay must show the desktop through
+  // it, not an opaque page background. This override otherwise fills the whole
+  // viewport with opaque white/black (hiding the scene backgroundBrush that
+  // holds the captured desktop) and never chains to the base view. For the
+  // desktop overlay, defer to QGraphicsView::drawBackground so the scene's
+  // backgroundBrush (the desktop pixmap, or transparent) is painted, and skip
+  // the page fill + ruling.
+  if (bIsDesktop)
+    {
+      QGraphicsView::drawBackground (painter, rect);
+      return;
+    }
+
   bool darkBackground = scene() && scene()->isDarkBackground();
 
   // #297: the board page background follows the scene's dark/light mode — this
