@@ -7,6 +7,7 @@
  */
 
 #include "UBPageController.h"
+#include "UBPageThumbnailModel.h"
 
 #include "core/UBApplication.h"
 #include "board/UBBoardController.h"
@@ -19,17 +20,15 @@ UBPageController::UBPageController(QObject* parent)
             this, &UBPageController::onActiveSceneChanged);
     connect(UBApplication::boardController, &UBBoardController::pageChanged,
             this, &UBPageController::onActiveSceneChanged);
-    // #321: any thumbnail mutation (add/delete/duplicate/reorder/reload) bumps
-    // the revision so the QML thumbnail list rebuilds, even when the page count
-    // is unchanged (e.g. a reorder).
-    connect(UBApplication::boardController, &UBBoardController::documentThumbnailsUpdated,
-            this, [this]() { bumpRevision(); });
+
+    // #328: the real thumbnail model, kept in sync with the board controller
+    // signals (documentThumbnailsUpdated / documentPageUpdated) inside the model.
+    m_thumbnailModel = new UBPageThumbnailModel(this);
 }
 
-void UBPageController::bumpRevision()
+QObject* UBPageController::thumbnailModel() const
 {
-    ++m_revision;
-    emit revisionChanged();
+    return m_thumbnailModel;
 }
 
 int UBPageController::currentPage() const
