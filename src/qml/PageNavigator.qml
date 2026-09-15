@@ -91,11 +91,11 @@ Rectangle {
             Layout.margins: 8
             spacing: 6
             clip: true
-            // #321: fold `revision` into the model so a reorder (which leaves
-            // pageCount unchanged) still rebuilds the delegates. Reading
-            // pageController.revision makes this binding re-evaluate on every
-            // page mutation; the actual model value stays the page count.
-            model: (pageController.revision, pageController.pageCount)
+            // #328: real thumbnail model (QAbstractListModel). Each row exposes
+            // `thumbnailUrl` (a file:// URL to the page preview), so the delegate
+            // renders the actual page instead of a blank numbered rectangle.
+            // Replaces the (revision, pageCount) integer-model workaround (#321).
+            model: pageController.thumbnailModel
             currentIndex: pageController.currentPage - 1
 
             // #257: drag-and-drop reordering. `moving` is the source index while
@@ -168,6 +168,20 @@ Rectangle {
                     opacity: dragActive ? 0.6 : ((index === pageList.currentIndex) ? 1.0 : (thumbMouse.containsMouse ? 0.9 : 0.75))
 
                     property bool dragActive: pageList.draggedIndex === index
+
+                    // #328: real page preview. `model.thumbnailUrl` is a file://
+                    // URL (with a ?v=N cache buster) to pageN.thumbnail.jpg.
+                    Image {
+                        anchors.fill: parent
+                        anchors.margins: 2
+                        source: model.thumbnailUrl
+                        fillMode: Image.PreserveAspectFit
+                        asynchronous: true
+                        cache: false            // versioned URL handles freshness
+                        smooth: true
+                        // Hide the broken-image glyph until a thumbnail exists.
+                        visible: status === Image.Ready
+                    }
 
                     // Page number badge
                     Rectangle {
