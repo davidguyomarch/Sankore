@@ -38,6 +38,7 @@
 #include "tst_UBRecognition.h"
 #include "tst_UBSmoothStrokeItem.h"
 #include "tst_UBKeyboardPaletteColors.h"
+#include "tst_UBThemeManager.h"
 #include "tst_UBDisplayManager.h"
 #include "tst_UBExportSelection.h"
 #include "tst_UBPageDeletion.h"
@@ -154,6 +155,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBKeyboardPaletteColors test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBThemeManager test;
         status |= QTest::qExec(&test, argc, argv);
     }
     {

@@ -34,6 +34,7 @@
 
 #include "UBFeaturesWidget.h"
 #include "gui/UBThumbnailWidget.h"
+#include "qml/UBThemeManager.h"
 #include "frameworks/UBFileSystemUtils.h"
 #include "core/UBApplication.h"
 #include "core/UBDownloadManager.h"
@@ -871,12 +872,19 @@ void UBFeaturesNewFolderDialog::setFileNameList(const QStringList &pLst)
 }
 void UBFeaturesNewFolderDialog::reactOnTextChanged(const QString &pStr)
 {
+    auto* tm = UBThemeManager::instance();
     if (validString(pStr)) {
         acceptButton->setEnabled(true);
-        mLineEdit->setStyleSheet("background:white;");
+        // #297: valid input — plain themed surface.
+        mLineEdit->setStyleSheet(QString("background:%1; color:%2;")
+                                     .arg(UBThemeManager::css(tm->surface()),
+                                          UBThemeManager::css(tm->onSurface())));
     } else {
         acceptButton->setEnabled(false);
-        mLineEdit->setStyleSheet("background:#FFB3C8;");
+        // #297: invalid input — theme error/validation color (was #FFB3C8).
+        mLineEdit->setStyleSheet(QString("background:%1; color:%2;")
+                                     .arg(UBThemeManager::css(tm->error()),
+                                          UBThemeManager::css(tm->onError())));
     }
 }
 
@@ -1075,7 +1083,10 @@ UBFeatureProperties::UBFeatureProperties( QWidget *parent, const char *name ) : 
     mpButtonLayout->addStretch(1);
 
     mpObjInfoLabel = new QLabel(tr("Object informations"));
-    mpObjInfoLabel->setStyleSheet(QString("color: #888888; font-size : 18px; font-weight:bold;"));
+    // #297: dim label color from the theme (was #888888).
+    mpObjInfoLabel->setStyleSheet(
+        QString("color: %1; font-size: 18px; font-weight: bold;")
+            .arg(UBThemeManager::css(UBThemeManager::instance()->onSurfaceDim())));
     mpLayout->addWidget(mpObjInfoLabel, 0);
 
     mpObjInfos = new QTreeWidget(this);
@@ -1356,7 +1367,13 @@ void UBFeatureProperties::onSetAsDefaultBackground()
 UBFeatureItemButton::UBFeatureItemButton(QWidget *parent, const char *name):QPushButton(parent)
 {
     setObjectName(name);
-    setStyleSheet(QString("background-color : #DDDDDD; color : #555555; border-radius : 6px; padding : 5px; font-weight : bold; font-size : 12px;"));
+    // #297: themed button colors (was #DDDDDD / #555555).
+    auto* tm = UBThemeManager::instance();
+    setStyleSheet(
+        QString("background-color: %1; color: %2; border-radius: 6px; padding: 5px; "
+                "font-weight: bold; font-size: 12px;")
+            .arg(UBThemeManager::css(tm->surfaceVariant()),
+                 UBThemeManager::css(tm->onSurface())));
 }
 
 UBFeatureItemButton::~UBFeatureItemButton()

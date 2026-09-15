@@ -211,14 +211,18 @@ void UBDocumentReplaceDialog::reactOnTextChanged(const QString &pStr)
     // #285: warning states keep dark text for readability; the neutral state
     // clears the override so the field inherits the theme QSS (was forced white,
     // unreadable in the dark theme, cf #260).
+    auto* tm = UBThemeManager::instance();
+    const QString warnQss = QString("background:%1; color:%2;")
+                                .arg(UBThemeManager::css(tm->error()),
+                                     UBThemeManager::css(tm->onError()));
     if (!validString(pStr)) {
         acceptButton->setEnabled(false);
-        mLineEdit->setStyleSheet("background:#FFB3C8; color:#1A1A1A;");
+        mLineEdit->setStyleSheet(warnQss);  // #297 (was #FFB3C8/#1A1A1A)
         acceptButton->setEnabled(false);
 
     } else if (mFileNameList.contains(pStr.trimmed(), Qt::CaseSensitive)) {
         acceptButton->setEnabled(true);
-        mLineEdit->setStyleSheet("background:#FFB3C8; color:#1A1A1A;");
+        mLineEdit->setStyleSheet(warnQss);  // #297 (was #FFB3C8/#1A1A1A)
         acceptButton->setText(replaceText);
 
     } else {
@@ -1635,9 +1639,11 @@ void UBDocumentTreeItemDelegate::processChangedText(const QString &str) const
     }
 
     if (!validateString(str)) {
-        // #285: invalid name — warning background with dark text so it stays
-        // readable regardless of the active theme.
-        editor->setStyleSheet("background-color: #FFB3C8; color: #1A1A1A;");
+        // #297: invalid name — theme error/validation colors (was #FFB3C8/#1A1A1A).
+        auto* tm = UBThemeManager::instance();
+        editor->setStyleSheet(QString("background-color: %1; color: %2;")
+                                  .arg(UBThemeManager::css(tm->error()),
+                                       UBThemeManager::css(tm->onError())));
     } else {
         // Valid — clear the override so the editor inherits the theme QSS
         // (forcing white here made text unreadable in the dark theme, cf #260).

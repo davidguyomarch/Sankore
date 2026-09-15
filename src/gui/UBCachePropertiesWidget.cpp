@@ -77,7 +77,9 @@ void UBCachePreviewWidget::paintEvent(QPaintEvent *event)
     painter.setPen(mMaskColor);
     painter.setBrush(mMaskColor);
     painter.drawRect(rect());
-    painter.setBrush(QColor(Qt::white));
+    // #297: the cache "hole" is punched in white — a functional mask color, not
+    // themeable chrome. ui-color-allow
+    painter.setBrush(QColor(Qt::white));   // ui-color-allow (mask hole)
 
     UBBoardView *view = UBApplication::boardController->controlView();
     qreal scaleRatio = static_cast<qreal>(rect().width())/static_cast<qreal>(view->width());

@@ -25,6 +25,8 @@
 #ifndef UBTHUMBNAILWIDGET_H_
 #define UBTHUMBNAILWIDGET_H_
 
+#include "qml/UBThemeManager.h"
+
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
@@ -415,7 +417,9 @@ class UBThumbnailTextItem : public QGraphicsTextItem
 
             if (mIsHighlighted)
             {
-                setHtml("<span style=\"color: #6682b5\">" + elidedText + "</span>");
+                // #297: highlight color from the theme accent (was #6682b5).
+                const QString accent = UBThemeManager::instance()->primary().name();
+                setHtml("<span style=\"color: " + accent + "\">" + elidedText + "</span>");
             }
             else
             {

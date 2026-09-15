@@ -101,6 +101,9 @@ protected:
 
 private:
 	void setButtons();
+	// #297: (re)build the stylesheets from UBThemeManager; called on construction
+	// and on themeChanged so the bar restyles when the theme changes.
+	void applyTheme();
 	UBFeaturesController *featuresController;
 	UBFeaturesActionBarState currentState;
 

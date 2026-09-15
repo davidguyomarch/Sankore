@@ -31,9 +31,12 @@ protected:
         // EV-7 - CFA - 20140127 : ...
         //unable to use Uniboard.css for custom classes, even with overiding paintEvent as Qt recommands...
         //use .css and setObjectName should be preferable, but no more time, and not enough knowledge...
-        static const QString styleSheetLeftGroupedButton;
-        static const QString styleSheetCenterGroupedButton;
-        static const QString styleSheetRightGroupedButton;
+        // #297: built from UBThemeManager at call time (was hard-coded const
+        // QSS strings with #d3d3d3/#c4c4c4/#444444). Methods, not constants, so
+        // they follow the active theme.
+        static QString styleSheetLeftGroupedButton();
+        static QString styleSheetCenterGroupedButton();
+        static QString styleSheetRightGroupedButton();
 };
 
 class UBColorPickerButton : public QToolButton
