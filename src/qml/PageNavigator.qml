@@ -261,7 +261,24 @@ Rectangle {
                     states: State {
                         when: thumbMouse.drag.active
                         ParentChange { target: thumb; parent: pageList }
-                        AnchorChanges { target: thumb; anchors.horizontalCenter: undefined; anchors.verticalCenter: undefined }
+                        // #339: also break anchors.fill and pin the thumb to the
+                        // slot size. Without clearing fill, reparenting to the
+                        // ListView made anchors.fill target the whole list, so the
+                        // dragged silhouette stretched to the empty-area height.
+                        AnchorChanges {
+                            target: thumb
+                            anchors.top: undefined
+                            anchors.bottom: undefined
+                            anchors.left: undefined
+                            anchors.right: undefined
+                            anchors.horizontalCenter: undefined
+                            anchors.verticalCenter: undefined
+                        }
+                        PropertyChanges {
+                            target: thumb
+                            width: pageSlot.width
+                            height: pageSlot.height
+                        }
                     }
 
                     MouseArea {
