@@ -530,10 +530,28 @@ Commande unique pour tout valider :
 
 ### Ajouter des diagnostics
 
-Si un bug est difficile à comprendre sans plus de contexte runtime :
-1. Ajouter des logs `[TAG]` dans le code C++ aux points clés
-2. Compiler, pousser la branche, et demander au développeur de renvoyer le startup.log
-3. Une fois le bug corrigé, nettoyer les logs temporaires (garder les logs structurels permanents)
+**Principe : corriger sur des FAITS, pas sur des suppositions.** Pour tout bug de
+comportement runtime (rendu, souris, Windows, transparence, timing), ne pas
+deviner la cause ni patcher à l'aveugle. Instrumenter d'abord avec des logs
+`[TAG]` aux points clés, capturer un `startup.log` de la VM, et corriger seulement
+une fois la cause confirmée par le log. C'est nettement plus efficace : plusieurs
+bugs (#241 desktop, #319/#317 formes) ont été résolus en un ou deux allers-retours
+de log là où les suppositions faisaient perdre des cycles entiers. Quand une
+correction a échoué deux fois, s'arrêter et instrumenter plutôt que retenter une
+variante.
+
+Boucle recommandée pour un bug runtime :
+1. Ajouter des logs `[TAG]` dans le code C++ aux points clés (état des variables,
+   flags, pointeurs, couleurs/tailles, quel chemin est pris).
+2. Compiler, pousser la branche, ouvrir/mettre à jour la PR (le CI Windows ne
+   tourne que sur PR), et demander au développeur de renvoyer le `startup.log`
+   depuis la VM (`type C:\Sankore\startup.log`).
+3. Lire le log, identifier la cause racine **prouvée**, puis coder la correction.
+4. Une fois le bug corrigé et confirmé, nettoyer les logs temporaires (garder les
+   logs structurels permanents).
+
+Astuce : instrumenter plusieurs hypothèses dans un même build pour éviter des
+allers-retours VM (chaque cycle VM ≈ un build CI de ~25 min).
 
 ---
 
