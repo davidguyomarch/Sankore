@@ -1115,22 +1115,6 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
     //EV-7 - NNE - 20131231
     emit mousePress(event);
 
-    // --- Diagnostics #248 (Shapes): only when a shape is being created (tool
-    //     Drawing), log whether this board view actually receives the click.
-    //     If a QML overlay swallows it, this line never appears in startup.log.
-    if ((UBStylusTool::Enum)UBToolController::toolController()->stylusTool() == UBStylusTool::Drawing)
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text))
-        {
-            QTextStream out(&logFile);
-            out << "[SHAPES] UBBoardView::mousePressEvent reached: bIsControl="
-                << (bIsControl ? 1 : 0) << " bIsDesktop=" << (bIsDesktop ? 1 : 0)
-                << " interactive=" << (isInteractive() ? 1 : 0) << "\n";
-            logFile.close();
-        }
-    }
-
     if (!bIsControl && !bIsDesktop) {
         event->ignore();
         return;

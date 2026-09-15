@@ -20,23 +20,6 @@
 #include "UBGraphicsScene.h"
 #include "UBInkColorUtils.h"
 
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
-
-// --- Temporary diagnostics for #248 (Shapes tool: cannot create a shape).
-//     Appends to startup.log next to the executable. Remove once the bug is fixed.
-static void ubShapesDiag(const QString &line)
-{
-    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-    if (logFile.open(QIODevice::Append | QIODevice::Text))
-    {
-        QTextStream out(&logFile);
-        out << "[SHAPES] " << line << "\n";
-        logFile.close();
-    }
-}
-
 UBShapeFactory::UBShapeFactory():
     mCurrentShape(nullptr),
     mBoardView(nullptr),
@@ -209,11 +192,6 @@ void UBShapeFactory::init()
     connect(mBoardView, &UBBoardView::mouseMove, this, &UBShapeFactory::onMouseMove);
     connect(mBoardView, &UBBoardView::mouseRelease, this, &UBShapeFactory::onMouseRelease);
     connect(mBoardView, &UBBoardView::mousePress, this, &UBShapeFactory::onMousePress);
-
-    ubShapesDiag(QString("init: boardView=%1 drawingController=%2 (mouse signals connected=%3)")
-                     .arg(mBoardView ? 1 : 0)
-                     .arg(mDrawingController ? 1 : 0)
-                     .arg((mBoardView && mDrawingController) ? 1 : 0));
 }
 
 
@@ -504,11 +482,6 @@ void UBShapeFactory::onMouseMove(QMouseEvent *event)
 
 void UBShapeFactory::onMousePress(QMouseEvent *event)
 {
-    ubShapesDiag(QString("onMousePress: mIsCreating=%1 mShapeType=%2 mIsRegularShape=%3 tool=%4")
-                     .arg(mIsCreating ? 1 : 0)
-                     .arg(static_cast<int>(mShapeType))
-                     .arg(mIsRegularShape ? 1 : 0)
-                     .arg(mDrawingController ? static_cast<int>(mDrawingController->stylusTool()) : -1));
     if(mIsCreating){
         mCursorMoved = false;
         mIsPress = true;
