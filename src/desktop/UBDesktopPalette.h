@@ -31,7 +31,6 @@
 #include <QHideEvent>
 
 #include "gui/UBActionPalette.h"
-#include "gui/UBRightPalette.h"
 
 /**
  * The uninotes window. This window is controlled by UBUninotesWindowController.
