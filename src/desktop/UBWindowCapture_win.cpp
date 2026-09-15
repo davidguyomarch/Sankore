@@ -24,7 +24,6 @@
 
 #include "UBWindowCaptureDelegate_win.h"
 #include "UBDesktopAnnotationController.h"
-#include "UBDesktopPalette.h"
 
 #include "board/UBBoardView.h"
 
@@ -51,14 +50,21 @@ const QPixmap UBWindowCapture::getCapturedWindow()
 
 int UBWindowCapture::execute()
 {
-    mParent->desktopPalette()->grabMouse();
-    mParent->desktopPalette()->grabKeyboard();
+    // #336: grab on the transparent overlay view (the toolbar is now a QML
+    // QQuickWidget child of it) instead of the removed UBDesktopPalette.
+    UBBoardView* view = mParent->drawingView();
+    if (view) {
+        view->grabMouse();
+        view->grabKeyboard();
+    }
 
     UBWindowCaptureDelegate windowCaptureEventHandler;
     int result = windowCaptureEventHandler.execute();
 
-    mParent->desktopPalette()->releaseMouse();
-    mParent->desktopPalette()->releaseKeyboard();
+    if (view) {
+        view->releaseMouse();
+        view->releaseKeyboard();
+    }
 
     mWindowPixmap = windowCaptureEventHandler.getCapturedWindow();
 

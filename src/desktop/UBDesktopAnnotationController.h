@@ -27,28 +27,26 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
-#include <QTime>
-#include <QTimer>
 
 class UBSettings;
 
-class UBDesktopPalette;
 class UBBoardView;
 class UBGraphicsScene;
-class UBDesktopPenPalette;
-class UBDesktopMarkerPalette;
-class UBDesktopEraserPalette;
-class UBActionPalette;
-
-#define PROPERTY_PALETTE_TIMER      1000
+class QQuickWidget;
 
 /**
- * The uninotes controller. This object allocate a uninotes window and implements all the actions corresponding to
- * the uninotes button:
- * - Go to Uninotes
- * - Custom capture
+ * The uninotes controller. This object allocates a uninotes window and implements all the actions corresponding to
+ * the desktop toolbar (DesktopToolbar.qml, issue #336):
+ * - Go to Uninotes (return to board)
+ * - Custom capture (part of the screen)
  * - Window capture
  * - Screen capture
+ *
+ * Since #336 the toolbar is the V2 QML DesktopToolbar hosted in a QQuickWidget
+ * parented to mTransparentDrawingView. The legacy UBDesktopPalette (QAction /
+ * UBFloatingPalette based, with pen/marker/eraser hold-timer property popups)
+ * has been removed; tool selection now binds directly to UBToolController and
+ * color/width is handled by the shared DrawingPropsBar.
  */
 class UBDesktopAnnotationController : public QObject
 {
@@ -60,7 +58,8 @@ class UBDesktopAnnotationController : public QObject
         void showWindow();
         void hideWindow();
 
-        UBDesktopPalette *desktopPalette();
+        // Rounded region covering the QML toolbar, so UBBoardView lets clicks
+        // on the toolbar pass through instead of drawing on the overlay.
         QPainterPath desktopPalettePath() const;
         UBBoardView *drawingView();
 
@@ -70,6 +69,7 @@ class UBDesktopAnnotationController : public QObject
     public slots:
 
         void screenLayoutChanged();
+        // Invokable from DesktopToolbar.qml via the desktopController context object.
         void goToUniboard();
         void customCapture();
         void windowCapture();
@@ -80,9 +80,6 @@ class UBDesktopAnnotationController : public QObject
 
         void stylusToolChanged(int tool);
         void updateBackground();
-
-//         void showKeyboard(bool show);
-//         void showKeyboard(); //X11 virtual keyboard working only needed
 
     signals:
         /**
@@ -96,58 +93,27 @@ class UBDesktopAnnotationController : public QObject
     protected:
         QPixmap getScreenPixmap();
 
-        UBBoardView* mTransparentDrawingView;       
+        UBBoardView* mTransparentDrawingView;
         UBGraphicsScene* mTransparentDrawingScene;
 
     private slots:
-        void desktopPenActionToggled(bool checked);
-        void desktopMarkerActionToggled(bool checked);
-        void desktopEraserActionToggled(bool checked);
-        void eraseDesktopAnnotations();
-        void penActionPressed();
-        void markerActionPressed();
-        void eraserActionPressed();
-        void penActionReleased();
-        void markerActionReleased();
-        void eraserActionReleased();
-        void selectorActionPressed();
-        void selectorActionReleased();
-        void pointerActionPressed();
-        void pointerActionReleased();
-
-        void switchCursor(int tool);
-        void onDesktopPaletteMaximized();
-        void onDesktopPaletteMinimize();
         void onTransparentWidgetResized();
         void refreshMask();
-        void onToolClicked();
 
     private:
-        UBSettings* mSettings;
-        void setAssociatedPalettePosition(UBActionPalette* palette, const QString& actionName);
-        void togglePropertyPalette(UBActionPalette* palette);
         void updateMask(bool bTransparent);
+        void setupToolbar();
+        void positionToolbar();
+        void showToolbar();
+        void hideToolbarForCapture();
+        void restoreToolbarAfterCapture();
 
-        UBDesktopPalette *mDesktopPalette;
-        //UBKeyboardPalette *mKeyboardPalette;
-        UBDesktopPenPalette* mDesktopPenPalette;
-        UBDesktopMarkerPalette* mDesktopMarkerPalette;
-        UBDesktopEraserPalette* mDesktopEraserPalette;
+        UBSettings* mSettings;
 
-        QTime mPenHoldTimer;
-        QTime mMarkerHoldTimer;
-        QTime mEraserHoldTimer;
-        QTimer mHoldTimerPen;
-        QTimer mHoldTimerMarker;
-        QTimer mHoldTimerEraser;
+        // V2 QML desktop toolbar (DesktopToolbar.qml), parented to mTransparentDrawingView.
+        QQuickWidget* mToolbarQml;
 
-        bool mWindowPositionInitialized;
         bool mIsFullyTransparent;
-        bool mDesktopToolsPalettePositioned;
-        bool mPendingPenButtonPressed;
-        bool mPendingMarkerButtonPressed;
-        bool mPendingEraserButtonPressed;
-        bool mbArrowClicked;
 
         int mBoardStylusTool;
         int mDesktopStylusTool;
