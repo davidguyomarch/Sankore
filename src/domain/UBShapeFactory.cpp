@@ -219,6 +219,13 @@ void UBShapeFactory::init()
 
 UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
 {
+    // #327: reset first so an unhandled/None shape type does not leave the
+    // previous (possibly deleted) pointer in place. The default branch below
+    // then returns nullptr instead of dereferencing a stale/null mCurrentShape,
+    // which crashed on the next line (setStyle) — access violation while
+    // drawing.
+    mCurrentShape = nullptr;
+
     switch (mShapeType) {
     case Ellipse:
         mCurrentShape = new UB3HEditableGraphicsEllipseItem();
@@ -247,6 +254,10 @@ UBAbstractGraphicsItem* UBShapeFactory::instanciateCurrentShape()
     default:
         break;
     }
+
+    // #327: no shape created for an unknown/None type — bail out safely.
+    if (!mCurrentShape)
+        return nullptr;
 
     mCurrentShape->setStyle(mCurrentBrushStyle, mCurrentPenStyle);
 
@@ -505,83 +516,98 @@ void UBShapeFactory::onMousePress(QMouseEvent *event)
         QPointF cursorPosition = mBoardView->mapToScene(event->pos());
 
         if(mIsRegularShape){
+            // #327: guard every dynamic_cast<...>(instanciateCurrentShape()).
+            // instanciateCurrentShape() can return nullptr (unknown/None type),
+            // and a mismatched cast yields nullptr too; dereferencing it here
+            // crashed (access violation) while drawing. onMouseMove/Release
+            // already guard their casts — align onMousePress with them.
             if (mShapeType == Ellipse)
             {
                 UB3HEditableGraphicsEllipseItem* ellipse = dynamic_cast<UB3HEditableGraphicsEllipseItem*>(instanciateCurrentShape());
-                ellipse->setPos(cursorPosition);
-
-                mBoardView->scene()->addItem(ellipse);
+                if (ellipse)
+                {
+                    ellipse->setPos(cursorPosition);
+                    mBoardView->scene()->addItem(ellipse);
+                }
             }
             else if(mShapeType == Circle)
             {
                 UB1HEditableGraphicsCircleItem* ellipse = dynamic_cast<UB1HEditableGraphicsCircleItem*>(instanciateCurrentShape());
-                ellipse->setPos(cursorPosition);
-
-                mBoardView->scene()->addItem(ellipse);
+                if (ellipse)
+                {
+                    ellipse->setPos(cursorPosition);
+                    mBoardView->scene()->addItem(ellipse);
+                }
             }
             else if (mShapeType == Rectangle)
             {
                 UB3HEditableGraphicsRectItem* rect = dynamic_cast<UB3HEditableGraphicsRectItem*>(instanciateCurrentShape());
-
-                rect->setRect(QRectF(cursorPosition.x(), cursorPosition.y(), 0, 0));
-
-                mBoardView->scene()->addItem(rect);
+                if (rect)
+                {
+                    rect->setRect(QRectF(cursorPosition.x(), cursorPosition.y(), 0, 0));
+                    mBoardView->scene()->addItem(rect);
+                }
             }
             else if(mShapeType == Square)
             {
                 UB1HEditableGraphicsSquareItem* rect = dynamic_cast<UB1HEditableGraphicsSquareItem*>(instanciateCurrentShape());
-
-                rect->setRect(QRectF(cursorPosition.x(), cursorPosition.y(), 0, 0));
-
-                mBoardView->scene()->addItem(rect);
+                if (rect)
+                {
+                    rect->setRect(QRectF(cursorPosition.x(), cursorPosition.y(), 0, 0));
+                    mBoardView->scene()->addItem(rect);
+                }
             }
             else if (mShapeType == Line)
             {
                 UBEditableGraphicsLineItem* line = dynamic_cast<UBEditableGraphicsLineItem*>(instanciateCurrentShape());
-
-                line->setLine(cursorPosition, cursorPosition);
-                line->setMagnetic(true);
-
-                mBoardView->scene()->addItem(line);
+                if (line)
+                {
+                    line->setLine(cursorPosition, cursorPosition);
+                    line->setMagnetic(true);
+                    mBoardView->scene()->addItem(line);
+                }
             }
         }else{
             if (mShapeType == RegularPolygon)
             {
                 UBEditableGraphicsRegularShapeItem* regularPathItem = dynamic_cast<UBEditableGraphicsRegularShapeItem*>(instanciateCurrentShape());
-
-                regularPathItem->setStartPoint(cursorPosition);
-
-                mBoardView->scene()->addItem(regularPathItem);
+                if (regularPathItem)
+                {
+                    regularPathItem->setStartPoint(cursorPosition);
+                    mBoardView->scene()->addItem(regularPathItem);
+                }
             }
             else //Polygon
             {
                 if(mShapeType == Pen){
                     if(mFirstClickForFreeHand){
                         UBGraphicsFreehandItem* pathItem = dynamic_cast<UBGraphicsFreehandItem*>(instanciateCurrentShape());
-
-
-                        pathItem->addPoint(cursorPosition);
-
-                        mFirstClickForFreeHand = false;
-
-                        mBoardView->scene()->addItem(pathItem);
+                        if (pathItem)
+                        {
+                            pathItem->addPoint(cursorPosition);
+                            mFirstClickForFreeHand = false;
+                            mBoardView->scene()->addItem(pathItem);
+                        }
                     }
                 }else{
                     UBEditableGraphicsPolygonItem* pathItem = dynamic_cast<UBEditableGraphicsPolygonItem*>(mCurrentShape);
                     if (mCurrentShape == nullptr || pathItem == nullptr)
                     {
                         pathItem = dynamic_cast<UBEditableGraphicsPolygonItem*>(instanciateCurrentShape());
-                        mBoardView->scene()->addItem(pathItem);
+                        if (pathItem)   // #327: don't addItem(nullptr) / deref null
+                            mBoardView->scene()->addItem(pathItem);
                     }
 
-                    pathItem->addPoint(cursorPosition);
-
-
-                    if (pathItem->isClosed() || pathItem->isOpened())
+                    if (pathItem)   // #327: guard before using the polygon
                     {
-                        if (pathItem->path().elementCount() < 2)
-                            mBoardView->scene()->removeItem(pathItem);
-                        mCurrentShape = nullptr;
+                        pathItem->addPoint(cursorPosition);
+
+                        if (pathItem->isClosed() || pathItem->isOpened())
+                        {
+                            if (pathItem->path().elementCount() < 2)
+                                mBoardView->scene()->removeItem(pathItem);
+                            mCurrentShape = nullptr;
+                        }
                     }
                 }
             }
