@@ -90,7 +90,12 @@ UBDesktopPalette::UBDesktopPalette(QWidget *parent)
     connect(mMaximizeAction, &QAction::triggered, this, [this]() { maximizeMe(); });
     connect(this, &UBFloatingPalette::maximizeStart, this, &UBDesktopPalette::maximizeMe);
     connect(this, &UBFloatingPalette::minimizeStart, this, &UBDesktopPalette::minimizeMe);
-    setMinimizePermission(true);
+    // #241: keep the desktop toolbar always deployed. It sits at the left edge
+    // (x=5), and UBFloatingPalette auto-minimizes any palette dropped at the
+    // edge — which immediately re-collapsed our programmatic maximizeMe() on
+    // entry, so the user only saw the "show stylus toolbar" tab. Disabling the
+    // minimize permission stops the auto-collapse; the toolbar stays visible.
+    setMinimizePermission(false);
 
 }
 
