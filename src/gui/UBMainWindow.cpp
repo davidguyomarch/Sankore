@@ -30,6 +30,7 @@
 #include <QPainter>
 
 #include "UBMainWindow.h"
+#include "qml/UBThemeManager.h"
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"
 #include "board/UBBoardController.h"
@@ -51,10 +52,11 @@ UBMainWindow::UBMainWindow(QWidget *parent, Qt::WindowFlags flags)
     mpDownloadWidget = new UBDownloadWidget();
     mpDownloadWidget->setWindowModality(Qt::ApplicationModal);
 
-    //Setting tooltip colors staticly, since they look not quite well on different color themes
+    // #297: tooltip colors from the theme (was a fixed #FFFFDC / black).
+    auto* tm = UBThemeManager::instance();
     QPalette toolTipPalette;
-    toolTipPalette.setColor(QPalette::ToolTipBase, QColor("#FFFFDC"));
-    toolTipPalette.setColor(QPalette::ToolTipText, Qt::black);
+    toolTipPalette.setColor(QPalette::ToolTipBase, tm->tooltipBase());
+    toolTipPalette.setColor(QPalette::ToolTipText, tm->onTooltip());
     QToolTip::setPalette(toolTipPalette);
 
     QWidget* centralWidget = new QWidget(this);

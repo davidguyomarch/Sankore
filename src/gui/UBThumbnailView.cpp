@@ -42,13 +42,15 @@ UBThumbnailView::~UBThumbnailView()
 void UBThumbnailView::drawBackground(QPainter *painter, const QRectF &rect)
 {
     // Do not draw crossed background in thumbnails
+    // #297: page background follows the scene's dark/light mode — this is scene
+    // content (like the board background), not themeable chrome. ui-color-allow
     if (qobject_cast<UBGraphicsScene*>(scene())->isDarkBackground())
     {
-        painter->fillRect(rect, QBrush(QColor(Qt::black)));
+        painter->fillRect(rect, QBrush(QColor(Qt::black)));   // ui-color-allow (scene background)
     }
     else
     {
-        painter->fillRect(rect, QBrush(QColor(Qt::white)));
+        painter->fillRect(rect, QBrush(QColor(Qt::white)));   // ui-color-allow (scene background)
     }
 }
 

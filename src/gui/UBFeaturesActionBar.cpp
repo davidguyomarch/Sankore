@@ -24,6 +24,20 @@
 
 #include "UBFeaturesActionBar.h"
 #include "gui/UBFeaturesWidget.h"
+#include "qml/UBThemeManager.h"
+
+void UBFeaturesActionBar::applyTheme()
+{
+    auto* tm = UBThemeManager::instance();
+    setStyleSheet(QString("background: %1; border-radius: 10px; border: 2px solid %2;")
+                      .arg(UBThemeManager::css(tm->surfaceVariant()),
+                           UBThemeManager::css(tm->border())));
+    if (mSearchBar)
+        mSearchBar->setStyleSheet(
+            QString("background-color: %1; color: %2; border-radius: 10px; padding: 2px;")
+                .arg(UBThemeManager::css(tm->surface()),
+                     UBThemeManager::css(tm->onSurface())));
+}
 
 UBFeaturesActionBar::UBFeaturesActionBar( UBFeaturesController *controller, QWidget* parent, const char* name ) : QWidget (parent)
 	, featuresController(controller)
@@ -47,13 +61,16 @@ UBFeaturesActionBar::UBFeaturesActionBar( UBFeaturesController *controller, QWid
     , mpNewFolderBtn(nullptr)
 {
 	setObjectName(name);
-    setStyleSheet(QString("background: #EEEEEE; border-radius : 10px; border : 2px solid #999999;"));
 
     setAcceptDrops(true);
 
     mButtonGroup = new QButtonGroup(this);
     mSearchBar = new QLineEdit(this);
-    mSearchBar->setStyleSheet(QString("background-color:white; border-radius : 10px; padding : 2px;"));
+
+    // #297: colors come from the theme (was hard-coded #EEEEEE/#999999/white).
+    applyTheme();
+    connect(UBThemeManager::instance(), &UBThemeManager::themeChanged,
+            this, &UBFeaturesActionBar::applyTheme);
 
     mLayout = new QHBoxLayout();
     setLayout(mLayout);

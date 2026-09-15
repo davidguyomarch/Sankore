@@ -1642,7 +1642,6 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
     if (mActiveScene)
     {
         updateBackgroundActionsState(mActiveScene->isDarkBackground(), mActiveScene->isCrossedBackground());
-        updateBackgroundState();
     }
 
     if(documentChange)
@@ -1761,8 +1760,6 @@ void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type
         mSettings->setCrossedBackground(UBBackgroundGrid::isRuled(gridType));
 
         mActiveScene->setBackgroundType(isDark, gridType);
-
-        updateBackgroundState();
 
         emit backgroundChanged();
     }
@@ -2161,21 +2158,6 @@ void UBBoardController::saveViewState()
 }
 
 
-void UBBoardController::updateBackgroundState()
-{
-    //adjust background style
-    QString newBackgroundStyle;
-
-    if (mActiveScene && mActiveScene->isDarkBackground())
-    {
-        newBackgroundStyle ="QWidget {background-color: #0E0E0E}";
-    }
-    else
-    {
-        newBackgroundStyle ="QWidget {background-color: #F1F1F1}";
-    }
-}
-
 void UBBoardController::stylusToolChanged(int tool)
 {
     if (UBPlatformUtils::hasVirtualKeyboard() && mPaletteManager->mKeyboardPalette)
@@ -2190,8 +2172,6 @@ void UBBoardController::stylusToolChanged(int tool)
 
     // Legacy button group toggle removed — QML V2 StylusPaletteV2 binds
     // directly to toolController.activeTool for visual state.
-
-    updateBackgroundState();
 }
 
 

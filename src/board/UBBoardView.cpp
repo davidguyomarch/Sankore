@@ -1875,13 +1875,15 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
 {
   bool darkBackground = scene() && scene()->isDarkBackground();
 
+  // #297: the board page background follows the scene's dark/light mode — this
+  // is scene content, not themeable chrome. ui-color-allow
   if (darkBackground)
     {
-      painter->fillRect (rect, QBrush (QColor (Qt::black)));
+      painter->fillRect (rect, QBrush (QColor (Qt::black)));   // ui-color-allow (scene background)
     }
   else
     {
-      painter->fillRect (rect, QBrush (QColor (Qt::white)));
+      painter->fillRect (rect, QBrush (QColor (Qt::white)));   // ui-color-allow (scene background)
     }
 
   if (scene() && transform ().m11 () > 0.5)
