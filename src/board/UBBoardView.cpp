@@ -72,7 +72,6 @@
 
 #ifdef Q_OS_MACOS
 #include "desktop/UBDesktopAnnotationController.h"
-#include "desktop/UBDesktopPalette.h"
 #endif
 
 #include "domain/UBGraphicsTextItem.h"

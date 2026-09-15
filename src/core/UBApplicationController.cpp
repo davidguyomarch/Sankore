@@ -65,7 +65,6 @@ static void ubDocFlashDiag(const QString &line)
 
 #include "domain/UBGraphicsWidgetItem.h"
 
-#include "desktop/UBDesktopPalette.h"
 #include "desktop/UBDesktopAnnotationController.h"
 
 #include "web/UBWebController.h"
