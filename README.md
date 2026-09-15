@@ -32,6 +32,25 @@ existing `.ubz` documents.
 - **Dark / light theme** — switchable via the theme manager
 - **School fonts** — bundled cursive fonts for education (Marelle, Andika, Écolier)
 
+## ❤️ Support Sankore
+
+Sankore is free and open source software.
+
+If you find Sankore useful, you can help support its continued development and maintenance. Your contribution helps cover infrastructure costs, maintenance, bug fixes and new features.
+
+<p align="center">
+  <a href="https://github.com/sponsors/davidguyomarch">
+    <img src="https://img.shields.io/badge/❤️%20GitHub%20Sponsors-support-pink?style=for-the-badge" alt="GitHub Sponsors">
+  </a>
+  <a href="https://www.buymeacoffee.com/dguyomarch">
+    <img src="https://img.shields.io/badge/☕%20Buy%20Me%20a%20Coffee-support-yellow?style=for-the-badge" alt="Buy Me a Coffee">
+  </a>
+</p>
+
+Every contribution helps keep Sankore free, open source and actively maintained.
+
+Thank you for supporting Sankore! ❤️
+
 ## Platform support
 
 | Platform | Architecture | Status | CI | Packages |
