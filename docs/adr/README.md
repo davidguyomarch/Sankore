@@ -27,3 +27,7 @@ tradeoffs. Not implementation details. See the workflow in
 |-----|-------|--------|
 | [0001](0001-qml-v2-ui-migration.md) | Migrate the UI to a QML V2 interface | Accepted |
 | [0002](0002-premoc-generation-strategy.md) | Pre-generate and commit moc files for the test target | Accepted |
+| [0003](0003-web-module-stubbed.md) | Stub the web module instead of porting QtWebEngine | Accepted |
+| [0004](0004-version-driven-by-git-tag.md) | The release version is driven by the git tag | Accepted |
+| [0005](0005-shared-pen-shape-color-palette.md) | Shared color palette between the pen and shape tools | Accepted |
+| [0006](0006-desktop-toolbar-qml-v2.md) | Unify the Desktop-mode toolbar on QML V2 | Accepted |
