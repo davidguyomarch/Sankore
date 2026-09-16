@@ -48,6 +48,7 @@
 #include "tst_UBHyperlink.h"
 #include "tst_UBBackgroundGrid.h"
 #include "tst_UBInkColorUtils.h"
+#include "tst_UBLibraryModel.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
 int main(int argc, char *argv[])
@@ -195,6 +196,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBInkColorUtils test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBLibraryModel test;
         status |= QTest::qExec(&test, argc, argv);
     }
 

@@ -231,8 +231,16 @@ if $BUILD_TESTS; then
             ../src/qml/UBThemeManager.h \
             -o premoc/moc_UBThemeManager.cpp
 
+        # Library model + controller (QObjects under test, #258)
+        $MOC_BIN $MOC_COMMON_FLAGS \
+            ../src/controllers/UBLibraryItemModel.h \
+            -o premoc/moc_UBLibraryItemModel.cpp
+        $MOC_BIN $MOC_COMMON_FLAGS \
+            ../src/controllers/UBLibraryController.h \
+            -o premoc/moc_UBLibraryController.cpp
+
         # Test class headers that moc fails to process with moc_predefs.h
-        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBThemeManager tst_UBDisplayManager tst_UBExportSelection tst_UBPageDeletion tst_UBResizeGrip tst_UBTextDrag tst_UBTextVerticalAlign tst_UBHyperlink tst_UBBackgroundGrid tst_UBInkColorUtils; do
+        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBThemeManager tst_UBDisplayManager tst_UBExportSelection tst_UBPageDeletion tst_UBResizeGrip tst_UBTextDrag tst_UBTextVerticalAlign tst_UBHyperlink tst_UBBackgroundGrid tst_UBInkColorUtils tst_UBLibraryModel; do
             $MOC_BIN $MOC_COMMON_FLAGS \
                 ${HEADER}.h \
                 -o premoc/moc_${HEADER}.cpp
@@ -249,7 +257,7 @@ if $BUILD_TESTS; then
         # Patch Makefile: use premoc outputs instead of build/moc for the 4 test classes
         # The Makefile generates moc_tst_*.cpp in build/moc/ but they are empty.
         # Replace the build/moc/ paths with premoc/ for these files.
-        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBThemeManager tst_UBDisplayManager tst_UBExportSelection tst_UBPageDeletion tst_UBResizeGrip tst_UBTextDrag tst_UBTextVerticalAlign tst_UBHyperlink tst_UBBackgroundGrid tst_UBInkColorUtils; do
+        for HEADER in tst_UBGraphicsScene tst_UBVisualRegression tst_UBRecognition tst_UBSmoothStrokeItem tst_UBKeyboardPaletteColors tst_UBThemeManager tst_UBDisplayManager tst_UBExportSelection tst_UBPageDeletion tst_UBResizeGrip tst_UBTextDrag tst_UBTextVerticalAlign tst_UBHyperlink tst_UBBackgroundGrid tst_UBInkColorUtils tst_UBLibraryModel; do
             sed -i "s|build/moc/moc_${HEADER}.cpp|premoc/moc_${HEADER}.cpp|g" Makefile 2>/dev/null || true
         done
 

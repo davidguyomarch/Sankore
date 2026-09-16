@@ -149,6 +149,20 @@ win32-msvc* {
 } else {
     SOURCES += premoc/moc_UBThemeManager.cpp
 }
+# Library model + controller (#258, PR 1) — real sources under test. UBFeature
+# was extracted to its own TU (board/UBFeature.cpp), which links against the
+# UBSettings stub (userTrashDirPath) and UBFileSystemUtilsCore (extension).
+# UBLibraryController/UBLibraryItemModel are QObjects → premoc on Linux.
+SOURCES += ../src/board/UBFeature.cpp \
+           ../src/controllers/UBLibraryItemModel.cpp \
+           ../src/controllers/UBLibraryController.cpp
+win32-msvc* {
+    HEADERS += ../src/controllers/UBLibraryItemModel.h \
+               ../src/controllers/UBLibraryController.h
+} else {
+    SOURCES += premoc/moc_UBLibraryItemModel.cpp \
+               premoc/moc_UBLibraryController.cpp
+}
 
 # Test sources
 SOURCES += main.cpp \
@@ -184,6 +198,7 @@ SOURCES += main.cpp \
            tst_UBDisplayManager.cpp \
            tst_UBExportSelection.cpp \
            tst_UBPageDeletion.cpp \
+           tst_UBLibraryModel.cpp \
            stubs/UBSmoothStrokeItem_testable.cpp \
            premoc/moc_tst_UBStringUtils.cpp \
            premoc/moc_tst_UBFileSystemUtils.cpp \
@@ -209,6 +224,13 @@ win32-msvc* {
     HEADERS += tst_UBExportSelection.h
 } else {
     SOURCES += premoc/moc_tst_UBExportSelection.cpp
+}
+
+# tst_UBLibraryModel moc (#258): premoc on Linux (moc bug), auto-moc on MSVC
+win32-msvc* {
+    HEADERS += tst_UBLibraryModel.h
+} else {
+    SOURCES += premoc/moc_tst_UBLibraryModel.cpp
 }
 
 
