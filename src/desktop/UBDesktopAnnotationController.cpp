@@ -24,10 +24,26 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QQuickWidget>
+#include <QQuickItem>
 #include <QQmlContext>
 #include <QPainterPath>
+#include <QFile>
+#include <QTextStream>
 
 #include "UBDesktopAnnotationController.h"
+
+// #336 diagnostics: log DesktopToolbar state to startup.log (temporary, to be
+// removed once the toolbar-not-showing bug is fixed). Pattern from
+// UBBoardPaletteManager.
+static void ubDesktopLog(const QString& line)
+{
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&logFile);
+        out << "[DESKTOP TOOLBAR] " << line << "\n";
+        logFile.close();
+    }
+}
 
 #include "frameworks/UBPlatformUtils.h"
 
@@ -149,9 +165,15 @@ void UBDesktopAnnotationController::setupToolbar()
     // The toolbar's capture / return-to-board buttons call slots on this controller.
     mToolbarQml->rootContext()->setContextProperty("desktopController", this);
     mToolbarQml->setSource(QUrl("qrc:/qml/DesktopToolbar.qml"));
+    ubDesktopLog(QString("setupToolbar: status=%1 (0=Null 1=Ready 2=Loading 3=Error)")
+                     .arg(int(mToolbarQml->status())));
     if (mToolbarQml->status() == QQuickWidget::Error)
-        for (const auto& e : mToolbarQml->errors())
+        for (const auto& e : mToolbarQml->errors()) {
             qWarning() << "DesktopToolbar QML error:" << e.toString();
+            ubDesktopLog("QML ERROR: " + e.toString());
+        }
+    ubDesktopLog(QString("setupToolbar: rootObject=%1")
+                     .arg(mToolbarQml->rootObject() ? "present" : "NULL"));
 
     // Size: 8 buttons + 2 separators (see DesktopToolbar.qml buttons array).
     const int btnSize = 40;
@@ -195,6 +217,14 @@ void UBDesktopAnnotationController::showToolbar()
     positionToolbar();
     mToolbarQml->show();
     mToolbarQml->raise();
+    ubDesktopLog(QString("showToolbar: overlay(view) shown=%1 size=%2x%3 | toolbar geom=%4,%5 %6x%7 visible=%8 rootObj=%9")
+                     .arg(mTransparentDrawingView ? mTransparentDrawingView->isVisible() : -1)
+                     .arg(mTransparentDrawingView ? mTransparentDrawingView->width() : -1)
+                     .arg(mTransparentDrawingView ? mTransparentDrawingView->height() : -1)
+                     .arg(mToolbarQml->x()).arg(mToolbarQml->y())
+                     .arg(mToolbarQml->width()).arg(mToolbarQml->height())
+                     .arg(mToolbarQml->isVisible())
+                     .arg(mToolbarQml->rootObject() ? "present" : "NULL"));
 }
 
 void UBDesktopAnnotationController::hideToolbarForCapture()
