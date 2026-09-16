@@ -140,6 +140,9 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
 
 UBDesktopAnnotationController::~UBDesktopAnnotationController()
 {
+    // mToolbarQml is now a top-level window with no parent (#336), so it must be
+    // deleted explicitly (it is no longer owned by mTransparentDrawingView).
+    delete mToolbarQml;
     delete mTransparentDrawingScene;
     delete mTransparentDrawingView;
 }
@@ -148,15 +151,30 @@ UBDesktopAnnotationController::~UBDesktopAnnotationController()
 /**
  * \brief Create the V2 QML desktop toolbar (DesktopToolbar.qml).
  *
- * Mirrors the QQuickWidget hosting pattern used by UBBoardPaletteManager for
- * StylusPaletteV2: transparent clear color, translucent background, always on
- * top, and a rounded mask so clicks outside the rounded shape pass through to
- * the transparent overlay underneath. Parented to mTransparentDrawingView.
+ * The toolbar is a TOP-LEVEL, OPAQUE window (not a child of the overlay).
+ *
+ * #336: a QQuickWidget *child* of mTransparentDrawingView (a top-level
+ * translucent frameless window) does not render its QML content on Windows — the
+ * RHI backing is not composited onto the translucent parent surface. The C++
+ * state was correct (status=Ready, rootObject present, visible=1,
+ * sized/positioned) yet nothing was painted (diagnosed via startup.log). The
+ * board palettes render fine because they are children of an opaque container.
+ *
+ * Fix: make the toolbar its own frameless, always-on-top TOP-LEVEL window. A
+ * top-level translucent QQuickWidget composites correctly on Windows (unlike the
+ * child-of-translucent-parent case), so we keep the themed semi-transparent
+ * surface + transparent clearColor. A rounded QRegion mask gives the rounded
+ * corners and lets clicks outside the rounded shape fall through. It is
+ * positioned in global screen coordinates over the overlay.
  */
 void UBDesktopAnnotationController::setupToolbar()
 {
-    mToolbarQml = new QQuickWidget(mTransparentDrawingView);
+    mToolbarQml = new QQuickWidget(nullptr);
+    mToolbarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     mToolbarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    // Translucent is fine for a TOP-LEVEL window (it composites on Windows);
+    // the bug was only a translucent QQuickWidget *child* of the translucent
+    // overlay. Top-level + translucent keeps the themed semi-transparent surface.
     mToolbarQml->setClearColor(Qt::transparent);
     mToolbarQml->setAttribute(Qt::WA_TranslucentBackground);
     mToolbarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
@@ -205,9 +223,14 @@ void UBDesktopAnnotationController::positionToolbar()
     if (!mToolbarQml || !mTransparentDrawingView)
         return;
 
-    int posX = (mTransparentDrawingView->width() - mToolbarQml->width()) / 2;
-    int posY = 24;
-    mToolbarQml->move(qMax(0, posX), posY);
+    // Top-level window → position in GLOBAL screen coordinates, centered on the
+    // top of the screen the overlay lives on.
+    QScreen* screen = mTransparentDrawingView->screen();
+    const QRect screenGeom = screen ? screen->geometry()
+                                    : QGuiApplication::primaryScreen()->geometry();
+    const int posX = screenGeom.x() + (screenGeom.width() - mToolbarQml->width()) / 2;
+    const int posY = screenGeom.y() + 24;
+    mToolbarQml->move(qMax(screenGeom.x(), posX), posY);
 }
 
 void UBDesktopAnnotationController::showToolbar()
