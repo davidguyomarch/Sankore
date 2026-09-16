@@ -49,9 +49,9 @@ UBFeature::UBFeature(const QString &url
     }
 }
 
-UBFeature::~UBFeature()
-{
-}
+// ~UBFeature() is defined inline (= default) in the header on purpose — see the
+// comment there (#258): defining it out-of-line here caused LNK2005 under MSVC
+// when both UBFeature.cpp and UBDocumentProxy.cpp are linked (unit-test target).
 
 QString UBFeature::getNameFromVirtualPath(const QString &pVirtPath)
 {

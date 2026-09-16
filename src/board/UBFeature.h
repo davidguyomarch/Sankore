@@ -78,7 +78,13 @@ public:
               , UBFeatureElementType type = FEATURE_CATEGORY
               , Permissions pOwnPermissions = ALL_P
               , QString pSortKey = QString());
-    virtual ~UBFeature();
+    // Defined inline (= default) on purpose: UBFeature is a value type held by
+    // value in several classes (e.g. UBDocumentProxy::mDefaultImageBackground).
+    // With a virtual destructor defined out-of-line in UBFeature.cpp, MSVC emits
+    // it in both UBFeature.obj and UBDocumentProxy.obj, causing LNK2005 when both
+    // TUs are linked together (the unit-test target does exactly that). An inline
+    // defaulted dtor is a COMDAT/weak symbol that the linker de-duplicates. (#258)
+    virtual ~UBFeature() = default;
     QString getName() const { return mName; }
 
     QString getDisplayName() const {return mDisplayName;}
