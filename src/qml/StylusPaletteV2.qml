@@ -96,8 +96,8 @@ Rectangle {
             active: toolData.isToggle ? (toolController.shapesVisible || shapeToolActive)
                                       : (toolController.activeTool === toolData.id)
             // blue highlight = the tool is actually the active tool
-            primary: toolData.isToggle ? shapeToolActive
-                                       : (toolController.activeTool === toolData.id)
+            primaryHighlight: toolData.isToggle ? shapeToolActive
+                                                : (toolController.activeTool === toolData.id)
             onClicked: {
                 if (toolData.isToggle)
                     toolController.toggleShapes()

@@ -90,7 +90,7 @@ Rectangle {
             tooltip: btnData.tooltip
             // tool buttons highlight (blue) when they are the active tool
             active: isTool && toolController.activeTool === btnData.id
-            primary: active
+            primaryHighlight: active
             onClicked: {
                 if (isTool) {
                     toolController.activeTool = btnData.id

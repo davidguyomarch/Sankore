@@ -19,17 +19,20 @@ import Qt5Compat.GraphicalEffects
  * and a mouse-transparent tooltip (#247).
  *
  * The button is "dumb": the parent decides `active` and reacts to `clicked()`.
- * `primary` drives the blue (primary) highlight; when it differs from `active`
- * (e.g. the Shapes toggle: open palette = active tint, shape tool actually
- * selected = primary/blue) pass both.
+ * `primaryHighlight` drives the blue (primary) highlight; when it differs from
+ * `active` (e.g. the Shapes toggle: open palette = active tint, shape tool
+ * actually selected = blue) pass both.
  */
 Rectangle {
     id: btn
 
     property string iconName: ""
     property string tooltip: ""
-    property bool active: false          // softer highlight (hover-like tint)
-    property bool primary: active        // blue (primary) highlight + indicator
+    property bool active: false               // softer highlight (hover-like tint)
+    // NB: not named "primary" — that clashes with a QML-reserved/attached name
+    // and makes the whole palette fail to load ("Cannot assign to non-existent
+    // property \"primary\"").
+    property bool primaryHighlight: active    // blue highlight + active indicator
     property int buttonSize: 40
     property bool isVertical: false
     property bool placeTooltipBelow: false
@@ -42,7 +45,7 @@ Rectangle {
 
     property bool isHovered: btnMouse.containsMouse
 
-    color: primary ? themeManager.primary
+    color: primaryHighlight ? themeManager.primary
          : active ? themeManager.surfaceHover
          : isHovered ? themeManager.surfaceHover
          : "transparent"
@@ -63,13 +66,13 @@ Rectangle {
     ColorOverlay {
         anchors.fill: iconImg
         source: iconImg
-        color: btn.primary ? themeManager.onPrimary : themeManager.onSurface
+        color: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
         opacity: btn.active ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
     }
 
     // Active indicator bar (shown on primary highlight)
     Rectangle {
-        visible: btn.primary
+        visible: btn.primaryHighlight
         color: themeManager.onPrimary
         radius: 1.5
         width: btn.isVertical ? 3 : parent.width * 0.45
