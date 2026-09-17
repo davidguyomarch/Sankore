@@ -341,14 +341,27 @@ void UBDesktopAnnotationController::updateBackground()
 
 void UBDesktopAnnotationController::hideWindow()
 {
+    // #364: hideWindow() runs twice on the normal "back to board" path
+    // (goToUniboard() calls it directly, then restoreUniboard →
+    // UBApplicationController::hideDesktop → showBoard calls it again). Only the
+    // FIRST pass, while the overlay is still visible, is a real desktop→board
+    // transition: that is when we must remember the desktop tool and restore the
+    // board tool. On the second pass the current tool is already the board tool,
+    // so re-saving it into mDesktopStylusTool corrupted the "remember last
+    // desktop tool" state and made the tool selection behave inconsistently.
+    const bool wasShowingDesktop = mTransparentDrawingView && mTransparentDrawingView->isVisible();
+
     if (mToolbarQml)
         mToolbarQml->hide();
 
     if (mTransparentDrawingView)
         mTransparentDrawingView->hide();
 
-    mDesktopStylusTool = UBToolController::toolController()->stylusTool();
-    UBToolController::toolController()->setStylusTool(mBoardStylusTool);
+    if (wasShowingDesktop)
+    {
+        mDesktopStylusTool = UBToolController::toolController()->stylusTool();
+        UBToolController::toolController()->setStylusTool(mBoardStylusTool);
+    }
 }
 
 
