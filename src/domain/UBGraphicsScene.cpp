@@ -528,6 +528,11 @@ void UBGraphicsScene::setDrawingMode(bool bModeDesktop)
     mBackgroundRenderer->setDesktopMode(bModeDesktop);
 }
 
+bool UBGraphicsScene::isDrawingMode() const
+{
+    return mBackgroundRenderer && mBackgroundRenderer->isDesktopMode();
+}
+
 UBGraphicsPolygonItem* UBGraphicsScene::polygonToPolygonItem(const QPolygonF pPolygon)
 {
     return mDrawingHandler->polygonToPolygonItem(mContext, isDarkBackground(), pPolygon);
