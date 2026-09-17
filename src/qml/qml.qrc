@@ -5,6 +5,7 @@
         <file>PageNavigator.qml</file>
         <file>DrawingPropsBar.qml</file>
         <file>ShapesPaletteV2.qml</file>
+        <file>DesktopToolbar.qml</file>
         <file>DocumentsTopBar.qml</file>
         <file>TooltipLabel.qml</file>
     </qresource>

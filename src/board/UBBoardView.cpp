@@ -72,7 +72,6 @@
 
 #ifdef Q_OS_MACOS
 #include "desktop/UBDesktopAnnotationController.h"
-#include "desktop/UBDesktopPalette.h"
 #endif
 
 #include "domain/UBGraphicsTextItem.h"
@@ -1119,6 +1118,10 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
         event->ignore();
         return;
     }
+
+    // #336: the Desktop toolbar is an opaque, masked CHILD QQuickWidget of this
+    // overlay, so clicks on it are consumed natively by the child and never
+    // reach here — no hit-test/pass-through needed (unlike the top-level attempt).
 
     mIsDragInProgress = false;
 
