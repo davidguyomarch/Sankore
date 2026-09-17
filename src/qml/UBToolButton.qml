@@ -7,11 +7,14 @@
  */
 
 import QtQuick 2.15
-import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
 
 /**
- * ToolButton — shared toolbar button (#351).
+ * UBToolButton — shared toolbar button (#351).
+ *
+ * NB: named UBToolButton (not "ToolButton") to avoid colliding with
+ * QtQuick.Controls' ToolButton type — that collision made the palettes resolve
+ * the wrong type and fail to load (blank toolbars).
  *
  * One implementation of the Phosphor-icon toolbar button used by both
  * StylusPaletteV2 (board) and DesktopToolbar (desktop mode): themed colors,

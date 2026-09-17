@@ -76,11 +76,11 @@ Rectangle {
         }
     }
 
-    // --- Button Component (shared ToolButton, #351) ---
+    // --- Button Component (shared UBToolButton, #351) ---
     Component {
         id: buttonComp
 
-        ToolButton {
+        UBToolButton {
             required property var btnData
 
             readonly property bool isTool: btnData.kind === "tool"

@@ -75,11 +75,11 @@ Rectangle {
         }
     }
 
-    // --- Tool Button Component (uses shared ToolButton, #351) ---
+    // --- Tool Button Component (uses shared UBToolButton, #351) ---
     Component {
         id: toolButtonComp
 
-        ToolButton {
+        UBToolButton {
             required property var toolData
 
             // #318: the Shapes button is a toggle (opens the shapes palette) but
