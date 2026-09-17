@@ -134,6 +134,9 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
+                    // #336 diagnostic (temporary): confirm the top-level toolbar
+                    // receives clicks on the Windows VM.
+                    desktopController.logToolbarEvent("click id=" + (btnData.id !== undefined ? btnData.id : btnData.action))
                     if (btn.isTool) {
                         toolController.activeTool = btnData.id
                     } else if (btnData.action === "customCapture") {

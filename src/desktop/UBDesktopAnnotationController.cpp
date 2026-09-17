@@ -29,6 +29,7 @@
 #include <QPainterPath>
 #include <QFile>
 #include <QTextStream>
+#include <QWindow>
 
 #include "UBDesktopAnnotationController.h"
 
@@ -140,7 +141,8 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
 
 UBDesktopAnnotationController::~UBDesktopAnnotationController()
 {
-    // mToolbarQml is a child of mTransparentDrawingView and is deleted with it.
+    // mToolbarQml is a top-level window with no QObject parent → delete explicitly.
+    delete mToolbarQml;
     delete mTransparentDrawingScene;
     delete mTransparentDrawingView;
 }
@@ -149,37 +151,31 @@ UBDesktopAnnotationController::~UBDesktopAnnotationController()
 /**
  * \brief Create the V2 QML desktop toolbar (DesktopToolbar.qml).
  *
- * The toolbar is a CHILD of the overlay with an OPAQUE backing.
+ * TOP-LEVEL window (renders on Windows) tied to the overlay as a TRANSIENT
+ * PARENT (reliable z-order above it + receives clicks).
  *
- * #336 saga (all diagnosed on the Windows VM via startup.log):
- *  - child of the translucent overlay + WA_TranslucentBackground → the QML
- *    content was NOT painted on Windows (RHI backing not composited onto the
- *    translucent parent surface), even though status=Ready / rootObject present
- *    / visible=1 / correctly sized+positioned.
- *  - top-level separate window → it painted, but did NOT receive clicks: two
- *    WindowStaysOnTopHint windows (the fullscreen overlay shown last vs the
- *    toolbar) fight for z-order, and event->ignore() on the overlay cannot hand
- *    a click to a *different* top-level window.
+ * #336 saga, all diagnosed on the Windows VM via startup.log:
+ *  - child of the translucent overlay (translucent OR opaque backing) → the QML
+ *    content is NOT painted on Windows: a QQuickWidget child of a top-level
+ *    *translucent* window does not composite its RHI backing. status=Ready,
+ *    rootObject present, visible=1, correctly sized/positioned — yet blank.
+ *  - plain separate top-level window → it paints, but the fullscreen overlay
+ *    (another WindowStaysOnTopHint window, shown last) sits above it and eats the
+ *    clicks; event->ignore() cannot hand a click to a different top-level window.
  *
- * Fix (this version): keep it a CHILD of mTransparentDrawingView — so clicks and
- * z-order are intra-window and reliable, exactly like the board palettes — but
- * give it an OPAQUE backing (no WA_TranslucentBackground, opaque clearColor).
- * The board palettes render because their parent container is opaque; the opaque
- * backing is what makes the RHI content composite on Windows, not the parenting
- * itself. A rounded QRegion mask gives the rounded corners and lets clicks
- * outside the rounded shape fall through to the overlay (draw there).
+ * This version: top-level (so it paints) + set the overlay window as the
+ * toolbar's transient parent, which ties the toolbar's stacking to the overlay
+ * so it stays above it and receives input. Positioned in global coordinates.
+ * A rounded mask gives the rounded corners. (Diagnostic logToolbarEvent() is
+ * wired from the QML to confirm clicks arrive; temporary.)
  */
 void UBDesktopAnnotationController::setupToolbar()
 {
-    mToolbarQml = new QQuickWidget(mTransparentDrawingView);
+    mToolbarQml = new QQuickWidget(nullptr);
+    mToolbarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     mToolbarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    // OPAQUE backing (the fix): opaque clearColor + NO WA_TranslucentBackground.
-    // Use the themed surface color forced opaque so the bar looks right.
-    {
-        QColor s = UBThemeManager::instance()->surface();
-        s.setAlpha(255);
-        mToolbarQml->setClearColor(s);
-    }
+    mToolbarQml->setClearColor(Qt::transparent);
+    mToolbarQml->setAttribute(Qt::WA_TranslucentBackground);
     mToolbarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mToolbarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mToolbarQml->rootContext()->setContextProperty("toolController", UBToolController::toolController());
@@ -219,24 +215,33 @@ void UBDesktopAnnotationController::setupToolbar()
 }
 
 /**
- * \brief Place the toolbar at the bottom-center of the overlay (like the board).
+ * \brief Place the toolbar at the bottom-center of the screen (top-level → global coords).
  */
 void UBDesktopAnnotationController::positionToolbar()
 {
     if (!mToolbarQml || !mTransparentDrawingView)
         return;
 
-    // Child widget → position in the overlay's LOCAL coordinates. Bottom-center,
-    // matching the board's StylusPaletteV2 (y = height - thickness - 20).
-    const int posX = (mTransparentDrawingView->width() - mToolbarQml->width()) / 2;
-    const int posY = mTransparentDrawingView->height() - mToolbarQml->height() - 20;
-    mToolbarQml->move(qMax(0, posX), qMax(0, posY));
+    QScreen* screen = mTransparentDrawingView->screen();
+    const QRect g = screen ? screen->geometry()
+                           : QGuiApplication::primaryScreen()->geometry();
+    const int posX = g.x() + (g.width() - mToolbarQml->width()) / 2;
+    const int posY = g.y() + g.height() - mToolbarQml->height() - 40;
+    mToolbarQml->move(qMax(g.x(), posX), posY);
 }
 
 void UBDesktopAnnotationController::showToolbar()
 {
     if (!mToolbarQml)
         return;
+    // Tie the toolbar's stacking to the overlay: as a transient parent, the
+    // toolbar stays above the overlay and receives input, while remaining its own
+    // native (rendering) window. Must be done once both window handles exist.
+    if (mTransparentDrawingView && mTransparentDrawingView->windowHandle()) {
+        mToolbarQml->winId(); // force native window creation
+        if (mToolbarQml->windowHandle())
+            mToolbarQml->windowHandle()->setTransientParent(mTransparentDrawingView->windowHandle());
+    }
     positionToolbar();
     mToolbarQml->show();
     mToolbarQml->raise();
@@ -273,6 +278,12 @@ QPainterPath UBDesktopAnnotationController::desktopPalettePath() const
         result.addRect(mToolbarQml->geometry());
     return result;
 }
+
+void UBDesktopAnnotationController::logToolbarEvent(const QString& what)
+{
+    ubDesktopLog("QML event: " + what);
+}
+
 
 UBBoardView* UBDesktopAnnotationController::drawingView()
 {

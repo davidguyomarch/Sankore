@@ -62,6 +62,10 @@ class UBDesktopAnnotationController : public QObject
         QPainterPath desktopPalettePath() const;
         UBBoardView *drawingView();
 
+        // #336 diagnostic (temporary): let the QML toolbar report received clicks
+        // to startup.log, to confirm whether the top-level window gets input.
+        Q_INVOKABLE void logToolbarEvent(const QString& what);
+
         void TransparentWidgetResized();
 
 
