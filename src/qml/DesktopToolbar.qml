@@ -7,15 +7,13 @@
  */
 
 import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import Qt5Compat.GraphicalEffects
 
 /**
  * DesktopToolbar — V2 toolbar for the Desktop annotation mode (issue #336).
  *
  * Replaces the legacy UBDesktopPalette. Modeled on StylusPaletteV2.qml:
- * Phosphor icons + ColorOverlay, all colors from themeManager.
+ * shared UBToolButton (Phosphor icons recolored via MultiEffect), all colors
+ * from themeManager.
  *
  * Two kinds of buttons:
  *  - tool buttons bound to UBToolController.activeTool (ids match
