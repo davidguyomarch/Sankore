@@ -29,7 +29,6 @@
 #include "controllers/UBToolController.h"
 #include "gui/UBMainWindow.h"
 #include "gui/UBToolbarButtonGroup.h"
-#include "gui/UBRightPalette.h"
 
 
 UBDesktopPropertyPalette::UBDesktopPropertyPalette(QWidget *parent)
