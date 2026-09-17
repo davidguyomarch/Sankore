@@ -58,12 +58,8 @@ class UBDesktopAnnotationController : public QObject
         void showWindow();
         void hideWindow();
 
-        // Rounded region covering the QML toolbar, so UBBoardView lets clicks
-        // on the toolbar pass through instead of drawing on the overlay.
+        // Rounded region covering the QML toolbar (macOS tabletEvent workaround).
         QPainterPath desktopPalettePath() const;
-        // #336: true if a GLOBAL screen point falls within the (top-level) QML
-        // toolbar window — used by UBBoardView to avoid annotating under it.
-        bool isOnDesktopToolbar(const QPoint& globalPos) const;
         UBBoardView *drawingView();
 
         void TransparentWidgetResized();

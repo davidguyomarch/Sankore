@@ -140,9 +140,7 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
 
 UBDesktopAnnotationController::~UBDesktopAnnotationController()
 {
-    // mToolbarQml is now a top-level window with no parent (#336), so it must be
-    // deleted explicitly (it is no longer owned by mTransparentDrawingView).
-    delete mToolbarQml;
+    // mToolbarQml is a child of mTransparentDrawingView and is deleted with it.
     delete mTransparentDrawingScene;
     delete mTransparentDrawingView;
 }
@@ -151,32 +149,37 @@ UBDesktopAnnotationController::~UBDesktopAnnotationController()
 /**
  * \brief Create the V2 QML desktop toolbar (DesktopToolbar.qml).
  *
- * The toolbar is a TOP-LEVEL, OPAQUE window (not a child of the overlay).
+ * The toolbar is a CHILD of the overlay with an OPAQUE backing.
  *
- * #336: a QQuickWidget *child* of mTransparentDrawingView (a top-level
- * translucent frameless window) does not render its QML content on Windows — the
- * RHI backing is not composited onto the translucent parent surface. The C++
- * state was correct (status=Ready, rootObject present, visible=1,
- * sized/positioned) yet nothing was painted (diagnosed via startup.log). The
- * board palettes render fine because they are children of an opaque container.
+ * #336 saga (all diagnosed on the Windows VM via startup.log):
+ *  - child of the translucent overlay + WA_TranslucentBackground → the QML
+ *    content was NOT painted on Windows (RHI backing not composited onto the
+ *    translucent parent surface), even though status=Ready / rootObject present
+ *    / visible=1 / correctly sized+positioned.
+ *  - top-level separate window → it painted, but did NOT receive clicks: two
+ *    WindowStaysOnTopHint windows (the fullscreen overlay shown last vs the
+ *    toolbar) fight for z-order, and event->ignore() on the overlay cannot hand
+ *    a click to a *different* top-level window.
  *
- * Fix: make the toolbar its own frameless, always-on-top TOP-LEVEL window. A
- * top-level translucent QQuickWidget composites correctly on Windows (unlike the
- * child-of-translucent-parent case), so we keep the themed semi-transparent
- * surface + transparent clearColor. A rounded QRegion mask gives the rounded
- * corners and lets clicks outside the rounded shape fall through. It is
- * positioned in global screen coordinates over the overlay.
+ * Fix (this version): keep it a CHILD of mTransparentDrawingView — so clicks and
+ * z-order are intra-window and reliable, exactly like the board palettes — but
+ * give it an OPAQUE backing (no WA_TranslucentBackground, opaque clearColor).
+ * The board palettes render because their parent container is opaque; the opaque
+ * backing is what makes the RHI content composite on Windows, not the parenting
+ * itself. A rounded QRegion mask gives the rounded corners and lets clicks
+ * outside the rounded shape fall through to the overlay (draw there).
  */
 void UBDesktopAnnotationController::setupToolbar()
 {
-    mToolbarQml = new QQuickWidget(nullptr);
-    mToolbarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    mToolbarQml = new QQuickWidget(mTransparentDrawingView);
     mToolbarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    // Translucent is fine for a TOP-LEVEL window (it composites on Windows);
-    // the bug was only a translucent QQuickWidget *child* of the translucent
-    // overlay. Top-level + translucent keeps the themed semi-transparent surface.
-    mToolbarQml->setClearColor(Qt::transparent);
-    mToolbarQml->setAttribute(Qt::WA_TranslucentBackground);
+    // OPAQUE backing (the fix): opaque clearColor + NO WA_TranslucentBackground.
+    // Use the themed surface color forced opaque so the bar looks right.
+    {
+        QColor s = UBThemeManager::instance()->surface();
+        s.setAlpha(255);
+        mToolbarQml->setClearColor(s);
+    }
     mToolbarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mToolbarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mToolbarQml->rootContext()->setContextProperty("toolController", UBToolController::toolController());
@@ -216,21 +219,18 @@ void UBDesktopAnnotationController::setupToolbar()
 }
 
 /**
- * \brief Place the toolbar at the top-center of the overlay.
+ * \brief Place the toolbar at the bottom-center of the overlay (like the board).
  */
 void UBDesktopAnnotationController::positionToolbar()
 {
     if (!mToolbarQml || !mTransparentDrawingView)
         return;
 
-    // Top-level window → position in GLOBAL screen coordinates, centered on the
-    // top of the screen the overlay lives on.
-    QScreen* screen = mTransparentDrawingView->screen();
-    const QRect screenGeom = screen ? screen->geometry()
-                                    : QGuiApplication::primaryScreen()->geometry();
-    const int posX = screenGeom.x() + (screenGeom.width() - mToolbarQml->width()) / 2;
-    const int posY = screenGeom.y() + 24;
-    mToolbarQml->move(qMax(screenGeom.x(), posX), posY);
+    // Child widget → position in the overlay's LOCAL coordinates. Bottom-center,
+    // matching the board's StylusPaletteV2 (y = height - thickness - 20).
+    const int posX = (mTransparentDrawingView->width() - mToolbarQml->width()) / 2;
+    const int posY = mTransparentDrawingView->height() - mToolbarQml->height() - 20;
+    mToolbarQml->move(qMax(0, posX), qMax(0, posY));
 }
 
 void UBDesktopAnnotationController::showToolbar()
@@ -273,18 +273,6 @@ QPainterPath UBDesktopAnnotationController::desktopPalettePath() const
         result.addRect(mToolbarQml->geometry());
     return result;
 }
-
-bool UBDesktopAnnotationController::isOnDesktopToolbar(const QPoint& globalPos) const
-{
-    // The toolbar is a top-level window, so its geometry() is already in global
-    // screen coordinates. Test the point against it (the rounded corners are a
-    // few px; blocking the tight bounding rect is fine and avoids drawing under
-    // the bar).
-    if (!mToolbarQml || !mToolbarQml->isVisible())
-        return false;
-    return mToolbarQml->geometry().contains(globalPos);
-}
-
 
 UBBoardView* UBDesktopAnnotationController::drawingView()
 {
