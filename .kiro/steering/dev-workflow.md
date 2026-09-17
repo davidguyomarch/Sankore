@@ -351,14 +351,30 @@ docker run --rm -v $(pwd):/src -w /src sankore-dev bash -c '
 '
 ```
 
-- **Erreurs bloquantes à corriger** : `non-existent property`, `Cannot assign`,
-  `reserved`, `Type … not found`, erreurs de syntaxe.
+- **Erreurs bloquantes à corriger** : `non-existent property`,
+  `Could not find property`, `Cannot assign`, `reserved`, `Type … not found`,
+  erreurs de syntaxe.
 - **Warnings à ignorer** : `Unqualified access` sur `themeManager` /
   `toolController` / `pageController` / `appController` / `desktopController`
   (ce sont des *context properties* injectées en C++ à l'exécution, invisibles de
   `qmllint`), et `Unused import`.
 
 Ne jamais pousser un changement QML sans avoir lancé `qmllint` dessus.
+
+**Deux pièges de nommage QML (les deux vécus sur #351, deux cycles VM perdus) :**
+
+1. **Ne jamais nommer une propriété comme un nom réservé/attaché QML** (`primary`,
+   `parent`, `data`, `state`, `visible`…). Symptôme : `Cannot assign to
+   non-existent property "…"` → le fichier ne charge pas. Préfixer si besoin
+   (ex. `primaryHighlight`).
+2. **Ne jamais nommer un composant `.qml` comme un type built-in de
+   QtQuick/QtQuick.Controls** (`ToolButton`, `Button`, `Label`, `Slider`,
+   `Rectangle`, `Text`…). Symptôme : le nom résout vers le type built-in (car
+   l'import explicite `QtQuick.Controls` prime sur l'import implicite du
+   répertoire), donc `qmllint` signale `Could not find property "…"` pour TOUTES
+   les propriétés custom, et le composant ne charge pas. Préfixer les composants
+   partagés du projet : `UBToolButton`, etc. (`ToolbarSeparator` est OK — pas de
+   type built-in de ce nom).
 
 ### Étape 2 : Push branche + PR + CI
 
