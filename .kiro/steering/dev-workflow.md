@@ -330,6 +330,52 @@ Ce qu'il faut vérifier dans le log :
 - `status=1` pour tous les QML widgets → Pas d'erreur de parsing QML
 - Aucune ligne `ERROR:` → Pas de crash QML
 
+### Étape 1c : Lint QML — obligatoire dès qu'on touche un `.qml` (~5 sec)
+
+**Une erreur QML ne se voit ni au build ni aux tests headless** : elle n'apparaît
+qu'au chargement runtime (souvent seulement sur la VM Windows, après un cycle CI
+de ~25 min). Exemple vécu (#351) : une propriété nommée `primary` — nom
+réservé/attaché QML — a fait échouer le chargement de `StylusPaletteV2.qml`
+(« Cannot assign to non-existent property "primary" »), rendant **les deux barres
+d'outils invisibles**, sans aucune erreur de compilation.
+
+`qmllint` (fourni par Qt, présent dans l'image dev) attrape ce genre d'erreur
+localement, en quelques secondes :
+
+```bash
+docker run --rm -v $(pwd):/src -w /src sankore-dev bash -c '
+  for f in src/qml/*.qml; do
+    echo "=== $f ==="
+    /usr/lib/qt6/bin/qmllint "$f"
+  done
+'
+```
+
+- **Erreurs bloquantes à corriger** : `non-existent property`,
+  `Could not find property`, `Cannot assign`, `reserved`, `Type … not found`,
+  erreurs de syntaxe.
+- **Warnings à ignorer** : `Unqualified access` sur `themeManager` /
+  `toolController` / `pageController` / `appController` / `desktopController`
+  (ce sont des *context properties* injectées en C++ à l'exécution, invisibles de
+  `qmllint`), et `Unused import`.
+
+Ne jamais pousser un changement QML sans avoir lancé `qmllint` dessus.
+
+**Deux pièges de nommage QML (les deux vécus sur #351, deux cycles VM perdus) :**
+
+1. **Ne jamais nommer une propriété comme un nom réservé/attaché QML** (`primary`,
+   `parent`, `data`, `state`, `visible`…). Symptôme : `Cannot assign to
+   non-existent property "…"` → le fichier ne charge pas. Préfixer si besoin
+   (ex. `primaryHighlight`).
+2. **Ne jamais nommer un composant `.qml` comme un type built-in de
+   QtQuick/QtQuick.Controls** (`ToolButton`, `Button`, `Label`, `Slider`,
+   `Rectangle`, `Text`…). Symptôme : le nom résout vers le type built-in (car
+   l'import explicite `QtQuick.Controls` prime sur l'import implicite du
+   répertoire), donc `qmllint` signale `Could not find property "…"` pour TOUTES
+   les propriétés custom, et le composant ne charge pas. Préfixer les composants
+   partagés du projet : `UBToolButton`, etc. (`ToolbarSeparator` est OK — pas de
+   type built-in de ce nom).
+
 ### Étape 2 : Push branche + PR + CI
 
 Pousser la branche et créer la PR immédiatement. Le CI Windows ne tourne que sur les PRs :
@@ -566,9 +612,12 @@ Avant tout commit et push, Kiro doit exécuter la validation locale complète :
 2. **Tests unitaires + couverture** : `./scripts/docker-build.sh --test-only`
    - Si un test échoue → corriger avant de continuer
    - Vérifier que la couverture ne régresse pas significativement
-3. **Si tout passe** → commiter avec `fix(#ID)` / `feat(#ID)` et pousser la branche
-4. **Créer la PR** immédiatement (le CI ne tourne que sur les PRs)
-5. Le développeur vérifie le CI, teste sur VM, puis demande le merge
+3. **Si un `.qml` a été touché** : `qmllint` (voir Étape 1c). Une erreur QML
+   passe le build/les tests mais casse l'UI au runtime — ne jamais pousser du
+   QML sans l'avoir linté.
+4. **Si tout passe** → commiter avec `fix(#ID)` / `feat(#ID)` et pousser la branche
+5. **Créer la PR** immédiatement (le CI ne tourne que sur les PRs)
+6. Le développeur vérifie le CI, teste sur VM, puis demande le merge
 
 Commande unique pour tout valider :
 ```bash
