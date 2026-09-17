@@ -274,133 +274,7 @@ UBFeaturesComputingThread::~UBFeaturesComputingThread()
     wait();
 }
 
-UBFeature::UBFeature(const QString &url
-                     , const QImage &icon
-                     , const QString &name
-                     , const QUrl &realPath
-                     , UBFeatureElementType type
-                     , Permissions pOwnPermissions
-                     , QString pSortKey)
-    : mThumbnail(icon)
-    , mDisplayName(name)
-    , mPath(realPath)
-    , elementType(type)
-    , mOwnPermissions(pOwnPermissions)
-    , mSortKey(pSortKey)
-    , mDisposition(Center)
-{
-    mName = getNameFromVirtualPath(url);
-    virtualDir = getVirtualDirFromVirtualPath(url);
-    if (mSortKey.isNull()) {
-        mSortKey = name;
-    }
-}
-
-UBFeature::~UBFeature()
-{
-}
-
-QString UBFeature::getNameFromVirtualPath(const QString &pVirtPath)
-{
-    QString result;
-    int slashPos = pVirtPath.lastIndexOf("/");
-    if (slashPos != -1) {
-        result = pVirtPath.right(pVirtPath.count() - slashPos - 1);
-    } else {
-        qDebug() << "UBFeature: incorrect virtual path parameter specified";
-    }
-
-    return result;
-}
-
-QString UBFeature::getVirtualDirFromVirtualPath(const QString &pVirtPath)
-{
-    QString result;
-    int slashPos = pVirtPath.lastIndexOf("/");
-    if (slashPos != -1) {
-        result = pVirtPath.left(slashPos);
-    } else {
-        qDebug() << "UBFeature: incorrect virtual path parameter specified";
-    }
-
-    return result;
-}
-
-QString UBFeature::getUrl() const
-{
-    if ( elementType == FEATURE_INTERNAL )
-        return getFullPath().toString();
-
-    return getFullPath().toLocalFile();
-}
-
-UBFeature &UBFeature::markedWithSortKey(const QString &str)
-{
-    mSortKey = str;
-    return *this;
-}
-
-bool UBFeature::operator ==( const UBFeature &f )const
-{
-    return virtualDir == f.getVirtualPath() && mName == f.getName() && mPath == f.getFullPath() && elementType == f.getType();
-}
-
-bool UBFeature::operator !=( const UBFeature &f )const
-{
-    return !(*this == f);
-}
-
-bool UBFeature::isFolder() const
-{
-    return elementType == FEATURE_CATEGORY || elementType == FEATURE_TRASH || elementType == FEATURE_FAVORITE
-        || elementType == FEATURE_FOLDER || elementType == FEATURE_SEARCH;
-}
-
-bool UBFeature::allowedCopy() const
-{
-    return isFolder()
-            && elementType != FEATURE_CATEGORY
-            && elementType != FEATURE_SEARCH;
-}
-
-bool UBFeature::isDeletable() const
-{
-    return elementType == FEATURE_ITEM
-            || elementType == FEATURE_AUDIO
-            || elementType == FEATURE_VIDEO
-            || elementType == FEATURE_IMAGE
-            || elementType == FEATURE_FLASH
-            || elementType == FEATURE_FOLDER
-            || elementType == FEATURE_BOOKMARK
-            || elementType == FEATURE_LINK
-    //Ilia. Just a hotfix. Permission mechanism for UBFeatures should be reworked
-            || getVirtualPath().startsWith("/root/Interactivities/Web");// Issue 1627 - CFA - 20131024 : Interactivities, not Applications
-}
-
-bool UBFeature::inTrash() const
-{
-    return getFullPath().toLocalFile().startsWith(QUrl::fromLocalFile(UBSettings::userTrashDirPath()).toLocalFile() );
-}
-
-//issue 1474 - NNE - 20131121
-void UBFeature::setName(const QString &newName)
-{
-    QString name = newName;
-    if(!this->isFolder()){
-        name += '.' + UBFileSystemUtils::extension(this->mName);
-    }
-
-    this->mDisplayName = name;
-    this->mName = name;
-    this->mSortKey = name;
-
-    QString fullPath = this->getFullPath().toString();
-    int slashPos = fullPath.lastIndexOf("/");
-
-    QString newUrl = fullPath.mid(0, slashPos+1) + name;
-    this->mPath = QUrl(newUrl);
-}
-//issue 1474 - NNE - 20131121 : END
+// UBFeature method bodies were extracted to src/board/UBFeature.cpp (#258).
 
 UBFeaturesController::UBFeaturesController(QWidget *pParentWidget) :
     QObject(pParentWidget)
@@ -1187,16 +1061,8 @@ void UBFeaturesController::addItemAsBackground(UBFeature &item, bool isFromPalet
     UBApplication::boardController->persistCurrentScene();
 }
 
-// Issue 1684 - CFA - 20131120
-const UBFeatureBackgroundDisposition& UBFeature::backgroundDisposition() const
-{
-    return mDisposition;
-}
-
-void UBFeature::setBackgroundDisposition(UBFeatureBackgroundDisposition disposition)
-{
-    mDisposition = disposition;
-}
+// UBFeature::backgroundDisposition() / setBackgroundDisposition() moved to
+// src/board/UBFeature.cpp (#258).
 
 
 void UBFeaturesController::addItemAsDefaultBackground(UBFeature &item, bool isFromPalette)

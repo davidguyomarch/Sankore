@@ -67,3 +67,8 @@ QString UBSettings::userImageDirectory()
 {
     return QDir::tempPath() + "/OpenSankoreTests/images";
 }
+
+QString UBSettings::userTrashDirPath()
+{
+    return QDir::tempPath() + "/OpenSankoreTests/trash";
+}

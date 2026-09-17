@@ -104,6 +104,7 @@ public:
     static QString userDataDirectory();
     static QString userDocumentDirectory();
     static QString userImageDirectory();
+    static QString userTrashDirPath();
 
 private:
     static UBSettings* sInstance;

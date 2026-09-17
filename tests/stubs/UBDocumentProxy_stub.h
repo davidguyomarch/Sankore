@@ -35,7 +35,9 @@
 
 #include "../src/frameworks/UBStringUtils.h"
 #include "stubs/UBSettings_stub.h"
-#include "stubs/UBFeature_stub.h"
+// #258: use the real (light) UBFeature header, not a divergent stub — a second
+// UBFeature layout in the same binary is an ODR violation (crash in ~UBFeature).
+#include "board/UBFeature.h"
 
 class UBGraphicsScene;
 
