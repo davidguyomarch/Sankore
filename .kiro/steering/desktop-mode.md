@@ -18,7 +18,7 @@ Vérifier ici avant de toucher au code desktop.
 | Instance unique | `UBApplicationController::mUninoteController` | Créée une fois ; accessible via `UBApplication::applicationController->uninotesController()` |
 | Overlay plein écran | `mTransparentDrawingView` (`UBBoardView`) | Top-level `Qt::Window`, frameless, always-on-top, translucide |
 | Scène de l'overlay | `mTransparentDrawingScene` (`UBGraphicsScene`) | `setDrawingMode(true)`, brush transparent |
-| Barre d'outils | `mToolbarQml` (`QQuickWidget`) → `DesktopToolbar.qml` | Enfant de `mTransparentDrawingView` |
+| Barre d'outils | `mToolbarQml` (`QQuickWidget`) → `DesktopToolbar.qml` | Fenêtre **top-level** (bas-centre) ; overlay = **transient parent** |
 | Outil / couleurs | `UBToolController::toolController()` (singleton) | Partagé avec le mode tableau |
 
 ## Entrée / sortie du mode
@@ -65,28 +65,47 @@ zone, Capture écran | Retour au tableau. Icônes : `pen`, `eraser`,
 
 ### Le pattern d'hébergement (à réutiliser)
 
-`UBDesktopAnnotationController::setupToolbar()` reproduit le pattern
-`UBBoardPaletteManager` pour les QQuickWidget V2 :
+**Leçon durement acquise sur la VM Windows (#336, 4 itérations).** Contrairement
+aux palettes du tableau (enfants du container **opaque** `mContainer`), la toolbar
+desktop **ne peut PAS être un `QQuickWidget` enfant de l'overlay** :
+
+| Approche | Rend sur Windows ? | Reçoit les clics ? |
+|----------|--------------------|--------------------|
+| Enfant de l'overlay, backing translucide | ❌ | — |
+| Enfant de l'overlay, backing **opaque** | ❌ | — |
+| Fenêtre top-level séparée | ✅ | ❌ (l'overlay plein écran capte les clics) |
+| **Top-level + overlay en transient parent** | ✅ | ✅ |
+
+Un `QQuickWidget` **enfant d'une fenêtre top-level translucide** ne composite
+jamais son backing RHI sur Windows (rien peint, même avec `status=Ready`,
+`rootObject` présent, `visible=1`). Seule une **fenêtre top-level** peint. Mais
+deux fenêtres `WindowStaysOnTopHint` (overlay plein écran vs toolbar) se disputent
+le z-order, et `event->ignore()` sur l'overlay ne transfère pas le clic à une
+autre fenêtre. Solution qui marche :
 
 ```cpp
-mToolbarQml = new QQuickWidget(mTransparentDrawingView);   // parent = overlay
+mToolbarQml = new QQuickWidget(nullptr);                    // TOP-LEVEL
+mToolbarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 mToolbarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
 mToolbarQml->setClearColor(Qt::transparent);
-mToolbarQml->setAttribute(Qt::WA_TranslucentBackground);
+mToolbarQml->setAttribute(Qt::WA_TranslucentBackground);    // OK pour un top-level
 mToolbarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
 mToolbarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
 mToolbarQml->rootContext()->setContextProperty("toolController", UBToolController::toolController());
 mToolbarQml->rootContext()->setContextProperty("desktopController", this); // slots capture/retour
 mToolbarQml->setSource(QUrl("qrc:/qml/DesktopToolbar.qml"));
-// taille fixe calculée, puis masque arrondi pour laisser passer les clics hors du rect arrondi :
-QPainterPath p; p.addRoundedRect(0,0,w,h,12,12);
-mToolbarQml->setMask(QRegion(p.toFillPolygon().toPolygon()));
+// taille fixe + masque arrondi (laisse passer les clics hors du rect arrondi)
+
+// Dans showToolbar(), une fois les deux handles natifs créés :
+mToolbarQml->winId();                                       // force la fenêtre native
+mToolbarQml->windowHandle()->setTransientParent(
+    mTransparentDrawingView->windowHandle());               // ⇒ reste au-dessus + reçoit les clics
 ```
 
-Ingrédients transparence : `clearColor transparent` + `WA_TranslucentBackground`
-+ `WA_AlwaysStackOnTop` + masque arrondi. La toolbar est re-centrée en haut par
+Positionnée en **coordonnées GLOBALES** (top-level), **bas-centre**, via
 `positionToolbar()`, rappelée depuis `onTransparentWidgetResized()` (connecté à
-`UBBoardView::resized`).
+`UBBoardView::resized`). Top-level sans parent QObject ⇒ **supprimée
+explicitement** dans le destructeur.
 
 **Slots exposés à QML** : `customCapture`, `screenCapture`, `goToUniboard` sont
 des **public slots** du contrôleur → automatiquement invocables depuis QML via le
@@ -126,9 +145,10 @@ Sous Linux, `updateMask(bool)` construit en plus un masque de fenêtre X11
 
 ## Pièges (appris pendant #336 / #135 / #241)
 
-- **Parenté de la toolbar** : la toolbar QML doit être enfant de
-  `mTransparentDrawingView` (l'overlay), **pas** de `mContainer` (la board view,
-  cachée en mode desktop). Se tromper de parent = toolbar invisible.
+- **Hébergement de la toolbar** : fenêtre **top-level** + overlay en **transient
+  parent** (voir le tableau plus haut). PAS un `QQuickWidget` enfant de l'overlay
+  (ne rend pas sur Windows), PAS une top-level sans transient parent (ne reçoit
+  pas les clics).
 - **Toujours re-`raise()` la toolbar après `showFullScreen()`** de l'overlay,
   sinon elle passe sous la vue.
 - **#135 (ré-entrance)** : ne pas appeler `processEvents()` pendant la transition
