@@ -76,95 +76,38 @@ Rectangle {
         }
     }
 
-    // --- Button Component (tool + action share the same look) ---
+    // --- Button Component (shared ToolButton, #351) ---
     Component {
         id: buttonComp
 
-        Rectangle {
-            id: btn
-            width: root.buttonSize
-            height: root.buttonSize
-            radius: 8
+        ToolButton {
+            required property var btnData
 
             readonly property bool isTool: btnData.kind === "tool"
-            // Tool buttons highlight when they are the active tool.
-            property bool isActive: isTool && toolController.activeTool === btnData.id
-            property bool isHovered: btnMouse.containsMouse
 
-            color: isActive ? themeManager.primary
-                 : isHovered ? themeManager.surfaceHover
-                 : "transparent"
-
-            // Icon (hidden source for ColorOverlay)
-            Image {
-                id: iconImg
-                anchors.centerIn: parent
-                width: 24
-                height: 24
-                source: "qrc:/icons/phosphor/" + btnData.icon + ".svg"
-                sourceSize: Qt.size(24, 24)
-                smooth: true
-                mipmap: true
-                visible: false
-            }
-
-            ColorOverlay {
-                anchors.fill: iconImg
-                source: iconImg
-                color: btn.isActive ? themeManager.onPrimary : themeManager.onSurface
-                opacity: btn.isActive ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
-            }
-
-            // Active indicator bar (tool buttons only)
-            Rectangle {
-                visible: btn.isActive
-                color: themeManager.onPrimary
-                radius: 1.5
-                width: parent.width * 0.45
-                height: 3
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    bottom: parent.bottom
-                    bottomMargin: 2
+            buttonSize: root.buttonSize
+            iconName: btnData.icon
+            tooltip: btnData.tooltip
+            // tool buttons highlight (blue) when they are the active tool
+            active: isTool && toolController.activeTool === btnData.id
+            primary: active
+            onClicked: {
+                if (isTool) {
+                    toolController.activeTool = btnData.id
+                } else if (btnData.action === "customCapture") {
+                    desktopController.customCapture()
+                } else if (btnData.action === "screenCapture") {
+                    desktopController.screenCapture()
+                } else if (btnData.action === "goToUniboard") {
+                    desktopController.goToUniboard()
                 }
-            }
-
-            MouseArea {
-                id: btnMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    if (btn.isTool) {
-                        toolController.activeTool = btnData.id
-                    } else if (btnData.action === "customCapture") {
-                        desktopController.customCapture()
-                    } else if (btnData.action === "screenCapture") {
-                        desktopController.screenCapture()
-                    } else if (btnData.action === "goToUniboard") {
-                        desktopController.goToUniboard()
-                    }
-                }
-            }
-
-            // #247: mouse-transparent tooltip above the button.
-            TooltipLabel {
-                anchor: btn
-                text: btnData.tooltip
-                show: btnMouse.containsMouse && btnData.tooltip !== ""
-                placeBelow: false
             }
         }
     }
 
-    // --- Separator Component ---
+    // --- Separator Component (shared, #351) ---
     Component {
         id: separatorComp
-
-        Rectangle {
-            width: 1
-            height: root.buttonSize * 0.6
-            color: themeManager.border
-            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-        }
+        ToolbarSeparator { buttonSize: root.buttonSize }
     }
 }

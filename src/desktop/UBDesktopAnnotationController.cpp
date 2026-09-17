@@ -122,12 +122,18 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
 
     // --- V2 QML Desktop Toolbar (issue #336) ---
     setupToolbar();
+    // --- V2 QML Drawing Props Bar (color/width) in desktop mode (issue #351) ---
+    setupPropsBar();
+    // Show/hide + resize the props bar when the active tool changes.
+    connect(UBToolController::toolController(), &UBToolController::activeToolChanged,
+            this, [this]() { updatePropsBarVisibility(); });
 }
 
 UBDesktopAnnotationController::~UBDesktopAnnotationController()
 {
-    // mToolbarQml is a top-level window with no QObject parent → delete explicitly.
+    // Top-level windows with no QObject parent → delete explicitly.
     delete mToolbarQml;
+    delete mPropsBarQml;
     delete mTransparentDrawingScene;
     delete mTransparentDrawingView;
 }
@@ -208,6 +214,82 @@ void UBDesktopAnnotationController::positionToolbar()
     mToolbarQml->move(qMax(g.x(), posX), posY);
 }
 
+/**
+ * \brief Create the drawing props bar (color/width) for desktop mode (#351).
+ *
+ * Reuses the board's DrawingPropsBar.qml, hosted exactly like the toolbar
+ * (top-level, transient-parented to the overlay). Shown above the toolbar when a
+ * drawing tool is active (toolController.showDrawingProps).
+ */
+void UBDesktopAnnotationController::setupPropsBar()
+{
+    mPropsBarQml = new QQuickWidget(nullptr);
+    mPropsBarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    mPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mPropsBarQml->setClearColor(Qt::transparent);
+    mPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
+    mPropsBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mPropsBarQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mPropsBarQml->rootContext()->setContextProperty("toolController", UBToolController::toolController());
+    mPropsBarQml->setSource(QUrl("qrc:/qml/DrawingPropsBar.qml"));
+    if (mPropsBarQml->status() == QQuickWidget::Error)
+        for (const auto& e : mPropsBarQml->errors())
+            qWarning() << "DesktopToolbar DrawingPropsBar QML error:" << e.toString();
+    mPropsBarQml->hide();
+}
+
+/**
+ * \brief Size + place the props bar centered above the toolbar (global coords).
+ */
+void UBDesktopAnnotationController::positionPropsBar()
+{
+    if (!mPropsBarQml || !mTransparentDrawingView || !mToolbarQml)
+        return;
+
+    // Same sizes as the board (UBBoardPaletteManager): 210 for the eraser
+    // (widths + actions), 280 otherwise (colors + widths).
+    const bool isEraser =
+        (UBToolController::toolController()->activeTool() == UBStylusTool::Eraser);
+    const int barW = isEraser ? 210 : 280;
+    const int barH = 48;
+    mPropsBarQml->setFixedSize(barW, barH);
+    {
+        QPainterPath path;
+        path.addRoundedRect(0, 0, barW, barH, 12, 12);
+        mPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
+    }
+
+    QScreen* screen = mTransparentDrawingView->screen();
+    const QRect g = screen ? screen->geometry()
+                           : QGuiApplication::primaryScreen()->geometry();
+    const int posX = g.x() + (g.width() - barW) / 2;
+    const int posY = mToolbarQml->y() - barH - 8; // just above the toolbar
+    mPropsBarQml->move(qMax(g.x(), posX), posY);
+}
+
+/**
+ * \brief Show/hide + reposition the props bar based on the active tool.
+ */
+void UBDesktopAnnotationController::updatePropsBarVisibility()
+{
+    if (!mPropsBarQml)
+        return;
+    // Only while the desktop overlay is up.
+    const bool overlayUp = mTransparentDrawingView && mTransparentDrawingView->isVisible();
+    if (overlayUp && UBToolController::toolController()->showDrawingProps()) {
+        if (mTransparentDrawingView->windowHandle()) {
+            mPropsBarQml->winId();
+            if (mPropsBarQml->windowHandle())
+                mPropsBarQml->windowHandle()->setTransientParent(mTransparentDrawingView->windowHandle());
+        }
+        positionPropsBar();
+        mPropsBarQml->show();
+        mPropsBarQml->raise();
+    } else {
+        mPropsBarQml->hide();
+    }
+}
+
 void UBDesktopAnnotationController::showToolbar()
 {
     if (!mToolbarQml)
@@ -223,12 +305,15 @@ void UBDesktopAnnotationController::showToolbar()
     positionToolbar();
     mToolbarQml->show();
     mToolbarQml->raise();
+    updatePropsBarVisibility();
 }
 
 void UBDesktopAnnotationController::hideToolbarForCapture()
 {
     if (mToolbarQml)
         mToolbarQml->hide();
+    if (mPropsBarQml)
+        mPropsBarQml->hide();
     qApp->processEvents();
 }
 
@@ -238,6 +323,7 @@ void UBDesktopAnnotationController::restoreToolbarAfterCapture()
         mToolbarQml->show();
         mToolbarQml->raise();
     }
+    updatePropsBarVisibility();
 }
 
 
@@ -343,6 +429,8 @@ void UBDesktopAnnotationController::hideWindow()
 {
     if (mToolbarQml)
         mToolbarQml->hide();
+    if (mPropsBarQml)
+        mPropsBarQml->hide();
 
     if (mTransparentDrawingView)
         mTransparentDrawingView->hide();
@@ -481,6 +569,7 @@ void UBDesktopAnnotationController::TransparentWidgetResized()
 void UBDesktopAnnotationController::onTransparentWidgetResized()
 {
     positionToolbar();
+    updatePropsBarVisibility(); // repositions the props bar above the toolbar
 }
 
 void UBDesktopAnnotationController::updateMask(bool bTransparent)

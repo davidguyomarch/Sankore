@@ -8,5 +8,7 @@
         <file>DesktopToolbar.qml</file>
         <file>DocumentsTopBar.qml</file>
         <file>TooltipLabel.qml</file>
+        <file>ToolButton.qml</file>
+        <file>ToolbarSeparator.qml</file>
     </qresource>
 </RCC>

@@ -75,111 +75,44 @@ Rectangle {
         }
     }
 
-    // --- Tool Button Component ---
+    // --- Tool Button Component (uses shared ToolButton, #351) ---
     Component {
         id: toolButtonComp
 
-        Rectangle {
-            id: btn
-            width: root.buttonSize
-            height: root.buttonSize
-            radius: 8
+        ToolButton {
+            required property var toolData
 
-            // #318 regression: the Shapes button is a toggle (opens the shapes
-            // palette), but it must also read as "selected" (blue) while the
-            // shape tool is the active tool — activeTool === Drawing (14) — so
-            // the user sees which tool is in use, like every other tool button.
+            // #318: the Shapes button is a toggle (opens the shapes palette) but
+            // must also read as "selected" (blue) while the shape tool is active
+            // (activeTool === Drawing (14)).
             readonly property bool shapeToolActive:
                 toolData.isToggle && toolController.activeTool === 14
 
-            property bool isActive: {
+            buttonSize: root.buttonSize
+            isVertical: root.isVertical
+            iconName: toolData.icon
+            tooltip: toolData.tooltip
+            // softer tint when the shapes palette is open (without drawing)
+            active: toolData.isToggle ? (toolController.shapesVisible || shapeToolActive)
+                                      : (toolController.activeTool === toolData.id)
+            // blue highlight = the tool is actually the active tool
+            primary: toolData.isToggle ? shapeToolActive
+                                       : (toolController.activeTool === toolData.id)
+            onClicked: {
                 if (toolData.isToggle)
-                    return toolController.shapesVisible || shapeToolActive
-                return toolController.activeTool === toolData.id
-            }
-            // Blue (primary) highlight when this is the active tool. For the
-            // Shapes toggle that means the shape tool is active; merely having
-            // the palette open (without drawing) keeps the softer hover tint.
-            readonly property bool primaryHighlight:
-                toolData.isToggle ? shapeToolActive : isActive
-            property bool isHovered: btnMouse.containsMouse
-
-            color: primaryHighlight ? themeManager.primary
-                 : isActive ? themeManager.surfaceHover
-                 : isHovered ? themeManager.surfaceHover
-                 : "transparent"
-
-            // Icon (hidden source for ColorOverlay)
-            Image {
-                id: iconImg
-                anchors.centerIn: parent
-                width: 24
-                height: 24
-                source: "qrc:/icons/phosphor/" + toolData.icon + ".svg"
-                sourceSize: Qt.size(24, 24)
-                smooth: true
-                mipmap: true
-                visible: false
-            }
-
-            // Colored icon overlay
-            ColorOverlay {
-                anchors.fill: iconImg
-                source: iconImg
-                color: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
-                opacity: btn.isActive ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
-            }
-
-            // Active indicator bar
-            Rectangle {
-                visible: btn.primaryHighlight
-                color: themeManager.onPrimary
-                radius: 1.5
-                width: root.isVertical ? 3 : parent.width * 0.45
-                height: root.isVertical ? parent.height * 0.45 : 3
-                anchors {
-                    horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-                    right: root.isVertical ? parent.right : undefined
-                    rightMargin: root.isVertical ? 2 : 0
-                    bottom: root.isVertical ? undefined : parent.bottom
-                    bottomMargin: root.isVertical ? 0 : 2
-                }
-            }
-
-            MouseArea {
-                id: btnMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    if (toolData.isToggle) {
-                        toolController.toggleShapes()
-                    } else {
-                        toolController.activeTool = toolData.id
-                    }
-                }
-            }
-
-            // #247: mouse-transparent tooltip above the button (bottom bar), so
-            // it never intercepts the click like the QtQuick ToolTip Popup did.
-            TooltipLabel {
-                anchor: btn
-                text: toolData.tooltip
-                show: btnMouse.containsMouse && toolData.tooltip !== ""
-                placeBelow: false
+                    toolController.toggleShapes()
+                else
+                    toolController.activeTool = toolData.id
             }
         }
     }
 
-    // --- Separator Component ---
+    // --- Separator Component (shared, #351) ---
     Component {
         id: separatorComp
-
-        Rectangle {
-            width: root.isVertical ? root.buttonSize * 0.6 : 1
-            height: root.isVertical ? 1 : root.buttonSize * 0.6
-            color: themeManager.border
-            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+        ToolbarSeparator {
+            buttonSize: root.buttonSize
+            isVertical: root.isVertical
         }
     }
 }
