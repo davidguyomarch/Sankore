@@ -274,6 +274,17 @@ QPainterPath UBDesktopAnnotationController::desktopPalettePath() const
     return result;
 }
 
+bool UBDesktopAnnotationController::isOnDesktopToolbar(const QPoint& globalPos) const
+{
+    // The toolbar is a top-level window, so its geometry() is already in global
+    // screen coordinates. Test the point against it (the rounded corners are a
+    // few px; blocking the tight bounding rect is fine and avoids drawing under
+    // the bar).
+    if (!mToolbarQml || !mToolbarQml->isVisible())
+        return false;
+    return mToolbarQml->geometry().contains(globalPos);
+}
+
 
 UBBoardView* UBDesktopAnnotationController::drawingView()
 {

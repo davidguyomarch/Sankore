@@ -61,6 +61,9 @@ class UBDesktopAnnotationController : public QObject
         // Rounded region covering the QML toolbar, so UBBoardView lets clicks
         // on the toolbar pass through instead of drawing on the overlay.
         QPainterPath desktopPalettePath() const;
+        // #336: true if a GLOBAL screen point falls within the (top-level) QML
+        // toolbar window — used by UBBoardView to avoid annotating under it.
+        bool isOnDesktopToolbar(const QPoint& globalPos) const;
         UBBoardView *drawingView();
 
         void TransparentWidgetResized();

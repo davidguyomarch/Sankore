@@ -70,9 +70,8 @@
 #include "board/UBBoardController.h"
 #include "board/UBBoardPaletteManager.h"
 
-#ifdef Q_OS_MACOS
+// #336: needed on all platforms now (isOnDesktopToolbar hit-test in mouse events)
 #include "desktop/UBDesktopAnnotationController.h"
-#endif
 
 #include "domain/UBGraphicsTextItem.h"
 #include "domain/UBGraphicsPixmapItem.h"
@@ -1119,6 +1118,17 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
         return;
     }
 
+    // #336: in Desktop mode the QML toolbar is a separate top-level window on
+    // top of this transparent overlay. Do not draw where the toolbar is — reject
+    // presses whose global position falls within the toolbar so the click goes
+    // to the toolbar window instead of annotating under it.
+    if (bIsDesktop && UBApplication::applicationController
+        && UBApplication::applicationController->uninotesController()
+        && UBApplication::applicationController->uninotesController()->isOnDesktopToolbar(event->globalPosition().toPoint())) {
+        event->ignore();
+        return;
+    }
+
     mIsDragInProgress = false;
 
     if (isAbsurdPoint (event->pos ()))
@@ -1302,6 +1312,15 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
 
     //EV-7 - NNE - 20131231
     emit mouseMove(event);
+
+  // #336: don't annotate under the Desktop-mode QML toolbar (separate top-level
+  // window). See mousePressEvent.
+  if (bIsDesktop && UBApplication::applicationController
+      && UBApplication::applicationController->uninotesController()
+      && UBApplication::applicationController->uninotesController()->isOnDesktopToolbar(event->globalPosition().toPoint())) {
+      event->ignore();
+      return;
+  }
 
   if(!mIsDragInProgress && ((mapToScene(event->pos()) - mLastPressedMousePos).manhattanLength() < QApplication::startDragDistance()))
   {
