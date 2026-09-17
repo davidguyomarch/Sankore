@@ -461,6 +461,14 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 
 ## Règles pour Kiro
 
+### Décisions structurantes → proposer un ADR
+
+Quand le développeur prend une **décision structurante** (choix d'archi/techno,
+format de fichier ou API, abandon/remplacement/stub d'un module, tradeoff
+perf/sécurité/build assumé), Kiro **propose** de la consigner en ADR dans
+`docs/adr/`. Kiro ne crée jamais un ADR de sa propre initiative. Détail du
+format et du workflow : voir `.kiro/steering/adr.md`.
+
 ### Avant de modifier du code
 
 1. **Vérifier la branche** — `git branch --show-current` doit correspondre à l'issue
