@@ -44,3 +44,15 @@ void TestUBHyperlink::testEmptyStaysEmpty()
     QCOMPARE(UBHyperlink::normalizeUrl(""), QString(""));
     QCOMPARE(UBHyperlink::normalizeUrl("   "), QString(""));
 }
+
+// #358 — a URL pasted with an explicit https:// scheme must not get an extra
+// scheme prepended. The old add-link action prepended http:// unconditionally
+// unless the string already started with "http://", so "https://x" became
+// "http://https://x". The shared normalizer leaves any existing scheme intact.
+void TestUBHyperlink::testHttpsNotDoublePrefixed()
+{
+    QCOMPARE(UBHyperlink::normalizeUrl("https://example.com"),
+             QString("https://example.com"));
+    QCOMPARE(UBHyperlink::normalizeUrl("http://example.com"),
+             QString("http://example.com"));
+}
