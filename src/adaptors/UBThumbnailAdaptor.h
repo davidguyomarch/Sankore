@@ -43,6 +43,15 @@ class UBThumbnailAdaptor //static class
 public:
     static QUrl thumbnailUrl(UBDocumentProxy* proxy, int pageIndex);
 
+    /**
+     * Generate page%1.thumbnail.jpg for a single page if it does not exist yet
+     * (#359). Cheaper than generateMissingThumbnails (which rescans the whole
+     * document); lets a consumer guarantee the file is on disk before it hands
+     * out its URL, so a QML Image loads it on the first try instead of only
+     * once the page is selected. No-op if the file already exists.
+     */
+    static void ensureThumbnail(UBDocumentProxy* proxy, int pageIndex);
+
     static void persistScene(UBDocumentProxy* proxy, UBGraphicsScene* pScene, int pageIndex, bool overrideModified = false);
 
     static const QPixmap* get(UBDocumentProxy* proxy, int index);
