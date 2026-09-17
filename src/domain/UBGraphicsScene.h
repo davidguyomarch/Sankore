@@ -376,6 +376,10 @@ public slots:
         void setBackgroundType(bool pIsDark, UBBackgroundGrid::Type pGridType);
         void setBackgroundZoomFactor(qreal zoom);
         void setDrawingMode(bool bModeDesktop);
+        /// True on the transparent desktop-annotation overlay (no opaque page
+        /// behind the items) — mirror of setDrawingMode(true). Used by marker
+        /// compositing (#365).
+        bool isDrawingMode() const;
         void deselectAllItems();
 
         UBGraphicsPixmapItem* addPixmap(const QPixmap& pPixmap, 

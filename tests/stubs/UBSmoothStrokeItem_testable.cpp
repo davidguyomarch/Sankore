@@ -38,10 +38,15 @@ public:
 #include "domain/UBItem.h"
 
 // Minimal UBGraphicsScene stub — just enough for UBSmoothStrokeItem::scene()
+// and the marker compositing check (#365). isDrawingMode()==false /
+// isLightBackground()==false reproduces the transparent desktop-overlay case
+// (plain SourceOver, no Darken), which is what the #365 test renders.
 class UBGraphicsScene : public QGraphicsScene
 {
 public:
     using QGraphicsScene::QGraphicsScene;
+    bool isDrawingMode() const { return false; }
+    bool isLightBackground() const { return false; }
 };
 
 // Stubs for UBItem and UBGraphicsItem base class functions
