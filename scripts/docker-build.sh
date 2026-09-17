@@ -12,6 +12,7 @@
 #   ./scripts/docker-build.sh --x64 --build-only # x64: build app only
 #   ./scripts/docker-build.sh --clean            # ARM64: clean build
 #   ./scripts/docker-build.sh --x64 --clean      # x64: clean build
+#   ./scripts/docker-build.sh --check-premoc     # verify committed tests/premoc/ is in sync
 #
 # Requirements:
 #   - Docker Desktop with buildx (QEMU for x64 on ARM host)
@@ -30,6 +31,7 @@ BUILD_TESTS=true
 RUN_TESTS=true
 COVERAGE=true
 CLEAN=false
+CHECK_PREMOC=false
 
 # --- Parse arguments ---
 while [[ $# -gt 0 ]]; do
@@ -55,6 +57,15 @@ while [[ $# -gt 0 ]]; do
             shift ;;
         --clean)
             CLEAN=true
+            shift ;;
+        --check-premoc)
+            # Verify every premoc referenced by tests.pro is committed
+            # (presence guard, #348 / ADR-0002). Pure file check, no build.
+            CHECK_PREMOC=true
+            BUILD_APP=false
+            BUILD_TESTS=false
+            RUN_TESTS=false
+            COVERAGE=false
             shift ;;
         -h|--help)
             head -15 "$0" | tail -11
@@ -126,6 +137,35 @@ if $CLEAN; then
     '
     echo "✓ Clean done."
     echo ""
+fi
+
+# --- Premoc presence guard (#348 / ADR-0002) ---
+# The CI consumes committed tests/premoc/*.cpp (it never regenerates moc). This
+# guard fails if tests.pro references a premoc/ file that is NOT committed — the
+# silent trap where a new QObject test passes locally (docker-build regenerates
+# it) but its moc is missing on CI. Pure file check, no Docker/moc needed.
+# Content staleness is intentionally not diff-checked: committed files are a
+# working baseline generated across several moc versions (6.2.4/6.8.x), so a
+# version diff would false-positive; a truly stale moc fails at compile time.
+if $CHECK_PREMOC; then
+    echo "🔎 Checking premoc presence..."
+    cd "$PROJECT_DIR/tests"
+    STATUS=0
+    # Only real references (strip comments: everything after '#').
+    for ref in $(sed 's/#.*//' tests.pro | grep -oE 'premoc/moc_[A-Za-z0-9_]+\.cpp' | sort -u); do
+        if [ ! -f "$ref" ]; then
+            echo "MISSING committed premoc referenced by tests.pro: tests/$ref"
+            STATUS=1
+        fi
+    done
+    if [ $STATUS -ne 0 ]; then
+        echo ""
+        echo "A QObject premoc is referenced but not committed."
+        echo "Run ./scripts/docker-build.sh, then: git add tests/premoc/"
+        exit 1
+    fi
+    echo "✓ All premoc referenced by tests.pro are committed."
+    exit 0
 fi
 
 # --- Step 2: Build app ---

@@ -461,6 +461,14 @@ Si le fichier `startup.log` n'existe PAS après un crash, c'est que le crash a e
 
 ## Règles pour Kiro
 
+### Décisions structurantes → proposer un ADR
+
+Quand le développeur prend une **décision structurante** (choix d'archi/techno,
+format de fichier ou API, abandon/remplacement/stub d'un module, tradeoff
+perf/sécurité/build assumé), Kiro **propose** de la consigner en ADR dans
+`docs/adr/`. Kiro ne crée jamais un ADR de sa propre initiative. Détail du
+format et du workflow : voir `.kiro/steering/adr.md`.
+
 ### Avant de modifier du code
 
 1. **Vérifier la branche** — `git branch --show-current` doit correspondre à l'issue
@@ -499,9 +507,55 @@ Cas particuliers :
   Windows) : si aucun TU raisonnable ne peut le capturer, le documenter dans la PR, ajouter
   des diagnostics `[TAG]` dans `startup.log` (voir plus bas), et corriger avec l'aide des
   logs de la VM. Noter explicitement pourquoi le bug n'a pas pu être couvert par un TU.
-- **Ajout d'une nouvelle classe QObject sous test** : compiler la vraie source dans
-  `tests/tests.pro`, pré-générer son moc dans `docker-build.sh` (motif `premoc/`), et
-  régénérer le `premoc/moc_tst_*.cpp` du fichier de test si on ajoute des slots.
+- **Ajout d'une nouvelle classe QObject sous test** : voir la checklist dédiée
+  « Ajouter une classe QObject aux tests » ci-dessous.
+
+### Ajouter une classe QObject aux tests
+
+Le moc système Qt 6.8.3 ne peut pas parser les system headers GCC 14 via
+`moc_predefs.h` (voir « Notes techniques → moc bug »). On contourne en **pré-générant
+les moc à la main** dans `tests/premoc/`, qui sont **commités dans le repo**. Toute
+classe `QObject` (macro `Q_OBJECT`) qu'on veut couvrir par un test doit suivre ces
+étapes. Exemples concrets : `UBThemeManager`, `UBPageThumbnailModel`.
+
+1. **`tests/tests.pro` — compiler la vraie source + son moc.**
+   ```pro
+   SOURCES += ../src/<chemin>/Foo.cpp
+   win32-msvc* {
+       HEADERS += ../src/<chemin>/Foo.h   # MSVC gère le moc normalement
+   } else {
+       SOURCES += premoc/moc_Foo.cpp      # Linux/Docker : moc pré-généré à la main
+   }
+   ```
+   Si le header inclut du QML (`<QQmlEngine>`, etc.), ajouter aussi `QT += qml`.
+
+2. **`scripts/docker-build.sh` — pré-générer le moc de la classe.**
+   Ajouter la ligne de génération à côté des autres :
+   ```sh
+   $MOC_BIN $MOC_COMMON_FLAGS ../src/<chemin>/Foo.h -o premoc/moc_Foo.cpp
+   ```
+
+3. **Header de test QObject (`tst_Foo.h` avec slots `Q_OBJECT`)** — si le test
+   lui-même est un QObject à moc-er, l'ajouter aux **deux** listes de
+   `docker-build.sh` :
+   - la boucle de génération : `for HEADER in tst_UBGraphicsScene ... tst_Foo ; do`
+   - la boucle de patch Makefile :
+     `sed -i "s|build/moc/moc_${HEADER}.cpp|premoc/moc_${HEADER}.cpp|g"`
+   Régénérer `premoc/moc_tst_Foo.cpp` après tout ajout/retrait de slot.
+
+4. **Commiter les `tests/premoc/moc_*.cpp`** générés — c'est le pattern du projet, ils
+   font partie du repo (le CI ne relance pas la pré-génération).
+
+5. **`tests/main.cpp` — enregistrer le test.**
+   ```cpp
+   #include "tst_Foo.h"
+   // ...
+   { TestFoo test; status |= QTest::qExec(&test, argc, argv); }
+   ```
+
+6. **Valider** : `./scripts/docker-build.sh --build-only` puis
+   `./scripts/docker-build.sh --test-only --no-coverage`. Le link doit passer (preuve
+   que les moc sont corrects) et le nouveau test doit être exécuté (0 failed).
 
 ### Après modifications — validation locale obligatoire
 

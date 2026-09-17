@@ -238,6 +238,34 @@ jobs:
             echo "No .gcda files found — app coverage not available"
           fi
 
+      - name: Check premoc presence (#348 / ADR-0002)
+        run: |
+          # The CI consumes committed tests/premoc/*.cpp (it does not regenerate
+          # moc — see ADR-0002). This guard fails if tests.pro *explicitly*
+          # references (SOURCES += premoc/moc_X.cpp) a file that is not committed
+          # — the silent trap where a new QObject test passes locally
+          # (docker-build regenerates) but the moc is missing on CI. Scope: the
+          # explicitly-referenced premoc (the documented pattern for new QObjects,
+          # win32-msvc*/else). Content staleness is NOT diff-checked: committed
+          # files are a working baseline across moc versions (6.2.4/6.8.x) so a
+          # version diff would false-positive; a stale moc fails at compile below.
+          cd tests
+          STATUS=0
+          # Only real references (strip comments: everything after '#').
+          for ref in $(sed 's/#.*//' tests.pro | grep -oE 'premoc/moc_[A-Za-z0-9_]+\.cpp' | sort -u); do
+            if [ ! -f "$ref" ]; then
+              echo "MISSING committed premoc referenced by tests.pro: tests/$ref"
+              STATUS=1
+            fi
+          done
+          if [ $STATUS -ne 0 ]; then
+            echo ""
+            echo "A QObject premoc is referenced but not committed. Run"
+            echo "./scripts/docker-build.sh locally, then: git add tests/premoc/"
+            exit 1
+          fi
+          echo "All premoc referenced by tests.pro are committed."
+
       - name: Build unit tests
         run: |
           cd tests
@@ -253,19 +281,10 @@ jobs:
           sed -i '/libexec\/moc/s| -I/usr/local/include||g' Makefile 2>/dev/null || true
           sed -i '/libexec\/moc/s| -I/usr/include ||g' Makefile 2>/dev/null || true
           sed -i '/libexec\/moc/s| -I/usr/include$||g' Makefile 2>/dev/null || true
-          # Pre-generate moc for UBFileSystemUtils.h (moc crashes on GCC system headers
-          # when --include moc_predefs.h pulls in <type_traits>). Run without moc_predefs.
-          /opt/qt/6.8.2/gcc_64/libexec/moc -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_TESTLIB_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB \
-            -I/opt/qt/6.8.2/gcc_64/mkspecs/linux-g++ -I. -I../src \
-            -I/opt/qt/6.8.2/gcc_64/include -I/opt/qt/6.8.2/gcc_64/include/QtCore \
-            -I/opt/qt/6.8.2/gcc_64/include/QtGui -I/opt/qt/6.8.2/gcc_64/include/QtWidgets \
-            ../src/frameworks/UBFileSystemUtils.h -o premoc/moc_UBFileSystemUtils.cpp
-          # Pre-generate moc for UBOEmbedParser.h (QObject under test for #229 regression)
-          /opt/qt/6.8.2/gcc_64/libexec/moc -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_TESTLIB_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB \
-            -I/opt/qt/6.8.2/gcc_64/mkspecs/linux-g++ -I. -I../src \
-            -I/opt/qt/6.8.2/gcc_64/include -I/opt/qt/6.8.2/gcc_64/include/QtCore \
-            -I/opt/qt/6.8.2/gcc_64/include/QtGui -I/opt/qt/6.8.2/gcc_64/include/QtWidgets \
-            ../src/web/UBOEmbedParser.h -o premoc/moc_UBOEmbedParser.cpp
+          # Premoc strategy (ADR-0002, #348): the CI does NOT regenerate moc — the
+          # system moc cannot parse GCC headers via moc_predefs.h. It consumes the
+          # committed tests/premoc/*.cpp instead. A drift guard (docker-build.sh
+          # --check-premoc, run in the dev container) keeps those files in sync.
           make -j$(nproc)
 
       - name: Run unit tests with coverage
