@@ -48,10 +48,7 @@
 
 #include <QQuickWidget>
 #include <QQmlContext>
-#include <QQmlEngine>
 #include <QTimer>
-
-#include "qml/UBIconImageProvider.h"
 #include <QToolBar>
 #include <QFile>
 #include <QTextStream>
@@ -222,15 +219,6 @@ void UBBoardPaletteManager::setupPalettes()
 
     // Create the QQuickWidget for the stylus palette
     mStylusPaletteQml = new QQuickWidget(mContainer);
-    // #351/#352: CPU icon provider (works on the software Qt Quick backend of
-    // the GPU-less test VM, where shader/layer effects don't paint). Each
-    // engine owns its own provider instance.
-    mStylusPaletteQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
-    {
-        // #351 diagnostics (TODO remove): confirm the provider is registered.
-        QFile _l(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_l.open(QIODevice::Append | QIODevice::Text)) { QTextStream(&_l) << "[ICON] provider registered on StylusPalette engine\n"; }
-    }
     mStylusPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mStylusPaletteQml->setClearColor(Qt::transparent);
     mStylusPaletteQml->setAttribute(Qt::WA_TranslucentBackground);
@@ -293,7 +281,6 @@ void UBBoardPaletteManager::setupPalettes()
 
     // --- QML Top Bar (Issue #121 Step 3) ---
     mTopBarQml = new QQuickWidget(mContainer);
-    mTopBarQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
     mTopBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mTopBarQml->setClearColor(Qt::transparent);
     mTopBarQml->setAttribute(Qt::WA_AlwaysStackOnTop);
@@ -312,7 +299,6 @@ void UBBoardPaletteManager::setupPalettes()
 
     // --- QML Page Navigator Sidebar (Issue #121 Step 4) ---
     mPageNavQml = new QQuickWidget(mContainer);
-    mPageNavQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
     mPageNavQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mPageNavQml->setClearColor(Qt::transparent);
     mPageNavQml->setAttribute(Qt::WA_AlwaysStackOnTop);
@@ -330,7 +316,6 @@ void UBBoardPaletteManager::setupPalettes()
 
     // --- QML Drawing Props Bar (Issue #121 Step 5) ---
     mDrawingPropsBarQml = new QQuickWidget(mContainer);
-    mDrawingPropsBarQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
     mDrawingPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mDrawingPropsBarQml->setClearColor(Qt::transparent);
     mDrawingPropsBarQml->setAttribute(Qt::WA_TranslucentBackground);
@@ -384,7 +369,6 @@ void UBBoardPaletteManager::setupPalettes()
 
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
     mShapesPaletteV2Qml = new QQuickWidget(mContainer);
-    mShapesPaletteV2Qml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
     mShapesPaletteV2Qml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mShapesPaletteV2Qml->setClearColor(Qt::transparent);
     mShapesPaletteV2Qml->setAttribute(Qt::WA_TranslucentBackground);

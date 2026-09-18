@@ -26,9 +26,6 @@
 #include <QQuickWidget>
 #include <QQuickItem>
 #include <QQmlContext>
-#include <QQmlEngine>
-
-#include "qml/UBIconImageProvider.h"
 #include <QPainterPath>
 #include <QWindow>
 
@@ -165,8 +162,6 @@ UBDesktopAnnotationController::~UBDesktopAnnotationController()
 void UBDesktopAnnotationController::setupToolbar()
 {
     mToolbarQml = new QQuickWidget(nullptr);
-    // #351/#352: CPU icon provider (software Qt Quick backend on the GPU-less VM).
-    mToolbarQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
     mToolbarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     mToolbarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mToolbarQml->setClearColor(Qt::transparent);
@@ -229,7 +224,6 @@ void UBDesktopAnnotationController::positionToolbar()
 void UBDesktopAnnotationController::setupPropsBar()
 {
     mPropsBarQml = new QQuickWidget(nullptr);
-    mPropsBarQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
     mPropsBarQml->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     mPropsBarQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mPropsBarQml->setClearColor(Qt::transparent);

@@ -7,6 +7,7 @@
  */
 
 import QtQuick 2.15
+import Qt5Compat.GraphicalEffects
 
 /**
  * UBToolButton — shared toolbar button (#351).
@@ -17,15 +18,16 @@ import QtQuick 2.15
  *
  * One implementation of the Phosphor-icon toolbar button used by both
  * StylusPaletteV2 (board) and DesktopToolbar (desktop mode): themed colors,
- * Phosphor SVG recolored via MultiEffect, hover/active states, active
+ * Phosphor SVG recolored via ColorOverlay, hover/active states, active
  * indicator bar, and a mouse-transparent tooltip (#247).
  *
- * #352: icon recoloring uses MultiEffect (QtQuick.Effects), NOT ColorOverlay
- * (Qt5Compat.GraphicalEffects). ColorOverlay renders through an offscreen
- * ShaderEffectSource/FBO that does not composite on a translucent top-level
- * QQuickWidget (the desktop-mode toolbar), so the icons were invisible there
- * while the plain Rectangles still painted. MultiEffect applies the tint
- * directly on the source and composites correctly on the translucent surface.
+ * Icon recoloring uses the EXACT mechanism StylusPaletteV2 used before #351 —
+ * a hidden `Image` + `ColorOverlay` — because that is proven to render on the
+ * Windows test VM. #351/#352 tried to "improve" this (MultiEffect,
+ * layer.effect, a CPU image provider) to also fix the desktop overlay icons,
+ * but every variant broke the board toolbar that already worked. Rule: keep the
+ * board icon rendering identical to the known-good original; the desktop
+ * overlay icons are a separate concern.
  *
  * The button is "dumb": the parent decides `active` and reacts to `clicked()`.
  * `primaryHighlight` drives the blue (primary) highlight; when it differs from
@@ -59,38 +61,23 @@ Rectangle {
          : isHovered ? themeManager.surfaceHover
          : "transparent"
 
-    // Themed tint for the icon, as a color value.
-    readonly property color iconColor: btn.primaryHighlight ? themeManager.onPrimary
-                                                             : themeManager.onSurface
-    // 6-hex-digit form WITHOUT '#', for the image://phosphor/...?c= URL.
-    // NB: a QML `color` is not a JS string — String(color) yields "#rrggbb"
-    // (or "#aarrggbb"); take the last 6 chars so an alpha prefix is dropped.
-    // (An earlier version called color.slice(), which threw a TypeError, left
-    //  the Image source empty and never hit the provider — #351.)
-    readonly property string iconColorHex: String(iconColor).slice(-6)
-
-    // Phosphor icon, already recolored by the C++ image provider
-    // (image://phosphor/<name>?c=RRGGBB). See UBIconImageProvider / ADR 0007.
-    //
-    // #351/#352 saga: every QML-side GPU recolor (ColorOverlay, MultiEffect,
-    // layer.effect) left the icons invisible on the Windows test VM, which runs
-    // the software Qt Quick backend (no GPU under x64 emulation) where shader/
-    // layer effects don't paint. The provider rasterizes and tints the SVG on
-    // the CPU, so the Image needs NO effect and renders on any backend.
-    //
-    // The tint color is the themed on-surface / on-primary color, passed as a
-    // 6-hex-digit string without '#'. themeChanged / primaryHighlight changes
-    // rebuild the source URL, so the icon recolors on theme switch and on
-    // selection.
+    // Icon (hidden source for ColorOverlay) — identical to the pre-#351 original.
     Image {
         id: iconImg
         anchors.centerIn: parent
         width: 24
         height: 24
-        source: "image://phosphor/" + btn.iconName + "?c=" + btn.iconColorHex
+        source: "qrc:/icons/phosphor/" + btn.iconName + ".svg"
         sourceSize: Qt.size(24, 24)
         smooth: true
         mipmap: true
+        visible: false
+    }
+
+    ColorOverlay {
+        anchors.fill: iconImg
+        source: iconImg
+        color: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
         opacity: btn.active ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
     }
 
