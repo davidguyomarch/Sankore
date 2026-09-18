@@ -226,6 +226,11 @@ void UBBoardPaletteManager::setupPalettes()
     // the GPU-less test VM, where shader/layer effects don't paint). Each
     // engine owns its own provider instance.
     mStylusPaletteQml->engine()->addImageProvider(QStringLiteral("phosphor"), new UBIconImageProvider());
+    {
+        // #351 diagnostics (TODO remove): confirm the provider is registered.
+        QFile _l(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_l.open(QIODevice::Append | QIODevice::Text)) { QTextStream(&_l) << "[ICON] provider registered on StylusPalette engine\n"; }
+    }
     mStylusPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mStylusPaletteQml->setClearColor(Qt::transparent);
     mStylusPaletteQml->setAttribute(Qt::WA_TranslucentBackground);

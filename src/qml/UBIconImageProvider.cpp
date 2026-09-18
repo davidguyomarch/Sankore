@@ -13,6 +13,22 @@
 #include <QColor>
 #include <QUrl>
 #include <QUrlQuery>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+// #351 diagnostics: trace every icon request into startup.log so we can see,
+// from the VM, whether the provider is even called and whether the SVG loads.
+// TODO(remove): delete once the icon rendering is confirmed on the VM.
+static void ubIconLog(const QString& line)
+{
+    QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (f.open(QIODevice::Append | QIODevice::Text))
+    {
+        QTextStream out(&f);
+        out << "[ICON] " << line << "\n";
+    }
+}
 
 UBIconImageProvider::UBIconImageProvider()
     : QQuickImageProvider(QQuickImageProvider::Image)
@@ -46,11 +62,10 @@ QImage UBIconImageProvider::requestImage(const QString& id, QSize* size, const Q
     QImage image(w, h, QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::transparent);
 
-    QSvgRenderer renderer(QStringLiteral("qrc:/icons/phosphor/") + iconName + QStringLiteral(".svg"));
-    // QSvgRenderer does not resolve the "qrc:" scheme; use the ":" resource path.
-    if (!renderer.isValid())
-        renderer.load(QStringLiteral(":/icons/phosphor/") + iconName + QStringLiteral(".svg"));
+    const QString qrcPath = QStringLiteral(":/icons/phosphor/") + iconName + QStringLiteral(".svg");
+    QSvgRenderer renderer(qrcPath);
 
+    bool rendered = false;
     if (renderer.isValid())
     {
         QPainter painter(&image);
@@ -62,6 +77,16 @@ QImage UBIconImageProvider::requestImage(const QString& id, QSize* size, const Q
         painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
         painter.fillRect(image.rect(), tint);
         painter.end();
+        rendered = true;
+    }
+
+    // #351 diagnostics.
+    {
+        // Sample the center pixel alpha to confirm something was actually drawn.
+        const int centerAlpha = qAlpha(image.pixel(w / 2, h / 2));
+        ubIconLog(QStringLiteral("id=%1 name=%2 tint=%3 svgValid=%4 size=%5x%6 centerA=%7")
+                      .arg(id, iconName, tint.name(QColor::HexRgb))
+                      .arg(rendered ? 1 : 0).arg(w).arg(h).arg(centerAlpha));
     }
 
     if (size)
