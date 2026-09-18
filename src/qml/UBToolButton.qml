@@ -60,7 +60,20 @@ Rectangle {
          : isHovered ? themeManager.surfaceHover
          : "transparent"
 
-    // Icon (hidden source; recolored by the MultiEffect below)
+    // Phosphor icon, recolored toward the themed color by a MultiEffect applied
+    // as the Image's own layer effect.
+    //
+    // #352 regressions, in order:
+    //  - ColorOverlay (Qt5Compat) did not composite on the translucent desktop
+    //    toolbar → icons invisible there.
+    //  - Switching to a SEPARATE MultiEffect whose `source` was an
+    //    `Image { visible: false }` broke BOTH toolbars: a `visible: false` item
+    //    is not rendered at all, so MultiEffect had no source texture and painted
+    //    nothing.
+    // The canonical Qt 6 fix is to enable a layer on the Image and set the
+    // MultiEffect as `layer.effect`. The Image is rendered once into its layer
+    // texture and the effect recolors it in place — no hidden source, no double
+    // draw, works on both the opaque board bar and the translucent overlay.
     Image {
         id: iconImg
         anchors.centerIn: parent
@@ -70,18 +83,13 @@ Rectangle {
         sourceSize: Qt.size(24, 24)
         smooth: true
         mipmap: true
-        visible: false
-    }
-
-    // #352: MultiEffect tints the monochrome SVG toward the themed color.
-    // colorization=1 fully replaces the icon's own color; brightness keeps it
-    // opaque. Works on the translucent desktop toolbar where ColorOverlay did not.
-    MultiEffect {
-        anchors.fill: iconImg
-        source: iconImg
-        colorization: 1.0
-        colorizationColor: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
         opacity: btn.active ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            colorization: 1.0
+            colorizationColor: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
+        }
     }
 
     // Active indicator bar (shown on primary highlight)
