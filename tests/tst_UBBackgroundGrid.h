@@ -27,6 +27,8 @@ private slots:
     void testGridIsUniform8mm();
     void testSeyesInterlineSpacing();
     void testSeyesHasVerticalAndMargin();
+    void testSeyesMarginAnchoredToPageLeft_regression362();
+    void testGridVerticalsAnchoredToPageLeft_regression362();
     void testSeyesLargeIsScaled();
     void testDoubleLine3mmPairs();
 };

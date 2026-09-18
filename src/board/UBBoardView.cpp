@@ -1913,7 +1913,10 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
           if (transform ().m11 () < 1.0)
             marginColor.setAlpha (255 * transform ().m11 () / 2);
 
-          const auto lines = UBBackgroundGrid::generateLines (scene()->gridType (), rect);
+          // #362: anchor the ruling to the page left edge (page is centered on
+          // the scene origin, so left edge x = -width/2).
+          const double pageLeft = -scene()->nominalSize ().width () / 2.0;
+          const auto lines = UBBackgroundGrid::generateLines (scene()->gridType (), rect, pageLeft);
           for (const auto &line : lines)
             {
               switch (line.weight)
