@@ -53,6 +53,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QPainterPath>
+#include <QImage>
+#include <QImageReader>
 #include "qml/UBThemeManager.h"
 
 
@@ -218,6 +220,22 @@ void UBBoardPaletteManager::setupPalettes()
     bool isVertical = mSettings->appToolBarOrientationVertical->get().toBool();
 
     // Create the QQuickWidget for the stylus palette
+    // #351 DEBUG (temporary): can the process load a Phosphor SVG at all, from
+    // the qrc, via QImageReader (independent of QtQuick)? Also list the imageio
+    // plugins the app sees. Distinguishes "qrc missing" / "no SVG plugin" from
+    // "QtQuick can't render it".
+    {
+        QFile _l(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_l.open(QIODevice::Append | QIODevice::Text))
+        {
+            QTextStream out(&_l);
+            QImage img(QStringLiteral(":/icons/phosphor/pen.svg"));
+            out << "[ICON] QImage(:/icons/phosphor/pen.svg) null=" << img.isNull()
+                << " size=" << img.width() << "x" << img.height() << "\n";
+            out << "[ICON] supported imageformats=" << QImageReader::supportedImageFormats().join(',').constData() << "\n";
+        }
+    }
+
     mStylusPaletteQml = new QQuickWidget(mContainer);
     mStylusPaletteQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mStylusPaletteQml->setClearColor(Qt::transparent);
