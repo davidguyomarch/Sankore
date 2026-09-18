@@ -59,6 +59,16 @@ Rectangle {
          : isHovered ? themeManager.surfaceHover
          : "transparent"
 
+    // Themed tint for the icon, as a color value.
+    readonly property color iconColor: btn.primaryHighlight ? themeManager.onPrimary
+                                                             : themeManager.onSurface
+    // 6-hex-digit form WITHOUT '#', for the image://phosphor/...?c= URL.
+    // NB: a QML `color` is not a JS string — String(color) yields "#rrggbb"
+    // (or "#aarrggbb"); take the last 6 chars so an alpha prefix is dropped.
+    // (An earlier version called color.slice(), which threw a TypeError, left
+    //  the Image source empty and never hit the provider — #351.)
+    readonly property string iconColorHex: String(iconColor).slice(-6)
+
     // Phosphor icon, already recolored by the C++ image provider
     // (image://phosphor/<name>?c=RRGGBB). See UBIconImageProvider / ADR 0007.
     //
@@ -77,9 +87,7 @@ Rectangle {
         anchors.centerIn: parent
         width: 24
         height: 24
-        source: "image://phosphor/" + btn.iconName + "?c="
-                + (btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface)
-                    .toString().slice(1)
+        source: "image://phosphor/" + btn.iconName + "?c=" + btn.iconColorHex
         sourceSize: Qt.size(24, 24)
         smooth: true
         mipmap: true
