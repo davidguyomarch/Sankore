@@ -7,7 +7,6 @@
  */
 
 import QtQuick 2.15
-import QtQuick.Effects
 
 /**
  * UBToolButton — shared toolbar button (#351).
@@ -60,36 +59,31 @@ Rectangle {
          : isHovered ? themeManager.surfaceHover
          : "transparent"
 
-    // Phosphor icon, recolored toward the themed color by a MultiEffect applied
-    // as the Image's own layer effect.
+    // Phosphor icon, already recolored by the C++ image provider
+    // (image://phosphor/<name>?c=RRGGBB). See UBIconImageProvider / ADR 0007.
     //
-    // #352 regressions, in order:
-    //  - ColorOverlay (Qt5Compat) did not composite on the translucent desktop
-    //    toolbar → icons invisible there.
-    //  - Switching to a SEPARATE MultiEffect whose `source` was an
-    //    `Image { visible: false }` broke BOTH toolbars: a `visible: false` item
-    //    is not rendered at all, so MultiEffect had no source texture and painted
-    //    nothing.
-    // The canonical Qt 6 fix is to enable a layer on the Image and set the
-    // MultiEffect as `layer.effect`. The Image is rendered once into its layer
-    // texture and the effect recolors it in place — no hidden source, no double
-    // draw, works on both the opaque board bar and the translucent overlay.
+    // #351/#352 saga: every QML-side GPU recolor (ColorOverlay, MultiEffect,
+    // layer.effect) left the icons invisible on the Windows test VM, which runs
+    // the software Qt Quick backend (no GPU under x64 emulation) where shader/
+    // layer effects don't paint. The provider rasterizes and tints the SVG on
+    // the CPU, so the Image needs NO effect and renders on any backend.
+    //
+    // The tint color is the themed on-surface / on-primary color, passed as a
+    // 6-hex-digit string without '#'. themeChanged / primaryHighlight changes
+    // rebuild the source URL, so the icon recolors on theme switch and on
+    // selection.
     Image {
         id: iconImg
         anchors.centerIn: parent
         width: 24
         height: 24
-        source: "qrc:/icons/phosphor/" + btn.iconName + ".svg"
+        source: "image://phosphor/" + btn.iconName + "?c="
+                + (btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface)
+                    .toString().slice(1)
         sourceSize: Qt.size(24, 24)
         smooth: true
         mipmap: true
         opacity: btn.active ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
-
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            colorization: 1.0
-            colorizationColor: btn.primaryHighlight ? themeManager.onPrimary : themeManager.onSurface
-        }
     }
 
     // Active indicator bar (shown on primary highlight)
