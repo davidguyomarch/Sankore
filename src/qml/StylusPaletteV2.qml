@@ -77,7 +77,14 @@ Rectangle {
         id: toolButtonComp
 
         UBToolButton {
-            required property var toolData
+            // #351 regression: do NOT redeclare `toolData` as a `required
+            // property` here. This component is loaded by a Loader that exposes
+            // `property var toolData: modelData`; a required property is NOT
+            // satisfied by the Loader, so the item failed to instantiate and the
+            // whole button (icon + background) never painted — the bottom
+            // toolbar was blank. Leaving `toolData` unqualified lets it resolve
+            // to the Loader's property via scope, exactly like the pre-#351
+            // Rectangle did.
 
             // #318: the Shapes button is a toggle (opens the shapes palette) but
             // must also read as "selected" (blue) while the shape tool is active

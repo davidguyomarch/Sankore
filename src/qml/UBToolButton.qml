@@ -81,31 +81,6 @@ Rectangle {
         opacity: btn.active ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
     }
 
-    // === #351 DEBUG (temporary) — decide, in ONE VM run, where the icon
-    // rendering breaks. Three probes stacked at the TOP-LEFT of every button:
-    //   A: raw SVG Image, VISIBLE, no effect, native color  → tests SVG decode
-    //   B: raw SVG tinted red via a colored Rectangle mask   → n/a here
-    //   C: a solid blue 6x6 square                           → witness the delegate paints
-    // Read on the VM:
-    //   see only C  → SVG does not decode in QtQuick at all
-    //   see A + C   → SVG decodes; the ColorOverlay effect is what fails
-    //   see A,B,C   → everything paints (icons should be visible; look elsewhere)
-    // TODO(remove) once diagnosed.
-    Image {                                   // probe A
-        id: dbgRaw
-        x: 0; y: 0
-        width: 12; height: 12
-        source: "qrc:/icons/phosphor/pen.svg"
-        sourceSize: Qt.size(12, 12)
-        smooth: true
-        visible: true
-    }
-    Rectangle {                               // probe C
-        x: 13; y: 0
-        width: 6; height: 6
-        color: "blue"
-    }
-
     // Active indicator bar (shown on primary highlight)
     Rectangle {
         visible: btn.primaryHighlight

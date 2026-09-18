@@ -79,8 +79,10 @@ Rectangle {
         id: buttonComp
 
         UBToolButton {
-            required property var btnData
-
+            // #351 regression: NOT a `required property` — the Loader exposes
+            // `property var btnData: modelData` and a required property is not
+            // satisfied by the Loader, so the button never instantiated (blank
+            // toolbar). Unqualified `btnData` resolves to the Loader's property.
             readonly property bool isTool: btnData.kind === "tool"
 
             buttonSize: root.buttonSize
