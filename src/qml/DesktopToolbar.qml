@@ -64,50 +64,51 @@ Rectangle {
         anchors.centerIn: parent
         spacing: root.spacing
 
+        // #351 regression fix: same pattern as StylusPaletteV2 — the delegate is
+        // an Item holding a shared UBToolButton and a ToolbarSeparator inline,
+        // fed the row data via QUALIFIED references (del.modelData). A bare
+        // `btnData` resolved through a Loader did not reach into the separate
+        // UBToolButton .qml (undefined), so the buttons failed to bind.
         Repeater {
             model: root.buttons
 
-            Loader {
-                sourceComponent: modelData.kind === "separator" ? separatorComp : buttonComp
-                property var btnData: modelData
-            }
-        }
-    }
+            delegate: Item {
+                id: del
+                required property var modelData
+                readonly property Item shown: (modelData.kind === "separator") ? sep : toolBtn
+                implicitWidth: shown.implicitWidth > 0 ? shown.implicitWidth : shown.width
+                implicitHeight: shown.implicitHeight > 0 ? shown.implicitHeight : shown.height
+                width: implicitWidth
+                height: implicitHeight
 
-    // --- Button Component (shared UBToolButton, #351) ---
-    Component {
-        id: buttonComp
+                UBToolButton {
+                    id: toolBtn
+                    visible: del.modelData.kind !== "separator"
+                    readonly property bool isTool: del.modelData.kind === "tool"
+                    buttonSize: root.buttonSize
+                    iconName: (del.modelData.kind === "separator") ? "" : del.modelData.icon
+                    tooltip: (del.modelData.kind === "separator") ? "" : del.modelData.tooltip
+                    active: isTool && toolController.activeTool === del.modelData.id
+                    primaryHighlight: active
+                    onClicked: {
+                        if (isTool) {
+                            toolController.activeTool = del.modelData.id
+                        } else if (del.modelData.action === "customCapture") {
+                            desktopController.customCapture()
+                        } else if (del.modelData.action === "screenCapture") {
+                            desktopController.screenCapture()
+                        } else if (del.modelData.action === "goToUniboard") {
+                            desktopController.goToUniboard()
+                        }
+                    }
+                }
 
-        UBToolButton {
-            // #351 regression: NOT a `required property` — the Loader exposes
-            // `property var btnData: modelData` and a required property is not
-            // satisfied by the Loader, so the button never instantiated (blank
-            // toolbar). Unqualified `btnData` resolves to the Loader's property.
-            readonly property bool isTool: btnData.kind === "tool"
-
-            buttonSize: root.buttonSize
-            iconName: btnData.icon
-            tooltip: btnData.tooltip
-            // tool buttons highlight (blue) when they are the active tool
-            active: isTool && toolController.activeTool === btnData.id
-            primaryHighlight: active
-            onClicked: {
-                if (isTool) {
-                    toolController.activeTool = btnData.id
-                } else if (btnData.action === "customCapture") {
-                    desktopController.customCapture()
-                } else if (btnData.action === "screenCapture") {
-                    desktopController.screenCapture()
-                } else if (btnData.action === "goToUniboard") {
-                    desktopController.goToUniboard()
+                ToolbarSeparator {
+                    id: sep
+                    visible: del.modelData.kind === "separator"
+                    buttonSize: root.buttonSize
                 }
             }
         }
-    }
-
-    // --- Separator Component (shared, #351) ---
-    Component {
-        id: separatorComp
-        ToolbarSeparator { buttonSize: root.buttonSize }
     }
 }

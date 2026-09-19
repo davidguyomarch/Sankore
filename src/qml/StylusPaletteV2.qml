@@ -62,61 +62,60 @@ Rectangle {
         anchors.centerIn: parent
         spacing: root.spacing
 
+        // #351 regression fix: the delegate is an Item that holds BOTH a shared
+        // UBToolButton and a ToolbarSeparator inline, and passes the row data to
+        // them via QUALIFIED references (del.modelData). The previous approach
+        // let a Loader-hosted button read the Loader's `toolData` by bare scope
+        // resolution, which does not reach into a separate .qml component:
+        // `toolData` came out undefined ("Unable to assign [undefined] to
+        // bool"), buttons failed to bind, the row collapsed (tool offset) and
+        // the Shapes toggle never fired.
         Repeater {
             model: root.tools
 
-            Loader {
-                sourceComponent: modelData.isSeparator ? separatorComp : toolButtonComp
-                property var toolData: modelData
+            delegate: Item {
+                id: del
+                required property var modelData
+                readonly property Item shown: (modelData.isSeparator === true) ? sep : toolBtn
+                implicitWidth: shown.implicitWidth > 0 ? shown.implicitWidth : shown.width
+                implicitHeight: shown.implicitHeight > 0 ? shown.implicitHeight : shown.height
+                width: implicitWidth
+                height: implicitHeight
+
+                // `=== true` everywhere a model flag feeds a bool, so a missing
+                // flag (undefined) becomes a real false instead of undefined
+                // ("Unable to assign [undefined] to bool").
+                readonly property bool isSeparator: del.modelData.isSeparator === true
+
+                UBToolButton {
+                    id: toolBtn
+                    visible: !del.isSeparator
+                    readonly property bool isToggle: del.modelData.isToggle === true
+                    readonly property bool shapeToolActive:
+                        isToggle && toolController.activeTool === 14
+                    buttonSize: root.buttonSize
+                    isVertical: root.isVertical
+                    iconName: del.isSeparator ? "" : del.modelData.icon
+                    tooltip: del.isSeparator ? "" : del.modelData.tooltip
+                    active: isToggle ? (toolController.shapesVisible || shapeToolActive)
+                                     : (toolController.activeTool === del.modelData.id)
+                    primaryHighlight: isToggle ? shapeToolActive
+                                               : (toolController.activeTool === del.modelData.id)
+                    onClicked: {
+                        if (isToggle)
+                            toolController.toggleShapes()
+                        else
+                            toolController.activeTool = del.modelData.id
+                    }
+                }
+
+                ToolbarSeparator {
+                    id: sep
+                    visible: del.isSeparator
+                    buttonSize: root.buttonSize
+                    isVertical: root.isVertical
+                }
             }
-        }
-    }
-
-    // --- Tool Button Component (uses shared UBToolButton, #351) ---
-    Component {
-        id: toolButtonComp
-
-        UBToolButton {
-            // #351 regression: do NOT redeclare `toolData` as a `required
-            // property` here. This component is loaded by a Loader that exposes
-            // `property var toolData: modelData`; a required property is NOT
-            // satisfied by the Loader, so the item failed to instantiate and the
-            // whole button (icon + background) never painted — the bottom
-            // toolbar was blank. Leaving `toolData` unqualified lets it resolve
-            // to the Loader's property via scope, exactly like the pre-#351
-            // Rectangle did.
-
-            // #318: the Shapes button is a toggle (opens the shapes palette) but
-            // must also read as "selected" (blue) while the shape tool is active
-            // (activeTool === Drawing (14)).
-            readonly property bool shapeToolActive:
-                toolData.isToggle && toolController.activeTool === 14
-
-            buttonSize: root.buttonSize
-            isVertical: root.isVertical
-            iconName: toolData.icon
-            tooltip: toolData.tooltip
-            // softer tint when the shapes palette is open (without drawing)
-            active: toolData.isToggle ? (toolController.shapesVisible || shapeToolActive)
-                                      : (toolController.activeTool === toolData.id)
-            // blue highlight = the tool is actually the active tool
-            primaryHighlight: toolData.isToggle ? shapeToolActive
-                                                : (toolController.activeTool === toolData.id)
-            onClicked: {
-                if (toolData.isToggle)
-                    toolController.toggleShapes()
-                else
-                    toolController.activeTool = toolData.id
-            }
-        }
-    }
-
-    // --- Separator Component (shared, #351) ---
-    Component {
-        id: separatorComp
-        ToolbarSeparator {
-            buttonSize: root.buttonSize
-            isVertical: root.isVertical
         }
     }
 }
