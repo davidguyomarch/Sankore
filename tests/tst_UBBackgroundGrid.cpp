@@ -64,14 +64,14 @@ void TestUBBackgroundGrid::testIsRuled()
 
 void TestUBBackgroundGrid::testGridIsUniform8mm()
 {
-    // 8 mm step == 32 units. In a 0..320 window we expect lines at
-    // 0,32,...,288 → 10 horizontals and 10 verticals, all Major.
-    const double step = 8.0 * UPM;
-    QCOMPARE(step, 32.0);
+    // #379: grid doubled to 16 mm == 64 units. In a 0..320 window we expect
+    // lines at 0,64,128,192,256 → 5 horizontals and 5 verticals, all Major.
+    const double step = 16.0 * UPM;
+    QCOMPARE(step, 64.0);
 
     auto lines = generateLines(Type::Grid, QRectF(0, 0, 320, 320));
-    QCOMPARE(countLines(lines, Orientation::Horizontal), 10);
-    QCOMPARE(countLines(lines, Orientation::Vertical), 10);
+    QCOMPARE(countLines(lines, Orientation::Horizontal), 5);
+    QCOMPARE(countLines(lines, Orientation::Vertical), 5);
     QCOMPARE(countLines(lines, Orientation::Horizontal, Weight::Minor), 0);
 
     // First and second horizontal lines are exactly one step apart.
@@ -84,13 +84,13 @@ void TestUBBackgroundGrid::testGridIsUniform8mm()
 
 void TestUBBackgroundGrid::testSeyesInterlineSpacing()
 {
-    // Séyès: within an 8 mm cell there are 4 horizontal lines (1 Major at the
-    // cell boundary + 3 Minor interlines), spaced 2 mm apart.
-    const double cell = 8.0 * UPM;   // 32
-    const double inter = 2.0 * UPM;  // 8
+    // #379: within a doubled 16 mm cell there are 4 horizontal lines (1 Major at
+    // the cell boundary + 3 Minor interlines), spaced 4 mm apart.
+    const double cell = 16.0 * UPM;  // 64
+    const double inter = 4.0 * UPM;  // 16
 
-    // A window covering exactly one cell [0, 32) must yield the 4 lines of that
-    // cell (Major at 0, Minor at 8, 16, 24).
+    // A window covering exactly one cell [0, 64) must yield the 4 lines of that
+    // cell (Major at 0, Minor at 16, 32, 48).
     auto lines = generateLines(Type::Seyes, QRectF(0, 0, 320, cell));
     std::vector<Line> h;
     for (const auto& l : lines)
@@ -111,8 +111,9 @@ void TestUBBackgroundGrid::testSeyesInterlineSpacing()
 
 void TestUBBackgroundGrid::testSeyesHasVerticalAndMargin()
 {
-    // Vertical major lines every 8 mm, plus one red margin line at 40 mm.
-    const double cell = 8.0 * UPM;    // 32
+    // Vertical major lines every (doubled) 16 mm cell, plus one red margin line
+    // at 40 mm (the margin distance is unchanged by #379).
+    const double cell = 16.0 * UPM;   // 64
     const double marginX = 40.0 * UPM; // 160
 
     auto lines = generateLines(Type::Seyes, QRectF(0, 0, 320, 320));
@@ -126,8 +127,8 @@ void TestUBBackgroundGrid::testSeyesHasVerticalAndMargin()
     QVERIFY(it != lines.end());
     QVERIFY(qFuzzyCompare(it->pos, marginX));
 
-    // Vertical majors are one cell apart.
-    QVERIFY(qFuzzyCompare(cell, 32.0));
+    // Vertical majors are one (doubled) cell apart.
+    QVERIFY(qFuzzyCompare(cell, 64.0));
 }
 
 void TestUBBackgroundGrid::testSeyesLargeIsScaled()
@@ -140,20 +141,20 @@ void TestUBBackgroundGrid::testSeyesLargeIsScaled()
     int largeH = countLines(large, Orientation::Horizontal);
     QVERIFY(largeH < normalH);
 
-    // Interline for large == 3 mm (2 mm * 1.5) == 12 units.
+    // #379: interline for large == 6 mm (doubled 4 mm * 1.5) == 24 units.
     std::vector<double> ys;
     for (const auto& l : large)
         if (l.orientation == Orientation::Horizontal) ys.push_back(l.pos);
     std::sort(ys.begin(), ys.end());
     QVERIFY(ys.size() >= 2);
-    QVERIFY(qFuzzyCompare(ys[1] - ys[0], 2.0 * UPM * 1.5));
+    QVERIFY(qFuzzyCompare(ys[1] - ys[0], 4.0 * UPM * 1.5));
 }
 
 void TestUBBackgroundGrid::testDoubleLine3mmPairs()
 {
-    // Maternelle double ruling: pairs 3 mm apart, period 6 mm.
-    const double band = 3.0 * UPM;   // 12
-    const double period = 6.0 * UPM; // 24
+    // Maternelle double ruling, #379 doubled: writing band 6 mm, period 12 mm.
+    const double band = 6.0 * UPM;    // 24
+    const double period = 12.0 * UPM; // 48
 
     auto lines = generateLines(Type::DoubleLine3mm, QRectF(0, 0, 320, period * 2));
     // No verticals for this ruling.

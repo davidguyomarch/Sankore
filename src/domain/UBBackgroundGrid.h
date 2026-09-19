@@ -36,10 +36,10 @@ namespace UBBackgroundGrid
     enum class Type
     {
         Plain = 0,       ///< no ruling (blank page)
-        Grid = 1,        ///< uniform square grid (legacy "crossed" background)
-        Seyes = 2,       ///< French Séyès: 8 mm cells, 2 mm interlines, vertical lines
-        SeyesLarge = 3,  ///< enlarged Séyès (1.5x) for beginners
-        DoubleLine3mm = 4///< maternelle double ruling: line pairs 3 mm apart
+        Grid = 1,        ///< uniform square grid (16 mm cells, #379)
+        Seyes = 2,       ///< French Séyès: 16 mm cells, 4 mm interlines, vertical lines (#379)
+        SeyesLarge = 3,  ///< enlarged Séyès (1.5x → 24 mm cells) for beginners
+        DoubleLine3mm = 4///< maternelle double ruling: 6 mm writing band, 12 mm period (#379)
     };
 
     /// Calibration: 8 mm == 32 scene units (UBSettings::crossSize) → 4 u/mm.
@@ -140,8 +140,9 @@ namespace UBBackgroundGrid
 
         if (type == Type::Grid)
         {
-            // Uniform 8 mm square grid — identical to the legacy crossed grid.
-            const double step = 8.0 * upm; // == UBSettings::crossSize
+            // #379: doubled from 8 mm to 16 mm so pupils can write inside the
+            // cells and the ruling reads from the back of the class.
+            const double step = 16.0 * upm;
             for (double y = firstAtOrBelow(y0, step); y < y1; y += step)
                 addH(y, Weight::Major);
             for (double x = firstAtOrBelow(x0, step); x < x1; x += step)
@@ -154,9 +155,13 @@ namespace UBBackgroundGrid
             // Séyès: major horizontal lines every 8 mm, with 3 faint interlines
             // 2 mm apart between them; vertical major lines every 8 mm; a single
             // red margin line 40 mm (5 cells) from the left of the page origin 0.
+            // #379: doubled base spacing (cell 8->16 mm, interline 2->4 mm) so
+            // a pupil can write letters between the interlines and it stays
+            // legible from a distance. SeyesLarge keeps its extra 1.5x on top
+            // (16 * 1.5 = 24 mm cell). The red margin below is unchanged.
             const double scale = (type == Type::SeyesLarge) ? 1.5 : 1.0;
-            const double cell = 8.0 * upm * scale;    // major spacing
-            const double inter = 2.0 * upm * scale;   // interline spacing
+            const double cell = 16.0 * upm * scale;   // major spacing
+            const double inter = 4.0 * upm * scale;   // interline spacing
 
             // Horizontal: emit interlines everywhere, promote every 4th (cell
             // boundary) to Major so the 8 mm rhythm reads clearly.
@@ -186,10 +191,11 @@ namespace UBBackgroundGrid
 
         if (type == Type::DoubleLine3mm)
         {
-            // Maternelle double ruling: pairs of lines 3 mm apart, pairs spaced
-            // 3 mm from each other (writing band 3 mm, gap 3 mm → 6 mm period).
-            const double band = 3.0 * upm;   // line pair inner spacing
-            const double period = 6.0 * upm; // pair-to-pair period
+            // Maternelle double ruling: pairs of lines with a writing band and
+            // an equal gap between pairs. #379: doubled (band 3->6 mm, period
+            // 6->12 mm) so a pupil can form letters inside the 6 mm band.
+            const double band = 6.0 * upm;    // line pair inner spacing (writing band)
+            const double period = 12.0 * upm; // pair-to-pair period
             for (double base = firstAtOrBelow(y0, period); base < y1 + period; base += period)
             {
                 const double top = base;
