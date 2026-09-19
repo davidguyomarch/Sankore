@@ -106,11 +106,20 @@ class UBDesktopAnnotationController : public QObject
         void showToolbar();
         void hideToolbarForCapture();
         void restoreToolbarAfterCapture();
+        // #351: pen/marker color+width bar (reuses the board's DrawingPropsBar.qml),
+        // hosted like the toolbar (top-level, transient-parented to the overlay),
+        // shown above the toolbar when a drawing tool is active.
+        void setupPropsBar();
+        void positionPropsBar();
+        void updatePropsBarVisibility();
 
         UBSettings* mSettings;
 
-        // V2 QML desktop toolbar (DesktopToolbar.qml), parented to mTransparentDrawingView.
+        // V2 QML desktop toolbar (DesktopToolbar.qml), top-level, transient-parented
+        // to mTransparentDrawingView.
         QQuickWidget* mToolbarQml;
+        // V2 QML drawing props bar (DrawingPropsBar.qml), same hosting as the toolbar.
+        QQuickWidget* mPropsBarQml = nullptr;
 
         bool mIsFullyTransparent;
 
