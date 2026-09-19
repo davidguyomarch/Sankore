@@ -298,6 +298,16 @@ jobs:
           choco install innosetup -y --no-progress
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" scripts\installer.iss
 
+      - name: Strip debug symbols from the artifact
+        if: success()
+        shell: cmd
+        run: |
+          rem The 50+ MB .pdb debug-symbol file is not needed to run the app and
+          rem is too large for the VirtIO share used to deploy to the test VM
+          rem (ERROR 223). Remove it after the installer is built.
+          del /F /Q build\win32\release\product\*.pdb 2>NUL
+          exit /b 0
+
       - name: Upload artifact
         if: success() && (github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
         uses: actions/upload-artifact@v6

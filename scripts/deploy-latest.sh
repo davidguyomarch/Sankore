@@ -40,10 +40,14 @@ select_run_for_branch() {
 
     echo "Looking up Windows builds for branch '$branch'..."
 
-    # Pull the recent run history for this branch (newest first).
+    # Pull the recent run history for this branch. gh run list does NOT reliably
+    # return runs newest-first, so sort by createdAt descending ourselves —
+    # otherwise "[first successful]" could pick an older successful build than a
+    # more recent one (observed: an 07:30 build selected over a 15:47 one).
     local runs
     runs=$(gh run list --workflow="$WORKFLOW" --branch="$branch" --limit 20 \
-        --json databaseId,status,conclusion,createdAt,headSha)
+        --json databaseId,status,conclusion,createdAt,headSha \
+        | jq 'sort_by(.createdAt) | reverse')
 
     if [ "$(echo "$runs" | jq 'length')" -eq 0 ]; then
         echo "ERROR: no '$WORKFLOW' runs found for branch '$branch'." >&2
@@ -170,7 +174,10 @@ else
         fi
     else
         echo "Downloading latest successful CI artifact..."
-        RUN_ID=$(gh run list --workflow="$WORKFLOW" --status success --limit 1 --json databaseId -q '.[0].databaseId')
+        # Sort by createdAt ourselves — gh run list is not reliably newest-first.
+        RUN_ID=$(gh run list --workflow="$WORKFLOW" --status success --limit 20 \
+            --json databaseId,createdAt \
+            | jq -r 'sort_by(.createdAt) | reverse | .[0].databaseId')
         gh run download "$RUN_ID" --name "$ARTIFACT" --dir "$INSTALL_DIR"
         BUILD_VERSION=$(gh run view "$RUN_ID" --json headSha -q '.headSha[0:8]')
     fi
