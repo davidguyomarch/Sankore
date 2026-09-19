@@ -58,6 +58,14 @@ QVariant UBPageThumbnailModel::data(const QModelIndex& index, int role) const
         if (!doc)
             return QString();
 
+        // #359: guarantee the thumbnail file exists before handing out its URL.
+        // Otherwise a page whose thumbnail has not been generated yet (never
+        // persisted/selected) would resolve to a missing file, the QML Image
+        // would go to status=Error and — because the URL never changes until
+        // the page is selected (which bumps ?v=N) — stay blank. Generating it
+        // on demand here makes the preview appear without selecting the page.
+        UBThumbnailAdaptor::ensureThumbnail(doc, row);
+
         QUrl url = UBThumbnailAdaptor::thumbnailUrl(doc, row);
         // Append a per-row version so QML's Image cache reloads the file after a
         // regeneration (same path would otherwise serve the cached image).
