@@ -541,7 +541,11 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
     }
 
     UBToolController::toolController()->setInDesktopMode(true);
-    UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
+    // #364: do NOT force Selector here. showWindow() already restored the tool
+    // last used in desktop mode (mDesktopStylusTool); forcing Selector right
+    // after clobbered that restore, so desktop mode never remembered the tool
+    // and always reset to Selector on entry — part of the "tools stay selected /
+    // don't behave as expected" report.
 }
 
 

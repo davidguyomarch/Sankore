@@ -261,9 +261,23 @@ void UBDesktopAnnotationController::showWindow()
 
     updateBackground();
 
-    mBoardStylusTool = UBToolController::toolController()->stylusTool();
+    auto* tc = UBToolController::toolController();
+    mBoardStylusTool = tc->stylusTool();
 
-    UBToolController::toolController()->setStylusTool(mDesktopStylusTool);
+    // Apply the desktop tool. setStylusTool() early-returns when the value is
+    // unchanged, which happens on the first entry when the board tool and the
+    // desktop tool are both Pen: the toolbar then shows Pen (activeTool is Pen)
+    // but the freshly-shown transparent scene never ran the tool's side effects,
+    // so it behaved like Selector. Force the side effects to run by re-selecting
+    // through a guaranteed-different sentinel first when the value would not
+    // change.
+    if (tc->stylusTool() == mDesktopStylusTool)
+    {
+        const int sentinel = (mDesktopStylusTool == UBStylusTool::Selector)
+                                 ? UBStylusTool::Pen : UBStylusTool::Selector;
+        tc->setStylusTool(sentinel);
+    }
+    tc->setStylusTool(mDesktopStylusTool);
 
 #ifdef Q_OS_WIN
     // #241: try REAL transparency (show the live desktop through the overlay)
@@ -341,14 +355,27 @@ void UBDesktopAnnotationController::updateBackground()
 
 void UBDesktopAnnotationController::hideWindow()
 {
+    // #364: hideWindow() runs twice on the normal "back to board" path
+    // (goToUniboard() calls it directly, then restoreUniboard →
+    // UBApplicationController::hideDesktop → showBoard calls it again). Only the
+    // FIRST pass, while the overlay is still visible, is a real desktop→board
+    // transition: that is when we must remember the desktop tool and restore the
+    // board tool. On the second pass the current tool is already the board tool,
+    // so re-saving it into mDesktopStylusTool corrupted the "remember last
+    // desktop tool" state and made the tool selection behave inconsistently.
+    const bool wasShowingDesktop = mTransparentDrawingView && mTransparentDrawingView->isVisible();
+
     if (mToolbarQml)
         mToolbarQml->hide();
 
     if (mTransparentDrawingView)
         mTransparentDrawingView->hide();
 
-    mDesktopStylusTool = UBToolController::toolController()->stylusTool();
-    UBToolController::toolController()->setStylusTool(mBoardStylusTool);
+    if (wasShowingDesktop)
+    {
+        mDesktopStylusTool = UBToolController::toolController()->stylusTool();
+        UBToolController::toolController()->setStylusTool(mBoardStylusTool);
+    }
 }
 
 
