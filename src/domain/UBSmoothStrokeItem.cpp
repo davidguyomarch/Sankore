@@ -292,6 +292,27 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
     strokePen.setCapStyle(Qt::RoundCap);
     strokePen.setJoinStyle(Qt::RoundJoin);
 
+    // #365: a highlighter/marker stroke carries a semi-transparent color
+    // (alpha < 1; pen alpha is always 1). It must READ as translucent both over
+    // an opaque page (board) and over the transparent desktop overlay.
+    //
+    // Two things broke that on the desktop overlay:
+    //  1. the soft-edge pass below draws a second, wider, semi-transparent copy
+    //     UNDER the main pass; the two overlapping translucent draws
+    //     self-composite and read as opaque. Skip that pass for markers so the
+    //     stroke is painted exactly once at its own alpha.
+    //  2. on an opaque light page a highlighter looks best with a Darken
+    //     composition (matches the legacy UBGraphicsPolygonItem marker path).
+    //     We only enable Darken over an opaque page — never over the transparent
+    //     overlay, where Darken against alpha-0 pixels misbehaves; there plain
+    //     SourceOver of the single 0.5-alpha pass gives the correct see-through
+    //     highlight.
+    const bool isMarker = strokePen.color().alphaF() < 1.0;
+    UBGraphicsScene* ubScene = scene();
+    const bool overOpaquePage = ubScene && !ubScene->isDrawingMode();
+    if (isMarker && overOpaquePage && ubScene->isLightBackground())
+        painter->setCompositionMode(QPainter::CompositionMode_Darken);
+
     // --- Velocity-based width modulation ---
     // Compute per-point widths based on velocity between consecutive points.
     // Slow movement → thick (natural pen behavior at start of stroke)
@@ -339,14 +360,18 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
         // Simplified approach: draw each segment with its own pen width
         QColor strokeColor = strokePen.color();
 
-        // Soft-edge pass
-        QColor softColor = strokeColor;
-        softColor.setAlphaF(softColor.alphaF() * 0.25);
-        for (int i = 0; i < mRawPoints.size() - 1; ++i)
+        // Soft-edge pass (skipped for markers — see #365: the extra
+        // translucent copy self-composites and reads as opaque on the overlay).
+        if (!isMarker)
         {
-            QPen segPen(softColor, smoothWidths[i] + 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-            painter->setPen(segPen);
-            painter->drawLine(mRawPoints[i], mRawPoints[i + 1]);
+            QColor softColor = strokeColor;
+            softColor.setAlphaF(softColor.alphaF() * 0.25);
+            for (int i = 0; i < mRawPoints.size() - 1; ++i)
+            {
+                QPen segPen(softColor, smoothWidths[i] + 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+                painter->setPen(segPen);
+                painter->drawLine(mRawPoints[i], mRawPoints[i + 1]);
+            }
         }
 
         // Main pass
@@ -363,8 +388,9 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 
     // Fallback: fixed-width rendering for short strokes or thin lines
 
-    // Soft-edge pass: draw a slightly wider, semi-transparent version first
-    if (strokePen.widthF() >= 1.5)
+    // Soft-edge pass: draw a slightly wider, semi-transparent version first.
+    // Skipped for markers (#365) — see the comment on the velocity path above.
+    if (!isMarker && strokePen.widthF() >= 1.5)
     {
         QPen softPen = strokePen;
         QColor softColor = strokePen.color();

@@ -55,6 +55,10 @@ private slots:
     // #307 — day/night switch must recolor a smooth stroke from its stored
     // light/dark color pair so it stays visible after the background flips.
     void testDayNightRecolor_regression307();
+
+    // #365 — a marker (semi-transparent color) painted over a transparent
+    // surface must stay translucent, not self-composite into an opaque stroke.
+    void testMarkerStaysTranslucentOverTransparent_regression365();
 };
 
 #endif // TST_UBSMOOTHSTROKEITEM_H
