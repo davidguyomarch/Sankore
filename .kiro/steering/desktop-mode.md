@@ -149,6 +149,18 @@ Sous Linux, `updateMask(bool)` construit en plus un masque de fenêtre X11
   parent** (voir le tableau plus haut). PAS un `QQuickWidget` enfant de l'overlay
   (ne rend pas sur Windows), PAS une top-level sans transient parent (ne reçoit
   pas les clics).
+- **#351/#352 (icônes invisibles sur surface translucide)** : recolorer une icône
+  avec `ColorOverlay` (`Qt5Compat.GraphicalEffects`) **ne composite pas** sur un
+  `QQuickWidget` top-level translucide (`WA_TranslucentBackground`) — c'est le cas
+  de la toolbar desktop. Symptôme vécu : la barre s'affiche, les `Rectangle`
+  colorés (color picker, séparateurs) peignent, mais **toutes** les icônes
+  d'outils sont absentes. Cause : `ColorOverlay` rend via un `ShaderEffectSource`/
+  FBO offscreen qui ne se recompose pas sur la surface translucide. Utiliser
+  **`MultiEffect` (`QtQuick.Effects`)** avec `colorization: 1.0` +
+  `colorizationColor`, qui teinte la source directement. Le composant partagé
+  `UBToolButton` utilise `MultiEffect` (donc StylusPaletteV2 du tableau aussi).
+  `QtQuick.Effects` exige `qtshadertools` (déjà installé au CI Windows) et est
+  embarqué par `windeployqt --qmldir src\qml`.
 - **Toujours re-`raise()` la toolbar après `showFullScreen()`** de l'overlay,
   sinon elle passe sous la vue.
 - **#135 (ré-entrance)** : ne pas appeler `processEvents()` pendant la transition
