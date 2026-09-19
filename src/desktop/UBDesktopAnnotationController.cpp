@@ -261,9 +261,23 @@ void UBDesktopAnnotationController::showWindow()
 
     updateBackground();
 
-    mBoardStylusTool = UBToolController::toolController()->stylusTool();
+    auto* tc = UBToolController::toolController();
+    mBoardStylusTool = tc->stylusTool();
 
-    UBToolController::toolController()->setStylusTool(mDesktopStylusTool);
+    // Apply the desktop tool. setStylusTool() early-returns when the value is
+    // unchanged, which happens on the first entry when the board tool and the
+    // desktop tool are both Pen: the toolbar then shows Pen (activeTool is Pen)
+    // but the freshly-shown transparent scene never ran the tool's side effects,
+    // so it behaved like Selector. Force the side effects to run by re-selecting
+    // through a guaranteed-different sentinel first when the value would not
+    // change.
+    if (tc->stylusTool() == mDesktopStylusTool)
+    {
+        const int sentinel = (mDesktopStylusTool == UBStylusTool::Selector)
+                                 ? UBStylusTool::Pen : UBStylusTool::Selector;
+        tc->setStylusTool(sentinel);
+    }
+    tc->setStylusTool(mDesktopStylusTool);
 
 #ifdef Q_OS_WIN
     // #241: try REAL transparency (show the live desktop through the overlay)
