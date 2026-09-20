@@ -848,6 +848,15 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                 if (mShapesPaletteV2Qml)
                     mShapesPaletteV2Qml->hide();
 
+                // #379-followup: the DESKTOP branch reparents mAddItemPalette onto
+                // the transparent desktop overlay. Coming back straight to the
+                // Documents view (desktop → document) never runs the BOARD branch,
+                // so the palette stayed a child of the always-on-top translucent
+                // overlay, keeping that heavy window alive behind the UI and making
+                // everything sluggish. Reparent it off the overlay here too.
+                if (mAddItemPalette)
+                    mAddItemPalette->setParent(UBApplication::mainWindow);
+
                 // Dock palettes permanently hidden — QML V2 replaces them
                 if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
                 {
