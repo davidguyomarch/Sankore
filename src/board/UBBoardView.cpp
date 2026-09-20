@@ -163,6 +163,15 @@ void UBBoardView::init ()
   connect (UBSettings::settings ()->boardUseHighResTabletEvent, &UBSetting::changed,
            this, &UBBoardView::settingChanged);
 
+  // Long-press timer: connect ONCE here. Previously the Selector/Eraser press
+  // handlers did connect(&mLongPressTimer, ...) on EVERY press without a
+  // matching disconnect (the only disconnect is inside longPressEvent, which
+  // runs only when the timer actually fires). Each short click therefore added
+  // a duplicate timeout→longPressEvent connection that was never removed, so
+  // over a session (aggravated by mode switches) clicks got progressively
+  // slower and longPressEvent could run many times. Connect once here.
+  connect (&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
+
   setWindowFlags (Qt::FramelessWindowHint);
   setFrameStyle (QFrame::NoFrame);
   setRenderHints (QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::TextAntialiasing);
@@ -1090,7 +1099,8 @@ void UBBoardView::longPressEvent()
    UBToolController *drawingController = UBToolController::toolController();
    UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController ()->stylusTool ();
 
-   disconnect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
+   // (timer is single-shot and connected once in init(); no per-press
+   // connect/disconnect — see init())
 
    if (UBStylusTool::Selector == currentTool)
    {
@@ -1180,7 +1190,6 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             if (scene()->backgroundObject() == movingItem)
                 movingItem = nullptr;
 
-            connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
             if (!movingItem && !mController->cacheIsVisible())
                 mLongPressTimer.start();
 
@@ -1290,7 +1299,6 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             {
                 if (currentTool == UBStylusTool::Eraser)
                 {
-                    connect(&mLongPressTimer, &QTimer::timeout, this, &UBBoardView::longPressEvent);
                     mLongPressTimer.start();
                 }
                 scene ()->inputDevicePress (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())));
@@ -1913,7 +1921,10 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
           if (transform ().m11 () < 1.0)
             marginColor.setAlpha (255 * transform ().m11 () / 2);
 
-          const auto lines = UBBackgroundGrid::generateLines (scene()->gridType (), rect);
+          // #362: anchor the ruling to the page left edge (page is centered on
+          // the scene origin, so left edge x = -width/2).
+          const double pageLeft = -scene()->nominalSize ().width () / 2.0;
+          const auto lines = UBBackgroundGrid::generateLines (scene()->gridType (), rect, pageLeft);
           for (const auto &line : lines)
             {
               switch (line.weight)
