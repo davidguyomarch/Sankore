@@ -70,11 +70,18 @@ resources/            # UI forms, icons (Phosphor), translations
 
 | File | Widget | Position |
 |------|--------|----------|
-| `StylusPaletteV2.qml` | Barre d'outils bottom | Centre-bas |
+| `UBToolbar.qml` | **Coquille partagée** des barres d'outils (Row+Repeater+delegate, sans dépendance controller) | — |
+| `UBToolButton.qml` | Bouton d'outil partagé (icône Phosphor + ColorOverlay) | — |
+| `ToolbarSeparator.qml` | Séparateur partagé | — |
+| `StylusPaletteV2.qml` | Barre d'outils bottom (instance de `UBToolbar`) | Centre-bas |
+| `DesktopToolbar.qml` | Barre d'outils mode Bureau (instance de `UBToolbar`) | Bas-centre overlay |
 | `TopBar.qml` | Barre top (modes, undo, pages, fond, prefs, quit) | Haut |
 | `PageNavigator.qml` | Sidebar miniatures pages | Gauche |
 | `DrawingPropsBar.qml` | Couleurs/tailles contextuel | Au-dessus de StylusPalette |
 | `ShapesPaletteV2.qml` | Palette formes + propriétés | Gauche, au-dessus bottom bar |
+
+Pièges QML transversaux (required property, backend software, noms réservés) et
+composant partagé `UBToolbar` : voir le steering **`qml-ui.md`**.
 
 ### Code legacy encore actif
 

@@ -9,44 +9,25 @@
 import QtQuick 2.15
 
 /**
- * DesktopToolbar — V2 toolbar for the Desktop annotation mode (issue #336).
+ * DesktopToolbar — desktop-annotation toolbar (issue #336). A thin instance of
+ * the shared UBToolbar (same shell/rendering as the board StylusPaletteV2): it
+ * only supplies the desktop button set and the click routing.
  *
- * Replaces the legacy UBDesktopPalette. Modeled on StylusPaletteV2.qml:
- * shared UBToolButton (Phosphor icons recolored via MultiEffect), all colors
- * from themeManager.
+ * Buttons:
+ *  - "tool"   → toolController.activeTool = id (ids match UBStylusTool::Enum:
+ *               Pen=0 Eraser=1 Marker=2 Selector=3 Pointer=8),
+ *  - "action" → a slot on the desktopController context object
+ *               (UBDesktopAnnotationController): customCapture / screenCapture /
+ *               goToUniboard,
+ *  - "separator".
  *
- * Two kinds of buttons:
- *  - tool buttons bound to UBToolController.activeTool (ids match
- *    UBStylusTool::Enum: Pen=0 Eraser=1 Marker=2 Selector=3 Pointer=8),
- *  - action buttons that call slots on the desktopController context object
- *    (UBDesktopAnnotationController): customCapture / screenCapture / goToUniboard.
- *
- * Hosted in a QQuickWidget parented to mTransparentDrawingView, with
+ * Hosted in a top-level QQuickWidget transient-parented to the overlay, with
  * toolController, themeManager and desktopController as context properties.
  */
-Rectangle {
+UBToolbar {
     id: root
 
-    property int buttonSize: 40
-    property int padding: 6
-    property int spacing: 2
-
-    // Computed dimensions (horizontal bar)
-    property int contentLength: toolRow.implicitWidth + padding * 2
-    property int thickness: buttonSize + padding * 2
-
-    width: contentLength
-    height: thickness
-    radius: 12
-    color: themeManager.surface
-    border.color: themeManager.border
-    border.width: 1
-
-    // Button descriptors.
-    // kind "tool"    → toggles toolController.activeTool to `id`
-    // kind "action"  → invokes desktopController[`action`]()
-    // kind "separator"
-    readonly property var buttons: [
+    model: [
         { kind: "tool",   id: 0,  icon: "pen",                tooltip: "Stylo" },
         { kind: "tool",   id: 1,  icon: "eraser",             tooltip: "Gomme" },
         { kind: "tool",   id: 2,  icon: "highlighter-circle", tooltip: "Marqueur" },
@@ -59,56 +40,21 @@ Rectangle {
         { kind: "action", action: "goToUniboard", icon: "chalkboard-teacher", tooltip: "Retour au tableau" }
     ]
 
-    Row {
-        id: toolRow
-        anchors.centerIn: parent
-        spacing: root.spacing
+    isActive: function(row) {
+        return row.kind === "tool" && toolController.activeTool === row.id
+    }
+    isPrimary: function(row) {
+        return row.kind === "tool" && toolController.activeTool === row.id
+    }
 
-        // #351 regression fix: same pattern as StylusPaletteV2 — the delegate is
-        // an Item holding a shared UBToolButton and a ToolbarSeparator inline,
-        // fed the row data via QUALIFIED references (del.modelData). A bare
-        // `btnData` resolved through a Loader did not reach into the separate
-        // UBToolButton .qml (undefined), so the buttons failed to bind.
-        Repeater {
-            model: root.buttons
-
-            delegate: Item {
-                id: del
-                required property var modelData
-                readonly property Item shown: (modelData.kind === "separator") ? sep : toolBtn
-                implicitWidth: shown.implicitWidth > 0 ? shown.implicitWidth : shown.width
-                implicitHeight: shown.implicitHeight > 0 ? shown.implicitHeight : shown.height
-                width: implicitWidth
-                height: implicitHeight
-
-                UBToolButton {
-                    id: toolBtn
-                    visible: del.modelData.kind !== "separator"
-                    readonly property bool isTool: del.modelData.kind === "tool"
-                    buttonSize: root.buttonSize
-                    iconName: (del.modelData.kind === "separator") ? "" : del.modelData.icon
-                    tooltip: (del.modelData.kind === "separator") ? "" : del.modelData.tooltip
-                    active: isTool && toolController.activeTool === del.modelData.id
-                    primaryHighlight: active
-                    onClicked: {
-                        if (isTool) {
-                            toolController.activeTool = del.modelData.id
-                        } else if (del.modelData.action === "customCapture") {
-                            desktopController.customCapture()
-                        } else if (del.modelData.action === "screenCapture") {
-                            desktopController.screenCapture()
-                        } else if (del.modelData.action === "goToUniboard") {
-                            desktopController.goToUniboard()
-                        }
-                    }
-                }
-
-                ToolbarSeparator {
-                    id: sep
-                    visible: del.modelData.kind === "separator"
-                    buttonSize: root.buttonSize
-                }
-            }
-        }
+    onButtonClicked: function(row) {
+        if (row.kind === "tool")
+            toolController.activeTool = row.id
+        else if (row.action === "customCapture")
+            desktopController.customCapture()
+        else if (row.action === "screenCapture")
+            desktopController.screenCapture()
+        else if (row.action === "goToUniboard")
+            desktopController.goToUniboard()
     }
 }
