@@ -30,6 +30,7 @@
 #include "document/UBDocumentController.h"
 #include "document/UBDocumentProxy.h"
 #include "document/UBDocumentContainer.h"
+#include "domain/UBHyperlinkUtils.h"
 
 #include "board/UBBoardController.h"
 
@@ -191,14 +192,11 @@ QStringList UBGraphicsItemMoveToPageAction::save()
 UBGraphicsItemLinkToWebPageAction::UBGraphicsItemLinkToWebPageAction(QString url, QObject *parent) :
     UBGraphicsItemAction(eLinkToWebUrl,parent)
 {
-    if (url.length() > 0)
-    {
-        if(!url.startsWith("http://"))
-            url = "http://" + url;
-        mUrl = url;
-    }
-    else
-        mUrl = QString();
+    // Normalise via the shared, unit-tested helper (#358): keep an existing
+    // scheme (http://, https://, ftp://, mailto:) untouched and only prepend
+    // https:// to a bare host. Previously http:// was blindly prepended, which
+    // both forced insecure links and double-prefixed already-schemed URLs.
+    mUrl = UBHyperlink::normalizeUrl(url);
 }
 
 void UBGraphicsItemLinkToWebPageAction::play()

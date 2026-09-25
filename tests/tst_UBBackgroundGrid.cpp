@@ -111,24 +111,75 @@ void TestUBBackgroundGrid::testSeyesInterlineSpacing()
 
 void TestUBBackgroundGrid::testSeyesHasVerticalAndMargin()
 {
-    // Vertical major lines every (doubled) 16 mm cell, plus one red margin line
-    // at 40 mm (the margin distance is unchanged by #379).
-    const double cell = 16.0 * UPM;   // 64
+    // #362: Séyès verticals are Minor (faint) — a real copybook has no strong
+    // grey vertical — and there is exactly one red margin line. With the
+    // default pageLeft==0 the margin is 40 mm from x==0. (16 mm cell spacing
+    // doubled by #379 is exercised by testSeyesInterlineSpacing.)
     const double marginX = 40.0 * UPM; // 160
 
     auto lines = generateLines(Type::Seyes, QRectF(0, 0, 320, 320));
-    QVERIFY(countLines(lines, Orientation::Vertical, Weight::Major) > 0);
+    // No strong (Major) verticals anymore.
+    QCOMPARE(countLines(lines, Orientation::Vertical, Weight::Major), 0);
+    // But there are faint vertical guides.
+    QVERIFY(countLines(lines, Orientation::Vertical, Weight::Minor) > 0);
 
-    // Exactly one margin line, at 40 mm.
+    // Exactly one margin line, at 40 mm from the page left edge (0 here).
     int marginCount = countLines(lines, Orientation::Vertical, Weight::Margin);
     QCOMPARE(marginCount, 1);
     auto it = std::find_if(lines.begin(), lines.end(), [](const Line& l){
         return l.weight == Weight::Margin; });
     QVERIFY(it != lines.end());
     QVERIFY(qFuzzyCompare(it->pos, marginX));
+}
 
-    // Vertical majors are one (doubled) cell apart.
-    QVERIFY(qFuzzyCompare(cell, 64.0));
+// #362: the page is centered on the scene origin, so its left edge is at
+// x = -W/2 and the center is at x = 0. Anchoring to the page left must (a) put
+// the red margin 40 mm RIGHT of the left edge (near the left, not the center),
+// and (b) never place a strong vertical exactly on the page center x==0.
+void TestUBBackgroundGrid::testSeyesMarginAnchoredToPageLeft_regression362()
+{
+    const double pageWidth = 1280.0;         // default 4:3 page
+    const double pageLeft = -pageWidth / 2.0; // -640, the left edge
+    const QRectF viewport(pageLeft, -480, pageWidth, 960); // whole page visible
+
+    auto lines = generateLines(Type::Seyes, viewport, pageLeft);
+
+    // The red margin sits 40 mm (160 u) from the LEFT edge, i.e. near the left,
+    // not near the center.
+    auto it = std::find_if(lines.begin(), lines.end(), [](const Line& l){
+        return l.weight == Weight::Margin; });
+    QVERIFY(it != lines.end());
+    QVERIFY(qFuzzyCompare(it->pos, pageLeft + 40.0 * UPM)); // -640 + 160 = -480
+    QVERIFY(it->pos < 0.0); // clearly left of the page center
+
+    // No strong grey vertical is drawn on the page center (x == 0).
+    bool majorOnCenter = std::any_of(lines.begin(), lines.end(), [](const Line& l){
+        return l.orientation == Orientation::Vertical
+               && l.weight == Weight::Major
+               && std::abs(l.pos) < 1e-6; });
+    QVERIFY(!majorOnCenter);
+}
+
+void TestUBBackgroundGrid::testGridVerticalsAnchoredToPageLeft_regression362()
+{
+    const double pageWidth = 1280.0;
+    const double pageLeft = -pageWidth / 2.0;
+    const QRectF viewport(pageLeft, -480, pageWidth, 960);
+
+    auto lines = generateLines(Type::Grid, viewport, pageLeft);
+
+    // Grid verticals are phased from the page left edge, so a vertical falls on
+    // pageLeft itself and NOT necessarily on the center x==0. With pageLeft
+    // = -640 (a multiple of the doubled 64 u step) a line does land on 0, so
+    // instead assert the phase: every vertical is an integer number of steps
+    // from pageLeft. (#379 doubled the Grid step to 16 mm == 64 u.)
+    const double step = 16.0 * UPM; // 64
+    for (const auto& l : lines)
+    {
+        if (l.orientation != Orientation::Vertical) continue;
+        const double k = (l.pos - pageLeft) / step;
+        QVERIFY(qFuzzyCompare(k, std::round(k)));
+    }
 }
 
 void TestUBBackgroundGrid::testSeyesLargeIsScaled()

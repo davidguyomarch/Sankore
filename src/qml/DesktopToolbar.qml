@@ -7,15 +7,13 @@
  */
 
 import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import Qt5Compat.GraphicalEffects
 
 /**
  * DesktopToolbar — V2 toolbar for the Desktop annotation mode (issue #336).
  *
  * Replaces the legacy UBDesktopPalette. Modeled on StylusPaletteV2.qml:
- * Phosphor icons + ColorOverlay, all colors from themeManager.
+ * shared UBToolButton (Phosphor icons recolored via MultiEffect), all colors
+ * from themeManager.
  *
  * Two kinds of buttons:
  *  - tool buttons bound to UBToolController.activeTool (ids match
@@ -66,105 +64,51 @@ Rectangle {
         anchors.centerIn: parent
         spacing: root.spacing
 
+        // #351 regression fix: same pattern as StylusPaletteV2 — the delegate is
+        // an Item holding a shared UBToolButton and a ToolbarSeparator inline,
+        // fed the row data via QUALIFIED references (del.modelData). A bare
+        // `btnData` resolved through a Loader did not reach into the separate
+        // UBToolButton .qml (undefined), so the buttons failed to bind.
         Repeater {
             model: root.buttons
 
-            Loader {
-                sourceComponent: modelData.kind === "separator" ? separatorComp : buttonComp
-                property var btnData: modelData
-            }
-        }
-    }
+            delegate: Item {
+                id: del
+                required property var modelData
+                readonly property Item shown: (modelData.kind === "separator") ? sep : toolBtn
+                implicitWidth: shown.implicitWidth > 0 ? shown.implicitWidth : shown.width
+                implicitHeight: shown.implicitHeight > 0 ? shown.implicitHeight : shown.height
+                width: implicitWidth
+                height: implicitHeight
 
-    // --- Button Component (tool + action share the same look) ---
-    Component {
-        id: buttonComp
-
-        Rectangle {
-            id: btn
-            width: root.buttonSize
-            height: root.buttonSize
-            radius: 8
-
-            readonly property bool isTool: btnData.kind === "tool"
-            // Tool buttons highlight when they are the active tool.
-            property bool isActive: isTool && toolController.activeTool === btnData.id
-            property bool isHovered: btnMouse.containsMouse
-
-            color: isActive ? themeManager.primary
-                 : isHovered ? themeManager.surfaceHover
-                 : "transparent"
-
-            // Icon (hidden source for ColorOverlay)
-            Image {
-                id: iconImg
-                anchors.centerIn: parent
-                width: 24
-                height: 24
-                source: "qrc:/icons/phosphor/" + btnData.icon + ".svg"
-                sourceSize: Qt.size(24, 24)
-                smooth: true
-                mipmap: true
-                visible: false
-            }
-
-            ColorOverlay {
-                anchors.fill: iconImg
-                source: iconImg
-                color: btn.isActive ? themeManager.onPrimary : themeManager.onSurface
-                opacity: btn.isActive ? 1.0 : (btn.isHovered ? 1.0 : 0.85)
-            }
-
-            // Active indicator bar (tool buttons only)
-            Rectangle {
-                visible: btn.isActive
-                color: themeManager.onPrimary
-                radius: 1.5
-                width: parent.width * 0.45
-                height: 3
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    bottom: parent.bottom
-                    bottomMargin: 2
-                }
-            }
-
-            MouseArea {
-                id: btnMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    if (btn.isTool) {
-                        toolController.activeTool = btnData.id
-                    } else if (btnData.action === "customCapture") {
-                        desktopController.customCapture()
-                    } else if (btnData.action === "screenCapture") {
-                        desktopController.screenCapture()
-                    } else if (btnData.action === "goToUniboard") {
-                        desktopController.goToUniboard()
+                UBToolButton {
+                    id: toolBtn
+                    visible: del.modelData.kind !== "separator"
+                    readonly property bool isTool: del.modelData.kind === "tool"
+                    buttonSize: root.buttonSize
+                    iconName: (del.modelData.kind === "separator") ? "" : del.modelData.icon
+                    tooltip: (del.modelData.kind === "separator") ? "" : del.modelData.tooltip
+                    active: isTool && toolController.activeTool === del.modelData.id
+                    primaryHighlight: active
+                    onClicked: {
+                        if (isTool) {
+                            toolController.activeTool = del.modelData.id
+                        } else if (del.modelData.action === "customCapture") {
+                            desktopController.customCapture()
+                        } else if (del.modelData.action === "screenCapture") {
+                            desktopController.screenCapture()
+                        } else if (del.modelData.action === "goToUniboard") {
+                            desktopController.goToUniboard()
+                        }
                     }
                 }
+
+                ToolbarSeparator {
+                    id: sep
+                    visible: del.modelData.kind === "separator"
+                    buttonSize: root.buttonSize
+                }
             }
-
-            // #247: mouse-transparent tooltip above the button.
-            TooltipLabel {
-                anchor: btn
-                text: btnData.tooltip
-                show: btnMouse.containsMouse && btnData.tooltip !== ""
-                placeBelow: false
-            }
-        }
-    }
-
-    // --- Separator Component ---
-    Component {
-        id: separatorComp
-
-        Rectangle {
-            width: 1
-            height: root.buttonSize * 0.6
-            color: themeManager.border
-            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
         }
     }
 }

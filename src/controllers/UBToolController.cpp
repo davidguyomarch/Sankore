@@ -168,6 +168,8 @@ void UBToolController::setStylusTool(int tool)
             m_currentShape.clear();
             emit currentShapeChanged();
         }
+        // #356: selecting any non-shape tool must also close the Shapes palette.
+        setShapesVisible(false);
     }
 
     emit stylusToolChanged(tool);
@@ -508,7 +510,13 @@ int UBToolController::eraserWidthIndex() const
 
 void UBToolController::setEraserWidthIndex(int index)
 {
-    setStylusTool(UBStylusTool::Eraser);
+    // A width setter must NOT change the active tool. It used to call
+    // setStylusTool(Eraser) here, which produced a spurious Pen->Eraser->Pen
+    // toggle every time the DrawingPropsBar width Repeater initialised its
+    // bindings (currentWidthIndex write) right after entering desktop mode:
+    // the toolbar highlighted Pen while the effective tool briefly bounced
+    // through Eraser. The tool is chosen by setStylusTool alone (the single
+    // authoritative entry point); width setters only persist the width.
     mSettings->setEraserWidthIndex(index);
     emit eraserWidthChanged();
     emit currentWidthIndexChanged();
