@@ -13,8 +13,7 @@ The Desktop annotation mode (transparent full-screen overlay over the desktop)
 still used the legacy `UBDesktopPalette` (a `UBActionPalette`/`UBFloatingPalette`
 with `QAction`s and pen/marker/eraser hold-timer property popups), while the rest
 of the UI had moved to QML V2 (ADR-0001). Two ways to unify it were considered:
-(A) reuse the board's `StylusPaletteV2` instance on the overlay, or (B) build a
-dedicated QML toolbar for the desktop.
+(A) reuse the board's `StylusPaletteV2` instance on the overlay, or (B) build a dedicated QML toolbar for the desktop.
 
 ## Decision
 
@@ -44,4 +43,27 @@ property-popup machinery are removed; color/width is handled by the shared
   board-only tools/actions, and coupling the two contexts is messier than a small
   dedicated toolbar with exactly the desktop actions.
 - **Keep `UBDesktopPalette`** — rejected: leaves a legacy QAction/QWidget island
+- **Keep `UBDesktopPalette`** — rejected: leaves a legacy QAction/QWidget island
   inconsistent with the V2 UI (ADR-0001) and hard to theme.
+
+## Update (#351) — shared components, hosting, and props bar
+
+The dedicated-toolbar decision (option B) stands, refined by implementation
+reality:
+
+- **Shared QML components.** Rather than duplicating the button/style code
+  between `StylusPaletteV2.qml` and `DesktopToolbar.qml`, the common building
+  blocks are extracted into `ToolButton.qml` and `ToolbarSeparator.qml`, used by
+  both. Each toolbar keeps its own action list and hosting; only the visual
+  building blocks are shared (single source of truth for the button look).
+- **Hosting (Windows).** The initial "child of the overlay" hosting did not work
+  on Windows. After VM diagnosis: a `QQuickWidget` child of the translucent
+  frameless overlay does not composite (blank); a plain separate top-level window
+  paints but the fullscreen overlay steals its clicks. The working hosting is a
+  **top-level frameless window with the overlay set as its transient parent**
+  (`QWindow::setTransientParent`) — it paints and receives input. Positioned in
+  global screen coordinates, **bottom-center** like the board. Details in the
+  desktop-mode steering.
+- **Pen color/width.** `DrawingPropsBar.qml` (the board's) is reused as-is,
+  hosted the same way (top-level, transient-parented), shown above the toolbar
+  when `toolController.showDrawingProps` is true.

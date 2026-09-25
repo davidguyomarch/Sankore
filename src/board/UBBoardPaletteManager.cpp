@@ -53,6 +53,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QPainterPath>
+#include <QImage>
 #include "qml/UBThemeManager.h"
 
 
