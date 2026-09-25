@@ -46,6 +46,7 @@
 #include "tst_UBTextDrag.h"
 #include "tst_UBTextVerticalAlign.h"
 #include "tst_UBHyperlink.h"
+#include "tst_UBPageNumber.h"
 #include "tst_UBBackgroundGrid.h"
 #include "tst_UBInkColorUtils.h"
 #include "tst_UBLibraryModel.h"
@@ -188,6 +189,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBHyperlink test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBPageNumber test;
         status |= QTest::qExec(&test, argc, argv);
     }
     {

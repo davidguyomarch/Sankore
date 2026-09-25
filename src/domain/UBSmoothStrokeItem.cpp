@@ -49,6 +49,16 @@ UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     Delegate()->setCanTrigAnAction(true);
 
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
+    // #364: assign the *new* itemLayerType key too. The z-value controller
+    // (UBZLayerController::generateZLevel) reads UBGraphicsItemData::itemLayerType,
+    // NOT the deprecated ItemLayerType above. Without it, validLayerType() fails,
+    // the item falls back to NoLayer and gets errorNumber (-20000001 ≈ -2e7) as
+    // its z — i.e. BELOW the page background — so the stroke is painted but hidden
+    // under the background until a tool change re-sorts z. The legacy
+    // UBGraphicsStrokesGroup sets this key explicitly ("Necessary ... for z value
+    // to be assigned correctly"); the smooth-stroke pipeline that replaced it
+    // forgot to. Mirror it so drawn strokes land in the Object/Drawing z-scope.
+    setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::ObjectItem));
     setUuid(QUuid::createUuid());
 
     setFlag(QGraphicsItem::ItemIsSelectable, true);

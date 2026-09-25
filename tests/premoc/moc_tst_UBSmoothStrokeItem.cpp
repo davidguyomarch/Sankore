@@ -7,7 +7,6 @@
 *****************************************************************************/
 
 #include "../tst_UBSmoothStrokeItem.h"
-#include <QtNetwork/QSslError>
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -57,7 +56,8 @@ static constexpr auto qt_meta_stringdata_ZN22TestUBSmoothStrokeItemE = QtMocHelp
     "testType",
     "testHasDelegate_regression243",
     "testDayNightRecolor_regression307",
-    "testMarkerStaysTranslucentOverTransparent_regression365"
+    "testMarkerStaysTranslucentOverTransparent_regression365",
+    "testLayerTypeKeySetForZOrdering_regression364"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -69,7 +69,7 @@ Q_CONSTINIT static const uint qt_meta_data_ZN22TestUBSmoothStrokeItemE[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-      18,   14, // methods
+      19,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -77,26 +77,28 @@ Q_CONSTINIT static const uint qt_meta_data_ZN22TestUBSmoothStrokeItemE[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,  122,    2, 0x08,    1 /* Private */,
-       3,    0,  123,    2, 0x08,    2 /* Private */,
-       4,    0,  124,    2, 0x08,    3 /* Private */,
-       5,    0,  125,    2, 0x08,    4 /* Private */,
-       6,    0,  126,    2, 0x08,    5 /* Private */,
-       7,    0,  127,    2, 0x08,    6 /* Private */,
-       8,    0,  128,    2, 0x08,    7 /* Private */,
-       9,    0,  129,    2, 0x08,    8 /* Private */,
-      10,    0,  130,    2, 0x08,    9 /* Private */,
-      11,    0,  131,    2, 0x08,   10 /* Private */,
-      12,    0,  132,    2, 0x08,   11 /* Private */,
-      13,    0,  133,    2, 0x08,   12 /* Private */,
-      14,    0,  134,    2, 0x08,   13 /* Private */,
-      15,    0,  135,    2, 0x08,   14 /* Private */,
-      16,    0,  136,    2, 0x08,   15 /* Private */,
-      17,    0,  137,    2, 0x08,   16 /* Private */,
-      18,    0,  138,    2, 0x08,   17 /* Private */,
-      19,    0,  139,    2, 0x08,   18 /* Private */,
+       1,    0,  128,    2, 0x08,    1 /* Private */,
+       3,    0,  129,    2, 0x08,    2 /* Private */,
+       4,    0,  130,    2, 0x08,    3 /* Private */,
+       5,    0,  131,    2, 0x08,    4 /* Private */,
+       6,    0,  132,    2, 0x08,    5 /* Private */,
+       7,    0,  133,    2, 0x08,    6 /* Private */,
+       8,    0,  134,    2, 0x08,    7 /* Private */,
+       9,    0,  135,    2, 0x08,    8 /* Private */,
+      10,    0,  136,    2, 0x08,    9 /* Private */,
+      11,    0,  137,    2, 0x08,   10 /* Private */,
+      12,    0,  138,    2, 0x08,   11 /* Private */,
+      13,    0,  139,    2, 0x08,   12 /* Private */,
+      14,    0,  140,    2, 0x08,   13 /* Private */,
+      15,    0,  141,    2, 0x08,   14 /* Private */,
+      16,    0,  142,    2, 0x08,   15 /* Private */,
+      17,    0,  143,    2, 0x08,   16 /* Private */,
+      18,    0,  144,    2, 0x08,   17 /* Private */,
+      19,    0,  145,    2, 0x08,   18 /* Private */,
+      20,    0,  146,    2, 0x08,   19 /* Private */,
 
  // slots: parameters
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -163,6 +165,8 @@ Q_CONSTINIT const QMetaObject TestUBSmoothStrokeItem::staticMetaObject = { {
         // method 'testDayNightRecolor_regression307'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'testMarkerStaysTranslucentOverTransparent_regression365'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'testLayerTypeKeySetForZOrdering_regression364'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -191,6 +195,7 @@ void TestUBSmoothStrokeItem::qt_static_metacall(QObject *_o, QMetaObject::Call _
         case 15: _t->testHasDelegate_regression243(); break;
         case 16: _t->testDayNightRecolor_regression307(); break;
         case 17: _t->testMarkerStaysTranslucentOverTransparent_regression365(); break;
+        case 18: _t->testLayerTypeKeySetForZOrdering_regression364(); break;
         default: ;
         }
     }
@@ -216,14 +221,14 @@ int TestUBSmoothStrokeItem::qt_metacall(QMetaObject::Call _c, int _id, void **_a
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 18)
+        if (_id < 19)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 18;
+        _id -= 19;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 18)
+        if (_id < 19)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 18;
+        _id -= 19;
     }
     return _id;
 }

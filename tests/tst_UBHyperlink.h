@@ -23,6 +23,7 @@ private slots:
     void testMailtoUntouched();
     void testTrimmed();
     void testEmptyStaysEmpty();
+    void testHttpsNotDoublePrefixed(); // #358
 };
 
 #endif // TST_UBHYPERLINK_H

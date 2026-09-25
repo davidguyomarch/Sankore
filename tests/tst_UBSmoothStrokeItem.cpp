@@ -8,6 +8,7 @@
 
 #include "tst_UBSmoothStrokeItem.h"
 #include "domain/UBSmoothStrokeItem.h"
+#include "core/UB.h"
 
 #include <QGraphicsScene>
 #include <QPainterPath>
@@ -383,4 +384,26 @@ void TestUBSmoothStrokeItem::testHasDelegate_regression243()
     UBGraphicsItem* asUbItem = dynamic_cast<UBGraphicsItem*>(&item);
     QVERIFY(asUbItem != nullptr);            // the cast that UBBoardView performs
     QVERIFY(asUbItem->Delegate() != nullptr); // the pointer it then dereferences
+}
+
+// #364 regression: the stroke must carry the *new* itemLayerType key, which the
+// scene's z-value controller (UBZLayerController::generateZLevel) reads to place
+// the item in a z-scope. Before the fix the constructor only set the deprecated
+// ItemLayerType key; generateZLevel read the unset itemLayerType key, fell back
+// to NoLayer and assigned errorNumber (-20000001 ≈ -2e7) as the z — BELOW the
+// page background — so a freshly drawn stroke was painted but hidden under the
+// background until a tool change re-sorted z (seen when returning from desktop
+// mode). This pins that the correct layer-type key is set at construction.
+void TestUBSmoothStrokeItem::testLayerTypeKeySetForZOrdering_regression364()
+{
+    UBSmoothStrokeItem item;
+
+    // The key the z-controller actually reads.
+    const QVariant v = item.data(UBGraphicsItemData::itemLayerType);
+    QVERIFY(v.isValid());
+    const int layer = v.toInt();
+
+    // Must be a real, z-scoped layer (not NoLayer=0, which triggers errorNumber).
+    QVERIFY(layer != static_cast<int>(itemLayerType::NoLayer));
+    QCOMPARE(layer, static_cast<int>(itemLayerType::ObjectItem));
 }
