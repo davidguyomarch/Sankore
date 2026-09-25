@@ -30,11 +30,14 @@ echo [3/6] Copying fresh files to C:\Sankore...
 set "SRC=%~dp0"
 set "SRC=%SRC:~0,-1%"
 REM /IS /IT: recopy same/tweaked files. Do NOT hide file list so copy errors show.
-robocopy "%SRC%" C:\Sankore /E /IS /IT /NJH /NJS /R:5 /W:3 >nul
+REM /XF *.pdb: the 50+ MB debug-symbol file is useless for a functional test and
+REM the VirtIO/9p network share rejects it (ERROR 223, file too large), which
+REM made robocopy loop forever. Symbols are never needed to run the app.
+robocopy "%SRC%" C:\Sankore /E /IS /IT /XF *.pdb /NJH /NJS /R:5 /W:3 >nul
 REM robocopy exit codes >= 8 mean a real failure.
 if %ERRORLEVEL% GEQ 8 (
     echo ERROR: robocopy reported a failure ^(exit %ERRORLEVEL%^). Retrying verbosely...
-    robocopy "%SRC%" C:\Sankore /E /IS /IT /R:5 /W:3
+    robocopy "%SRC%" C:\Sankore /E /IS /IT /XF *.pdb /R:5 /W:3
 )
 if not exist C:\Sankore\Open-Sankore.exe (
     echo ERROR: Open-Sankore.exe was not copied. Aborting.
