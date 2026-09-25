@@ -56,6 +56,10 @@ private slots:
     // light/dark color pair so it stays visible after the background flips.
     void testDayNightRecolor_regression307();
 
+    // #365 — a marker (semi-transparent color) painted over a transparent
+    // surface must stay translucent, not self-composite into an opaque stroke.
+    void testMarkerStaysTranslucentOverTransparent_regression365();
+
     // #364 — the stroke must carry the new itemLayerType key so the z-controller
     // places it in a real z-scope, instead of falling back to errorNumber (-2e7)
     // and being hidden under the page background (seen on desktop return).

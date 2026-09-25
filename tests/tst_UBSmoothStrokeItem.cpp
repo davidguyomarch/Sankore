@@ -313,6 +313,66 @@ void TestUBSmoothStrokeItem::testDayNightRecolor_regression307()
     QCOMPARE(item.pen().color(), QColor(Qt::black));
 }
 
+// #365: on the desktop overlay the marker was painted opaque instead of
+// translucent. Root cause: UBSmoothStrokeItem::paint drew a wider "soft-edge"
+// copy UNDER the main stroke; over a transparent surface the two overlapping
+// semi-transparent passes self-composited and read as opaque. The fix skips the
+// soft-edge pass for markers (a marker is detected by its pen alpha < 1). This
+// renders the item onto a transparent ARGB image and checks the marker keeps a
+// clearly translucent alpha, well below an opaque pen stroke.
+static int maxAlphaAlongStroke(const QColor& penColor, qreal width)
+{
+    QGraphicsScene scene;
+    UBSmoothStrokeItem* item = new UBSmoothStrokeItem();
+    scene.addItem(item);
+    item->setStrokeWidth(width);
+    item->setStrokeColor(penColor);
+    // A few points so the velocity path (the one that did the soft-edge pass)
+    // is exercised.
+    item->addPoint(QPointF(10, 30), 1.0);
+    item->addPoint(QPointF(40, 30), 1.0);
+    item->addPoint(QPointF(70, 30), 1.0);
+    item->addPoint(QPointF(100, 30), 1.0);
+    item->finalize();
+
+    QImage img(120, 60, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::transparent); // transparent destination, like the desktop overlay
+
+    QPainter p(&img);
+    // Render through the scene (invokes item->paint). The scene is a plain
+    // QGraphicsScene, not a UBGraphicsScene → item->scene() (the UB overload)
+    // is null → no Darken composition, plain SourceOver: exactly the
+    // transparent desktop-overlay case.
+    const QRectF sceneRect(0, 0, img.width(), img.height());
+    scene.render(&p, QRectF(0, 0, img.width(), img.height()), sceneRect);
+    p.end();
+
+    int maxA = 0;
+    for (int y = 0; y < img.height(); ++y)
+        for (int x = 0; x < img.width(); ++x)
+            maxA = qMax(maxA, qAlpha(img.pixel(x, y)));
+    return maxA;
+}
+
+void TestUBSmoothStrokeItem::testMarkerStaysTranslucentOverTransparent_regression365()
+{
+    QColor marker(Qt::yellow);
+    marker.setAlphaF(0.5);            // highlighter: semi-transparent
+    const int markerAlpha = maxAlphaAlongStroke(marker, 12.0);
+
+    const int penAlpha = maxAlphaAlongStroke(QColor(Qt::black), 12.0); // opaque pen
+
+    // The opaque pen fully covers its pixels.
+    QCOMPARE(penAlpha, 255);
+
+    // The marker must stay clearly translucent over the transparent surface:
+    // roughly its own 0.5 alpha (~128), never opacified toward 255 by an extra
+    // self-composited pass. Allow generous headroom for antialiasing.
+    QVERIFY2(markerAlpha < 200,
+             qPrintable(QString("marker max alpha=%1 (expected clearly < 200, ~128)").arg(markerAlpha)));
+    QVERIFY(markerAlpha > 0);
+}
+
 void TestUBSmoothStrokeItem::testHasDelegate_regression243()
 {
     // Before the fix, the constructor never called setDelegate(), so Delegate()
