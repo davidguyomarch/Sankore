@@ -124,6 +124,7 @@ namespace UBBackgroundGrid
      * For Plain, no lines are produced.
      */
     inline std::vector<Line> generateLines(Type type, const QRectF& rect,
+                                           double pageLeft = 0.0,
                                            double upm = unitsPerMm())
     {
         std::vector<Line> lines;
@@ -135,6 +136,15 @@ namespace UBBackgroundGrid
         const double x1 = rect.x() + rect.width();
         const double y1 = rect.y() + rect.height();
 
+        // #362: the page is centered on the scene origin, so its LEFT edge is at
+        // scene x == pageLeft (= -pageWidth/2), NOT x == 0 (which is the page
+        // CENTER). Anchor the vertical rhythm and the red margin to pageLeft so
+        // the margin sits on the left and no strong vertical falls on the center.
+        // Snap a page-left-aligned first coordinate at or below `start`.
+        auto firstAtOrBelowFrom = [](double origin, double start, double step) {
+            return origin + std::floor((start - origin) / step) * step;
+        };
+
         auto addH = [&](double y, Weight w) { lines.push_back({Orientation::Horizontal, w, y}); };
         auto addV = [&](double x, Weight w) { lines.push_back({Orientation::Vertical, w, x}); };
 
@@ -144,7 +154,9 @@ namespace UBBackgroundGrid
             const double step = 8.0 * upm; // == UBSettings::crossSize
             for (double y = firstAtOrBelow(y0, step); y < y1; y += step)
                 addH(y, Weight::Major);
-            for (double x = firstAtOrBelow(x0, step); x < x1; x += step)
+            // Vertical phase anchored to the page left edge (#362) so no line is
+            // forced onto the page center at x==0.
+            for (double x = firstAtOrBelowFrom(pageLeft, x0, step); x < x1; x += step)
                 addV(x, Weight::Major);
             return lines;
         }
@@ -171,13 +183,16 @@ namespace UBBackgroundGrid
                 }
             }
 
-            // Vertical major lines every cell.
-            for (double x = firstAtOrBelow(x0, cell); x < x1; x += cell)
-                addV(x, Weight::Major);
+            // Vertical lines every cell, phase anchored to the page left edge
+            // (#362). They are Minor (faint) — as in a real Séyès copybook —
+            // so no strong grey vertical crosses the page (the old Major
+            // vertical landing on x==0 was the "grey line in the middle").
+            for (double x = firstAtOrBelowFrom(pageLeft, x0, cell); x < x1; x += cell)
+                addV(x, Weight::Minor);
 
-            // Red margin line at a fixed 40 mm from page origin (x==0), drawn
-            // only when visible.
-            const double marginX = 40.0 * upm * scale;
+            // Red margin line 40 mm from the page LEFT edge (pageLeft), not from
+            // scene x==0 (the page center). Drawn only when visible.
+            const double marginX = pageLeft + 40.0 * upm * scale;
             if (marginX >= x0 && marginX < x1)
                 addV(marginX, Weight::Margin);
 

@@ -10,6 +10,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 
+#include "UBGraphicsScene.h"
 #include "UBGraphicsStrokesGroup.h"
 #include "UBSmoothStrokeItem.h"
 #include "UBAbstractGraphicsItem.h"
@@ -169,7 +170,14 @@ void UBBackgroundRenderer::paintBackground(QPainter* painter, const QRectF& rect
             if (mZoomFactor < 1.0)
                 marginColor.setAlpha(255 * mZoomFactor / 2);
 
-            const auto lines = UBBackgroundGrid::generateLines(mGridType, rect);
+            // #362: anchor the vertical rhythm / red margin to the page LEFT
+            // edge. The page is centered on the scene origin, so its left edge
+            // is at x = -pageWidth/2.
+            double pageLeft = 0.0;
+            if (auto* ubScene = dynamic_cast<UBGraphicsScene*>(mScene))
+                pageLeft = -ubScene->nominalSize().width() / 2.0;
+
+            const auto lines = UBBackgroundGrid::generateLines(mGridType, rect, pageLeft);
             for (const auto& line : lines)
             {
                 switch (line.weight)
