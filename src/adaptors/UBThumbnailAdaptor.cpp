@@ -77,6 +77,24 @@ void UBThumbnailAdaptor::generateMissingThumbnails(UBDocumentProxy* proxy)
     }
 }
 
+void UBThumbnailAdaptor::ensureThumbnail(UBDocumentProxy* proxy, int pageIndex)
+{
+    if (!proxy || pageIndex < 0 || pageIndex >= proxy->pageCount())
+        return;
+
+    const QString thumbFileName = proxy->persistencePath()
+            + UBFileSystemUtils::digitFileFormat("/page%1.thumbnail.jpg", pageIndex);
+
+    if (QFile::exists(thumbFileName))
+        return;  // already on disk — nothing to do (#359)
+
+    // Missing: render this single page's thumbnail now, so the URL we hand out
+    // points to an existing file and the QML Image loads it on the first try.
+    UBGraphicsScene* scene = UBSvgSubsetAdaptor::loadScene(proxy, pageIndex);
+    if (scene)
+        persistScene(proxy, scene, pageIndex);
+}
+
 const QPixmap* UBThumbnailAdaptor::get(UBDocumentProxy* proxy, int pageIndex)
 {
     QString fileName = proxy->persistencePath() + UBFileSystemUtils::digitFileFormat("/page%1.thumbnail.jpg", pageIndex);
