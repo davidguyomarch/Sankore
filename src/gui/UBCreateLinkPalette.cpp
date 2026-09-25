@@ -45,6 +45,8 @@
 
 #include "customWidgets/UBGraphicsItemAction.h"
 
+#include "domain/UBPageNumberUtils.h"
+
 #include "frameworks/UBFileSystemUtils.h"
 
 
@@ -225,9 +227,13 @@ void UBCreateLinkPalette::init()
     toPageNumberLayout->addWidget(pageNumberCheckBox);
     mPageComboBox = new QComboBox(this);
     toPageNumberLayout->addWidget(mPageComboBox);
+    // #357: show a 1-based page number to the user but keep the 0-based scene
+    // index as item data, so navigation stays correct while the label reads
+    // like the page navigator (page 1, 2, 3, ... instead of 0, 1, 2, ...).
     for(int sceneIndex = 0; sceneIndex <= lastSceneIndex;sceneIndex+=1)
         if(sceneIndex != activeIndex)
-            mPageComboBox->insertItem(sceneIndex,QString("%1").arg(sceneIndex));
+            mPageComboBox->addItem(QString("%1").arg(UBPageNumber::sceneIndexToPageNumber(sceneIndex)),
+                                   sceneIndex);
     if(!mPageComboBox->count())
         pageNumberCheckBox->setEnabled(false);
     mPageComboBox->setEnabled(false);
@@ -318,7 +324,9 @@ void UBCreateLinkPalette::onOkLinkToPageClicked()
     if(id!= eMoveToPage)
         action = new UBGraphicsItemMoveToPageAction(id);
     else
-        action = new UBGraphicsItemMoveToPageAction(id,mPageComboBox->currentText().toInt());
+        // #357: navigate by the 0-based scene index stored as item data, not
+        // the (now 1-based) displayed label.
+        action = new UBGraphicsItemMoveToPageAction(id,mPageComboBox->currentData().toInt());
     emit definedAction(action);
     close();
 }
