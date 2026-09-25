@@ -55,6 +55,11 @@ private slots:
     // #307 — day/night switch must recolor a smooth stroke from its stored
     // light/dark color pair so it stays visible after the background flips.
     void testDayNightRecolor_regression307();
+
+    // #364 — the stroke must carry the new itemLayerType key so the z-controller
+    // places it in a real z-scope, instead of falling back to errorNumber (-2e7)
+    // and being hidden under the page background (seen on desktop return).
+    void testLayerTypeKeySetForZOrdering_regression364();
 };
 
 #endif // TST_UBSMOOTHSTROKEITEM_H
