@@ -343,6 +343,11 @@ UBBoardView* UBDesktopAnnotationController::drawingView()
 
 void UBDesktopAnnotationController::showWindow()
 {
+    // Re-assert the always-on-top hint that hideWindow() dropped for perf while
+    // the overlay was hidden (see hideWindow()).
+    if (mTransparentDrawingView)
+        mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, true);
+
     showToolbar();
 
     updateBackground();
@@ -433,7 +438,14 @@ void UBDesktopAnnotationController::hideWindow()
         mPropsBarQml->hide();
 
     if (mTransparentDrawingView)
+    {
         mTransparentDrawingView->hide();
+        // Perf: a hidden but always-on-top translucent full-screen window still
+        // participates in the compositor and slowed the whole UI once we left
+        // desktop mode. Drop the always-on-top hint while hidden; showWindow()
+        // re-asserts the window flags on the next entry.
+        mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, false);
+    }
 
     mDesktopStylusTool = UBToolController::toolController()->stylusTool();
     UBToolController::toolController()->setStylusTool(mBoardStylusTool);
