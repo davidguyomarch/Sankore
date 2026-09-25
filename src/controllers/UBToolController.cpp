@@ -168,6 +168,8 @@ void UBToolController::setStylusTool(int tool)
             m_currentShape.clear();
             emit currentShapeChanged();
         }
+        // #356: selecting any non-shape tool must also close the Shapes palette.
+        setShapesVisible(false);
     }
 
     emit stylusToolChanged(tool);
