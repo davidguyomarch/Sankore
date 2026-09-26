@@ -3,7 +3,7 @@
 - **Status:** Proposed <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
 - **Date:** 2026-09-25
 - **Deciders:** maintainer (David Guyomarch)
-- **Related:** #350 (4.5.0 review); #364 (first-stroke-on-return, root-caused); #387 (ghost process on quit); ADR-0006 (dedicated desktop toolbar); desktop-mode / drawing-model steering; `notes/364-desktop-return-firststroke-diagnosis.md`
+- **Related:** #350 (4.5.0 review); #364 (first-stroke-on-return, root-caused); #387 (ghost process on quit); #389 (future custom background image — same page-background model); ADR-0006 (dedicated desktop toolbar); desktop-mode / drawing-model steering; `notes/364-desktop-return-firststroke-diagnosis.md`
 
 ## Context
 
@@ -56,14 +56,24 @@ the previously-open windowing and persistence questions:
    items).
 2. **Shared interface.** Board and Desktop use the *same* UI: the same toolbar and
    controls, not a parallel toolbar.
-3. **Live desktop, in real time.** In Desktop view the *real* desktop is seen
-   through the transparent page **live** — if the desktop changes (a window moves,
-   a video plays), it updates in real time behind the annotations. This rules out
-   a static desktop screenshot painted as the background.
-4. **Mode is persisted; reopening replays live.** Saving records the *mode* of the
+3. **Live desktop via a genuinely transparent window (no redraw/capture).** In
+   Desktop view the page background is truly transparent so the compositor shows
+   the *real* desktop **of the screen Sankoré is displayed on**, live, through the
+   page. Sankoré does **not** capture or repaint the desktop — it just lets it
+   show through. Consequence (intended): only the desktop of Sankoré's own screen
+   is visible; a teacher's *other* screen stays private/separate. This also keeps
+   multi-monitor simple (nothing to mirror — the see-through is a compositor hole,
+   not pixels Sankoré owns).
+4. **Desktop mode is purely "annotate over the see-through desktop".** The
+   fullscreen window captures input for drawing; clicking *through* to the apps
+   behind is **not** supported (this drops the old overlay's click-through mask —
+   an intentional behavior change).
+5. **Mode is persisted; reopening replays live.** Saving records the *mode* of the
    page (board vs desktop/see-through). Reopening a page saved in Desktop mode
-   shows the **current** live desktop through it (again: the page stores a
-   see-through *flag*, never a captured desktop image).
+   shows the **current** live desktop through it (the page stores a see-through
+   *flag*, never the live desktop pixels). A **static thumbnail** capture of the
+   background for the pages sidebar is acceptable (it is only a preview, not the
+   page content).
 
 ## Decision
 
@@ -80,14 +90,23 @@ Concretely, the target model is:
    (`mTransparentDrawingView`) for drawing. Entering/leaving Desktop mode does
    **not** move items between scenes and does **not** swap the interactive view.
 
-2. **Desktop mode = a persisted see-through background + a live window
-   presentation.** A new background type/flag ("desktop / see-through") on the
-   page makes its background transparent so the **live** real desktop is visible
-   behind the annotations, updating in real time (Requirement 3). The same
-   drawing pipeline, the same `UBToolController`, the same items, and the same
-   z-ordering apply. The see-through flag is **saved with the page** (Requirement
-   4): the document stores only the *mode*, never a desktop screenshot, so
-   reopening a desktop page shows the *current* live desktop through it.
+2. **Desktop mode = a persisted see-through background + a transparent window.**
+   A new page **background type** ("desktop / see-through") makes the page
+   background transparent; the fullscreen window is genuinely translucent
+   (`WA_TranslucentBackground`, as already proven for the #241 overlay) so the
+   compositor shows the live desktop behind. Sankoré does **not** repaint or
+   capture the desktop — transparency is a compositor property, cost-free
+   (Requirement 3). The same drawing pipeline, the same `UBToolController`, the
+   same items, and the same z-ordering apply. The see-through flag is **saved
+   with the page** (Requirement 5): the document stores only the *mode*, never
+   desktop pixels, so reopening a desktop page shows the *current* live desktop.
+
+   This new background type sits alongside the existing background types (plain,
+   grid, Séyès…). It is designed as **one more entry in the page-background model**
+   so that a future **user-chosen background image** (see Related) fits the same
+   mechanism rather than a special case: background = { none | ruling(kind) |
+   see-through | image(ref) }, all selected the same way and serialized the same
+   way.
 
 3. **One toolbar surface.** The board's toolbar (`StylusPaletteV2`, already a thin
    instance of the shared `UBToolbar` since #384) is the single toolbar. Desktop
@@ -108,14 +127,17 @@ drawing surface (see Consequences); ADR-0006's "V2 look, no legacy
 
 ### Settled by the requirements (previously open)
 
-- **Live transparency, not a capture.** Requirement 3 mandates a real see-through
-  window showing the live desktop, so the "captured desktop image as background"
-  fallback is **excluded**. Implementation must achieve real-time transparency
-  (and prove it on the GPU-less test VM — the main technical risk, see
-  Consequences).
-- **Desktop pages persist as normal pages, storing a mode flag.** Requirement 4
-  makes a desktop page a first-class saved page whose background mode is
-  serialized; no desktop pixels are stored. Reopening replays the live desktop.
+- **See-through via compositor transparency, not capture or repaint.**
+  Requirement 3 is satisfied by a genuinely transparent window (the desktop shows
+  through), showing only the screen Sankoré is on. No screenshot, no per-frame
+  repaint. The teacher's other screen stays private, and multi-monitor needs no
+  special mirroring of desktop pixels.
+- **Desktop pages persist as normal pages, storing a mode flag.** Requirement 5
+  makes a desktop page a first-class saved page whose background *mode* is
+  serialized; no desktop pixels are stored. A static thumbnail capture for the
+  pages sidebar is acceptable (preview only).
+- **No click-through.** Requirement 4: the mode is purely annotation over the
+  see-through desktop; the old click-through mask is removed.
 
 ## Consequences
 
@@ -132,14 +154,19 @@ drawing surface (see Consequences); ADR-0006's "V2 look, no legacy
 
 **Harder / given up / to watch**
 
-- **Live translucent windowing on Windows is the main risk, and now mandatory.**
-  Requirement 3 forbids the static-capture fallback, so the implementation must
-  reveal the *live* desktop through a real translucent full-screen window and
-  update in real time. This is fragile on the GPU-less test VM, where Qt Quick
-  falls back to the software backend (see the qml-ui / desktop-mode steering).
-  This must be prototyped on the VM **first**, before committing to the unified
-  window path — if live transparency proves unachievable on target hardware, this
-  ADR must be revisited (a follow-up ADR), not silently downgraded to a capture.
+- **Windowing risk is low** now that transparency is a plain compositor property
+  (Requirement 3): the same `WA_TranslucentBackground` full-screen transparency
+  already works for the #241 overlay, and Sankoré neither captures nor repaints
+  the desktop, so there is no per-frame cost and no dependency on GPU effects on
+  the software-backend VM. The remaining care point is the board view's
+  **background cache**: `UBBoardView` uses `CacheBackground`, which must be
+  disabled (or the background drawn transparent) for a see-through page so the
+  cached opaque page fill does not hide the desktop. Prototype the fullscreen
+  transparent presentation on the VM before removing the old overlay path.
+- **Click-through is dropped.** The old overlay let clicks pass through to the
+  apps behind via a mask (`desktopPalettePath`); the unified fullscreen window
+  captures input for drawing instead (Requirement 4). Intentional behavior change
+  to document in release notes.
 - **Multi-monitor / mirroring** behavior (`UBDisplayManager`) must be re-derived
   for the "board window goes fullscreen over the desktop" case.
 - **Captures** (`customCapture`/`screenCapture`) must be re-wired to the unified
@@ -179,22 +206,24 @@ drawing surface (see Consequences); ADR-0006's "V2 look, no legacy
   keeps two interactive views, two input routers, and the view enable/disable
   dance that caused the dirty-region / event-ordering confusion during the #364
   hunt. Most of the transition fragility would remain.
-- **Capture the desktop into a static background image on entry** — **rejected**
-  by Requirement 3 (the desktop must be seen live, updating in real time). Kept
-  here only as the documented fallback *iff* live transparency turns out to be
-  impossible on target hardware, in which case a follow-up ADR would revisit the
-  requirement rather than silently substitute a static capture.
+- **Capture the desktop into a static/repainted background image** — **rejected**.
+  Requirement 3 is met more cheaply by plain window transparency (compositor
+  hole); capturing/repainting would add cost and, worse, could leak another
+  screen's content. A static capture is used *only* for the page thumbnail.
+- **Share the scene but keep a separate overlay view** — rejected (see above): it
+  keeps two interactive views and the transition fragility.
 
 ## Open questions (to resolve during implementation, may spawn follow-up ADRs)
 
-1. **How to serialize the see-through mode** in the `.ubz`/document model
-   (Requirement 4) — a new page background type/attribute, backward-compatible
-   with existing documents (older readers should degrade gracefully).
+1. **How to serialize the background type** in the `.ubz`/document model
+   (Requirement 5) — extend the page background model to
+   { none | ruling(kind) | see-through | image(ref) } (the last for the future
+   custom background image, see Related), backward-compatible so older readers
+   degrade gracefully (unknown type → plain).
 2. **Toolbar/affordances in desktop presentation.** Which board affordances hide
    (page navigator, top bar?) and how the capture/return actions attach to the
    single shared toolbar (Requirement 2).
-3. **Multi-monitor** presentation when the board window goes fullscreen over one
-   screen while a second screen mirrors/extends (`UBDisplayManager`).
-4. **Thumbnails** of a desktop page: what a saved desktop page shows in the pages
-   sidebar (annotations over a neutral/transparent background, since no desktop
-   pixels are stored).
+3. **Background cache.** Confirm the exact way to make `UBBoardView`'s
+   `CacheBackground` not hide the see-through desktop (disable cache for the mode,
+   or paint the background truly transparent) — this is the mechanism that, when
+   mishandled, produced the #364 z/paint confusion.
