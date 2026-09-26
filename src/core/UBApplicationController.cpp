@@ -541,7 +541,9 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
     }
 
     UBToolController::toolController()->setInDesktopMode(true);
-    UBToolController::toolController()->setStylusTool(UBStylusTool::Selector);
+    // #390: do NOT force Selector here. showWindow() sets a deterministic Pen on
+    // entry; forcing Selector afterwards is what left the Selector tool active in
+    // desktop mode instead of Pen.
 }
 
 
