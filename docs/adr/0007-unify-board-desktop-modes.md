@@ -46,6 +46,25 @@ transparent page) — the drawing surface, tools, and existing annotations shoul
 stay the same.** In other words, Desktop is a *background variant of the board*,
 not a separate application mode.
 
+## Requirements (maintainer)
+
+The unified design must satisfy these four product requirements — they resolve
+the previously-open windowing and persistence questions:
+
+1. **Shared drawing area.** Board and Desktop share the *same* drawing surface: a
+   stroke drawn in Board is visible in Desktop and vice-versa (same scene, same
+   items).
+2. **Shared interface.** Board and Desktop use the *same* UI: the same toolbar and
+   controls, not a parallel toolbar.
+3. **Live desktop, in real time.** In Desktop view the *real* desktop is seen
+   through the transparent page **live** — if the desktop changes (a window moves,
+   a video plays), it updates in real time behind the annotations. This rules out
+   a static desktop screenshot painted as the background.
+4. **Mode is persisted; reopening replays live.** Saving records the *mode* of the
+   page (board vs desktop/see-through). Reopening a page saved in Desktop mode
+   shows the **current** live desktop through it (again: the page stores a
+   see-through *flag*, never a captured desktop image).
+
 ## Decision
 
 We will **unify Board and Desktop annotation into one scene and one view.**
@@ -61,10 +80,14 @@ Concretely, the target model is:
    (`mTransparentDrawingView`) for drawing. Entering/leaving Desktop mode does
    **not** move items between scenes and does **not** swap the interactive view.
 
-2. **Desktop mode = a background mode + a window presentation.** A new background
-   type/flag ("desktop / see-through") makes the page background transparent so
-   the real desktop is visible behind the annotations. The same drawing pipeline,
-   the same `UBToolController`, the same items, the same z-ordering apply.
+2. **Desktop mode = a persisted see-through background + a live window
+   presentation.** A new background type/flag ("desktop / see-through") on the
+   page makes its background transparent so the **live** real desktop is visible
+   behind the annotations, updating in real time (Requirement 3). The same
+   drawing pipeline, the same `UBToolController`, the same items, and the same
+   z-ordering apply. The see-through flag is **saved with the page** (Requirement
+   4): the document stores only the *mode*, never a desktop screenshot, so
+   reopening a desktop page shows the *current* live desktop through it.
 
 3. **One toolbar surface.** The board's toolbar (`StylusPaletteV2`, already a thin
    instance of the shared `UBToolbar` since #384) is the single toolbar. Desktop
@@ -83,13 +106,16 @@ This supersedes the **hosting/parallel-toolbar** parts of ADR-0006 for the
 drawing surface (see Consequences); ADR-0006's "V2 look, no legacy
 `UBDesktopPalette`" intent is preserved.
 
-### Explicitly out of scope for this ADR
+### Settled by the requirements (previously open)
 
-- The exact windowing technique to reveal the real desktop (true per-pixel
-  transparency of the main window vs. a captured desktop image painted as the
-  page background) — see Open questions.
-- Whether Desktop annotations persist as a normal page in the document or are
-  ephemeral — see Open questions.
+- **Live transparency, not a capture.** Requirement 3 mandates a real see-through
+  window showing the live desktop, so the "captured desktop image as background"
+  fallback is **excluded**. Implementation must achieve real-time transparency
+  (and prove it on the GPU-less test VM — the main technical risk, see
+  Consequences).
+- **Desktop pages persist as normal pages, storing a mode flag.** Requirement 4
+  makes a desktop page a first-class saved page whose background mode is
+  serialized; no desktop pixels are stored. Reopening replays the live desktop.
 
 ## Consequences
 
@@ -106,11 +132,14 @@ drawing surface (see Consequences); ADR-0006's "V2 look, no legacy
 
 **Harder / given up / to watch**
 
-- **Windowing on Windows is the main risk.** Revealing the live desktop behind an
-  opaque application window requires either real translucent-window compositing
-  (fragile on the GPU-less test VM — see the qml-ui / desktop-mode steering on the
-  software backend) or a captured-desktop-as-background approach (static, doesn't
-  update if the desktop changes). This must be prototyped on the VM early.
+- **Live translucent windowing on Windows is the main risk, and now mandatory.**
+  Requirement 3 forbids the static-capture fallback, so the implementation must
+  reveal the *live* desktop through a real translucent full-screen window and
+  update in real time. This is fragile on the GPU-less test VM, where Qt Quick
+  falls back to the software backend (see the qml-ui / desktop-mode steering).
+  This must be prototyped on the VM **first**, before committing to the unified
+  window path — if live transparency proves unachievable on target hardware, this
+  ADR must be revisited (a follow-up ADR), not silently downgraded to a capture.
 - **Multi-monitor / mirroring** behavior (`UBDisplayManager`) must be re-derived
   for the "board window goes fullscreen over the desktop" case.
 - **Captures** (`customCapture`/`screenCapture`) must be re-wired to the unified
@@ -150,20 +179,22 @@ drawing surface (see Consequences); ADR-0006's "V2 look, no legacy
   keeps two interactive views, two input routers, and the view enable/disable
   dance that caused the dirty-region / event-ordering confusion during the #364
   hunt. Most of the transition fragility would remain.
-- **Capture the desktop into a background image on entry (no live transparency)**
-  — not rejected outright; kept as a fallback for the windowing question (see
-  Open questions). Simpler and VM-friendly, but the background is static.
+- **Capture the desktop into a static background image on entry** — **rejected**
+  by Requirement 3 (the desktop must be seen live, updating in real time). Kept
+  here only as the documented fallback *iff* live transparency turns out to be
+  impossible on target hardware, in which case a follow-up ADR would revisit the
+  requirement rather than silently substitute a static capture.
 
 ## Open questions (to resolve during implementation, may spawn follow-up ADRs)
 
-1. **Live transparency vs. captured background.** True translucent fullscreen
-   window (live desktop, but risky on the software-backend VM) or a
-   desktop-screenshot painted as the see-through page background (robust, static)?
-   Prototype both on the VM before committing.
-2. **Persistence.** Is a "desktop annotation" a normal, saved page of the document
-   or an ephemeral scratch layer? Affects the document model and thumbnails.
-3. **Toolbar/affordances in desktop presentation.** Which board affordances hide
+1. **How to serialize the see-through mode** in the `.ubz`/document model
+   (Requirement 4) — a new page background type/attribute, backward-compatible
+   with existing documents (older readers should degrade gracefully).
+2. **Toolbar/affordances in desktop presentation.** Which board affordances hide
    (page navigator, top bar?) and how the capture/return actions attach to the
-   single toolbar.
-4. **Multi-monitor** presentation when the board window goes fullscreen over one
-   screen while a second screen mirrors/extends.
+   single shared toolbar (Requirement 2).
+3. **Multi-monitor** presentation when the board window goes fullscreen over one
+   screen while a second screen mirrors/extends (`UBDisplayManager`).
+4. **Thumbnails** of a desktop page: what a saved desktop page shows in the pages
+   sidebar (annotations over a neutral/transparent background, since no desktop
+   pixels are stored).
