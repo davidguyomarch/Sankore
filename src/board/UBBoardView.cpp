@@ -1124,20 +1124,6 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
     //EV-7 - NNE - 20131231
     emit mousePress(event);
 
-    // #390 diagnostics (TODO remove): does ANY mouse press reach this view, and
-    // is it the desktop overlay? Logged before any early-return so we can tell,
-    // on the VM, whether desktop clicks reach the overlay at all (window/
-    // transparency issue) vs. being routed/handled wrong.
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[PRESS] view bIsDesktop=" << bIsDesktop
-                             << " bIsControl=" << bIsControl
-                             << " tool=" << UBToolController::toolController()->stylusTool()
-                             << " interactive=" << isInteractive()
-                             << " btn=" << (int)event->button() << "\n";
-    }
-
     if (!bIsControl && !bIsDesktop) {
         event->ignore();
         return;
@@ -1328,22 +1314,6 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
 
     //EV-7 - NNE - 20131231
     emit mouseMove(event);
-
-  // #390 diagnostics (TODO remove): log the first few moves on the desktop
-  // overlay (before any early-return), with the real button state, to confirm
-  // whether drag events reach the overlay and carry a pressed button.
-  if (bIsDesktop) {
-      static int sPressedMoveLog = 0;
-      if ((event->buttons() & Qt::LeftButton) && sPressedMoveLog < 6) {
-          ++sPressedMoveLog;
-          QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-          if (_f.open(QIODevice::Append | QIODevice::Text))
-              QTextStream(&_f) << "[MOVE] desktop move#" << sPressedMoveLog
-                               << " tool=" << UBToolController::toolController()->stylusTool()
-                               << " buttons=" << (int)event->buttons()
-                               << " mousePressed=" << mMouseButtonIsPressed << "\n";
-      }
-  }
 
   if(!mIsDragInProgress && ((mapToScene(event->pos()) - mLastPressedMousePos).manhattanLength() < QApplication::startDragDistance()))
   {

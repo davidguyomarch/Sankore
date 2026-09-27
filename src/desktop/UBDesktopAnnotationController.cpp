@@ -23,9 +23,6 @@
 
 #include <QScreen>
 #include <QGuiApplication>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 #include <QQuickWidget>
 #include <QQuickItem>
 #include <QQmlContext>
@@ -360,24 +357,11 @@ void UBDesktopAnnotationController::showWindow()
     // caused toolbar/effective-tool desyncs. Bounce through Selector first if the
     // tool is already Pen, so setStylusTool actually runs its effects and
     // re-highlights the toolbar (it early-returns on an unchanged value).
-    // #390 diagnostics (TODO remove): mark the tool-force window so the log shows
-    // whether a later setStylusTool(Selector) fires AFTER we forced Pen.
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[SHOWWIN] begin force-Pen\n";
-    }
     auto* tc = UBToolController::toolController();
     mBoardStylusTool = tc->stylusTool();
     if (tc->stylusTool() == UBStylusTool::Pen)
         tc->setStylusTool(UBStylusTool::Selector);
     tc->setStylusTool(UBStylusTool::Pen);
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[SHOWWIN] end force-Pen, effectiveTool="
-                             << tc->stylusTool() << "\n";
-    }
 
 #ifdef Q_OS_WIN
     // #241: try REAL transparency (show the live desktop through the overlay)
