@@ -392,7 +392,17 @@ void UBDesktopAnnotationController::showWindow()
     mTransparentDrawingView->setAttribute(Qt::WA_TranslucentBackground, true);
     mTransparentDrawingView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
     mTransparentDrawingView->viewport()->setAutoFillBackground(false);
-    mTransparentDrawingScene->setBackgroundBrush(QBrush(Qt::transparent));
+    // #390 ROOT CAUSE: do NOT force a fully-transparent (alpha 0) scene brush
+    // here. On Windows a WA_TranslucentBackground window whose pixels are alpha 0
+    // is CLICK-THROUGH — the compositor hit-test treats alpha-0 pixels as "not
+    // there", so mouse presses go to the desktop behind and never reach the
+    // overlay view (confirmed on the VM: no [PRESS] logged in desktop mode).
+    // updateBackground() (called below, after the tool is Pen) sets the correct
+    // brush: for a drawing tool it is QColor(127,127,127,1) — visually
+    // transparent but alpha 1, so the overlay still RECEIVES clicks. For the
+    // Selector tool it is alpha 0 on purpose (click-through, interact with the
+    // desktop). Overwriting with Qt::transparent here defeated that and made the
+    // whole overlay click-through regardless of tool.
     mTransparentDrawingView->showFullScreen();
 #elif defined(Q_OS_LINUX)
     // this is necessary to avoid unity to hide the panels
@@ -401,6 +411,11 @@ void UBDesktopAnnotationController::showWindow()
     mTransparentDrawingView->showFullScreen();
 #endif
     UBPlatformUtils::setDesktopMode(true);
+
+    // Apply the tool-dependent background brush LAST, once the tool is Pen and
+    // the window is shown: a drawing tool yields an alpha-1 brush the overlay can
+    // be clicked on (see updateBackground / #390 above).
+    updateBackground();
 
     // Keep the toolbar on top of the overlay after the view is shown.
     showToolbar();
