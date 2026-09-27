@@ -67,7 +67,6 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
         , mToolbarQml(nullptr)
         , mIsFullyTransparent(false)
         , mBoardStylusTool(UBToolController::toolController()->stylusTool())
-        , mDesktopStylusTool(UBToolController::toolController()->stylusTool())
 {
     mSettings = UBSettings::settings();
 
@@ -352,9 +351,17 @@ void UBDesktopAnnotationController::showWindow()
 
     updateBackground();
 
-    mBoardStylusTool = UBToolController::toolController()->stylusTool();
-
-    UBToolController::toolController()->setStylusTool(mDesktopStylusTool);
+    // #390: enter desktop mode with a deterministic Pen tool (a teacher expects
+    // to draw immediately). Save the board tool to restore on exit. We no longer
+    // restore a remembered "last desktop tool" (mDesktopStylusTool) — that scheme
+    // caused toolbar/effective-tool desyncs. Bounce through Selector first if the
+    // tool is already Pen, so setStylusTool actually runs its effects and
+    // re-highlights the toolbar (it early-returns on an unchanged value).
+    auto* tc = UBToolController::toolController();
+    mBoardStylusTool = tc->stylusTool();
+    if (tc->stylusTool() == UBStylusTool::Pen)
+        tc->setStylusTool(UBStylusTool::Selector);
+    tc->setStylusTool(UBStylusTool::Pen);
 
 #ifdef Q_OS_WIN
     // #241: try REAL transparency (show the live desktop through the overlay)
@@ -369,7 +376,17 @@ void UBDesktopAnnotationController::showWindow()
     mTransparentDrawingView->setAttribute(Qt::WA_TranslucentBackground, true);
     mTransparentDrawingView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
     mTransparentDrawingView->viewport()->setAutoFillBackground(false);
-    mTransparentDrawingScene->setBackgroundBrush(QBrush(Qt::transparent));
+    // #390 ROOT CAUSE: do NOT force a fully-transparent (alpha 0) scene brush
+    // here. On Windows a WA_TranslucentBackground window whose pixels are alpha 0
+    // is CLICK-THROUGH — the compositor hit-test treats alpha-0 pixels as "not
+    // there", so mouse presses go to the desktop behind and never reach the
+    // overlay view (confirmed on the VM: no [PRESS] logged in desktop mode).
+    // updateBackground() (called below, after the tool is Pen) sets the correct
+    // brush: for a drawing tool it is QColor(127,127,127,1) — visually
+    // transparent but alpha 1, so the overlay still RECEIVES clicks. For the
+    // Selector tool it is alpha 0 on purpose (click-through, interact with the
+    // desktop). Overwriting with Qt::transparent here defeated that and made the
+    // whole overlay click-through regardless of tool.
     mTransparentDrawingView->showFullScreen();
 #elif defined(Q_OS_LINUX)
     // this is necessary to avoid unity to hide the panels
@@ -378,6 +395,11 @@ void UBDesktopAnnotationController::showWindow()
     mTransparentDrawingView->showFullScreen();
 #endif
     UBPlatformUtils::setDesktopMode(true);
+
+    // Apply the tool-dependent background brush LAST, once the tool is Pen and
+    // the window is shown: a drawing tool yields an alpha-1 brush the overlay can
+    // be clicked on (see updateBackground / #390 above).
+    updateBackground();
 
     // Keep the toolbar on top of the overlay after the view is shown.
     showToolbar();
@@ -447,7 +469,9 @@ void UBDesktopAnnotationController::hideWindow()
         mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, false);
     }
 
-    mDesktopStylusTool = UBToolController::toolController()->stylusTool();
+    // #390: restore the board tool that was active before entering desktop mode.
+    // (No "last desktop tool" is remembered anymore — entry always defaults to
+    // Pen; see showWindow().)
     UBToolController::toolController()->setStylusTool(mBoardStylusTool);
 }
 

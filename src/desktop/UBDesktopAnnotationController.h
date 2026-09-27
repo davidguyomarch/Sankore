@@ -123,8 +123,7 @@ class UBDesktopAnnotationController : public QObject
 
         bool mIsFullyTransparent;
 
-        int mBoardStylusTool;
-        int mDesktopStylusTool;
+        int mBoardStylusTool;  // board tool saved on entry, restored on exit (#390)
 
         QPixmap mMask;
 
