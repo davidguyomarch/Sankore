@@ -31,3 +31,4 @@ tradeoffs. Not implementation details. See the workflow in
 | [0004](0004-version-driven-by-git-tag.md) | The release version is driven by the git tag | Accepted |
 | [0005](0005-shared-pen-shape-color-palette.md) | Shared color palette between the pen and shape tools | Accepted |
 | [0006](0006-desktop-toolbar-qml-v2.md) | Unify the Desktop-mode toolbar on QML V2 | Accepted |
+| [0007](0007-unify-board-desktop-modes.md) | Unify Board and Desktop annotation modes on a single scene/view | Proposed |
