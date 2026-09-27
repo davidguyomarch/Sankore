@@ -19,6 +19,25 @@
 #include "domain/UBEditableGraphicsPolygonItem.h"
 
 #include <QAction>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+// #390 diagnostics (TODO remove): log every setStylusTool transition into
+// startup.log, so we can see on the VM WHICH call flips the tool back to
+// Selector AFTER showWindow() forces Pen on desktop entry. Correlate with the
+// [SHOWWIN begin/end] markers emitted by UBDesktopAnnotationController.
+static void ubToolSetLog(int from, int to, bool desktop, bool earlyReturn)
+{
+    QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (!f.open(QIODevice::Append | QIODevice::Text))
+        return;
+    QTextStream(&f) << "[TOOLSET] " << from << " -> " << to
+                    << " desktop=" << desktop
+                    << (earlyReturn ? " (EARLY-RETURN, unchanged)" : "")
+                    << "\n";
+    f.close();
+}
 
 // --- Singleton ---
 
@@ -98,7 +117,14 @@ void UBToolController::setActiveTool(int tool)
 void UBToolController::setStylusTool(int tool)
 {
     if (tool == m_activeTool && tool != (int)UBStylusTool::Drawing)
+    {
+        // #390 diagnostics (TODO remove)
+        ubToolSetLog(m_activeTool, tool, m_isDesktopMode, /*earlyReturn*/true);
         return;
+    }
+
+    // #390 diagnostics (TODO remove)
+    ubToolSetLog(m_activeTool, tool, m_isDesktopMode, /*earlyReturn*/false);
 
     const int previousTool = m_activeTool;
 
