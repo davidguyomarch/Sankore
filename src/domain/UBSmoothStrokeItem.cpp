@@ -34,6 +34,9 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     : QGraphicsPathItem(parent)
@@ -295,6 +298,23 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
+
+    // #393 diagnostics (TODO remove): confirm the stroke is actually painted at
+    // return, and with what z/visibility. If paint() fires with a sane z but the
+    // stroke is invisible, the bug is a stale board viewport (repaint), not z.
+    {
+        static int sPaintDiag = 0;
+        if (sPaintDiag < 8) { ++sPaintDiag;
+            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (_f.open(QIODevice::Append | QIODevice::Text))
+                QTextStream(&_f) << "[Z393] stroke paint pts=" << mRawPoints.size()
+                                 << " z=" << zValue()
+                                 << " visible=" << (isVisible() ? 1 : 0)
+                                 << " opacity=" << opacity()
+                                 << " widget=" << (void*)widget
+                                 << "\n";
+        }
+    }
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
