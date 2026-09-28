@@ -1818,12 +1818,22 @@ void UBBoardController::updateSeeThroughPresentation()
     // widget (UBMainWindow::enterSeeThroughMode). Every opaque ancestor must stop
     // filling its background or it defeats the translucency.
     mControlView->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-    if (mControlView->viewport())
+    mControlView->setAttribute(Qt::WA_NoSystemBackground, seeThrough);
+    if (QWidget* vp = mControlView->viewport())
     {
-        mControlView->viewport()->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-        mControlView->viewport()->setAutoFillBackground(!seeThrough);
+        // The QGraphicsView viewport is a plain child QWidget that, by default,
+        // paints QPalette::Base opaque (black on a dark theme) and has
+        // WA_OpaquePaintEvent — this is the black we see even though the window
+        // and the view defer to a transparent draw. Force the viewport itself
+        // transparent + no system background + no opaque paint, so the
+        // compositor hole reaches through it.
+        vp->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+        vp->setAttribute(Qt::WA_NoSystemBackground, seeThrough);
+        vp->setAttribute(Qt::WA_OpaquePaintEvent, !seeThrough);
+        vp->setAutoFillBackground(!seeThrough);
     }
     mControlContainer->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    mControlContainer->setAttribute(Qt::WA_NoSystemBackground, seeThrough);
     mControlContainer->setAutoFillBackground(!seeThrough);
 
     // Scene background brush: for a see-through page use an ALPHA-1 fill (visually
@@ -1840,6 +1850,20 @@ void UBBoardController::updateSeeThroughPresentation()
     mControlView->resetCachedContent();
     if (mControlView->viewport())
         mControlView->viewport()->update();
+
+    // #393 diagnostics (TODO remove): effective viewport transparency state.
+    {
+        QWidget* vp = mControlView->viewport();
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[SEE] viewport translucent="
+                             << (vp && vp->testAttribute(Qt::WA_TranslucentBackground))
+                             << " opaquePaint="
+                             << (vp && vp->testAttribute(Qt::WA_OpaquePaintEvent))
+                             << " autoFill=" << (vp && vp->autoFillBackground())
+                             << " sceneBrushA=" << mActiveScene->backgroundBrush().color().alpha()
+                             << "\n";
+    }
 }
 
 void UBBoardController::boardViewResized(QResizeEvent* event)
