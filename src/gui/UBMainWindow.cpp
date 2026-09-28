@@ -28,6 +28,9 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <QPainter>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 #include "UBMainWindow.h"
 #include "qml/UBThemeManager.h"
@@ -97,10 +100,18 @@ void UBMainWindow::enterSeeThroughMode(bool on)
 
     QWidget* central = centralWidget();
 
+    // #393: WA_TranslucentBackground on an ALREADY-SHOWN top-level window does
+    // not take effect on Windows — the native window was created opaque, so the
+    // background stays black. Hide the window before flipping the attribute so
+    // the native handle is recreated with the translucent surface, then show.
+    hide();
+
     setAttribute(Qt::WA_TranslucentBackground, on);
+    setAttribute(Qt::WA_NoSystemBackground, on);
     if (central)
     {
         central->setAttribute(Qt::WA_TranslucentBackground, on);
+        central->setAttribute(Qt::WA_NoSystemBackground, on);
         central->setAutoFillBackground(!on);
     }
 
@@ -108,6 +119,15 @@ void UBMainWindow::enterSeeThroughMode(bool on)
         showFullScreen();
     else
         showMaximized();
+
+    // #393 diagnostics (TODO remove)
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[SEE] UBMainWindow::enterSeeThroughMode on=" << on
+                             << " translucent=" << testAttribute(Qt::WA_TranslucentBackground)
+                             << "\n";
+    }
 }
 
 void UBMainWindow::addBoardWidget(QWidget *pWidget)
