@@ -1633,6 +1633,10 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
         mSettings->setCrossedBackground(mActiveScene->isCrossedBackground());
 
         freezeW3CWidgets(false);
+
+        // #393: sync the cache mode for the new scene's background type.
+        if (mControlView)
+            mControlView->updateCacheForBackgroundType();
     }
 
     selectionChanged();
@@ -1760,6 +1764,11 @@ void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type
         mSettings->setCrossedBackground(UBBackgroundGrid::isRuled(gridType));
 
         mActiveScene->setBackgroundType(isDark, gridType);
+
+        // #393: toggle the board view's background cache on/off so a Desktop
+        // (see-through) page doesn't show a stale opaque cached fill.
+        if (mControlView)
+            mControlView->updateCacheForBackgroundType();
 
         emit backgroundChanged();
     }

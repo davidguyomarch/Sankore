@@ -65,6 +65,12 @@ class UBBoardView : public QGraphicsView
 
         void setToolCursor(int tool);
 
+        /// #393: toggle CacheBackground on/off depending on whether the current
+        /// page background is opaque (rulings, plain) or see-through (Desktop).
+        /// An opaque cached background hides the see-through compositor hole;
+        /// disabling the cache for Desktop pages lets every frame paint through.
+        void updateCacheForBackgroundType();
+
         void rubberItems();
         void moveRubberedItems(QPointF movingVector);
 
