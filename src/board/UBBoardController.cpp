@@ -1637,6 +1637,9 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
         // #393: sync the cache mode for the new scene's background type.
         if (mControlView)
             mControlView->updateCacheForBackgroundType();
+
+        // #393: enter/leave see-through presentation if the new page is Desktop.
+        updateSeeThroughPresentation();
     }
 
     selectionChanged();
@@ -1772,6 +1775,48 @@ void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type
 
         emit backgroundChanged();
     }
+
+    // #393: entering/leaving the Desktop background flips the see-through
+    // fullscreen presentation.
+    updateSeeThroughPresentation();
+}
+
+void UBBoardController::updateSeeThroughPresentation()
+{
+    if (!mActiveScene || !mControlView || !mControlContainer || !mMainWindow)
+        return;
+
+    const bool seeThrough =
+        (mActiveScene->gridType() == UBBackgroundGrid::Type::Desktop);
+
+    // The board view already paints transparent for a Desktop page (step 2) and
+    // uses CacheNone. Here we open the compositor hole up the whole widget stack:
+    // view + viewport + the board container, plus the main window & its central
+    // widget (UBMainWindow::enterSeeThroughMode). Every opaque ancestor must stop
+    // filling its background or it defeats the translucency.
+    mControlView->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    if (mControlView->viewport())
+    {
+        mControlView->viewport()->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+        mControlView->viewport()->setAutoFillBackground(!seeThrough);
+    }
+    mControlContainer->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    mControlContainer->setAutoFillBackground(!seeThrough);
+
+    // Scene background brush: for a see-through page use an ALPHA-1 fill (visually
+    // transparent but hit-testable) so the fullscreen window still receives mouse
+    // events on Windows — an alpha-0 brush is click-through (#390). For opaque
+    // pages, clear any leftover see-through brush (drawBackground paints the fill).
+    if (seeThrough)
+        mActiveScene->setBackgroundBrush(QBrush(QColor(127, 127, 127, 1)));
+    else
+        mActiveScene->setBackgroundBrush(Qt::NoBrush);
+
+    mMainWindow->enterSeeThroughMode(seeThrough);
+
+    mControlView->resetCachedContent();
+    if (mControlView->viewport())
+        mControlView->viewport()->update();
 }
 
 void UBBoardController::boardViewResized(QResizeEvent* event)

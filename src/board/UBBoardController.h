@@ -232,6 +232,13 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
                                  bool isSyncOperation = true, bool isBackground = false, bool internalData = false, eItemActionType actionType = eItemActionType_Default, UBFeatureBackgroundDisposition disposition = Center);
         void changeBackground(bool isDark, bool isCrossed);
         void changeBackgroundType(bool isDark, UBBackgroundGrid::Type gridType);
+
+        /// #393 (ADR-0007): enter/leave the see-through fullscreen presentation
+        /// based on whether the active page background type is Desktop. Flips
+        /// transparency on the board container + view + viewport and the main
+        /// window, and sets an alpha-1 scene brush so the window still receives
+        /// clicks (the #390 lesson). Idempotent.
+        void updateSeeThroughPresentation();
         void setToolCursor(int tool);
         void showMessage(const QString& message, bool showSpinningWheel = false);
         void hideMessage();

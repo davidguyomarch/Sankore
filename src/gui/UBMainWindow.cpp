@@ -84,6 +84,32 @@ UBMainWindow::~UBMainWindow()
     }
 }
 
+void UBMainWindow::enterSeeThroughMode(bool on)
+{
+    // #393 (ADR-0007): the board window itself becomes the see-through desktop
+    // surface (no separate overlay). For the compositor hole to reach the board
+    // view, EVERY opaque ancestor between the window and the view must stop
+    // painting its background: the top-level window AND its central widget.
+    // (mControlContainer + the view/viewport are handled by UBBoardController.)
+    if (mSeeThroughMode == on)
+        return;
+    mSeeThroughMode = on;
+
+    QWidget* central = centralWidget();
+
+    setAttribute(Qt::WA_TranslucentBackground, on);
+    if (central)
+    {
+        central->setAttribute(Qt::WA_TranslucentBackground, on);
+        central->setAutoFillBackground(!on);
+    }
+
+    if (on)
+        showFullScreen();
+    else
+        showMaximized();
+}
+
 void UBMainWindow::addBoardWidget(QWidget *pWidget)
 {
     if (!mBoardWidget)

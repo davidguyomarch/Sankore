@@ -61,6 +61,14 @@ class UBMainWindow : public QMainWindow, public Ui::MainWindow
         void showDownloadWidget();
         void hideDownloadWidget();
 
+        /// #393 (ADR-0007): present the board window see-through and fullscreen
+        /// so the live desktop shows behind it (Desktop background type), or
+        /// restore the normal maximized opaque window. Idempotent: flips
+        /// WA_TranslucentBackground + autoFillBackground on the window and its
+        /// central widget, and switches fullscreen/maximized.
+        void enterSeeThroughMode(bool on);
+        bool isSeeThroughMode() const { return mSeeThroughMode; }
+
     signals:
         void closeEvent_Signal( QCloseEvent *event );
 
@@ -91,6 +99,7 @@ private:
         bool event(QEvent *event);
 #endif
         UBDownloadWidget* mpDownloadWidget;
+        bool mSeeThroughMode = false;   // #393
 };
 
 #endif /* UBMAINWINDOW_H_ */
