@@ -41,13 +41,15 @@ void TestUBBackgroundGrid::testTypeTokenRoundTrip()
     QCOMPARE(fromToken(toToken(Type::Seyes)), Type::Seyes);
     QCOMPARE(fromToken(toToken(Type::SeyesLarge)), Type::SeyesLarge);
     QCOMPARE(fromToken(toToken(Type::DoubleLine3mm)), Type::DoubleLine3mm);
+    QCOMPARE(fromToken(toToken(Type::Desktop)), Type::Desktop);
+    QCOMPARE(fromToken(toToken(Type::Image)), Type::Image);
     // Unknown token falls back to Plain.
     QCOMPARE(fromToken(QStringLiteral("bogus")), Type::Plain);
 }
 
 void TestUBBackgroundGrid::testTypeIntRoundTrip()
 {
-    for (int v : {0, 1, 2, 3, 4})
+    for (int v : {0, 1, 2, 3, 4, 5, 6})
         QCOMPARE(toInt(fromInt(v)), v);
     // Out-of-range integer falls back to Plain (0).
     QCOMPARE(fromInt(99), Type::Plain);
@@ -60,6 +62,10 @@ void TestUBBackgroundGrid::testIsRuled()
     QVERIFY(isRuled(Type::Seyes));
     QVERIFY(isRuled(Type::SeyesLarge));
     QVERIFY(isRuled(Type::DoubleLine3mm));
+    // #393: Desktop and Image are NOT rulings — they must not set
+    // crossed-background=true in the legacy SVG attribute.
+    QVERIFY(!isRuled(Type::Desktop));
+    QVERIFY(!isRuled(Type::Image));
 }
 
 void TestUBBackgroundGrid::testGridIsUniform8mm()
@@ -221,4 +227,27 @@ void TestUBBackgroundGrid::testDoubleLine3mmPairs()
     // Next pair starts one period after the first.
     if (ys.size() >= 3)
         QVERIFY(qFuzzyCompare(ys[2] - ys[0], period));
+}
+
+// #393: Desktop and Image produce no lines (they are not rulings).
+void TestUBBackgroundGrid::testDesktopAndImageProduceNoLines()
+{
+    auto desktopLines = generateLines(Type::Desktop, QRectF(0, 0, 800, 600));
+    QVERIFY(desktopLines.empty());
+
+    auto imageLines = generateLines(Type::Image, QRectF(0, 0, 800, 600));
+    QVERIFY(imageLines.empty());
+}
+
+// #393: drawsOpaqueBackground — Desktop is see-through, everything else is opaque.
+void TestUBBackgroundGrid::testDrawsOpaqueBackground()
+{
+    QVERIFY(drawsOpaqueBackground(Type::Plain));
+    QVERIFY(drawsOpaqueBackground(Type::Grid));
+    QVERIFY(drawsOpaqueBackground(Type::Seyes));
+    QVERIFY(drawsOpaqueBackground(Type::SeyesLarge));
+    QVERIFY(drawsOpaqueBackground(Type::DoubleLine3mm));
+    QVERIFY(drawsOpaqueBackground(Type::Image));
+    // Desktop is NOT opaque — it is the see-through background.
+    QVERIFY(!drawsOpaqueBackground(Type::Desktop));
 }
