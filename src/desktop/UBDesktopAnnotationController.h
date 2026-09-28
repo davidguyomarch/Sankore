@@ -58,6 +58,20 @@ class UBDesktopAnnotationController : public QObject
         void showWindow();
         void hideWindow();
 
+        /// #393 (ADR-0007): present the given board scene through the overlay
+        /// instead of the controller's private mTransparentDrawingScene, so
+        /// annotations made over the desktop live on the shared board page. Pass
+        /// the active board scene; the overlay never deletes an external scene.
+        /// Call before showWindow() (or while shown) to (re)bind the surface.
+        void presentScene(UBGraphicsScene* scene);
+
+        /// #393 (ADR-0008 D3): true when the user left the see-through overlay via
+        /// "return to board" while the page is still of the Desktop background
+        /// type. The board controller uses this to avoid immediately re-raising
+        /// the overlay (which would trap the user). Cleared by presentScene()
+        /// (page navigation / re-picking the background).
+        bool isManuallyHidden() const { return mManuallyHidden; }
+
         // Rounded region covering the QML toolbar (macOS tabletEvent workaround).
         QPainterPath desktopPalettePath() const;
         UBBoardView *drawingView();
@@ -93,7 +107,16 @@ class UBDesktopAnnotationController : public QObject
         QPixmap getScreenPixmap();
 
         UBBoardView* mTransparentDrawingView;
+        // The controller's OWN scene, used when no board scene is shared (kept
+        // for capture-only flows / legacy). Deleted by the destructor.
         UBGraphicsScene* mTransparentDrawingScene;
+
+        /// #393: the scene currently shown by the overlay. Points at
+        /// mTransparentDrawingScene by default, or at a shared board scene after
+        /// presentScene(). All scene mutations (background brush, clear, mask)
+        /// go through this so they hit whatever surface is on screen. NEVER
+        /// deleted here — the owning controller (board or this) owns it.
+        UBGraphicsScene* presentedScene() const;
 
     private slots:
         void onTransparentWidgetResized();
@@ -124,6 +147,10 @@ class UBDesktopAnnotationController : public QObject
         bool mIsFullyTransparent;
 
         int mBoardStylusTool;  // board tool saved on entry, restored on exit (#390)
+
+        // #393 (ADR-0008 D3): user pressed "return to board" while the page is
+        // still Desktop-type — session-level "don't re-raise" flag.
+        bool mManuallyHidden = false;
 
         QPixmap mMask;
 

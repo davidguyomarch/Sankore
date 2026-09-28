@@ -1866,19 +1866,6 @@ UBBoardView::resizeEvent (QResizeEvent * event)
 }
 
 void
-UBBoardView::updateCacheForBackgroundType()
-{
-    // #393: a Desktop (see-through) page must NOT use CacheBackground — the
-    // cached opaque fill would hide the transparent compositor hole, and the
-    // live desktop behind would never show. For all other (opaque) types,
-    // CacheBackground is the normal performant mode.
-    if (scene() && scene()->gridType() == UBBackgroundGrid::Type::Desktop)
-        setCacheMode(QGraphicsView::CacheNone);
-    else
-        setCacheMode(QGraphicsView::CacheBackground);
-}
-
-void
 UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
 {
   // #241: in Desktop annotation mode the overlay must show the desktop through
@@ -1890,26 +1877,6 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
   // the page fill + ruling.
   if (bIsDesktop)
     {
-      QGraphicsView::drawBackground (painter, rect);
-      return;
-    }
-
-  // #393 (ADR-0007): a board page whose background type is Desktop is also
-  // see-through — the live desktop shows through the transparent scene, exactly
-  // like the legacy desktop overlay. Defer to the base QGraphicsView so the
-  // scene's (transparent) backgroundBrush is painted instead of the opaque
-  // page fill below.
-  if (scene() && scene()->gridType() == UBBackgroundGrid::Type::Desktop)
-    {
-      // #393 diagnostics (TODO remove): confirm the see-through branch is taken.
-      {
-        static int sSeeThroughLog = 0;
-        if (sSeeThroughLog < 3) { ++sSeeThroughLog;
-          QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-          if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[DRAW] board see-through branch (gridType=Desktop)\n";
-        }
-      }
       QGraphicsView::drawBackground (painter, rect);
       return;
     }

@@ -40,9 +40,6 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QScrollBar>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 
 #include "frameworks/UBFileSystemUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -54,6 +51,7 @@
 #include "core/UBSetting.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBApplicationController.h"
+#include "desktop/UBDesktopAnnotationController.h"
 #include "core/UBDocumentManager.h"
 #include "core/UBMimeData.h"
 #include "core/UBDownloadManager.h"
@@ -1637,12 +1635,9 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
 
         freezeW3CWidgets(false);
 
-        // #393: sync the cache mode for the new scene's background type.
-        if (mControlView)
-            mControlView->updateCacheForBackgroundType();
-
-        // #393: enter/leave see-through presentation if the new page is Desktop.
-        updateSeeThroughPresentation();
+        // #393 (ADR-0007): show/hide the see-through desktop overlay for the
+        // newly-activated scene's background type (Desktop = overlay shown).
+        updateDesktopOverlayForBackground();
     }
 
     selectionChanged();
@@ -1759,111 +1754,71 @@ void UBBoardController::changeBackground(bool isDark, bool isCrossed)
     changeBackgroundType(isDark, target);
 }
 
+void UBBoardController::updateDesktopOverlayForBackground()
+{
+    // #393 (ADR-0007): the Desktop background type turns the current page into a
+    // see-through desktop-annotation surface. We do NOT make the board window
+    // itself translucent (that needs a compositing GPU and fails on the software
+    // backend of the test VM). Instead we reuse the existing top-level
+    // translucent overlay (UBDesktopAnnotationController), which is proven to
+    // render see-through on the VM, and point it at THIS controller's active
+    // scene so the annotations are the same objects as the board page.
+    if (!mActiveScene || !UBApplication::applicationController)
+        return;
+
+    UBDesktopAnnotationController* overlay =
+        UBApplication::applicationController->uninotesController();
+    if (!overlay)
+        return;
+
+    const bool wantOverlay =
+        (mActiveScene->gridType() == UBBackgroundGrid::Type::Desktop);
+
+    if (wantOverlay)
+    {
+        // ADR-0008 D3: the overlay is a *session* state, distinct from the page's
+        // background type. If the user explicitly returned to the board while on
+        // a desktop page (goToUniboard set the "manually hidden" flag), do NOT
+        // re-raise it — that would trap the user in the mode. Navigating to the
+        // page or re-picking the background clears the flag.
+        if (overlay->isManuallyHidden())
+            return;
+        if (!UBApplication::applicationController->isShowingDesktop())
+        {
+            // Share THIS page's scene, then enter the proven full desktop flow
+            // (hides the main window so the live desktop shows through — R3).
+            overlay->presentScene(mActiveScene);
+            UBApplication::applicationController->showDesktop();
+        }
+    }
+    else
+    {
+        // Leaving the Desktop background type: exit the overlay if it is up and
+        // unbind the shared scene so the board page is no longer mutated by the
+        // desktop transparency logic.
+        if (UBApplication::applicationController->isShowingDesktop())
+            UBApplication::applicationController->hideDesktop();
+        overlay->presentScene(nullptr);
+    }
+}
+
 void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type gridType)
 {
     bool currentIsDark = mActiveScene->isDarkBackground();
     UBBackgroundGrid::Type currentType = mActiveScene->gridType();
-
-    // #393 diagnostics (TODO remove)
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[BG] changeBackgroundType from=" << (int)currentType
-                             << " to=" << (int)gridType
-                             << " willApply=" << ((isDark != currentIsDark) || (currentType != gridType))
-                             << "\n";
-    }
-
     if ((isDark != currentIsDark) || (currentType != gridType))
     {
         mSettings->setDarkBackground(isDark);
         mSettings->setCrossedBackground(UBBackgroundGrid::isRuled(gridType));
-
         mActiveScene->setBackgroundType(isDark, gridType);
-
-        // #393: toggle the board view's background cache on/off so a Desktop
-        // (see-through) page doesn't show a stale opaque cached fill.
-        if (mControlView)
-            mControlView->updateCacheForBackgroundType();
-
         emit backgroundChanged();
     }
 
-    // #393: entering/leaving the Desktop background flips the see-through
-    // fullscreen presentation.
-    updateSeeThroughPresentation();
-}
-
-void UBBoardController::updateSeeThroughPresentation()
-{
-    if (!mActiveScene || !mControlView || !mControlContainer || !mMainWindow)
-        return;
-
-    const bool seeThrough =
-        (mActiveScene->gridType() == UBBackgroundGrid::Type::Desktop);
-
-    // #393 diagnostics (TODO remove)
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[SEE] updateSeeThroughPresentation seeThrough=" << seeThrough
-                             << " gridType=" << (int)mActiveScene->gridType()
-                             << " wasSeeThrough=" << mMainWindow->isSeeThroughMode()
-                             << "\n";
-    }
-
-    // The board view already paints transparent for a Desktop page (step 2) and
-    // uses CacheNone. Here we open the compositor hole up the whole widget stack:
-    // view + viewport + the board container, plus the main window & its central
-    // widget (UBMainWindow::enterSeeThroughMode). Every opaque ancestor must stop
-    // filling its background or it defeats the translucency.
-    mControlView->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-    mControlView->setAttribute(Qt::WA_NoSystemBackground, seeThrough);
-    if (QWidget* vp = mControlView->viewport())
-    {
-        // The QGraphicsView viewport is a plain child QWidget that, by default,
-        // paints QPalette::Base opaque (black on a dark theme) and has
-        // WA_OpaquePaintEvent — this is the black we see even though the window
-        // and the view defer to a transparent draw. Force the viewport itself
-        // transparent + no system background + no opaque paint, so the
-        // compositor hole reaches through it.
-        vp->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-        vp->setAttribute(Qt::WA_NoSystemBackground, seeThrough);
-        vp->setAttribute(Qt::WA_OpaquePaintEvent, !seeThrough);
-        vp->setAutoFillBackground(!seeThrough);
-    }
-    mControlContainer->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-    mControlContainer->setAttribute(Qt::WA_NoSystemBackground, seeThrough);
-    mControlContainer->setAutoFillBackground(!seeThrough);
-
-    // Scene background brush: for a see-through page use an ALPHA-1 fill (visually
-    // transparent but hit-testable) so the fullscreen window still receives mouse
-    // events on Windows — an alpha-0 brush is click-through (#390). For opaque
-    // pages, clear any leftover see-through brush (drawBackground paints the fill).
-    if (seeThrough)
-        mActiveScene->setBackgroundBrush(QBrush(QColor(127, 127, 127, 1)));
-    else
-        mActiveScene->setBackgroundBrush(Qt::NoBrush);
-
-    mMainWindow->enterSeeThroughMode(seeThrough);
-
-    mControlView->resetCachedContent();
-    if (mControlView->viewport())
-        mControlView->viewport()->update();
-
-    // #393 diagnostics (TODO remove): effective viewport transparency state.
-    {
-        QWidget* vp = mControlView->viewport();
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[SEE] viewport translucent="
-                             << (vp && vp->testAttribute(Qt::WA_TranslucentBackground))
-                             << " opaquePaint="
-                             << (vp && vp->testAttribute(Qt::WA_OpaquePaintEvent))
-                             << " autoFill=" << (vp && vp->autoFillBackground())
-                             << " sceneBrushA=" << mActiveScene->backgroundBrush().color().alpha()
-                             << "\n";
-    }
+    // #393 (ADR-0007): entering/leaving the Desktop background type shows or
+    // hides the see-through desktop-annotation overlay (which shares this
+    // scene). Kept out of the "changed" guard so a redundant re-selection still
+    // re-syncs the overlay to the current state.
+    updateDesktopOverlayForBackground();
 }
 
 void UBBoardController::boardViewResized(QResizeEvent* event)

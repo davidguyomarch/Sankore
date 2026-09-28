@@ -233,12 +233,13 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         void changeBackground(bool isDark, bool isCrossed);
         void changeBackgroundType(bool isDark, UBBackgroundGrid::Type gridType);
 
-        /// #393 (ADR-0007): enter/leave the see-through fullscreen presentation
-        /// based on whether the active page background type is Desktop. Flips
-        /// transparency on the board container + view + viewport and the main
-        /// window, and sets an alpha-1 scene brush so the window still receives
-        /// clicks (the #390 lesson). Idempotent.
-        void updateSeeThroughPresentation();
+        /// #393 (ADR-0007): show or hide the see-through desktop-annotation
+        /// overlay based on whether the active page background type is Desktop.
+        /// The overlay is a top-level translucent window that shares this
+        /// controller's active scene, so drawings are the same in both. This is
+        /// the GPU/VM-safe alternative to making the whole board window
+        /// translucent (which fails on a software backend). Idempotent.
+        void updateDesktopOverlayForBackground();
         void setToolCursor(int tool);
         void showMessage(const QString& message, bool showSpinningWheel = false);
         void hideMessage();
