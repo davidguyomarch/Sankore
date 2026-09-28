@@ -53,10 +53,13 @@ Rectangle {
                 spacing: 2
 
                 Repeater {
+                    // #393 (ADR-0007): the old "Bureau" (Desktop) mode tab is
+                    // removed — Desktop is now a background choice in the
+                    // "Fond d'écran" menu, not a separate application mode. Only
+                    // the two real app views remain (Board, Documents).
                     model: [
                         { mode: 0, icon: "chalkboard-teacher", label: "Tableau",   enabled: true },
-                        { mode: 1, icon: "folders",            label: "Documents", enabled: true },
-                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: true }
+                        { mode: 1, icon: "folders",            label: "Documents", enabled: true }
                     ]
 
                     Rectangle {

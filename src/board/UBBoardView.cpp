@@ -1901,6 +1901,15 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
   // page fill below.
   if (scene() && scene()->gridType() == UBBackgroundGrid::Type::Desktop)
     {
+      // #393 diagnostics (TODO remove): confirm the see-through branch is taken.
+      {
+        static int sSeeThroughLog = 0;
+        if (sSeeThroughLog < 3) { ++sSeeThroughLog;
+          QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+          if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[DRAW] board see-through branch (gridType=Desktop)\n";
+        }
+      }
       QGraphicsView::drawBackground (painter, rect);
       return;
     }

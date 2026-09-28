@@ -40,6 +40,9 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QScrollBar>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 #include "frameworks/UBFileSystemUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -1761,6 +1764,16 @@ void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type
     bool currentIsDark = mActiveScene->isDarkBackground();
     UBBackgroundGrid::Type currentType = mActiveScene->gridType();
 
+    // #393 diagnostics (TODO remove)
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[BG] changeBackgroundType from=" << (int)currentType
+                             << " to=" << (int)gridType
+                             << " willApply=" << ((isDark != currentIsDark) || (currentType != gridType))
+                             << "\n";
+    }
+
     if ((isDark != currentIsDark) || (currentType != gridType))
     {
         mSettings->setDarkBackground(isDark);
@@ -1788,6 +1801,16 @@ void UBBoardController::updateSeeThroughPresentation()
 
     const bool seeThrough =
         (mActiveScene->gridType() == UBBackgroundGrid::Type::Desktop);
+
+    // #393 diagnostics (TODO remove)
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[SEE] updateSeeThroughPresentation seeThrough=" << seeThrough
+                             << " gridType=" << (int)mActiveScene->gridType()
+                             << " wasSeeThrough=" << mMainWindow->isSeeThroughMode()
+                             << "\n";
+    }
 
     // The board view already paints transparent for a Desktop page (step 2) and
     // uses CacheNone. Here we open the compositor hole up the whole widget stack:
