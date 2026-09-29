@@ -34,6 +34,9 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     : QGraphicsPathItem(parent)
@@ -300,6 +303,24 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
+
+    // #393 diagnostics (TODO remove): which widget/view paints the stroke, with
+    // what z/visibility. `widget` is the viewport of the painting view — compare
+    // it to the [RET] showBoard controlView viewport pointer to tell whether the
+    // board control view or the (hidden) overlay view is the one painting.
+    {
+        static int sPaintDiag = 0;
+        if (sPaintDiag < 12) { ++sPaintDiag;
+            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (_f.open(QIODevice::Append | QIODevice::Text))
+                QTextStream(&_f) << "[RET] paint pts=" << mRawPoints.size()
+                                 << " z=" << zValue()
+                                 << " visible=" << (isVisible() ? 1 : 0)
+                                 << " opacity=" << opacity()
+                                 << " vpWidget=" << (void*)widget
+                                 << "\n";
+        }
+    }
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 

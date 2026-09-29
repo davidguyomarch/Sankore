@@ -41,6 +41,8 @@
 #include <QByteArray>
 #include <QDateTime>
 #include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 #include <QLineF>
 #include <QList>
 #include <QMap>
@@ -1172,6 +1174,18 @@ void UBGraphicsScene::addItem(QGraphicsItem* item)
     UBGraphicsItem::assignZValue(item, mZLayerController->generateZLevel(item));
 
     mFastAccessItems << item;
+
+    // #393 diagnostics (TODO remove): confirm the z-layer fix shipped (stroke z
+    // should now be POSITIVE / DrawingItem) and how many views hold this scene.
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[RET] addItem type=" << (int)item->type()
+                             << " itemLayerType=" << item->data(UBGraphicsItemData::itemLayerType).toInt()
+                             << " z=" << item->zValue()
+                             << " nbViews=" << views().count()
+                             << "\n";
+    }
 
     //CFA
     addShapeToUndoStack(item);

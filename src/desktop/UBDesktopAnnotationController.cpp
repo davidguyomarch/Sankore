@@ -28,6 +28,9 @@
 #include <QQmlContext>
 #include <QPainterPath>
 #include <QWindow>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 #include "UBDesktopAnnotationController.h"
 
@@ -365,6 +368,17 @@ void UBDesktopAnnotationController::presentScene(UBGraphicsScene* scene)
     // latch so the overlay can be raised again for this page.
     mManuallyHidden = false;
 
+    // #393 diagnostics (TODO remove): what scene the overlay binds to.
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[RET] presentScene arg=" << (void*)scene
+                             << " target=" << (void*)target
+                             << " overlayCurrentScene=" << (void*)(mTransparentDrawingView ? mTransparentDrawingView->scene() : nullptr)
+                             << " ownScene=" << (void*)mTransparentDrawingScene
+                             << "\n";
+    }
+
     if (!mTransparentDrawingView || mTransparentDrawingView->scene() == target)
         return;
 
@@ -505,6 +519,16 @@ void UBDesktopAnnotationController::hideWindow()
         // desktop mode. Drop the always-on-top hint while hidden; showWindow()
         // re-asserts the window flags on the next entry.
         mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, false);
+    }
+
+    // #393 diagnostics (TODO remove): confirm the overlay hides and the tool
+    // being restored (setStylusTool triggers resetCachedContent on the board).
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[RET] hideWindow overlayVisible="
+                             << (mTransparentDrawingView && mTransparentDrawingView->isVisible())
+                             << " restoreTool=" << mBoardStylusTool << "\n";
     }
 
     // #390: restore the board tool that was active before entering desktop mode.

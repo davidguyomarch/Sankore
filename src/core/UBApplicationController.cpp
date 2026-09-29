@@ -413,6 +413,25 @@ void UBApplicationController::showBoard()
         UBApplication::boardController->controlView()->viewport()->update();
     }
 
+    // #393 diagnostics (TODO remove): confirm showBoard runs on return and the
+    // control view's state (scene bound, cache mode, viewport ptr).
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text)) {
+            auto* cv = UBApplication::boardController ? UBApplication::boardController->controlView() : nullptr;
+            QTextStream(&_f) << "[RET] showBoard done"
+                             << " controlView=" << (void*)cv
+                             << " cvVisible=" << (cv && cv->isVisible())
+                             << " cvEnabled=" << (cv && cv->isEnabled())
+                             << " cvScene=" << (void*)(cv ? cv->scene() : nullptr)
+                             << " activeScene=" << (void*)(UBApplication::boardController ? UBApplication::boardController->activeScene() : nullptr)
+                             << " cacheMode=" << (cv ? (int)cv->cacheMode() : -1)
+                             << " vpUpdateMode=" << (cv ? (int)cv->viewportUpdateMode() : -1)
+                             << " vp=" << (void*)(cv ? cv->viewport() : nullptr)
+                             << "\n";
+        }
+    }
+
     emit mainModeChanged(Board);
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
@@ -567,6 +586,15 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 
 void UBApplicationController::hideDesktop()
 {
+    // #393 diagnostics (TODO remove): confirm hideDesktop runs and which mode it
+    // routes to (only Board runs showBoard + the cache reset).
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[RET] hideDesktop mMainMode=" << (int)mMainMode
+                             << " (0=Board?) isShowingDesktop=" << mIsShowingDesktop << "\n";
+    }
+
     // Re-enable the board view that was disabled in showDesktop() to prevent
     // stale events during the Desktop mode transition.  (#135)
     if (UBApplication::boardController && UBApplication::boardController->controlView())
