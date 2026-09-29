@@ -148,6 +148,7 @@ qreal UBZLayerController::generateZLevel(itemLayerType::Enum key)
     qreal result = scopeMap.value(key).curValue;
     qreal top = scopeMap.value(key).topLimit;
     qreal incrementalStep = scopeMap.value(key).incStep;
+    const qreal beforeCur = result; // #393 diag
 
     result += incrementalStep;
     if (result >= top) {
@@ -159,6 +160,20 @@ qreal UBZLayerController::generateZLevel(itemLayerType::Enum key)
     }
 
     scopeMap[key].curValue = result;
+
+    // #393 diagnostics (TODO remove): raw scope state at z generation. Explains
+    // whether ObjectItem's curValue is fresh (-1e7) or has advanced, and what z
+    // a stroke actually receives vs the background's scope.
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[Z393] genZ key=" << (int)key
+                             << " curBefore=" << beforeCur
+                             << " incStep=" << incrementalStep
+                             << " top=" << top
+                             << " -> z=" << result
+                             << "\n";
+    }
 
     return result;
 }
@@ -1345,6 +1360,15 @@ QGraphicsItem* UBGraphicsScene::setAsBackgroundObject(QGraphicsItem* item, bool 
 
         mZLayerController->setLayerType(item, itemLayerType::BackgroundItem);
         UBGraphicsItem::assignZValue(item, mZLayerController->generateZLevel(item));
+
+        // #393 diagnostics (TODO remove): the background object's final z, to
+        // compare against the stroke's z (which is hidden under it).
+        {
+            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (_f.open(QIODevice::Append | QIODevice::Text))
+                QTextStream(&_f) << "[Z393] backgroundObject z=" << item->zValue()
+                                 << " type=" << (int)item->type() << "\n";
+        }
 
         mBackgroundObject = item;
 
