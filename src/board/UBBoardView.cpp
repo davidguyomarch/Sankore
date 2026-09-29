@@ -1431,21 +1431,25 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
       {
           scene ()->inputDeviceMove (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())), mMouseButtonIsPressed);
 
-          // #393 EXPERIMENT + diag: force the board viewport to present the
-          // freshly drawn stroke. On the GPU-less VM, after returning from the
-          // desktop overlay, the item-level update() from the stroke does not
-          // reach the window surface until an unrelated event (a tool click)
-          // forces a full window repaint — so the stroke stays invisible while
-          // drawing. If an explicit viewport()->update() here makes it appear
-          // live, the cause is a missing surface flush, not z/cache.
-          if (bIsControl && mMouseButtonIsPressed)
+          // #393 EXPERIMENT 2: viewport()->update() did NOT reveal the stroke on
+          // the VM. The map shows the only thing that reveals it on a tool change
+          // is UBDesktopAnnotationController::updateBackground() calling
+          // scene->setBackgroundBrush() on the SHARED board scene, which forces a
+          // full SCENE re-render on all views. So the missing action on the draw
+          // path is a full scene invalidation, not a widget repaint. Try
+          // scene()->update() (invalidate the whole scene rect) after each move.
+          // If this reveals the stroke live, the cause is a missing scene-level
+          // re-render (monopolised by the overlay's updateBackground), and the
+          // fix is to stop the hidden overlay from touching the shared scene +
+          // let the board own its re-render.
+          if (bIsControl && mMouseButtonIsPressed && scene())
           {
-              viewport()->update();
+              scene()->update();
               static int sFlushDiag = 0;
               if (sFlushDiag < 6) { ++sFlushDiag;
                   QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
                   if (_f.open(QIODevice::Append | QIODevice::Text))
-                      QTextStream(&_f) << "[RET] mouseMove forced viewport update\n";
+                      QTextStream(&_f) << "[RET] mouseMove forced SCENE update\n";
               }
           }
       }
