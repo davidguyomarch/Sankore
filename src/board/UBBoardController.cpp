@@ -216,6 +216,16 @@ void UBBoardController::setupViews()
     mControlView = new UBBoardView(this, mControlContainer, true, false);
     mControlView->setInteractive(true);
     mControlView->setMouseTracking(true);
+    // #393 EXPERIMENT: the control view defaults to CacheBackground (set in the
+    // shared UBBoardView ctor). When the scene is shared with the desktop overlay
+    // (a 2nd/3rd attached view), a freshly drawn stroke was painted into the
+    // control viewport but not shown until a tool change — the classic symptom of
+    // a stale cached background pixmap composited over the new item. Disable the
+    // background cache on the interactive board view: the page background is a
+    // cheap fill (+ optional ruling), so there is no real perf gain from caching
+    // it, and CacheNone guarantees every frame repaints background + items
+    // together. (The desktop overlay already uses CacheNone.)
+    mControlView->setCacheMode(QGraphicsView::CacheNone);
     mControlView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
     // Layout so mControlView fills its container and receives mouse events
