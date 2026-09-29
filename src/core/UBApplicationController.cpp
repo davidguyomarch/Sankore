@@ -385,6 +385,10 @@ void UBApplicationController::showBoard()
     if (UBApplication::boardController)
     {
         UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::Screen);
+        // #393: the board scene may have been switched to desktop (transparent)
+        // drawing mode while it was shared with the see-through overlay. Restore
+        // the normal opaque board drawing mode so markers composite correctly.
+        UBApplication::boardController->activeScene()->setDrawingMode(false);
         UBApplication::boardController->show();
     }
 
@@ -394,6 +398,20 @@ void UBApplicationController::showBoard()
     mUninoteController->hideWindow();
 
     mMainWindow->show();
+
+    // #393: the board control view runs with QGraphicsView::CacheBackground, so
+    // its opaque page background is cached in an offscreen pixmap. Returning from
+    // the desktop overlay re-shows the view but never invalidates that cache, so
+    // the first stroke drawn after return is composited UNDER the stale cached
+    // background and stays invisible until the next cache reset (previously only a
+    // tool change did that, via resetCachedContent). Invalidate the cache here so
+    // freshly drawn strokes show immediately. (The overlay view uses CacheNone and
+    // never had this problem.)
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+    {
+        UBApplication::boardController->controlView()->resetCachedContent();
+        UBApplication::boardController->controlView()->viewport()->update();
+    }
 
     emit mainModeChanged(Board);
 
