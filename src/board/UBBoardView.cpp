@@ -1430,6 +1430,24 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
       if (!mTabletStylusIsPressed && scene ())
       {
           scene ()->inputDeviceMove (mapToScene (UBGeometryUtils::pointConstrainedInRect (event->pos (), rect ())), mMouseButtonIsPressed);
+
+          // #393 EXPERIMENT + diag: force the board viewport to present the
+          // freshly drawn stroke. On the GPU-less VM, after returning from the
+          // desktop overlay, the item-level update() from the stroke does not
+          // reach the window surface until an unrelated event (a tool click)
+          // forces a full window repaint — so the stroke stays invisible while
+          // drawing. If an explicit viewport()->update() here makes it appear
+          // live, the cause is a missing surface flush, not z/cache.
+          if (bIsControl && mMouseButtonIsPressed)
+          {
+              viewport()->update();
+              static int sFlushDiag = 0;
+              if (sFlushDiag < 6) { ++sFlushDiag;
+                  QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+                  if (_f.open(QIODevice::Append | QIODevice::Text))
+                      QTextStream(&_f) << "[RET] mouseMove forced viewport update\n";
+              }
+          }
       }
       event->accept ();
     }
