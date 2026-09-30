@@ -357,11 +357,13 @@ UBGraphicsScene* UBDesktopAnnotationController::presentedScene() const
 
 void UBDesktopAnnotationController::presentScene(UBGraphicsScene* scene)
 {
-    // #393 (ADR-0007): bind the overlay to a shared board scene so desktop
-    // annotations live on the board page (Option 2 — reuse the proven-on-VM
-    // translucent overlay, just point it at the active scene). Falls back to the
-    // controller's own scene when passed null.
-    UBGraphicsScene* target = scene ? scene : mTransparentDrawingScene;
+    // #393 BISECTION (test/393-bisect-no-shared-scene): force the overlay to keep
+    // its OWN scene, never the shared board scene. This reproduces the pre-Option-2
+    // / master behaviour (desktop mode = separate scene) while keeping the exact
+    // same UI, trigger and window flow. If the first stroke after returning to the
+    // board is VISIBLE with this build, the shared scene (Option 2) is the cause.
+    Q_UNUSED(scene);
+    UBGraphicsScene* target = mTransparentDrawingScene;
 
     // #393 (ADR-0008 D3): (re)binding the surface means the user navigated to a
     // page / re-picked the background — clear the "manually returned to board"
