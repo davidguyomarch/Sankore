@@ -51,6 +51,7 @@
 #include "core/UBSetting.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBApplicationController.h"
+#include "desktop/UBDesktopAnnotationController.h"
 #include "core/UBDocumentManager.h"
 #include "core/UBMimeData.h"
 #include "core/UBDownloadManager.h"
@@ -1633,6 +1634,10 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
         mSettings->setCrossedBackground(mActiveScene->isCrossedBackground());
 
         freezeW3CWidgets(false);
+
+        // #393 (ADR-0007): show/hide the see-through desktop overlay for the
+        // newly-activated scene's background type (Desktop = overlay shown).
+        updateDesktopOverlayForBackground();
     }
 
     selectionChanged();
@@ -1749,20 +1754,71 @@ void UBBoardController::changeBackground(bool isDark, bool isCrossed)
     changeBackgroundType(isDark, target);
 }
 
+void UBBoardController::updateDesktopOverlayForBackground()
+{
+    // #393 (ADR-0007): the Desktop background type turns the current page into a
+    // see-through desktop-annotation surface. We do NOT make the board window
+    // itself translucent (that needs a compositing GPU and fails on the software
+    // backend of the test VM). Instead we reuse the existing top-level
+    // translucent overlay (UBDesktopAnnotationController), which is proven to
+    // render see-through on the VM, and point it at THIS controller's active
+    // scene so the annotations are the same objects as the board page.
+    if (!mActiveScene || !UBApplication::applicationController)
+        return;
+
+    UBDesktopAnnotationController* overlay =
+        UBApplication::applicationController->uninotesController();
+    if (!overlay)
+        return;
+
+    const bool wantOverlay =
+        (mActiveScene->gridType() == UBBackgroundGrid::Type::Desktop);
+
+    if (wantOverlay)
+    {
+        // ADR-0008 D3: the overlay is a *session* state, distinct from the page's
+        // background type. If the user explicitly returned to the board while on
+        // a desktop page (goToUniboard set the "manually hidden" flag), do NOT
+        // re-raise it — that would trap the user in the mode. Navigating to the
+        // page or re-picking the background clears the flag.
+        if (overlay->isManuallyHidden())
+            return;
+        if (!UBApplication::applicationController->isShowingDesktop())
+        {
+            // Share THIS page's scene, then enter the proven full desktop flow
+            // (hides the main window so the live desktop shows through — R3).
+            overlay->presentScene(mActiveScene);
+            UBApplication::applicationController->showDesktop();
+        }
+    }
+    else
+    {
+        // Leaving the Desktop background type: exit the overlay if it is up and
+        // unbind the shared scene so the board page is no longer mutated by the
+        // desktop transparency logic.
+        if (UBApplication::applicationController->isShowingDesktop())
+            UBApplication::applicationController->hideDesktop();
+        overlay->presentScene(nullptr);
+    }
+}
+
 void UBBoardController::changeBackgroundType(bool isDark, UBBackgroundGrid::Type gridType)
 {
     bool currentIsDark = mActiveScene->isDarkBackground();
     UBBackgroundGrid::Type currentType = mActiveScene->gridType();
-
     if ((isDark != currentIsDark) || (currentType != gridType))
     {
         mSettings->setDarkBackground(isDark);
         mSettings->setCrossedBackground(UBBackgroundGrid::isRuled(gridType));
-
         mActiveScene->setBackgroundType(isDark, gridType);
-
         emit backgroundChanged();
     }
+
+    // #393 (ADR-0007): entering/leaving the Desktop background type shows or
+    // hides the see-through desktop-annotation overlay (which shares this
+    // scene). Kept out of the "changed" guard so a redundant re-selection still
+    // re-syncs the overlay to the current state.
+    updateDesktopOverlayForBackground();
 }
 
 void UBBoardController::boardViewResized(QResizeEvent* event)

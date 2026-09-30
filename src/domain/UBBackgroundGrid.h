@@ -32,14 +32,20 @@
  */
 namespace UBBackgroundGrid
 {
-    /// The kind of ruling drawn behind the page.
+    /// The kind of background drawn behind the page.
+    ///
+    /// Types 0–4 are line-based *rulings*. Types 5+ are non-ruling backgrounds
+    /// introduced by ADR-0007 (the "Bureau/Desktop = a background choice" model).
+    /// Unknown integer values (older builds reading newer .ubz) degrade to Plain.
     enum class Type
     {
-        Plain = 0,       ///< no ruling (blank page)
-        Grid = 1,        ///< uniform square grid (16 mm cells, #379)
-        Seyes = 2,       ///< French Séyès: 16 mm cells, 4 mm interlines, vertical lines (#379)
-        SeyesLarge = 3,  ///< enlarged Séyès (1.5x → 24 mm cells) for beginners
-        DoubleLine3mm = 4///< maternelle double ruling: 6 mm writing band, 12 mm period (#379)
+        Plain = 0,        ///< no ruling (blank page)
+        Grid = 1,         ///< uniform square grid (16 mm cells, #379)
+        Seyes = 2,        ///< French Séyès: 16 mm cells, 4 mm interlines, vertical lines (#379)
+        SeyesLarge = 3,   ///< enlarged Séyès (1.5x → 24 mm cells) for beginners
+        DoubleLine3mm = 4,///< maternelle double ruling: 6 mm writing band, 12 mm period (#379)
+        Desktop = 5,      ///< see-through: the live desktop shows through (ADR-0007 / #393)
+        Image = 6         ///< user-chosen background image (#389, placeholder — not yet implemented)
     };
 
     /// Calibration: 8 mm == 32 scene units (UBSettings::crossSize) → 4 u/mm.
@@ -55,6 +61,8 @@ namespace UBBackgroundGrid
         case 2: return Type::Seyes;
         case 3: return Type::SeyesLarge;
         case 4: return Type::DoubleLine3mm;
+        case 5: return Type::Desktop;
+        case 6: return Type::Image;
         default: return Type::Plain;
         }
     }
@@ -68,6 +76,8 @@ namespace UBBackgroundGrid
         case Type::Seyes:         return "seyes";
         case Type::SeyesLarge:    return "seyes-large";
         case Type::DoubleLine3mm: return "double-3mm";
+        case Type::Desktop:       return "desktop";
+        case Type::Image:         return "image";
         case Type::Plain:         default: return "plain";
         }
     }
@@ -77,11 +87,33 @@ namespace UBBackgroundGrid
         if (s == QLatin1String("seyes"))       return Type::Seyes;
         if (s == QLatin1String("seyes-large")) return Type::SeyesLarge;
         if (s == QLatin1String("double-3mm"))  return Type::DoubleLine3mm;
+        if (s == QLatin1String("desktop"))     return Type::Desktop;
+        if (s == QLatin1String("image"))       return Type::Image;
         return Type::Plain;
     }
 
-    /// True for any ruling that shows lines (i.e. maps to legacy crossed=true).
-    inline bool isRuled(Type t) { return t != Type::Plain; }
+    /// True for types that draw line rulings (maps to legacy crossed=true).
+    /// Desktop and Image are NOT ruled — they must not set crossed-background=true
+    /// in the legacy SVG attribute, otherwise older builds misinterpret them.
+    inline bool isRuled(Type t)
+    {
+        switch (t)
+        {
+        case Type::Grid:
+        case Type::Seyes:
+        case Type::SeyesLarge:
+        case Type::DoubleLine3mm:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    /// True for types that paint an opaque solid background (white/black page
+    /// fill). Desktop is false (see-through — the live desktop shows behind).
+    /// Image is true (the image fills the page). Used by the renderer to decide
+    /// whether to paint the solid page fill or leave transparent.
+    inline bool drawsOpaqueBackground(Type t) { return t != Type::Desktop; }
 
     /// Weight of a line, mapped by the renderer to a pen width/colour.
     enum class Weight
@@ -121,7 +153,7 @@ namespace UBBackgroundGrid
      * under only incidentally — callers should paint Minor first if overlap
      * matters, but positions are exact so order is not visually significant.
      *
-     * For Plain, no lines are produced.
+     * For Plain, Desktop, and Image, no lines are produced.
      */
     inline std::vector<Line> generateLines(Type type, const QRectF& rect,
                                            double pageLeft = 0.0,

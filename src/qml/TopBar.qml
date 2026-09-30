@@ -53,10 +53,13 @@ Rectangle {
                 spacing: 2
 
                 Repeater {
+                    // #393 (ADR-0007): the old "Bureau" (Desktop) mode tab is
+                    // removed — Desktop is now a background choice in the
+                    // "Fond d'écran" menu, not a separate application mode. Only
+                    // the two real app views remain (Board, Documents).
                     model: [
                         { mode: 0, icon: "chalkboard-teacher", label: "Tableau",   enabled: true },
-                        { mode: 1, icon: "folders",            label: "Documents", enabled: true },
-                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: true }
+                        { mode: 1, icon: "folders",            label: "Documents", enabled: true }
                     ]
 
                     Rectangle {
@@ -137,22 +140,17 @@ Rectangle {
         ToolbarButton { icon: "sun"; tooltip: "Fond clair"; active: !appController.isDarkBackground; onClicked: appController.setBackgroundLight() }
         ToolbarButton { icon: "moon"; tooltip: "Fond sombre"; active: appController.isDarkBackground; onClicked: appController.setBackgroundDark() }
 
-        // Ruling type selector (#289): dropdown with the square grid + French
-        // school rulings (Séyès, enlarged Séyès, double 3 mm).
+        // Background type selector (#289/#393): dropdown with rulings + Desktop
+        // see-through. The "Bureau" entry (Desktop) is a background choice, not a
+        // separate mode (ADR-0007).
         ToolbarButton {
             id: gridButton
             icon: "grid-four"
-            tooltip: "Quadrillage / réglures"
+            tooltip: "Fond d'écran"
             active: appController.gridType !== 0
-            // Use a native QtQuick Menu (its own popup window) rather than a
-            // Popup: the TopBar is a 48px-tall QQuickWidget and a Popup is
-            // clipped to that widget's surface, so the dropdown rendered
-            // entirely off-screen and nothing appeared (#292). A Menu creates
-            // a separate popup that overflows the widget — same pattern as
-            // PageNavigator's context menu.
             onClicked: gridMenu.popup(gridButton, 0, gridButton.height + 4)
         }
-        GridTypeMenu {
+        BackgroundTypeMenu {
             id: gridMenu
         }
 
@@ -222,17 +220,13 @@ Rectangle {
 
 
 
-    // === Ruling type dropdown (#289) ===
-    // Native QtQuick Menu so the dropdown renders in its own popup window and
-    // is not clipped to the 48px TopBar QQuickWidget (#292).
+    // === Background type dropdown (#289/#393) ===
     // Native QtQuick Menu so the dropdown renders in its own popup window and
     // is not clipped to the 48px TopBar QQuickWidget (#292).
     //
-    // The 5 rulings are listed as explicit MenuItems (not a Repeater): a
-    // Repeater is not a Menu content child and does not get laid out in the
-    // menu's vertical column, which made the entries render on a single line
-    // (#292 follow-up). Each item is a reusable RulingMenuItem.
-    component GridTypeMenu: Menu {
+    // Entries are explicit MenuItems (not a Repeater — see #292 follow-up).
+    // Each item is a reusable BackgroundMenuItem.
+    component BackgroundTypeMenu: Menu {
         id: menuRoot
 
         // Open in a real top-level popup window (Qt 6.8+), so the menu is not
@@ -241,8 +235,8 @@ Rectangle {
         // widget height and forcing scroll arrows (#292 follow-up).
         popupType: Popup.Window
 
-        // 0=Plain(none), 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm — matches
-        // UBBackgroundGrid::Type / UBAppController.gridType.
+        // 0=Plain, 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm, 5=Desktop,
+        // 6=Image — matches UBBackgroundGrid::Type / UBAppController.gridType.
         width: 240
 
         background: Rectangle {
@@ -252,25 +246,35 @@ Rectangle {
             radius: 8
         }
 
-        RulingMenuItem { rulingType: 0; rulingIcon: "circle";           rulingLabel: "Aucun" }
-        RulingMenuItem { rulingType: 1; rulingIcon: "grid-four";        rulingLabel: "Quadrillage" }
-        RulingMenuItem { rulingType: 2; rulingIcon: "rows-plus-top";    rulingLabel: "Séyès" }
-        RulingMenuItem { rulingType: 3; rulingIcon: "rows-plus-bottom"; rulingLabel: "Séyès agrandi" }
-        RulingMenuItem { rulingType: 4; rulingIcon: "list";             rulingLabel: "Double lignage 3 mm" }
+        // --- Rulings ---
+        BackgroundMenuItem { bgType: 0; bgIcon: "circle";           bgLabel: "Aucun" }
+        BackgroundMenuItem { bgType: 1; bgIcon: "grid-four";        bgLabel: "Quadrillage" }
+        BackgroundMenuItem { bgType: 2; bgIcon: "rows-plus-top";    bgLabel: "Séyès" }
+        BackgroundMenuItem { bgType: 3; bgIcon: "rows-plus-bottom"; bgLabel: "Séyès agrandi" }
+        BackgroundMenuItem { bgType: 4; bgIcon: "list";             bgLabel: "Double lignage 3 mm" }
+
+        MenuSeparator {
+            contentItem: Rectangle { implicitHeight: 1; color: themeManager.border }
+        }
+
+        // --- Non-ruling backgrounds (ADR-0007 / #393) ---
+        BackgroundMenuItem { bgType: 5; bgIcon: "desktop";  bgLabel: "Bureau (annoter le bureau)" }
+        // #389: placeholder — image background not yet implemented.
+        // BackgroundMenuItem { bgType: 6; bgIcon: "image"; bgLabel: "Image personnalisée" }
     }
 
-    // One row of the ruling dropdown: leading themed icon, label, trailing
-    // check mark when it is the active ruling.
-    component RulingMenuItem: MenuItem {
+    // One row of the background dropdown: leading themed icon, label, trailing
+    // check mark when it is the active background type.
+    component BackgroundMenuItem: MenuItem {
         id: item
-        property int rulingType: 0
-        property string rulingIcon: ""
-        property string rulingLabel: ""
+        property int bgType: 0
+        property string bgIcon: ""
+        property string bgLabel: ""
 
-        text: rulingLabel
+        text: bgLabel
         implicitHeight: 34
 
-        onTriggered: appController.setGridType(rulingType)
+        onTriggered: appController.setGridType(bgType)
 
         contentItem: Item {
             Image {
@@ -278,7 +282,7 @@ Rectangle {
                 x: 8
                 width: 18; height: 18
                 anchors.verticalCenter: parent.verticalCenter
-                source: "qrc:/icons/phosphor/" + item.rulingIcon + ".svg"
+                source: "qrc:/icons/phosphor/" + item.bgIcon + ".svg"
                 sourceSize: Qt.size(18, 18)
                 visible: false
             }
@@ -292,12 +296,12 @@ Rectangle {
             Text {
                 x: 34
                 anchors.verticalCenter: parent.verticalCenter
-                text: item.rulingLabel
+                text: item.bgLabel
                 font.pixelSize: 13
                 color: themeManager.onSurface
             }
 
-            // Trailing check mark for the active ruling.
+            // Trailing check mark for the active background type.
             Image {
                 id: checkIcon
                 width: 16; height: 16
@@ -312,7 +316,7 @@ Rectangle {
                 anchors.fill: checkIcon
                 source: checkIcon
                 color: themeManager.onSurface
-                visible: appController.gridType === item.rulingType
+                visible: appController.gridType === item.bgType
             }
         }
     }

@@ -135,9 +135,18 @@ void UBBackgroundRenderer::recolorAllItems()
 
 void UBBackgroundRenderer::paintBackground(QPainter* painter, const QRectF& rect)
 {
-    if (mIsDesktopMode)
+    // See-through cases: paint nothing, so the transparent scene lets whatever is
+    // behind (the live desktop) show through. Two triggers, kept in sync by
+    // ADR-0007 (#393): the legacy imperative mIsDesktopMode flag (set on the
+    // desktop overlay) AND the new per-page Type::Desktop background — a page
+    // whose background type is Desktop is see-through wherever it is shown.
+    if (mIsDesktopMode || mGridType == UBBackgroundGrid::Type::Desktop)
         return;  // caller falls through to QGraphicsScene::drawBackground
 
+    // #393: Type::Image is a placeholder (user-chosen background image, #389).
+    // Until image rendering lands it behaves like Plain — paint the solid page
+    // fill below and draw no lines. Non-see-through types (Plain, rulings, Image)
+    // all get the opaque page fill.
     if (mDarkBackground)
         painter->fillRect(rect, QBrush(QColor(Qt::black)));
     else

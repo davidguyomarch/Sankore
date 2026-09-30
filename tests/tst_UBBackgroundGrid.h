@@ -31,6 +31,9 @@ private slots:
     void testGridVerticalsAnchoredToPageLeft_regression362();
     void testSeyesLargeIsScaled();
     void testDoubleLine3mmPairs();
+    // #393 — new background types (Desktop/Image)
+    void testDesktopAndImageProduceNoLines();
+    void testDrawsOpaqueBackground();
 };
 
 #endif // TST_UBBACKGROUNDGRID_H
