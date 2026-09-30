@@ -368,17 +368,6 @@ void UBDesktopAnnotationController::presentScene(UBGraphicsScene* scene)
     // latch so the overlay can be raised again for this page.
     mManuallyHidden = false;
 
-    // #393 diagnostics (TODO remove): what scene the overlay binds to.
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[RET] presentScene arg=" << (void*)scene
-                             << " target=" << (void*)target
-                             << " overlayCurrentScene=" << (void*)(mTransparentDrawingView ? mTransparentDrawingView->scene() : nullptr)
-                             << " ownScene=" << (void*)mTransparentDrawingScene
-                             << "\n";
-    }
-
     if (!mTransparentDrawingView || mTransparentDrawingView->scene() == target)
         return;
 
@@ -497,7 +486,15 @@ void UBDesktopAnnotationController::updateBackground()
 #endif
     }
 
-    // #393: mutate whatever scene is on screen (shared board scene or own).
+    // #393: only mutate the scene while the overlay is actually visible. When the
+    // overlay is hidden (we are back on the board), the shared board scene is
+    // owned by the board view alone — writing its backgroundBrush here (this slot
+    // is still connected to stylusToolChanged) forced a spurious full-scene
+    // re-render on the board and was the mechanism that made a freshly drawn
+    // stroke only appear on a tool change. Do nothing when hidden.
+    if (!mTransparentDrawingView || !mTransparentDrawingView->isVisible())
+        return;
+
     UBGraphicsScene* scn = presentedScene();
     if (scn && scn->backgroundBrush() != newBrush)
         scn->setBackgroundBrush(newBrush);
@@ -519,16 +516,35 @@ void UBDesktopAnnotationController::hideWindow()
         // desktop mode. Drop the always-on-top hint while hidden; showWindow()
         // re-asserts the window flags on the next entry.
         mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, false);
-    }
 
-    // #393 diagnostics (TODO remove): confirm the overlay hides and the tool
-    // being restored (setStylusTool triggers resetCachedContent on the board).
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[RET] hideWindow overlayVisible="
-                             << (mTransparentDrawingView && mTransparentDrawingView->isVisible())
-                             << " restoreTool=" << mBoardStylusTool << "\n";
+        // #393 ROOT CAUSE: when the overlay shares the board scene (Option 2), it
+        // stays attached as a 3rd view of that scene even after hide(). A drawn
+        // stroke then only appeared on the board after a tool change, because the
+        // board scene had a lingering see-through backgroundBrush and an extra
+        // attached (hidden, translucent, always-on-top) view interfering with how
+        // scene updates reached the board viewport. On hide, fully RELEASE the
+        // shared scene: clear its see-through brush and rebind the overlay to its
+        // own private scene, so the board view is the sole owner of its scene's
+        // rendering again.
+        if (UBGraphicsScene* shared =
+                static_cast<UBGraphicsScene*>(mTransparentDrawingView->scene()))
+        {
+            if (shared != mTransparentDrawingScene)
+                shared->setBackgroundBrush(Qt::NoBrush);
+        }
+        if (mTransparentDrawingScene
+                && mTransparentDrawingView->scene() != mTransparentDrawingScene)
+            mTransparentDrawingView->setScene(mTransparentDrawingScene);
+
+        // #393 diagnostics (TODO remove once confirmed): after release, the board
+        // scene should have no extra attached overlay view.
+        {
+            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (_f.open(QIODevice::Append | QIODevice::Text))
+                QTextStream(&_f) << "[FIX] hideWindow released shared scene; overlay now on ownScene="
+                                 << (mTransparentDrawingView->scene() == mTransparentDrawingScene)
+                                 << "\n";
+        }
     }
 
     // #390: restore the board tool that was active before entering desktop mode.

@@ -385,10 +385,6 @@ void UBApplicationController::showBoard()
     if (UBApplication::boardController)
     {
         UBApplication::boardController->activeScene()->setRenderingContext(UBGraphicsScene::Screen);
-        // #393: the board scene may have been switched to desktop (transparent)
-        // drawing mode while it was shared with the see-through overlay. Restore
-        // the normal opaque board drawing mode so markers composite correctly.
-        UBApplication::boardController->activeScene()->setDrawingMode(false);
         UBApplication::boardController->show();
     }
 
@@ -398,39 +394,6 @@ void UBApplicationController::showBoard()
     mUninoteController->hideWindow();
 
     mMainWindow->show();
-
-    // #393: the board control view runs with QGraphicsView::CacheBackground, so
-    // its opaque page background is cached in an offscreen pixmap. Returning from
-    // the desktop overlay re-shows the view but never invalidates that cache, so
-    // the first stroke drawn after return is composited UNDER the stale cached
-    // background and stays invisible until the next cache reset (previously only a
-    // tool change did that, via resetCachedContent). Invalidate the cache here so
-    // freshly drawn strokes show immediately. (The overlay view uses CacheNone and
-    // never had this problem.)
-    if (UBApplication::boardController && UBApplication::boardController->controlView())
-    {
-        UBApplication::boardController->controlView()->resetCachedContent();
-        UBApplication::boardController->controlView()->viewport()->update();
-    }
-
-    // #393 diagnostics (TODO remove): confirm showBoard runs on return and the
-    // control view's state (scene bound, cache mode, viewport ptr).
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text)) {
-            auto* cv = UBApplication::boardController ? UBApplication::boardController->controlView() : nullptr;
-            QTextStream(&_f) << "[RET] showBoard done"
-                             << " controlView=" << (void*)cv
-                             << " cvVisible=" << (cv && cv->isVisible())
-                             << " cvEnabled=" << (cv && cv->isEnabled())
-                             << " cvScene=" << (void*)(cv ? cv->scene() : nullptr)
-                             << " activeScene=" << (void*)(UBApplication::boardController ? UBApplication::boardController->activeScene() : nullptr)
-                             << " cacheMode=" << (cv ? (int)cv->cacheMode() : -1)
-                             << " vpUpdateMode=" << (cv ? (int)cv->viewportUpdateMode() : -1)
-                             << " vp=" << (void*)(cv ? cv->viewport() : nullptr)
-                             << "\n";
-        }
-    }
 
     emit mainModeChanged(Board);
 
@@ -586,15 +549,6 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 
 void UBApplicationController::hideDesktop()
 {
-    // #393 diagnostics (TODO remove): confirm hideDesktop runs and which mode it
-    // routes to (only Board runs showBoard + the cache reset).
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[RET] hideDesktop mMainMode=" << (int)mMainMode
-                             << " (0=Board?) isShowingDesktop=" << mIsShowingDesktop << "\n";
-    }
-
     // Re-enable the board view that was disabled in showDesktop() to prevent
     // stale events during the Desktop mode transition.  (#135)
     if (UBApplication::boardController && UBApplication::boardController->controlView())

@@ -386,23 +386,14 @@ void TestUBSmoothStrokeItem::testHasDelegate_regression243()
     QVERIFY(asUbItem->Delegate() != nullptr); // the pointer it then dereferences
 }
 
-// #364 / #393 regression: the stroke must carry the *new* itemLayerType key, which
-// the scene's z-value controller (UBZLayerController::generateZLevel) reads to place
-// the item in a z-scope.
-//
-// #364 (first fix): the constructor only set the deprecated ItemLayerType key;
-// generateZLevel read the unset itemLayerType key, fell back to NoLayer and assigned
-// errorNumber (-20000001 ≈ -2e7) — below everything — so the stroke was hidden. The
-// fix set the new key, but to ObjectItem, whose z-scope is NEGATIVE (-1e7 .. 0).
-//
-// #393 (this fix): a NEGATIVE z is still below the opaque page background, which
-// UBBoardView::drawBackground paints for all z < 0. On the desktop overlay (no
-// opaque background) that was invisible-safe, but on a normal white board the fresh
-// stroke (z ≈ -1e7, ObjectItem bottom) landed under the background fill and stayed
-// hidden until a repaint — exactly the reported symptom after returning from desktop.
-// A hand-drawn stroke belongs in DrawingItem, whose z-scope is POSITIVE (0 .. +1e7),
-// like the legacy UBGraphicsPolygonItem stroke path (which sets DrawingItem). This
-// pins the stroke to DrawingItem so its z is always ABOVE the page background.
+// #364 regression: the stroke must carry the *new* itemLayerType key, which the
+// scene's z-value controller (UBZLayerController::generateZLevel) reads to place
+// the item in a z-scope. Before the fix the constructor only set the deprecated
+// ItemLayerType key; generateZLevel read the unset itemLayerType key, fell back
+// to NoLayer and assigned errorNumber (-20000001 ≈ -2e7) as the z — BELOW the
+// page background — so a freshly drawn stroke was painted but hidden under the
+// background until a tool change re-sorted z (seen when returning from desktop
+// mode). This pins that the correct layer-type key is set at construction.
 void TestUBSmoothStrokeItem::testLayerTypeKeySetForZOrdering_regression364()
 {
     UBSmoothStrokeItem item;
@@ -412,9 +403,7 @@ void TestUBSmoothStrokeItem::testLayerTypeKeySetForZOrdering_regression364()
     QVERIFY(v.isValid());
     const int layer = v.toInt();
 
-    // Must be a real, z-scoped layer (not NoLayer=0, which triggers errorNumber),
-    // and specifically the DrawingItem layer so the stroke sits above the page
-    // background (positive z), like the legacy polygon stroke path.
+    // Must be a real, z-scoped layer (not NoLayer=0, which triggers errorNumber).
     QVERIFY(layer != static_cast<int>(itemLayerType::NoLayer));
-    QCOMPARE(layer, static_cast<int>(itemLayerType::DrawingItem));
+    QCOMPARE(layer, static_cast<int>(itemLayerType::ObjectItem));
 }

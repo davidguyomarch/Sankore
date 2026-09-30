@@ -40,9 +40,6 @@
 #include <QScreen>
 #include <QGuiApplication>
 #include <QScrollBar>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 
 #include "frameworks/UBFileSystemUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -216,16 +213,6 @@ void UBBoardController::setupViews()
     mControlView = new UBBoardView(this, mControlContainer, true, false);
     mControlView->setInteractive(true);
     mControlView->setMouseTracking(true);
-    // #393 EXPERIMENT: the control view defaults to CacheBackground (set in the
-    // shared UBBoardView ctor). When the scene is shared with the desktop overlay
-    // (a 2nd/3rd attached view), a freshly drawn stroke was painted into the
-    // control viewport but not shown until a tool change — the classic symptom of
-    // a stale cached background pixmap composited over the new item. Disable the
-    // background cache on the interactive board view: the page background is a
-    // cheap fill (+ optional ruling), so there is no real perf gain from caching
-    // it, and CacheNone guarantees every frame repaints background + items
-    // together. (The desktop overlay already uses CacheNone.)
-    mControlView->setCacheMode(QGraphicsView::CacheNone);
     mControlView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
     // Layout so mControlView fills its container and receives mouse events
@@ -1787,17 +1774,6 @@ void UBBoardController::updateDesktopOverlayForBackground()
     const bool wantOverlay =
         (mActiveScene->gridType() == UBBackgroundGrid::Type::Desktop);
 
-    // #393 diagnostics (TODO remove): entry state of the overlay trigger.
-    {
-        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (_f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&_f) << "[RET] updateDesktopOverlay wantOverlay=" << wantOverlay
-                             << " gridType=" << (int)mActiveScene->gridType()
-                             << " isShowingDesktop=" << UBApplication::applicationController->isShowingDesktop()
-                             << " manuallyHidden=" << overlay->isManuallyHidden()
-                             << "\n";
-    }
-
     if (wantOverlay)
     {
         // ADR-0008 D3: the overlay is a *session* state, distinct from the page's
@@ -1820,21 +1796,9 @@ void UBBoardController::updateDesktopOverlayForBackground()
         // Leaving the Desktop background type: exit the overlay if it is up and
         // unbind the shared scene so the board page is no longer mutated by the
         // desktop transparency logic.
-        const bool wasShowing = UBApplication::applicationController->isShowingDesktop();
-        if (wasShowing)
+        if (UBApplication::applicationController->isShowingDesktop())
             UBApplication::applicationController->hideDesktop();
         overlay->presentScene(nullptr);
-
-        // #393 diagnostics (TODO remove): confirm we took the leave-overlay path
-        // and whether hideDesktop ran (which is what calls showBoard + the cache
-        // reset).
-        {
-            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-            if (_f.open(QIODevice::Append | QIODevice::Text))
-                QTextStream(&_f) << "[RET] leaveOverlay wasShowingDesktop=" << wasShowing
-                                 << " nowShowingDesktop=" << UBApplication::applicationController->isShowingDesktop()
-                                 << "\n";
-        }
     }
 }
 

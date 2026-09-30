@@ -34,9 +34,6 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 
 UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     : QGraphicsPathItem(parent)
@@ -52,21 +49,16 @@ UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     Delegate()->setCanTrigAnAction(true);
 
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
-    // #364 / #393: assign the *new* itemLayerType key. The z-value controller
+    // #364: assign the *new* itemLayerType key too. The z-value controller
     // (UBZLayerController::generateZLevel) reads UBGraphicsItemData::itemLayerType,
     // NOT the deprecated ItemLayerType above. Without it, validLayerType() fails,
-    // the item falls back to NoLayer and gets errorNumber (-2e7) — below
-    // everything (#364).
-    //
-    // The #364 fix set this to ObjectItem, but that layer's z-scope is NEGATIVE
-    // (-1e7 .. 0), and UBBoardView::drawBackground paints the opaque page fill for
-    // all z < 0 — so on a normal (non-see-through) page the fresh stroke landed at
-    // z ≈ -1e7 UNDER the background and stayed hidden until a repaint (#393: seen
-    // after returning from the shared-scene desktop overlay onto a white board).
-    // A hand-drawn stroke must live in DrawingItem, whose scope is POSITIVE
-    // (0 .. +1e7) — above the background — exactly like the legacy
-    // UBGraphicsPolygonItem stroke path (which sets DrawingItem too).
-    setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::DrawingItem));
+    // the item falls back to NoLayer and gets errorNumber (-20000001 ≈ -2e7) as
+    // its z — i.e. BELOW the page background — so the stroke is painted but hidden
+    // under the background until a tool change re-sorts z. The legacy
+    // UBGraphicsStrokesGroup sets this key explicitly ("Necessary ... for z value
+    // to be assigned correctly"); the smooth-stroke pipeline that replaced it
+    // forgot to. Mirror it so drawn strokes land in the Object/Drawing z-scope.
+    setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::ObjectItem));
     setUuid(QUuid::createUuid());
 
     setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -303,24 +295,6 @@ void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
-
-    // #393 diagnostics (TODO remove): which widget/view paints the stroke, with
-    // what z/visibility. `widget` is the viewport of the painting view — compare
-    // it to the [RET] showBoard controlView viewport pointer to tell whether the
-    // board control view or the (hidden) overlay view is the one painting.
-    {
-        static int sPaintDiag = 0;
-        if (sPaintDiag < 12) { ++sPaintDiag;
-            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-            if (_f.open(QIODevice::Append | QIODevice::Text))
-                QTextStream(&_f) << "[RET] paint pts=" << mRawPoints.size()
-                                 << " z=" << zValue()
-                                 << " visible=" << (isVisible() ? 1 : 0)
-                                 << " opacity=" << opacity()
-                                 << " vpWidget=" << (void*)widget
-                                 << "\n";
-        }
-    }
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
