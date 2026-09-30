@@ -527,7 +527,17 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
     mIsShowingDesktop = true;
     emit desktopMode(true);
 
-    mMainWindow->hide();
+    // #393 BISECTION (test/393-bisect-no-window-hide): do NOT hide the main
+    // window. If the first stroke after returning to the board becomes VISIBLE
+    // with this build, the culprit is the mMainWindow->hide()/show() cycle on the
+    // software backend of the VM (the re-shown top-level window's back-buffer is
+    // not presented until a full paintEvent, which a tool change forces).
+    // mMainWindow->hide();
+    {
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[BISECT2] showDesktop WITHOUT mainWindow->hide()\n";
+    }
     mUninoteController->showWindow();
 
     if (mMirror)
