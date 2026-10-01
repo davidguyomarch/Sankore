@@ -211,9 +211,30 @@ void UBDisplayManager::positionScreens()
     }
     if (mControlWidget && mControlScreenIndex > -1)
     {
-        mControlWidget->hide();
-        mControlWidget->setGeometry(QGuiApplication::screens().at(mControlScreenIndex)->geometry());
-        mControlWidget->showFullScreen();
+        // #397 / #399 (ADR-0008 D2, brick 1): the control widget is the main
+        // window. Forcing hide()+showFullScreen() here unconditionally pushed its
+        // windowState from Maximized to FullScreen on the Desktop-return path
+        // (adjustScreens is called at the end of hideDesktop). On the VM software
+        // backend that left the board surface painted-but-not-presented until a
+        // native event, so the first stroke after returning from Desktop stayed
+        // invisible (measured: mwState 2 -> 4). Only put the main window
+        // fullscreen when actually in multi-screen mode (it owns a dedicated
+        // screen); otherwise keep it MAXIMIZED, matching the startup state
+        // (UBApplication does showMaximized() at launch). This mirrors how the
+        // display/previous widgets already gate fullscreen on appUseMultiscreen.
+        if (mUseMultiScreen)
+        {
+            mControlWidget->hide();
+            mControlWidget->setGeometry(QGuiApplication::screens().at(mControlScreenIndex)->geometry());
+            mControlWidget->showFullScreen();
+        }
+        else if (mControlWidget->windowState() & Qt::WindowFullScreen
+                 || !mControlWidget->isVisible())
+        {
+            // Only re-assert Maximized if the window drifted to fullscreen or is
+            // hidden; avoid needless hide()/show churn in the common case.
+            mControlWidget->showMaximized();
+        }
     }
 
     if (mDisplayWidget && mDisplayScreenIndex > -1)
