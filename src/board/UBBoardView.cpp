@@ -55,6 +55,8 @@
 #include "core/UBTheme.h"
 #include "core/UBMimeData.h"
 #include "core/UBApplication.h"
+#include "core/UBApplicationController.h"
+#include "desktop/UBDesktopAnnotationController.h"
 #include "core/UBSetting.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UB.h"
@@ -1129,6 +1131,32 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
         return;
     }
 
+    // #397 OBSERVATION (TODO remove): capture the real window/activation state at
+    // the moment a stroke STARTS on the board. This measures (does not guess)
+    // whether the board window is the OS-active/foreground window on return from
+    // Desktop, and what Qt considers the active window.
+    if (bIsControl)
+    {
+        QWidget* mw = window();
+        QWidget* appActive = QApplication::activeWindow();
+        UBBoardView* overlay = UBApplication::applicationController
+                && UBApplication::applicationController->uninotesController()
+            ? UBApplication::applicationController->uninotesController()->drawingView()
+            : nullptr;
+        QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (_f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&_f) << "[WIN] press on board"
+                             << " mwActive=" << (mw && mw->isActiveWindow())
+                             << " mwVisible=" << (mw && mw->isVisible())
+                             << " mwState=" << (mw ? (int)mw->windowState() : -1)
+                             << " appActive=" << (void*)appActive
+                             << " mw=" << (void*)mw
+                             << " vpActive=" << isActiveWindow()
+                             << " overlayVisible=" << (overlay && overlay->isVisible())
+                             << " overlay=" << (void*)overlay
+                             << "\n";
+    }
+
     // #336: the Desktop toolbar is an opaque, masked CHILD QQuickWidget of this
     // overlay, so clicks on it are consumed natively by the child and never
     // reach here — no hit-test/pass-through needed (unlike the top-level attempt).
@@ -1450,6 +1478,33 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
   // first/ propagate device release to the scene
   if (scene ())
     scene ()->inputDeviceRelease ();
+
+  // #397 OBSERVATION (TODO remove): opening the settings menu reveals the stroke.
+  // A menu is a top-level popup that is shown then hidden — that show/hide of
+  // ANOTHER top-level forces the compositor to re-present the whole stack. Mimic
+  // exactly that here with a throwaway 1px top-level widget. If the stroke appears
+  // live with this, the fix is a window show/hide poke on return, not activation.
+  if (bIsControl)
+  {
+      static int sPokeDiag = 0;
+      const bool logThis = (sPokeDiag < 4);
+      if (logThis) ++sPokeDiag;
+
+      QWidget* poke = new QWidget(nullptr, Qt::ToolTip | Qt::FramelessWindowHint);
+      poke->setAttribute(Qt::WA_DeleteOnClose, true);
+      poke->setAttribute(Qt::WA_ShowWithoutActivating, true);
+      poke->setGeometry(0, 0, 1, 1);
+      poke->show();
+      poke->hide();
+      poke->close();
+
+      if (logThis)
+      {
+          QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
+          if (_f.open(QIODevice::Append | QIODevice::Text))
+              QTextStream(&_f) << "[WIN] stroke end: show/hide poke done\n";
+      }
+  }
 
   if (currentTool == UBStylusTool::Selector)
   {
