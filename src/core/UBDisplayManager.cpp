@@ -26,9 +26,6 @@
 #include <QAbstractButton>
 #include <QGuiApplication>
 #include <QScreen>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 
 #include "frameworks/UBPlatformUtils.h"
 
@@ -237,16 +234,6 @@ void UBDisplayManager::positionScreens()
             // Only re-assert Maximized if the window drifted to fullscreen or is
             // hidden; avoid needless hide()/show churn in the common case.
             mControlWidget->showMaximized();
-        }
-
-        // #397 diagnostics (TODO remove once validated on VM): confirm the main
-        // window's resulting windowState stays Maximized (2), not FullScreen (4).
-        {
-            QFile _f(QCoreApplication::applicationDirPath() + "/startup.log");
-            if (_f.open(QIODevice::Append | QIODevice::Text))
-                QTextStream(&_f) << "[WIN] positionScreens control mwState="
-                                 << (int)mControlWidget->windowState()
-                                 << " multiScreen=" << mUseMultiScreen << "\n";
         }
     }
 
