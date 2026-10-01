@@ -40,7 +40,6 @@
 #include <QUrl>
 #include <QVariant>
 #include <QListView>
-#include <QWindow>
 
 #include "controllers/UBToolController.h"
 
@@ -1451,20 +1450,6 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
   // first/ propagate device release to the scene
   if (scene ())
     scene ()->inputDeviceRelease ();
-
-  // #397 (test): on the VM software backend, after returning from Desktop
-  // annotation the board paints a freshly drawn stroke into its back-buffer but
-  // does NOT present it to screen until a native-window event (tool change,
-  // menu) forces compositor recomposition. Qt dirty-invalidations (update(),
-  // scene()->update()) are insufficient. At the end of a stroke on the
-  // interactive board view, force a SYNCHRONOUS native repaint (+ a native
-  // window update request) so the stroke is presented immediately.
-  if (bIsControl)
-  {
-      viewport ()->repaint ();
-      if (window () && window ()->windowHandle ())
-          window ()->windowHandle ()->requestUpdate ();
-  }
 
   if (currentTool == UBStylusTool::Selector)
   {

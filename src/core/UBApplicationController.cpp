@@ -395,6 +395,19 @@ void UBApplicationController::showBoard()
 
     mMainWindow->show();
 
+    // #397: when returning from Desktop annotation, the desktop overlay was a
+    // top-level WindowStaysOnTopHint window that held the OS foreground. show()
+    // alone does NOT bring the board window back to the foreground, so on the VM
+    // software backend the board window paints into its back-buffer but is not
+    // presented until some native interaction (a tool click, opening a menu)
+    // reactivates it — which is exactly why a freshly drawn stroke stayed
+    // invisible until a tool change. Explicitly raise + activate the board window
+    // and focus the control view so it is foreground and presents immediately.
+    mMainWindow->raise();
+    mMainWindow->activateWindow();
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->setFocus(Qt::OtherFocusReason);
+
     emit mainModeChanged(Board);
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
