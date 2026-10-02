@@ -108,6 +108,11 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
             return mControlView;
         }
 
+        // #393 brick 2: re-apply the see-through / opaque presentation on the
+        // control view after the current page's background kind changed in place
+        // (setActiveDocumentScene already calls this on a page switch).
+        void refreshSeeThroughPresentation() { applySeeThroughPresentation(); }
+
         UBBoardView* displayView()
         {
             return mDisplayView;
@@ -294,6 +299,10 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         void documentSceneChanged(UBDocumentProxy* proxy, int pIndex);
 
     private:
+        // #393 (ADR-0007) brick 2: apply (or remove) the translucent see-through
+        // presentation on the control view + its host chain, driven by the active
+        // page's background kind. No-op change when the kind is unchanged.
+        void applySeeThroughPresentation();
         void updatePageSizeState();
         void saveViewState();
         void adjustDisplayViews();

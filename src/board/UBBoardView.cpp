@@ -1868,14 +1868,16 @@ UBBoardView::resizeEvent (QResizeEvent * event)
 void
 UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
 {
-  // #241: in Desktop annotation mode the overlay must show the desktop through
-  // it, not an opaque page background. This override otherwise fills the whole
-  // viewport with opaque white/black (hiding the scene backgroundBrush that
-  // holds the captured desktop) and never chains to the base view. For the
-  // desktop overlay, defer to QGraphicsView::drawBackground so the scene's
-  // backgroundBrush (the desktop pixmap, or transparent) is painted, and skip
-  // the page fill + ruling.
-  if (bIsDesktop)
+  // #241 / #393 (ADR-0007/0009) brick 2: a see-through page must show the
+  // desktop through it, not an opaque page background. This override otherwise
+  // fills the whole viewport with opaque white/black (hiding the scene
+  // backgroundBrush) and never chains to the base view. Defer to
+  // QGraphicsView::drawBackground — painting only the scene backgroundBrush
+  // (transparent) and skipping the page fill + ruling — for BOTH the legacy
+  // desktop overlay (bIsDesktop) AND the main board view when the active page's
+  // background kind is SeeThrough (keyed on the page model, not the #408 env
+  // var). Proven on the #408 VM spike.
+  if (bIsDesktop || (scene() && scene()->isSeeThrough()))
     {
       QGraphicsView::drawBackground (painter, rect);
       return;

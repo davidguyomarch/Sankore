@@ -26,6 +26,9 @@
 
 #include <QBuffer>
 #include <QTemporaryFile>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -351,6 +354,54 @@ void UBBoardController::setupToolbar()
     connect(mMainWindow->actionSleep, &QAction::triggered, this, &UBBoardController::blackout);
     connect(mMainWindow->actionVirtualKeyboard, &QAction::triggered, this, &UBBoardController::showKeyboard);
     connect(mMainWindow->actionImportPage, &QAction::triggered, this, &UBBoardController::importPage);
+}
+
+void UBBoardController::applySeeThroughPresentation()
+{
+    // #393 (ADR-0007) brick 2: when the active page's background kind is
+    // SeeThrough, apply the translucency recipe proven on the #408 VM spike to
+    // the MAIN control view and its host chain so the live desktop shows through
+    // the board window; restore the opaque presentation otherwise. Keyed on the
+    // per-page background kind — NOT a startup flag. The window is kept MAXIMIZED
+    // (never fullscreen, #397); drawBackground already skips the opaque fill for
+    // a see-through page.
+    if (!mControlView || !mActiveScene)
+        return;
+
+    const bool seeThrough = mActiveScene->isSeeThrough();
+
+    // Idempotency: WA_TranslucentBackground already reflects the current state.
+    if (mControlView->testAttribute(Qt::WA_TranslucentBackground) == seeThrough)
+        return;
+
+    QWidget* central = mMainWindow ? mMainWindow->centralWidget() : nullptr;
+
+    mControlView->setCacheMode(seeThrough ? QGraphicsView::CacheNone
+                                          : QGraphicsView::CacheBackground);
+    mControlView->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    mControlView->viewport()->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    mControlView->viewport()->setAutoFillBackground(!seeThrough);
+
+    if (mControlContainer)
+        mControlContainer->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    if (central)
+        central->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    if (mMainWindow)
+        mMainWindow->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+
+    // Force the cached opaque fill to be dropped / rebuilt on the next paint.
+    mControlView->resetCachedContent();
+    mControlView->viewport()->update();
+
+    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+    if (logFile.open(QIODevice::Append | QIODevice::Text))
+    {
+        QTextStream(&logFile) << "[SEETHROUGH] control view seeThrough=" << seeThrough
+                              << " viewTranslucent=" << mControlView->testAttribute(Qt::WA_TranslucentBackground)
+                              << " cacheMode=" << (int)mControlView->cacheMode()
+                              << " mwState=" << (int)(mMainWindow ? (int)mMainWindow->windowState() : -1)
+                              << "\n";
+    }
 }
 
 
@@ -1642,6 +1693,9 @@ void UBBoardController::setActiveDocumentScene(UBDocumentProxy* pDocumentProxy, 
     if (mActiveScene)
     {
         updateBackgroundActionsState(mActiveScene->isDarkBackground(), mActiveScene->isCrossedBackground());
+        // #393 brick 2: the new active page may be see-through (or no longer be)
+        // — apply/remove the translucent presentation on the control view.
+        applySeeThroughPresentation();
     }
 
     if(documentChange)

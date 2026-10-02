@@ -136,6 +136,10 @@ Rectangle {
         // === Background ===
         ToolbarButton { icon: "sun"; tooltip: "Fond clair"; active: !appController.isDarkBackground; onClicked: appController.setBackgroundLight() }
         ToolbarButton { icon: "moon"; tooltip: "Fond sombre"; active: appController.isDarkBackground; onClicked: appController.setBackgroundDark() }
+        // #393 brick 2: toggle the page see-through (desktop shows through the
+        // board window). Provisional placement — the unified background picker
+        // (#393 later bricks) will host this properly.
+        ToolbarButton { icon: "monitor"; tooltip: "Fond transparent (bureau)"; active: appController.isSeeThrough; onClicked: appController.setSeeThrough(!appController.isSeeThrough) }
 
         // Ruling type selector (#289): dropdown with the square grid + French
         // school rulings (Séyès, enlarged Séyès, double 3 mm).

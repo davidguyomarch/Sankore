@@ -124,6 +124,29 @@ void UBAppController::setGridType(int gridType)
     emit backgroundChanged();
 }
 
+bool UBAppController::isSeeThrough() const
+{
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    return scene ? scene->isSeeThrough() : false;
+}
+
+void UBAppController::setSeeThrough(bool seeThrough)
+{
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return;
+    auto* scene = UBApplication::boardController->activeScene();
+    if (!scene)
+        return;
+    scene->setBackgroundKind(seeThrough ? UBBackgroundGrid::BackgroundKind::SeeThrough
+                                        : UBBackgroundGrid::BackgroundKind::Opaque);
+    // The kind changed in place (same scene), so re-apply the control-view
+    // presentation now (setActiveDocumentScene only runs on a page switch).
+    UBApplication::boardController->refreshSeeThroughPresentation();
+    emit backgroundChanged();
+}
+
 void UBAppController::setBackgroundLight()
 {
     UBApplication::boardController->changeBackground(false, false);

@@ -28,6 +28,8 @@ class UBAppController : public QObject
     Q_PROPERTY(bool isCrossedBackground READ isCrossedBackground NOTIFY backgroundChanged)
     // #289: full ruling type (0=Plain,1=Grid,2=Seyes,3=SeyesLarge,4=Double3mm)
     Q_PROPERTY(int gridType READ gridType NOTIFY backgroundChanged)
+    // #393 (ADR-0007/0009): see-through page background (desktop shows through).
+    Q_PROPERTY(bool isSeeThrough READ isSeeThrough NOTIFY backgroundChanged)
 
     // Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
@@ -49,6 +51,8 @@ public:
     bool isDarkBackground() const;
     bool isCrossedBackground() const;
     int gridType() const;
+    /// #393 (ADR-0007/0009): is the current page's background see-through?
+    bool isSeeThrough() const;
 
     bool canUndo() const;
     bool canRedo() const;
@@ -69,6 +73,11 @@ public slots:
     void toggleGrid();
     /// #289: set the ruling type (keeps the current dark/light).
     void setGridType(int gridType);
+    /// #393 brick 2: toggle the current page between an opaque background and a
+    /// see-through (desktop shows through) background. The final background
+    /// picker UI comes later; this is the model/presentation entry point and the
+    /// hook used to validate see-through on the VM.
+    void setSeeThrough(bool seeThrough);
 
 signals:
     void activeModeChanged();
