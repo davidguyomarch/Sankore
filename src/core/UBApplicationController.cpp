@@ -48,6 +48,7 @@ static void ubDocFlashDiag(const QString &line)
 }
 
 #include "core/UBApplication.h"
+#include "core/UBPresentationController.h"
 #include "core/UBPersistenceManager.h"
 #include "core/UBSettings.h"
 #include "core/UBSetting.h"
@@ -104,6 +105,9 @@ UBApplicationController::UBApplicationController(UBBoardView *pControlView,
     mDisplayManager = new UBDisplayManager(this);
 
     mUninoteController = new UBDesktopAnnotationController(this);
+
+    // #399 (ADR-0008 D2) brick 2: shadow presentation-state controller.
+    mPresentationController = new UBPresentationController(this);
 
     connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, this, &UBApplicationController::screenLayoutChanged);
     connect(mDisplayManager, &UBDisplayManager::screenLayoutChanged, mUninoteController, &UBDesktopAnnotationController::screenLayoutChanged);
@@ -375,6 +379,7 @@ void UBApplicationController::showBoard()
 //    }
 
     mMainMode = Board;
+    mPresentationController->setState(UBPresentationController::State::Board); // #399 shadow
 
     adaptToolBar();
 
@@ -430,6 +435,7 @@ void UBApplicationController::showInternet()
         mMainWindow->webToolBar->show();
 
         mMainMode = Internet;
+        mPresentationController->setState(UBPresentationController::State::Web); // #399 shadow
 
         adaptToolBar();
 
@@ -450,6 +456,7 @@ void UBApplicationController::showDocument()
     mMainWindow->documentToolBar->hide(); // Hidden: replaced by QML DocumentsTopBar
 
     mMainMode = Document;
+    mPresentationController->setState(UBPresentationController::State::Documents); // #399 shadow
 
     adaptToolBar();
 
@@ -525,6 +532,7 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
     // This triggers changeMode(DESKTOP) which hides QML palettes, preventing them
     // from receiving stale mouse events during the transition. (#135)
     mIsShowingDesktop = true;
+    mPresentationController->setState(UBPresentationController::State::DesktopAnnotation); // #399 shadow
     emit desktopMode(true);
 
     mMainWindow->hide();

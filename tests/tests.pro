@@ -51,7 +51,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            ../src/domain/UBInkColorUtils.h \
            tst_UBKeyboardPaletteColors.h \
            ../src/gui/UBKeyboardPaletteColors.h \
-           tst_UBThemeManager.h
+           tst_UBThemeManager.h \
+           tst_UBPresentationController.h
 
 # Sources under test (only self-contained utilities)
 SOURCES += ../src/frameworks/UBStringUtils.cpp \
@@ -150,6 +151,14 @@ win32-msvc* {
 } else {
     SOURCES += premoc/moc_UBThemeManager.cpp
 }
+# UBPresentationController (#399, ADR-0008 D2) — presentation state machine.
+# QObject → premoc on Linux (moc bug), auto-moc'd on MSVC.
+SOURCES += ../src/core/UBPresentationController.cpp
+win32-msvc* {
+    HEADERS += ../src/core/UBPresentationController.h
+} else {
+    SOURCES += premoc/moc_UBPresentationController.cpp
+}
 # Library model + controller (#258, PR 1) — real sources under test. UBFeature
 # was extracted to its own TU (board/UBFeature.cpp), which links against the
 # UBSettings stub (userTrashDirPath) and UBFileSystemUtilsCore (extension).
@@ -197,6 +206,7 @@ SOURCES += main.cpp \
            tst_UBInkColorUtils.cpp \
            tst_UBKeyboardPaletteColors.cpp \
            tst_UBThemeManager.cpp \
+           tst_UBPresentationController.cpp \
            tst_UBDisplayManager.cpp \
            tst_UBExportSelection.cpp \
            tst_UBPageDeletion.cpp \
