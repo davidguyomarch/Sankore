@@ -1875,8 +1875,13 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
   // desktop overlay, defer to QGraphicsView::drawBackground so the scene's
   // backgroundBrush (the desktop pixmap, or transparent) is painted, and skip
   // the page fill + ruling.
-  if (bIsDesktop)
+  if (bIsDesktop || mSeeThrough)
     {
+      // #408 spike: a see-through board must behave exactly like the desktop
+      // overlay here — defer to the base class so only the scene backgroundBrush
+      // (transparent) is painted, with NO opaque page fill. If this makes the
+      // live desktop show through on the VM, the single-surface design (#393) is
+      // viable; if the window stays black, it does not and we fall back.
       QGraphicsView::drawBackground (painter, rect);
       return;
     }

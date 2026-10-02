@@ -70,6 +70,13 @@ class UBBoardView : public QGraphicsView
 
         void setMultiselection(bool enable);
         bool isMultipleSelectionEnabled() { return mMultipleSelectionIsEnabled; }
+
+        // #408 spike: when true, drawBackground() skips the opaque page fill
+        // (and ruling) so the translucent window shows the live desktop through
+        // the board. Gated by the SANKORE_SEETHROUGH_BOARD env var at startup —
+        // this is an INVESTIGATION toggle, not a shipped feature. See issue #408.
+        void setSeeThrough(bool seeThrough) { mSeeThrough = seeThrough; }
+        bool isSeeThrough() const { return mSeeThrough; }
 // work around for handling tablet events on MAC OS with Qt 4.8.0 and above
 #if defined(Q_OS_MACOSX)
         bool directTabletEvent(QEvent *event);
@@ -189,6 +196,7 @@ class UBBoardView : public QGraphicsView
         bool mMultipleSelectionIsEnabled;
         bool bIsControl;
         bool bIsDesktop;
+        bool mSeeThrough = false;   // #408 spike
         bool mRubberBandInPlayMode;
 
         static bool hasSelectedParents(QGraphicsItem * item);

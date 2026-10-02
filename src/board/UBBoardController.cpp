@@ -26,6 +26,9 @@
 
 #include <QBuffer>
 #include <QTemporaryFile>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -185,6 +188,21 @@ void UBBoardController::init()
 
     setActiveDocumentScene(doc);
 
+    // #408 SPIKE: now that mActiveScene exists, give the see-through board the
+    // alpha-1 grey scene brush (visually transparent but hit-testable, like the
+    // overlay). No-op unless SANKORE_SEETHROUGH_BOARD is set.
+    if (mControlView && mControlView->isSeeThrough() && mActiveScene)
+    {
+        mActiveScene->setBackgroundBrush(QBrush(QColor(127, 127, 127, 1)));
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text))
+        {
+            QTextStream out(&logFile);
+            out << "[SEETHROUGH] scene brush applied (alpha-1 grey)\n";
+            logFile.close();
+        }
+    }
+
     connect(UBApplication::mainWindow->actionGroupItems, &QAction::triggered, this, &UBBoardController::groupButtonClicked);
 
     undoRedoStateChange(true);
@@ -226,6 +244,56 @@ void UBBoardController::setupViews()
 
     mControlContainer->setObjectName("ubBoardControlContainer");
     mMainWindow->addBoardWidget(mControlContainer);
+
+    // #408 SPIKE (investigation, not a feature): if SANKORE_SEETHROUGH_BOARD is
+    // set, apply the proven desktop-overlay transparency recipe to the MAIN
+    // board view so we can measure on the GPU-less Windows VM whether the live
+    // desktop shows through the board window — the blocker for the single-surface
+    // unification (#393). The recipe mirrors UBDesktopAnnotationController's
+    // mTransparentDrawingView:
+    //   - WA_TranslucentBackground on the view AND its viewport,
+    //   - viewport autoFillBackground = false,
+    //   - CacheNone (so the opaque page fill is not cached — ADR-0007 open Q#3),
+    //   - setSeeThrough(true) → drawBackground skips the opaque fillRect,
+    //   - the host chain (container + central widget) must ALSO be translucent,
+    //     otherwise a translucent child inside an opaque parent shows the parent.
+    // We deliberately keep the window showMaximized (never fullscreen, #397).
+    if (!qEnvironmentVariable("SANKORE_SEETHROUGH_BOARD").isEmpty())
+    {
+        mControlView->setSeeThrough(true);
+        mControlView->setCacheMode(QGraphicsView::CacheNone);
+        mControlView->setAttribute(Qt::WA_TranslucentBackground, true);
+        mControlView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
+        mControlView->viewport()->setAutoFillBackground(false);
+        mControlView->setStyleSheet(QString());
+
+        mControlContainer->setAttribute(Qt::WA_TranslucentBackground, true);
+        mControlContainer->setAutoFillBackground(false);
+        if (mMainWindow->centralWidget())
+        {
+            mMainWindow->centralWidget()->setAttribute(Qt::WA_TranslucentBackground, true);
+            mMainWindow->centralWidget()->setAutoFillBackground(false);
+        }
+        mMainWindow->setAttribute(Qt::WA_TranslucentBackground, true);
+
+        // NB: the scene background brush is applied later (applySeeThroughBrush,
+        // called from init() after setActiveDocumentScene) because mActiveScene
+        // does not exist yet at setupViews() time.
+
+        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (logFile.open(QIODevice::Append | QIODevice::Text))
+        {
+            QTextStream out(&logFile);
+            out << "\n[SEETHROUGH] enabled on mControlView"
+                << " viewTranslucent=" << mControlView->testAttribute(Qt::WA_TranslucentBackground)
+                << " vpTranslucent=" << mControlView->viewport()->testAttribute(Qt::WA_TranslucentBackground)
+                << " cacheMode=" << (int)mControlView->cacheMode()
+                << " containerTranslucent=" << mControlContainer->testAttribute(Qt::WA_TranslucentBackground)
+                << " mwState=" << (int)mMainWindow->windowState()
+                << "\n";
+            logFile.close();
+        }
+    }
 
     connect(mControlView, &UBBoardView::resized, this, &UBBoardController::boardViewResized);
 
