@@ -363,7 +363,92 @@ void UBApplicationController::addCapturedEmbedCode(const QString& embedCode)
 }
 
 
+// ===========================================================================
+// #399 (ADR-0008 D2, brick 3): single guarded entry point for mode transitions.
+//
+// Every public transition (showBoard / showInternet / showDocument /
+// showDesktop / hideDesktop) is a thin wrapper that runs under a re-entrancy
+// guard, then dispatches to the real (unguarded) do*() body. The transitions
+// emit desktopMode()/mainModeChanged(), which drive palette slots that could
+// request ANOTHER transition mid-flight; the guard makes each user action yield
+// exactly one transition (killing the measured triple hideWindow on return,
+// the double props bar, and the background-menu desync). Internal continuations
+// (hideDesktop -> board/web/doc, internet -> desktop) call do*() directly and
+// are therefore NOT blocked.
+// ===========================================================================
+
 void UBApplicationController::showBoard()
+{
+    if (mInModeTransition)
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[STATE] (reentrant showBoard ignored)\n";
+        return;
+    }
+    mInModeTransition = true;
+    doShowBoard();
+    mInModeTransition = false;
+}
+
+void UBApplicationController::showInternet()
+{
+    if (mInModeTransition)
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[STATE] (reentrant showInternet ignored)\n";
+        return;
+    }
+    mInModeTransition = true;
+    doShowInternet();
+    mInModeTransition = false;
+}
+
+void UBApplicationController::showDocument()
+{
+    if (mInModeTransition)
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[STATE] (reentrant showDocument ignored)\n";
+        return;
+    }
+    mInModeTransition = true;
+    doShowDocument();
+    mInModeTransition = false;
+}
+
+void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
+{
+    if (mInModeTransition)
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[STATE] (reentrant showDesktop ignored)\n";
+        return;
+    }
+    mInModeTransition = true;
+    doShowDesktop(dontSwitchFrontProcess);
+    mInModeTransition = false;
+}
+
+void UBApplicationController::hideDesktop()
+{
+    if (mInModeTransition)
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[STATE] (reentrant hideDesktop ignored)\n";
+        return;
+    }
+    mInModeTransition = true;
+    doHideDesktop();
+    mInModeTransition = false;
+}
+
+
+void UBApplicationController::doShowBoard()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
@@ -412,7 +497,7 @@ void UBApplicationController::showBoard()
 }
 
 
-void UBApplicationController::showInternet()
+void UBApplicationController::doShowInternet()
 {
 
     if (UBApplication::boardController)
@@ -424,7 +509,7 @@ void UBApplicationController::showInternet()
 
     if (mSettings->webUseExternalBrowser->get().toBool())
     {
-        showDesktop(true);
+        doShowDesktop(true); // #399: internal chain, bypass the re-entrancy guard
         UBApplication::webController->show(UBWebController::WebBrowser);
         // really no have emit mainModeChanged here ? potential problem with virtual keyboard ?
     }
@@ -449,7 +534,7 @@ void UBApplicationController::showInternet()
 }
 
 
-void UBApplicationController::showDocument()
+void UBApplicationController::doShowDocument()
 {
     mMainWindow->webToolBar->hide();
     mMainWindow->boardToolBar->hide();
@@ -508,7 +593,7 @@ void UBApplicationController::showDocument()
     emit mainModeChanged(Document);
 }
 
-void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
+void UBApplicationController::doShowDesktop(bool dontSwitchFrontProcess)
 {
     // Use the screen where the main window is currently displayed
     QScreen *currentScreen = mMainWindow->screen();
@@ -555,24 +640,26 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
 }
 
 
-void UBApplicationController::hideDesktop()
+void UBApplicationController::doHideDesktop()
 {
     // Re-enable the board view that was disabled in showDesktop() to prevent
     // stale events during the Desktop mode transition.  (#135)
     if (UBApplication::boardController && UBApplication::boardController->controlView())
         UBApplication::boardController->controlView()->setEnabled(true);
 
+    // #399: internal continuation of the SAME transition — call the unguarded
+    // do*() bodies directly so the re-entrancy guard does not block the return.
     if (mMainMode == Board)
     {
-        showBoard();
+        doShowBoard();
     }
     else if (mMainMode == Internet)
     {
-        showInternet();
+        doShowInternet();
     }
     else if (mMainMode == Document)
     {
-        showDocument();
+        doShowDocument();
     }
 
     mIsShowingDesktop = false;

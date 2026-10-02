@@ -76,6 +76,9 @@ class UBApplicationController : public QObject
 
         void initViewState(int horizontalPosition, int verticalPosition);
 
+        // #399 (brick 3): public transition entry points. Each is now a thin
+        // guarded wrapper around a private do*() body (see goToState / the
+        // re-entrancy guard). Signatures and semantics are unchanged for callers.
         void showBoard();
 
         void showInternet();
@@ -152,6 +155,19 @@ class UBApplicationController : public QObject
 
     private slots:
 
+    private:
+        // #399 (ADR-0008 D2, brick 3): the actual, UNGUARDED transition bodies.
+        // The public showBoard()/showInternet()/showDocument()/showDesktop()/
+        // hideDesktop() are thin re-entrancy-guarded wrappers around these.
+        // Internal transition chains (e.g. hideDesktop -> board) call these do*()
+        // directly so a legitimate synchronous nested transition is not blocked
+        // by the guard.
+        void doShowBoard();
+        void doShowInternet();
+        void doShowDocument();
+        void doShowDesktop(bool dontSwitchFrontProcess);
+        void doHideDesktop();
+
     protected:
 
         UBDesktopAnnotationController *mUninoteController;
@@ -184,6 +200,16 @@ class UBApplicationController : public QObject
         void setCheckingForUpdates(bool value);
 
         bool mIsShowingDesktop;
+
+        // #399 (ADR-0008 D2, brick 3): re-entrancy guard for mode transitions.
+        // The transition methods (showBoard/showDesktop/hideDesktop/showInternet/
+        // showDocument) emit desktopMode()/mainModeChanged(), which drive palette
+        // slots that can trigger another transition — and hideDesktop() calls
+        // showBoard() which calls hideWindow() again (the measured triple
+        // hideWindow). This flag serializes them: a transition requested while
+        // one is already running is ignored (logged), so each user action yields
+        // exactly one transition.
+        bool mInModeTransition = false;
 
         QNetworkAccessManager *networkAccessManager;
 
