@@ -1,9 +1,17 @@
 # ADR-0007: Unify Board and Desktop annotation modes on a single scene/view
 
-- **Status:** Proposed <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
-- **Date:** 2026-09-25
+- **Status:** Accepted <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
+- **Date:** 2026-09-25 (Accepted 2026-10-02)
 - **Deciders:** maintainer (David Guyomarch)
-- **Related:** #350 (4.5.0 review); #364 (first-stroke-on-return, root-caused); #387 (ghost process on quit); #389 (future custom background image — same page-background model); ADR-0006 (dedicated desktop toolbar); desktop-mode / drawing-model steering; `notes/364-desktop-return-firststroke-diagnosis.md`
+- **Related:** #393 (single-surface implementation); #408 (see-through feasibility spike — **proven on the GPU-less VM**); #350 (4.5.0 review); #364 (first-stroke-on-return, root-caused); #387 (ghost process on quit); #389 (future custom background image — same page-background model); ADR-0006 (dedicated desktop toolbar); ADR-0008 (strangler strategy — this is D4); desktop-mode / drawing-model steering; `notes/397-desktop-return-firststroke-diagnosis.md`; `notes/408-seethrough-board-spike-decision.md`
+
+> **Acceptance note (2026-10-02).** The only real unknown behind this decision —
+> whether a genuinely translucent fullscreen board window composites on the
+> GPU-less test VM — was measured and confirmed in the **#408 spike**: the live
+> desktop shows through the main board window and strokes render immediately. The
+> "windowing risk is low" claim below is therefore no longer an assumption but a
+> measured fact. The decision is Accepted; implementation proceeds incrementally
+> under #393 (see the brick breakdown in that issue), per the ADR-0008 D4 slot.
 
 ## Context
 
