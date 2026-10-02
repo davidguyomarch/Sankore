@@ -508,6 +508,12 @@ UBGraphicsScene* UBSvgSubsetAdaptor::UBSvgSubsetReader::loadScene()
                     mScene->setBackground(darkBackground, crossedBackground);
                 }
 
+                // #393 (ADR-0007): background kind (opaque / see-through / image).
+                // Absent attribute → Opaque, so older documents degrade cleanly.
+                QStringView ubBackgroundKind = mXmlReader.attributes().value(mNamespaceUri, "background-kind");
+                if (!ubBackgroundKind.isNull())
+                    mScene->setBackgroundKind(UBBackgroundGrid::kindFromToken(ubBackgroundKind.toString()));
+
                 QStringView pageNominalSize = mXmlReader.attributes().value(mNamespaceUri, "nominal-size");
                 if (!pageNominalSize.isNull())
                 {
@@ -1336,6 +1342,11 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::writeSvgElement()
     // ruled type; the new attribute carries the exact ruling (#289).
     mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "crossed-background", mScene->isCrossedBackground() ? xmlTrue : xmlFalse);
     mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "background-grid-type", QString::fromLatin1(UBBackgroundGrid::toToken(mScene->gridType())));
+    // #393 (ADR-0007): page background kind (opaque / see-through / image),
+    // orthogonal to the ruling. Only written when non-default so existing opaque
+    // pages are byte-identical; absent attribute reads back as Opaque.
+    if (mScene->backgroundKind() != UBBackgroundGrid::BackgroundKind::Opaque)
+        mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "background-kind", QString::fromLatin1(UBBackgroundGrid::kindToToken(mScene->backgroundKind())));
 
     QScreen* desktop = QGuiApplication::primaryScreen();
     mXmlWriter.writeAttribute("pageDpi", QString("%1").arg((desktop->physicalDotsPerInchX() + desktop->physicalDotsPerInchY()) / 2));

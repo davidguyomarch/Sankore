@@ -80,9 +80,27 @@ void UBBackgroundRenderer::setZoomFactor(qreal zoom)
     mZoomFactor = zoom;
 }
 
+bool UBBackgroundRenderer::setBackgroundKind(UBBackgroundGrid::BackgroundKind kind)
+{
+    if (mBackgroundKind == kind)
+        return false;
+    mBackgroundKind = kind;
+
+    // The opaque/see-through page fill changes, and it is cached by the view's
+    // CacheBackground — reset it so the new background is actually repainted.
+    for (QGraphicsView* view : mScene->views())
+        view->resetCachedContent();
+
+    return true;
+}
+
 void UBBackgroundRenderer::setDesktopMode(bool desktopMode)
 {
-    mIsDesktopMode = desktopMode;
+    // Backward-compatible shim (#393): the old scene-wide "desktop mode" is now
+    // the SeeThrough background kind. Kept so the existing desktop overlay path
+    // keeps working until the single-surface bricks replace it.
+    setBackgroundKind(desktopMode ? UBBackgroundGrid::BackgroundKind::SeeThrough
+                                   : UBBackgroundGrid::BackgroundKind::Opaque);
 }
 
 void UBBackgroundRenderer::recolorAllItems()
@@ -135,8 +153,8 @@ void UBBackgroundRenderer::recolorAllItems()
 
 void UBBackgroundRenderer::paintBackground(QPainter* painter, const QRectF& rect)
 {
-    if (mIsDesktopMode)
-        return;  // caller falls through to QGraphicsScene::drawBackground
+    if (isSeeThrough())
+        return;  // no opaque fill: caller falls through to QGraphicsScene::drawBackground
 
     if (mDarkBackground)
         painter->fillRect(rect, QBrush(QColor(Qt::black)));

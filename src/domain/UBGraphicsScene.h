@@ -256,6 +256,11 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         bool isCrossedBackground() const;
         UBBackgroundGrid::Type gridType() const;
 
+        // #393 (ADR-0007): page background kind (opaque / see-through / image),
+        // orthogonal to the ruling type above.
+        UBBackgroundGrid::BackgroundKind backgroundKind() const;
+        bool isSeeThrough() const;
+
         bool hasBackground()
         {
             return (mBackgroundObject != 0);
@@ -374,6 +379,8 @@ public slots:
 
         void setBackground(bool pIsDark, bool pIsCrossed);
         void setBackgroundType(bool pIsDark, UBBackgroundGrid::Type pGridType);
+        /// #393: set the page background kind (opaque / see-through / image).
+        void setBackgroundKind(UBBackgroundGrid::BackgroundKind pKind);
         void setBackgroundZoomFactor(qreal zoom);
         void setDrawingMode(bool bModeDesktop);
         /// True on the transparent desktop-annotation overlay (no opaque page
