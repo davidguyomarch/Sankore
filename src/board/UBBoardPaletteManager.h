@@ -87,9 +87,6 @@ class UBBoardPaletteManager : public QObject
         void addItem(const QUrl& pUrl);
         void addItem(const QPixmap& pPixmap, const QPointF& p = QPointF(0.0, 0.0), qreal scale = 1.0, const QUrl& sourceUrl = QUrl());
 
-        void slot_changeMainMode(UBApplicationController::MainMode);
-        void slot_changeDesktopMode(bool);
-
         /// #399 (ADR-0008 D2, brick 4a): react to the presentation state machine
         /// instead of the two legacy signals (desktopMode/mainModeChanged). This
         /// is now the single driver of changeMode() + the TopBar mode resync.

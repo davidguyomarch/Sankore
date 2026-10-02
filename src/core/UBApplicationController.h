@@ -127,8 +127,9 @@ class UBApplicationController : public QObject
         QStringList widgetInlineJavaScripts();
 
     signals:
-        void mainModeChanged(UBApplicationController::MainMode pMode);
-        void desktopMode(bool displayed);
+        // #399 (brick 4c): legacy mainModeChanged / desktopMode signals removed.
+        // Mode transitions are now observed via UBPresentationController::
+        // stateChanged (see presentationController()).
 
     public slots:
 
@@ -203,8 +204,8 @@ class UBApplicationController : public QObject
 
         // #399 (ADR-0008 D2, brick 3): re-entrancy guard for mode transitions.
         // The transition methods (showBoard/showDesktop/hideDesktop/showInternet/
-        // showDocument) emit desktopMode()/mainModeChanged(), which drive palette
-        // slots that can trigger another transition — and hideDesktop() calls
+        // showDocument) drive palette slots via PresentationController::
+        // stateChanged, which can trigger another transition — and hideDesktop() calls
         // showBoard() which calls hideWindow() again (the measured triple
         // hideWindow). This flag serializes them: a transition requested while
         // one is already running is ignored (logged), so each user action yields

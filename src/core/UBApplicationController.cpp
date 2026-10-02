@@ -369,8 +369,9 @@ void UBApplicationController::addCapturedEmbedCode(const QString& embedCode)
 // Every public transition (showBoard / showInternet / showDocument /
 // showDesktop / hideDesktop) is a thin wrapper that runs under a re-entrancy
 // guard, then dispatches to the real (unguarded) do*() body. The transitions
-// emit desktopMode()/mainModeChanged(), which drive palette slots that could
-// request ANOTHER transition mid-flight; the guard makes each user action yield
+// drive the palette slots via UBPresentationController::stateChanged, whose
+// handlers could request ANOTHER transition mid-flight; the guard makes each
+// user action yield
 // exactly one transition (killing the measured triple hideWindow on return,
 // the double props bar, and the background-menu desync). Internal continuations
 // (hideDesktop -> board/web/doc, internet -> desktop) call do*() directly and
@@ -485,7 +486,9 @@ void UBApplicationController::doShowBoard()
 
     mMainWindow->show();
 
-    emit mainModeChanged(Board);
+    // #399 (brick 4c): legacy mainModeChanged/desktopMode emits removed — the
+    // palette manager is driven by UBPresentationController::stateChanged
+    // (setState above). No subscriber remains for the old signals.
 
     UBStylusTool::Enum currentTool = (UBStylusTool::Enum)UBToolController::toolController()->stylusTool();
     // Legacy code forced Selector here — disabled for QML V2 UI which sets Pen at startup
@@ -528,8 +531,7 @@ void UBApplicationController::doShowInternet()
         mUninoteController->hideWindow();
 
         UBApplication::webController->show(UBWebController::WebBrowser);
-
-        emit mainModeChanged(Internet);
+        // #399 (brick 4c): legacy mainModeChanged emit removed (see setState(Web)).
     }
 }
 
@@ -589,8 +591,7 @@ void UBApplicationController::doShowDocument()
     ubDocFlashDiag(QString("after mainWindow->show END t=%1ms").arg(docFlashTimer.elapsed()));
 
     mUninoteController->hideWindow();
-
-    emit mainModeChanged(Document);
+    // #399 (brick 4c): legacy mainModeChanged emit removed (see setState(Documents)).
 }
 
 void UBApplicationController::doShowDesktop(bool dontSwitchFrontProcess)
@@ -613,12 +614,12 @@ void UBApplicationController::doShowDesktop(bool dontSwitchFrontProcess)
     if (UBApplication::boardController && UBApplication::boardController->controlView())
         UBApplication::boardController->controlView()->setEnabled(false);
 
-    // Emit desktopMode BEFORE hiding the main window and showing the desktop overlay.
-    // This triggers changeMode(DESKTOP) which hides QML palettes, preventing them
-    // from receiving stale mouse events during the transition. (#135)
+    // Set the presentation state to DesktopAnnotation BEFORE hiding the main
+    // window and showing the overlay. This drives changeMode(DESKTOP) via
+    // UBPresentationController::stateChanged, hiding the QML palettes before they
+    // could receive stale mouse events during the transition. (#135, #399)
     mIsShowingDesktop = true;
-    mPresentationController->setState(UBPresentationController::State::DesktopAnnotation); // #399 shadow
-    emit desktopMode(true);
+    mPresentationController->setState(UBPresentationController::State::DesktopAnnotation);
 
     mMainWindow->hide();
     mUninoteController->showWindow();
@@ -666,7 +667,9 @@ void UBApplicationController::doHideDesktop()
 
     mDisplayManager->adjustScreens(-1);
 
-    emit desktopMode(false);
+    // #399 (brick 4c): legacy desktopMode(false) emit removed. The palette
+    // restore is driven by the inner doShow*() above, whose setState() emits
+    // stateChanged (DesktopAnnotation -> Board/Web/Documents).
 }
 
 void UBApplicationController::setMirrorSourceWidget(QWidget* pWidget)

@@ -142,62 +142,10 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     mpFeaturesWidget = new UBFeaturesWidget();
 }
 
-void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMode mainMode)
-{
-//    Board = 0, Internet, Document, WebDocument
-
-    switch( mainMode )
-    {
-        case UBApplicationController::Board:
-            {
-                // call changeMode only when switch NOT from desktop mode
-                if(!UBApplication::applicationController->isShowingDesktop())
-                    changeMode(eUBDockPaletteWidget_BOARD);
-                // Sync QML controller back to Board when returning from Documents mode
-                if (mAppController && mAppController->activeMode() != UBAppController::Board)
-                    mAppController->syncMode(UBAppController::Board);
-            }
-            break;
-
-        case UBApplicationController::Internet:
-            changeMode(eUBDockPaletteWidget_WEB);
-            break;
-
-        case UBApplicationController::Document:
-            changeMode(eUBDockPaletteWidget_DOCUMENT);
-            break;
-
-        default:
-            {
-                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != nullptr)
-                    mKeyboardPalette->hide();
-            }
-            break;
-    }
-}
-
-void UBBoardPaletteManager::slot_changeDesktopMode(bool isDesktop)
-{
-    UBApplicationController::MainMode currMode = UBApplication::applicationController->displayMode();
-    if(!isDesktop)
-    {
-        // Sync QML controller back to Board when leaving Desktop mode
-        if (mAppController)
-            mAppController->syncMode(UBAppController::Board);
-
-        switch( currMode )
-        {
-            case UBApplicationController::Board:
-                changeMode(eUBDockPaletteWidget_BOARD);
-                break;
-
-            default:
-                break;
-        }
-    }
-    else
-        changeMode(eUBDockPaletteWidget_DESKTOP);
-}
+// #399 (brick 4c): slot_changeMainMode / slot_changeDesktopMode removed. They
+// were the subscribers of the legacy mainModeChanged / desktopMode signals,
+// replaced in brick 4a by slot_changePresentationState (driven by the single
+// UBPresentationController::stateChanged). The legacy signals are removed too.
 
 void UBBoardPaletteManager::slot_changePresentationState(
         UBPresentationController::State from,
