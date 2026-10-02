@@ -199,6 +199,51 @@ void UBBoardPaletteManager::slot_changeDesktopMode(bool isDesktop)
         changeMode(eUBDockPaletteWidget_DESKTOP);
 }
 
+void UBBoardPaletteManager::slot_changePresentationState(
+        UBPresentationController::State from,
+        UBPresentationController::State to)
+{
+    // #399 (ADR-0008 D2, brick 4a): single driver of the palette layout, keyed on
+    // the presentation state machine instead of the two legacy signals
+    // (mainModeChanged + desktopMode). This replaces slot_changeMainMode and
+    // slot_changeDesktopMode, which double-drove changeMode() and needed an
+    // isShowingDesktop() guard to avoid a double restore. With one source there
+    // is no double call, so no guard is needed.
+    //
+    // Faithful reproduction of the legacy behaviour (see the two legacy slots):
+    //  - DESKTOP/DOCUMENT hide the QML palettes and reparent keyboard/addItem;
+    //  - BOARD restores (shows) them;
+    //  - WEB only reparents (never hid them explicitly);
+    //  - the TopBar highlight (UBAppController) must be resynced to Board when we
+    //    land on Board, otherwise it stays stuck on the previous mode (e.g.
+    //    "Bureau") — this is the syncMode(Board) the legacy desktop-return did.
+    Q_UNUSED(from);
+
+    switch (to)
+    {
+    case UBPresentationController::State::Board:
+        changeMode(eUBDockPaletteWidget_BOARD);
+        // Resync the QML TopBar highlight back to Board (covers both the old
+        // Documents->Board mainModeChanged path and the Desktop->Board
+        // desktopMode(false) path, which each called syncMode(Board)).
+        if (mAppController && mAppController->activeMode() != UBAppController::Board)
+            mAppController->syncMode(UBAppController::Board);
+        break;
+
+    case UBPresentationController::State::DesktopAnnotation:
+        changeMode(eUBDockPaletteWidget_DESKTOP);
+        break;
+
+    case UBPresentationController::State::Documents:
+        changeMode(eUBDockPaletteWidget_DOCUMENT);
+        break;
+
+    case UBPresentationController::State::Web:
+        changeMode(eUBDockPaletteWidget_WEB);
+        break;
+    }
+}
+
 void UBBoardPaletteManager::setupPalettes()
 {
 

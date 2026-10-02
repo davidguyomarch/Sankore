@@ -35,6 +35,7 @@
 #include "gui/UBFeaturesWidget.h"
 #include "gui/UBDockPalette.h"
 #include "core/UBApplicationController.h"
+#include "core/UBPresentationController.h"
 
 class UBSettings;
 
@@ -88,6 +89,12 @@ class UBBoardPaletteManager : public QObject
 
         void slot_changeMainMode(UBApplicationController::MainMode);
         void slot_changeDesktopMode(bool);
+
+        /// #399 (ADR-0008 D2, brick 4a): react to the presentation state machine
+        /// instead of the two legacy signals (desktopMode/mainModeChanged). This
+        /// is now the single driver of changeMode() + the TopBar mode resync.
+        void slot_changePresentationState(UBPresentationController::State from,
+                                          UBPresentationController::State to);
 
         void toggleImageBackgroundPalette(bool ckecked, bool isDefault);
         void closeAllPopupPalettes();
