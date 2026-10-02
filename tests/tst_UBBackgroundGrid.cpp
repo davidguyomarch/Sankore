@@ -45,6 +45,20 @@ void TestUBBackgroundGrid::testTypeTokenRoundTrip()
     QCOMPARE(fromToken(QStringLiteral("bogus")), Type::Plain);
 }
 
+void TestUBBackgroundGrid::testBackgroundKindTokenRoundTrip()
+{
+    // #393 (ADR-0007): background kind is a separate axis from the ruling type.
+    QCOMPARE(kindFromToken(kindToToken(BackgroundKind::Opaque)),     BackgroundKind::Opaque);
+    QCOMPARE(kindFromToken(kindToToken(BackgroundKind::SeeThrough)), BackgroundKind::SeeThrough);
+    QCOMPARE(kindFromToken(kindToToken(BackgroundKind::Image)),      BackgroundKind::Image);
+    // Stable tokens (persisted in the .ubz).
+    QCOMPARE(QString::fromLatin1(kindToToken(BackgroundKind::SeeThrough)), QStringLiteral("see-through"));
+    QCOMPARE(QString::fromLatin1(kindToToken(BackgroundKind::Image)),      QStringLiteral("image"));
+    // Unknown / absent token falls back to Opaque (older documents degrade cleanly).
+    QCOMPARE(kindFromToken(QStringLiteral("bogus")), BackgroundKind::Opaque);
+    QCOMPARE(kindFromToken(QString()),               BackgroundKind::Opaque);
+}
+
 void TestUBBackgroundGrid::testTypeIntRoundTrip()
 {
     for (int v : {0, 1, 2, 3, 4})

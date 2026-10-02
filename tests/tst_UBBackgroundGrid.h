@@ -22,6 +22,7 @@ class TestUBBackgroundGrid : public QObject
 private slots:
     void testPlainProducesNoLines();
     void testTypeTokenRoundTrip();
+    void testBackgroundKindTokenRoundTrip();   // #393
     void testTypeIntRoundTrip();
     void testIsRuled();
     void testGridIsUniform8mm();

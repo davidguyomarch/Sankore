@@ -408,6 +408,16 @@ UBBackgroundGrid::Type UBGraphicsScene::gridType() const
     return mBackgroundRenderer->gridType();
 }
 
+UBBackgroundGrid::BackgroundKind UBGraphicsScene::backgroundKind() const
+{
+    return mBackgroundRenderer->backgroundKind();
+}
+
+bool UBGraphicsScene::isSeeThrough() const
+{
+    return mBackgroundRenderer && mBackgroundRenderer->isSeeThrough();
+}
+
 const QPointF& UBGraphicsScene::previousPoint()
 {
     return mDrawingHandler->previousPoint();
@@ -515,6 +525,12 @@ void UBGraphicsScene::setBackground(bool pIsDark, bool pIsCrossed)
 void UBGraphicsScene::setBackgroundType(bool pIsDark, UBBackgroundGrid::Type pGridType)
 {
     if (mBackgroundRenderer->setBackgroundType(pIsDark, pGridType))
+        setModified(true);
+}
+
+void UBGraphicsScene::setBackgroundKind(UBBackgroundGrid::BackgroundKind pKind)
+{
+    if (mBackgroundRenderer->setBackgroundKind(pKind))
         setModified(true);
 }
 

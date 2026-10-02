@@ -50,7 +50,12 @@ public:
     bool isCrossedBackground() const { return UBBackgroundGrid::isRuled(mGridType); }
     /// The full ruling type (#289).
     UBBackgroundGrid::Type gridType() const { return mGridType; }
-    bool isDesktopMode()       const { return mIsDesktopMode; }
+    // #393 (ADR-0007): a see-through page has no opaque fill (the desktop shows
+    // through). This supersedes the old scene-wide "desktop mode" flag, which is
+    // now a backward-compatible shim over the background kind (see .cpp).
+    UBBackgroundGrid::BackgroundKind backgroundKind() const { return mBackgroundKind; }
+    bool isSeeThrough()        const { return mBackgroundKind == UBBackgroundGrid::BackgroundKind::SeeThrough; }
+    bool isDesktopMode()       const { return isSeeThrough(); }
 
     // --- Mutators (called by scene facades) ---
 
@@ -68,6 +73,10 @@ public:
     bool setBackgroundType(bool isDark, UBBackgroundGrid::Type gridType);
 
     void setZoomFactor(qreal zoom);
+
+    /// Set the page background kind (#393). Returns true if a repaint is needed.
+    bool setBackgroundKind(UBBackgroundGrid::BackgroundKind kind);
+    /// Backward-compatible shim: desktopMode==true → SeeThrough, else Opaque.
     void setDesktopMode(bool desktopMode);
 
     // --- Painting (called from scene's drawBackground override) ---
@@ -82,7 +91,7 @@ private:
 
     bool  mDarkBackground    = false;
     UBBackgroundGrid::Type mGridType = UBBackgroundGrid::Type::Plain;
-    bool  mIsDesktopMode     = false;
+    UBBackgroundGrid::BackgroundKind mBackgroundKind = UBBackgroundGrid::BackgroundKind::Opaque;
     qreal mZoomFactor        = 1.0;
 };
 

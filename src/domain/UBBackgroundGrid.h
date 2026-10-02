@@ -42,6 +42,48 @@ namespace UBBackgroundGrid
         DoubleLine3mm = 4///< maternelle double ruling: 6 mm writing band, 12 mm period (#379)
     };
 
+    /**
+     * #393 (ADR-0007 R2): the *kind* of page background, orthogonal to the
+     * ruling Type above. The ruling says HOW to rule the page; the kind says
+     * what the page surface IS:
+     *   - Opaque     : a normal filled page (white/black per dark mode) — today's
+     *                  default. A ruling (grid/Séyès…) draws on top of it.
+     *   - SeeThrough : no opaque fill — the window is translucent so the live
+     *                  desktop shows through (replaces the old scene-wide
+     *                  "desktop mode" flag). This is the unified Desktop page.
+     *   - Image      : a user-chosen background image (future, #389). Reserved
+     *                  here so the model and serialization already have a slot;
+     *                  rendering is out of scope for brick 1.
+     *
+     * Kept as a separate axis (not folded into Type) on purpose: a see-through
+     * page may still carry a ruling one day, and an image background is not a
+     * ruling either. Matches ADR-0007's background = { ruling(kind) |
+     * see-through | image(ref) } target.
+     */
+    enum class BackgroundKind
+    {
+        Opaque = 0,
+        SeeThrough = 1,
+        Image = 2
+    };
+
+    /// Stable string token for BackgroundKind (persisted in the .ubz SVG).
+    inline const char* kindToToken(BackgroundKind k)
+    {
+        switch (k)
+        {
+        case BackgroundKind::SeeThrough: return "see-through";
+        case BackgroundKind::Image:      return "image";
+        case BackgroundKind::Opaque:     default: return "opaque";
+        }
+    }
+    inline BackgroundKind kindFromToken(const QString& s)
+    {
+        if (s == QLatin1String("see-through")) return BackgroundKind::SeeThrough;
+        if (s == QLatin1String("image"))       return BackgroundKind::Image;
+        return BackgroundKind::Opaque;
+    }
+
     /// Calibration: 8 mm == 32 scene units (UBSettings::crossSize) → 4 u/mm.
     inline constexpr double unitsPerMm() { return 32.0 / 8.0; }
 
