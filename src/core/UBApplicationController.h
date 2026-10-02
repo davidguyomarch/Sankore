@@ -34,6 +34,7 @@ class UBBoardView;
 class UBDocumentProxy;
 class UBGraphicsScene;
 class UBDesktopAnnotationController;
+class UBPresentationController;
 class UBScreenMirror;
 class UBMainWindow;
 class UBDisplayManager;
@@ -95,6 +96,14 @@ class UBApplicationController : public QObject
             return mUninoteController;
         }
 
+        /// #399 (ADR-0008 D2): single source of truth for the presentation state.
+        /// Introduced in shadow mode (brick 2) — updated in mirror of the
+        /// existing transitions; no consumer of its stateChanged yet.
+        UBPresentationController* presentationController()
+        {
+            return mPresentationController;
+        }
+
         enum MainMode
         {
             Board = 0, Internet, Document, WebDocument
@@ -146,6 +155,8 @@ class UBApplicationController : public QObject
     protected:
 
         UBDesktopAnnotationController *mUninoteController;
+
+        UBPresentationController *mPresentationController;  // #399 (shadow)
 
         UBMainWindow *mMainWindow;
 
