@@ -89,6 +89,7 @@
 #include "UBPreferencesController.h"
 #include "UBIdleTimer.h"
 #include "UBApplicationController.h"
+#include "UBPresentationController.h"
 
 #include "board/UBBoardController.h"
 #include "controllers/UBToolController.h"
@@ -404,11 +405,16 @@ int UBApplication::exec(const QString& pFileToImport)
 
 
 
-    connect(applicationController, &UBApplicationController::mainModeChanged,
-            boardController->paletteManager(), &UBBoardPaletteManager::slot_changeMainMode);
-
-    connect(applicationController, &UBApplicationController::desktopMode,
-            boardController->paletteManager(), &UBBoardPaletteManager::slot_changeDesktopMode);
+    // #399 (ADR-0008 D2, brick 4a): the palette manager now reacts to the single
+    // presentation state machine (UBPresentationController::stateChanged) instead
+    // of the two legacy signals (mainModeChanged + desktopMode). This removes the
+    // double-drive of changeMode() and the isShowingDesktop() guard it required.
+    // The legacy signals are still emitted by the transition code (no subscriber
+    // now) and will be removed in a later brick.
+    connect(applicationController->presentationController(),
+            &UBPresentationController::stateChanged,
+            boardController->paletteManager(),
+            &UBBoardPaletteManager::slot_changePresentationState);
 
 
 
@@ -502,6 +508,17 @@ int UBApplication::exec(const QString& pFileToImport)
         qDebug() << "Headless mode: forced window resize to" << fallback;
     }
     showBoard();
+
+    // #399 (ADR-0008 D2, brick 4a): apply the initial BOARD palette layout
+    // explicitly. The legacy wiring did this via the startup showBoard() emitting
+    // mainModeChanged(Board) -> slot_changeMainMode. Now the palette manager is
+    // driven by UBPresentationController::stateChanged, but at startup the state
+    // is already Board, so setState(Board) is a no-op and stateChanged does not
+    // fire. Drive the initial layout once here so the board palettes are shown
+    // exactly as before.
+    boardController->paletteManager()->slot_changePresentationState(
+        UBPresentationController::State::Board,
+        UBPresentationController::State::Board);
     mainWindow->showMaximized();
 
     // Force Pen tool selection after all init is complete (deferred to ensure QML is ready)
