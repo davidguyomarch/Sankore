@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: '**/{UBDesktopAnnotationController,UBCustomCaptureWindow,UBWindowCapture,UBWindowCaptureDelegate_win,DesktopToolbar,UBApplicationController,UBDisplayManager,UBScreenMirror}*'
+fileMatchPattern: '**/{UBDesktopAnnotationController,UBCustomCaptureWindow,UBWindowCapture,UBWindowCaptureDelegate_win,DesktopToolbar,UBApplicationController,UBPresentationController,UBDisplayManager,UBScreenMirror}*'
 ---
 # Open-Sankoré — Mode Desktop annotation (overlay transparent)
 
@@ -21,28 +21,70 @@ Vérifier ici avant de toucher au code desktop.
 | Barre d'outils | `mToolbarQml` (`QQuickWidget`) → `DesktopToolbar.qml` | Fenêtre **top-level** (bas-centre) ; overlay = **transient parent** |
 | Outil / couleurs | `UBToolController::toolController()` (singleton) | Partagé avec le mode tableau |
 
+## Machine à états de présentation (#399, ADR-0008 D2)
+
+Depuis #399, **toutes** les transitions de mode passent par un point d'entrée
+unique gardé, et les palettes réagissent à **un seul signal d'état** — plus les
+anciens signaux `desktopMode(bool)` / `mainModeChanged(MainMode)` (supprimés).
+
+- **Source de vérité de l'état** : `UBPresentationController` (`src/core/`),
+  accessible via `UBApplication::applicationController->presentationController()`.
+  Enum `State { Board, DesktopAnnotation, Documents, Web }` ; `setState(next)`
+  loggue `[STATE] from -> to`, émet `stateChanged(from, to)`, et est **no-op si
+  l'état ne change pas**.
+- **Point d'entrée unique gardé** : les méthodes publiques de transition de
+  `UBApplicationController` (`showBoard` / `showInternet` / `showDocument` /
+  `showDesktop` / `hideDesktop`) sont des **wrappers** gardés par
+  `mInModeTransition` qui délèguent à des corps privés `doShow*()/doHideDesktop()`.
+  Une transition demandée pendant qu'une autre tourne est **ignorée** (log
+  `[STATE] (reentrant X ignored)`). Résultat : **une action = une transition**.
+  Les continuations internes (`doHideDesktop` → `doShow*`, `doShowInternet` →
+  `doShowDesktop`) appellent les `do*()` directement (pas de blocage par le garde).
+- **Les palettes s'abonnent à l'état** : `UBBoardPaletteManager::slot_changePresentationState(from, to)`
+  est connecté à `stateChanged` et mappe l'état → `changeMode()` :
+  `Board→BOARD` (+ `mAppController->syncMode(Board)` pour le highlight TopBar),
+  `DesktopAnnotation→DESKTOP`, `Documents→DOCUMENT`, `Web→WEB`.
+
 ## Entrée / sortie du mode
 
-**Entrée** — `UBApplicationController::showDesktop()` :
+**Entrée** — `UBApplicationController::showDesktop()` → `doShowDesktop()` :
 1. cache + **désactive** la board view (`controlView()->setEnabled(false)`) pour
    éviter des events souris périmés (#135) ;
-2. `emit desktopMode(true)` → `changeMode(DESKTOP)` cache les palettes QML V2 du
-   tableau (elles sont parentées à `mContainer`, la board view) ;
+2. `mPresentationController->setState(DesktopAnnotation)` → `stateChanged` →
+   `slot_changePresentationState` → `changeMode(DESKTOP)` cache les palettes QML V2
+   du tableau (elles sont parentées à `mContainer`, la board view) ;
 3. cache la main window, appelle `mUninoteController->showWindow()` ;
-4. `toolController()->setInDesktopMode(true)` puis force l'outil Selector.
+4. `toolController()->setInDesktopMode(true)`. **Ne force pas Selector** : c'est
+   `showWindow()` qui pose un **Pen** déterministe à l'entrée (#390).
 
-**`showWindow()`** : affiche la toolbar, applique la transparence sur l'overlay
-(Windows : `WA_TranslucentBackground` + brush scène transparent pour voir le vrai
-bureau à travers, cf #241), `showFullScreen()` (Linux : `show()` + `updateMask`),
-`UBPlatformUtils::setDesktopMode(true)`, remet la toolbar au premier plan.
+**`showWindow()`** : affiche la toolbar, pose l'outil **Pen** (sauve l'outil
+tableau dans `mBoardStylusTool`), applique la transparence sur l'overlay
+(Windows : `WA_TranslucentBackground` + brush scène alpha-1 pour voir le vrai
+bureau à travers tout en recevant les clics, cf #241/#390), `showFullScreen()`
+(Linux : `show()` + `updateMask`), `UBPlatformUtils::setDesktopMode(true)`, remet
+la toolbar au premier plan.
 
 **Sortie** — le bouton « Retour au tableau » de la toolbar appelle
 `UBDesktopAnnotationController::goToUniboard()` :
 `hideWindow()` → `setDesktopMode(false)` → `setInDesktopMode(false)` →
 `emit restoreUniboard()`, connecté à `UBApplicationController::hideDesktop()`, qui
-réactive la board view et appelle `showBoard()/showInternet()/showDocument()`
-selon `mMainMode`. `hideWindow()` cache la toolbar + l'overlay et **restaure
+réactive la board view et appelle (via les corps privés) `doShowBoard()/
+doShowInternet()/doShowDocument()` selon `mMainMode`. Chaque `doShow*()` appelle
+`setState(...)`, dont le `stateChanged` (p. ex. `DesktopAnnotation → Board`)
+restaure les palettes. `hideWindow()` cache la toolbar + l'overlay et **restaure
 l'outil tableau** précédent (`mBoardStylusTool`).
+
+### Fix #397 — la fenêtre principale reste Maximized (jamais Fullscreen)
+
+`hideDesktop()` appelle en fin de course `UBDisplayManager::adjustScreens(-1)` →
+`positionScreens()`. En **mono-écran**, cette méthode ne met **plus** la fenêtre
+principale en `showFullScreen()` : elle la laisse **Maximized** (son état de
+démarrage). Avant le fix, le passage Maximized→Fullscreen au retour laissait, sur
+le backend logiciel de la VM (sans GPU), la surface du tableau peinte mais **non
+présentée** — le premier trait tracé au retour restait invisible jusqu'à un
+événement natif (changement d'outil, menu). Le `showFullScreen()` n'est conservé
+que pour le **multi-écran** (la fenêtre de contrôle possède alors son écran).
+Diagnostic complet : `notes/397-desktop-return-firststroke-diagnosis.md`.
 
 ## La barre d'outils QML V2 (`DesktopToolbar.qml`, #336)
 

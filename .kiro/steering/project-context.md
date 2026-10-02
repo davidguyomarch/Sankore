@@ -66,6 +66,19 @@ resources/            # UI forms, icons (Phosphor), translations
 | `UBAppController` | Mode app, fond, undo/redo, quit, préférences | `appController` |
 | `UBThemeManager` | Thème clair/sombre, couleurs QML | `themeManager` |
 
+### Machine à états de présentation (#399, ADR-0008 D2)
+
+`UBPresentationController` (`src/core/`, **non** exposé à QML) est la **source de
+vérité unique** du mode à l'écran — enum `State { Board, DesktopAnnotation,
+Documents, Web }`. Il remplace les anciens flags dispersés (`mMainMode`,
+`mIsShowingDesktop`) et les signaux `desktopMode`/`mainModeChanged` (supprimés).
+Toutes les transitions passent par un **point d'entrée unique gardé**
+(`UBApplicationController::showBoard/showDesktop/...` → corps privés `doShow*()`,
+garde `mInModeTransition`) ; les palettes réagissent à `stateChanged` via
+`UBBoardPaletteManager::slot_changePresentationState`. Accès :
+`UBApplication::applicationController->presentationController()`. Détails dans le
+steering **`desktop-mode.md`** et l'ADR-0008.
+
 ### QML Files (src/qml/)
 
 | File | Widget | Position |
