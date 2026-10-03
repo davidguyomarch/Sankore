@@ -13,7 +13,7 @@ It has been migrated to Qt 6 and features a new QML V2 interface (v4.1.0+).
 - **QML V2 UI**: ✅ StylusPaletteV2, TopBar, PageNavigator, DrawingPropsBar, ShapesPaletteV2
 - **Unit tests**: ✅ 17+ suites QTest (83%+ line coverage)
 - **Documents mode**: ✅ Réactivé (ancienne vue UBDocumentController)
-- **Desktop mode**: ⚠️ Réactivé mais crash au clic souris (#135)
+- **Desktop mode**: ✅ Surface unifiée avec le tableau (#414) — l'overlay rend la scène board partagée ; bureau transparent ; traits communs board/bureau
 
 ## Architecture
 
@@ -79,6 +79,19 @@ garde `mInModeTransition`) ; les palettes réagissent à `stateChanged` via
 `UBApplication::applicationController->presentationController()`. Détails dans le
 steering **`desktop-mode.md`** et l'ADR-0008.
 
+### Surface board/bureau unifiée (#393/#414, ADR-0007)
+
+Board et bureau partagent **une seule scène de dessin** depuis #414 : l'overlay
+bureau (`mTransparentDrawingView`) rend `boardController->activeScene()`, plus de
+scène privée. Un trait fait au bureau est un item de la page board (et persisté
+avec). **L'overlay reste la fenêtre qui présente** (fenêtre top-level dédiée) ; on
+ne rend **jamais** la fenêtre principale translucide — mesuré comme bloqué par le
+mur de présentation #397 sur backend software (brique 2/#413 et brique 4/#415
+abandonnées). Le see-through bureau est un flip **transitoire non persisté**
+(`setDrawingMode`). Le **type** de fond (`BackgroundKind { Opaque | SeeThrough |
+Image }`, axe orthogonal au ruling) est défini par ADR-0009/#412 et persisté.
+Détails dans **`desktop-mode.md`**, ADR-0007 et ADR-0009.
+
 ### QML Files (src/qml/)
 
 | File | Widget | Position |
@@ -134,7 +147,7 @@ Files in `src/frameworks/` providing empty implementations:
 | Document open/save (.ubz) | ✅ | Via QuaZip |
 | PDF export | ✅ | pdf-merger |
 | Geometric instruments | ✅ | Ruler, compass, protractor, triangle, aristo |
-| Desktop annotation mode | ⚠️ | Réactivé mais crash au clic (#135) |
+| Desktop annotation mode | ✅ | Surface unifiée (#414) : overlay rend la scène board partagée, bureau transparent, traits communs. Crash #135 corrigé. |
 | Documents view | ✅ | Ancien design, fonctionnel (#134 pour moderniser) |
 | Laser pointer | ✅ | Cercle rouge via UBGraphicsScene |
 | Shape creation | ✅ | Via ShapesPaletteV2 + UBShapeFactory |
