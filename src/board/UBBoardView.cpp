@@ -1124,6 +1124,21 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
     //EV-7 - NNE - 20131231
     emit mousePress(event);
 
+    // #413 DIAG (temporary): does a press reach the control view when the board
+    // is see-through? If this never logs while the board is transparent, the
+    // click is passing THROUGH the translucent window to the desktop (Windows
+    // treats low-alpha pixels as click-through — #390). Removed once fixed.
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[PRESS] control view press bIsControl=" << bIsControl
+                            << " bIsDesktop=" << bIsDesktop
+                            << " seeThrough=" << (scene() && scene()->isSeeThrough())
+                            << " interactive=" << isInteractive()
+                            << " enabled=" << isEnabled()
+                            << "\n";
+    }
+
     if (!bIsControl && !bIsDesktop) {
         event->ignore();
         return;
