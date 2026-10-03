@@ -93,11 +93,18 @@ class UBDesktopAnnotationController : public QObject
         QPixmap getScreenPixmap();
 
         UBBoardView* mTransparentDrawingView;
-        UBGraphicsScene* mTransparentDrawingScene;
+        // #393 brick 3: the overlay no longer owns a scene — it renders the
+        // board's active scene (shared), so a stroke drawn on the desktop is a
+        // stroke on the board page. Convenience accessor (fetched fresh — the
+        // active scene changes on page navigation).
+        UBGraphicsScene* boardScene() const;
 
     private slots:
         void onTransparentWidgetResized();
         void refreshMask();
+        // #393 brick 3: the board's active scene was swapped (page navigation);
+        // if the overlay is visible, re-point its view at the new scene.
+        void onActiveSceneChanged();
 
     private:
         void updateMask(bool bTransparent);
@@ -124,6 +131,14 @@ class UBDesktopAnnotationController : public QObject
         bool mIsFullyTransparent;
 
         int mBoardStylusTool;  // board tool saved on entry, restored on exit (#390)
+
+        // #393 brick 3: desktop mode must render the SHARED board scene
+        // see-through (no opaque page fill) so the real desktop shows through.
+        // We flip the scene into transient drawing-mode on entry and restore on
+        // exit. This uses setDrawingMode() (renderer-level, does NOT setModified)
+        // so it is NOT persisted; mSavedSeeThrough remembers the page's real
+        // state to restore. (A page that is genuinely see-through would stay so.)
+        bool mSavedSeeThrough = false;
 
         QPixmap mMask;
 
