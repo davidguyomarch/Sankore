@@ -132,6 +132,14 @@ class UBDesktopAnnotationController : public QObject
 
         int mBoardStylusTool;  // board tool saved on entry, restored on exit (#390)
 
+        // #393 brick 3: desktop mode must render the SHARED board scene
+        // see-through (no opaque page fill) so the real desktop shows through.
+        // We flip the scene into transient drawing-mode on entry and restore on
+        // exit. This uses setDrawingMode() (renderer-level, does NOT setModified)
+        // so it is NOT persisted; mSavedSeeThrough remembers the page's real
+        // state to restore. (A page that is genuinely see-through would stay so.)
+        bool mSavedSeeThrough = false;
+
         QPixmap mMask;
 
 };

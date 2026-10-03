@@ -158,7 +158,17 @@ void UBDesktopAnnotationController::onActiveSceneChanged()
     // see-through brush / mask so the desktop keeps showing the current page.
     if (!mTransparentDrawingView || !mTransparentDrawingView->isVisible())
         return;
-    mTransparentDrawingView->setScene(boardScene());
+    UBGraphicsScene* scene = boardScene();
+    mTransparentDrawingView->setScene(scene);
+    // The NEW page is normally Opaque — flip it see-through for the overlay too
+    // (transient, not persisted), same as showWindow(). The previous page was
+    // restored by setActiveDocumentScene's own flow; we track the new page's
+    // real state for restore on exit.
+    if (scene)
+    {
+        mSavedSeeThrough = scene->isSeeThrough();
+        scene->setDrawingMode(true);
+    }
     updateBackground();
 #ifdef Q_OS_LINUX
     updateMask(true);
@@ -377,11 +387,22 @@ void UBDesktopAnnotationController::showWindow()
 
     // #393 brick 3: render the board's ACTIVE scene (shared), so desktop strokes
     // land on the board page and vice-versa. Done here (not in the ctor) because
-    // the active scene exists by now. The overlay's bIsDesktop drawBackground
-    // shows the desktop through regardless of the page's background kind, so we
-    // do NOT mutate (or persist) the page kind here.
+    // the active scene exists by now.
     if (mTransparentDrawingView)
         mTransparentDrawingView->setScene(boardScene());
+
+    // #393 brick 3: the shared board page is normally Opaque, so its
+    // drawBackground paints a white fill — which the overlay would show as a
+    // white sheet over the desktop. Flip the SHARED scene into transient
+    // see-through drawing-mode for the duration of desktop mode so no opaque
+    // fill is painted and the real desktop shows through. setDrawingMode() is a
+    // renderer-level flag that does NOT setModified(), so it is not persisted;
+    // we save/restore the page's real see-through state around it.
+    if (UBGraphicsScene* scene = boardScene())
+    {
+        mSavedSeeThrough = scene->isSeeThrough();
+        scene->setDrawingMode(true);
+    }
 
     showToolbar();
 
@@ -507,9 +528,14 @@ void UBDesktopAnnotationController::hideWindow()
         // desktop mode. Drop the always-on-top hint while hidden; showWindow()
         // re-asserts the window flags on the next entry.
         mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, false);
-        // #393 brick 3: detach from the shared board scene while hidden so the
-        // overlay never holds a scene it doesn't own (avoids dangling if the
-        // active scene is later freed/swapped). showWindow() re-points it.
+        // #393 brick 3: restore the shared board page's real see-through state
+        // (undo the transient drawing-mode flip from showWindow) BEFORE detaching,
+        // so the board view paints its normal opaque page again. Not persisted.
+        if (UBGraphicsScene* scene = boardScene())
+            scene->setDrawingMode(mSavedSeeThrough);
+        // Detach from the shared board scene while hidden so the overlay never
+        // holds a scene it doesn't own (avoids dangling if the active scene is
+        // later freed/swapped). showWindow() re-points it.
         mTransparentDrawingView->setScene(nullptr);
     }
 
