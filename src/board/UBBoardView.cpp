@@ -46,6 +46,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
+#include <QWindow>
 
 #include "frameworks/UBGeometryUtils.h"
 #include "frameworks/UBPlatformUtils.h"
@@ -1671,6 +1672,25 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
   mLongPressTimer.stop();
 
   UBApplication::boardController->controlView()->viewport()->update(); // Issue 1026 - ALTI - 20131024 : depuis que le thumbnail courant est une view "live" de la boardScene, il peut y avoir des "trainées" quand on déplace rapidement les objets. Il faut rafraichir en fin de déplacement.
+
+  // #413 DIAG (temporary): on a see-through board, measure whether the stroke
+  // was actually CREATED (item count) and force a hard present. If the item
+  // count grows but nothing shows until we poke the surface, this is the #397
+  // "painted-but-not-presented" class on the translucent window — NOT a drawing
+  // failure. Removed once diagnosed.
+  if (scene() && scene()->isSeeThrough())
+  {
+      const int itemCount = scene()->items().size();
+      // Force a synchronous repaint + a native surface update, like opening a
+      // native menu does (which is what revealed the stroke in #397).
+      viewport()->repaint();
+      if (windowHandle())
+          windowHandle()->requestUpdate();
+      QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+      if (f.open(QIODevice::Append | QIODevice::Text))
+          QTextStream(&f) << "[DRAW] release seeThrough: sceneItems=" << itemCount
+                          << " (forced repaint + present)\n";
+  }
 }
 
 void
