@@ -63,7 +63,6 @@
 UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
         : QObject(parent)
         , mTransparentDrawingView(0)
-        , mTransparentDrawingScene(0)
         , mToolbarQml(nullptr)
         , mIsFullyTransparent(false)
         , mBoardStylusTool(UBToolController::toolController()->stylusTool())
@@ -86,18 +85,19 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     QString backgroundStyle = "QWidget {background-color: rgba(127, 127, 127, 0)}";
     mTransparentDrawingView->setStyleSheet(backgroundStyle);
 
-    mTransparentDrawingScene = new UBGraphicsScene(0, false);
-    // Initialize the scene context with the live drawing controller so that
-    // inputDevicePress / inputDeviceMove / updateGroupButtonState do not
-    // dereference a null drawingController.  (#135)
-    {
-        UBSceneContext ctx;
-        ctx.drawingController = UBToolController::toolController();
-        ctx.boardController = UBApplication::boardController;
-        mTransparentDrawingScene->setSceneContext(ctx);
-    }
-    mTransparentDrawingView->setScene(mTransparentDrawingScene);
-    mTransparentDrawingScene->setDrawingMode(true);
+    // #393 brick 3: the overlay no longer creates/owns its own scene. It renders
+    // the board's ACTIVE scene so desktop strokes are shared with the board page
+    // (ADR-0007 R1). setScene() is done in showWindow() — the active scene may
+    // not exist yet at construction (this controller is built early). The board
+    // scene already carries a valid UBSceneContext (set by UBBoardController), so
+    // no setSceneContext here; and the see-through look is provided by the
+    // overlay's own bIsDesktop drawBackground + the per-tool alpha brush, not by
+    // forcing a scene-wide drawing mode.
+
+    // #393 brick 3: when the board swaps its active scene (page navigation), the
+    // overlay must follow if it is visible.
+    connect(UBApplication::boardController, &UBBoardController::activeSceneChanged,
+            this, &UBDesktopAnnotationController::onActiveSceneChanged);
 
     if (UBPlatformUtils::hasVirtualKeyboard())
     {
@@ -115,8 +115,10 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     connect(UBToolController::toolController(), &UBToolController::stylusToolChanged, this, &UBDesktopAnnotationController::stylusToolChanged);
 
     connect(UBApplication::mainWindow->actionEraseDesktopAnnotations, &QAction::triggered, this, [this]() {
-        if (mTransparentDrawingScene)
-            mTransparentDrawingScene->clearContent(UBGraphicsScene::clearAnnotations);
+        // #393 brick 3: erase annotations on the shared board page (same as the
+        // board's own "erase annotations"), not on a private overlay scene.
+        if (boardScene())
+            boardScene()->clearContent(UBGraphicsScene::clearAnnotations);
     });
 
     // --- V2 QML Desktop Toolbar (issue #336) ---
@@ -133,8 +135,34 @@ UBDesktopAnnotationController::~UBDesktopAnnotationController()
     // Top-level windows with no QObject parent → delete explicitly.
     delete mToolbarQml;
     delete mPropsBarQml;
-    delete mTransparentDrawingScene;
+    // #393 brick 3: the overlay does NOT own the board scene — detach before
+    // deleting the view, and never delete the scene (owned by the board).
+    if (mTransparentDrawingView)
+        mTransparentDrawingView->setScene(nullptr);
     delete mTransparentDrawingView;
+}
+
+UBGraphicsScene* UBDesktopAnnotationController::boardScene() const
+{
+    // #393 brick 3: the shared board scene the overlay renders. Fetched fresh —
+    // it changes on page navigation (see onActiveSceneChanged).
+    return UBApplication::boardController
+               ? UBApplication::boardController->activeScene()
+               : nullptr;
+}
+
+void UBDesktopAnnotationController::onActiveSceneChanged()
+{
+    // #393 brick 3: the board swapped its active scene (page navigation). If the
+    // overlay is up, re-point its view at the new scene and re-apply the
+    // see-through brush / mask so the desktop keeps showing the current page.
+    if (!mTransparentDrawingView || !mTransparentDrawingView->isVisible())
+        return;
+    mTransparentDrawingView->setScene(boardScene());
+    updateBackground();
+#ifdef Q_OS_LINUX
+    updateMask(true);
+#endif
 }
 
 
@@ -347,6 +375,14 @@ void UBDesktopAnnotationController::showWindow()
     if (mTransparentDrawingView)
         mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 
+    // #393 brick 3: render the board's ACTIVE scene (shared), so desktop strokes
+    // land on the board page and vice-versa. Done here (not in the ctor) because
+    // the active scene exists by now. The overlay's bIsDesktop drawBackground
+    // shows the desktop through regardless of the page's background kind, so we
+    // do NOT mutate (or persist) the page kind here.
+    if (mTransparentDrawingView)
+        mTransparentDrawingView->setScene(boardScene());
+
     showToolbar();
 
     updateBackground();
@@ -447,8 +483,12 @@ void UBDesktopAnnotationController::updateBackground()
 #endif
     }
 
-    if (mTransparentDrawingScene && mTransparentDrawingScene->backgroundBrush() != newBrush)
-        mTransparentDrawingScene->setBackgroundBrush(newBrush);
+    // #393 brick 3: apply the alpha-0/alpha-1 click-through brush to the SHARED
+    // board scene (what the overlay renders). This is a transient display brush
+    // (#390), not the persisted background kind, so it does not modify the page.
+    UBGraphicsScene* scene = boardScene();
+    if (scene && scene->backgroundBrush() != newBrush)
+        scene->setBackgroundBrush(newBrush);
 }
 
 
@@ -467,6 +507,10 @@ void UBDesktopAnnotationController::hideWindow()
         // desktop mode. Drop the always-on-top hint while hidden; showWindow()
         // re-asserts the window flags on the next entry.
         mTransparentDrawingView->setWindowFlag(Qt::WindowStaysOnTopHint, false);
+        // #393 brick 3: detach from the shared board scene while hidden so the
+        // overlay never holds a scene it doesn't own (avoids dangling if the
+        // active scene is later freed/swapped). showWindow() re-points it.
+        mTransparentDrawingView->setScene(nullptr);
     }
 
     // #390: restore the board tool that was active before entering desktop mode.
@@ -660,7 +704,8 @@ void UBDesktopAnnotationController::updateMask(bool bTransparent)
 
         annotationPainter.setTransform(trans);
 
-        QList<QGraphicsItem*> allItems = mTransparentDrawingScene->items();
+        QList<QGraphicsItem*> allItems = boardScene() ? boardScene()->items()
+                                                      : QList<QGraphicsItem*>();
 
         for(int i = 0; i < allItems.size(); i++)
         {
@@ -689,7 +734,7 @@ void UBDesktopAnnotationController::updateMask(bool bTransparent)
 
 void UBDesktopAnnotationController::refreshMask()
 {
-    if (mTransparentDrawingScene && mTransparentDrawingView->isVisible()) {
+    if (boardScene() && mTransparentDrawingView->isVisible()) {
         if(mIsFullyTransparent
                 || UBToolController::toolController()->stylusTool() == UBStylusTool::Selector
                 //Needed to work correctly when another actions on stylus are checked

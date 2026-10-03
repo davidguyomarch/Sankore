@@ -93,11 +93,18 @@ class UBDesktopAnnotationController : public QObject
         QPixmap getScreenPixmap();
 
         UBBoardView* mTransparentDrawingView;
-        UBGraphicsScene* mTransparentDrawingScene;
+        // #393 brick 3: the overlay no longer owns a scene — it renders the
+        // board's active scene (shared), so a stroke drawn on the desktop is a
+        // stroke on the board page. Convenience accessor (fetched fresh — the
+        // active scene changes on page navigation).
+        UBGraphicsScene* boardScene() const;
 
     private slots:
         void onTransparentWidgetResized();
         void refreshMask();
+        // #393 brick 3: the board's active scene was swapped (page navigation);
+        // if the overlay is visible, re-point its view at the new scene.
+        void onActiveSceneChanged();
 
     private:
         void updateMask(bool bTransparent);
