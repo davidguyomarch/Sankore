@@ -230,6 +230,11 @@ void UBBoardController::setupViews()
     mControlContainer->setObjectName("ubBoardControlContainer");
     mMainWindow->addBoardWidget(mControlContainer);
 
+    // #393 brick 2: set up translucency capability now, before the window is
+    // first shown (Windows requirement). The board stays visually opaque until a
+    // page becomes SeeThrough (applySeeThroughPresentation flips the brush/cache).
+    enableTranslucentHostChain();
+
     connect(mControlView, &UBBoardView::resized, this, &UBBoardController::boardViewResized);
 
     mDisplayView = new UBBoardView(this, UBItemLayerType::FixedBackground, UBItemLayerType::Tool, 0);
@@ -370,26 +375,27 @@ void UBBoardController::applySeeThroughPresentation()
 
     const bool seeThrough = mActiveScene->isSeeThrough();
 
-    // Idempotency: WA_TranslucentBackground already reflects the current state.
-    if (mControlView->testAttribute(Qt::WA_TranslucentBackground) == seeThrough)
-        return;
-
-    QWidget* central = mMainWindow ? mMainWindow->centralWidget() : nullptr;
-
+    // #413 fix (VM: board stayed white). The #408 spike worked because
+    // WA_TranslucentBackground was set in setupViews() BEFORE the window was
+    // ever shown — on Windows the attribute must be present at the first native
+    // realization, setting it on an already-shown window leaves the surface
+    // opaque. So the translucency ATTRIBUTES are now set once at startup (see
+    // setupViews → enableTranslucentHostChain), unconditionally; here we only
+    // flip the RUNTIME bits that make the already-translucent-capable window
+    // actually show through:
+    //   - the scene background brush (opaque white default → the white we saw;
+    //     alpha-1 grey is see-through yet hit-testable, like the overlay #390),
+    //   - the view cache (CacheNone so the opaque fill is not cached),
+    //   - drawBackground already defers for a see-through page.
     mControlView->setCacheMode(seeThrough ? QGraphicsView::CacheNone
                                           : QGraphicsView::CacheBackground);
-    mControlView->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-    mControlView->viewport()->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
     mControlView->viewport()->setAutoFillBackground(!seeThrough);
 
-    if (mControlContainer)
-        mControlContainer->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-    if (central)
-        central->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
-    if (mMainWindow)
-        mMainWindow->setAttribute(Qt::WA_TranslucentBackground, seeThrough);
+    if (seeThrough)
+        mActiveScene->setBackgroundBrush(QBrush(QColor(127, 127, 127, 1)));
+    else
+        mActiveScene->setBackgroundBrush(Qt::NoBrush);
 
-    // Force the cached opaque fill to be dropped / rebuilt on the next paint.
     mControlView->resetCachedContent();
     mControlView->viewport()->update();
 
@@ -398,10 +404,35 @@ void UBBoardController::applySeeThroughPresentation()
     {
         QTextStream(&logFile) << "[SEETHROUGH] control view seeThrough=" << seeThrough
                               << " viewTranslucent=" << mControlView->testAttribute(Qt::WA_TranslucentBackground)
+                              << " vpTranslucent=" << mControlView->viewport()->testAttribute(Qt::WA_TranslucentBackground)
                               << " cacheMode=" << (int)mControlView->cacheMode()
+                              << " sceneBrushAlpha=" << mActiveScene->backgroundBrush().color().alpha()
+                              << " mwTranslucent=" << (mMainWindow ? mMainWindow->testAttribute(Qt::WA_TranslucentBackground) : -1)
                               << " mwState=" << (int)(mMainWindow ? (int)mMainWindow->windowState() : -1)
                               << "\n";
     }
+}
+
+void UBBoardController::enableTranslucentHostChain()
+{
+    // #413 fix: make the control view + its whole host chain translucent-CAPABLE
+    // at startup, before the window is first shown, so Windows configures a
+    // translucent native surface. This does NOT make the board see-through on
+    // its own — the opaque page fill (drawBackground) and the default scene
+    // brush keep it looking normal until a page becomes SeeThrough, at which
+    // point applySeeThroughPresentation() flips the brush/cache. Setting the
+    // attribute here (not at toggle time) is the key difference from the first
+    // attempt, which set it on an already-shown window and stayed opaque.
+    if (!mControlView)
+        return;
+    mControlView->setAttribute(Qt::WA_TranslucentBackground, true);
+    mControlView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
+    if (mControlContainer)
+        mControlContainer->setAttribute(Qt::WA_TranslucentBackground, true);
+    if (mMainWindow && mMainWindow->centralWidget())
+        mMainWindow->centralWidget()->setAttribute(Qt::WA_TranslucentBackground, true);
+    if (mMainWindow)
+        mMainWindow->setAttribute(Qt::WA_TranslucentBackground, true);
 }
 
 

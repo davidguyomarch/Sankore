@@ -303,6 +303,9 @@ class UBBoardController : public UBDocumentContainer, public IUBBoardContext
         // presentation on the control view + its host chain, driven by the active
         // page's background kind. No-op change when the kind is unchanged.
         void applySeeThroughPresentation();
+        // #393 brick 2: make the control view + host chain translucent-capable
+        // at startup (Windows needs WA_TranslucentBackground before first show).
+        void enableTranslucentHostChain();
         void updatePageSizeState();
         void saveViewState();
         void adjustDisplayViews();
