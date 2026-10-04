@@ -73,9 +73,9 @@ void UBAppController::setActiveMode(int mode)
     case Documents:
         UBApplication::app()->showDocument();
         break;
-    case Desktop:
-        UBApplication::applicationController->showDesktop();
-        break;
+    // #407: Desktop (mode 2) is no longer reachable via the mode tabs — it is
+    // entered as a page background kind (setBackgroundSeeThrough → showDesktop).
+    // The enum value is kept for syncMode arithmetic; no tab writes it here.
     }
 
     emit activeModeChanged();
@@ -134,44 +134,6 @@ void UBAppController::setBackgroundDark()
 {
     UBApplication::boardController->changeBackground(true, false);
     emit backgroundChanged();
-}
-
-void UBAppController::setBackgroundCrossedLight()
-{
-    UBApplication::boardController->changeBackground(false, true);
-    emit backgroundChanged();
-}
-
-void UBAppController::setBackgroundCrossedDark()
-{
-    UBApplication::boardController->changeBackground(true, true);
-    emit backgroundChanged();
-}
-
-void UBAppController::setBackgroundPlainLight()
-{
-    UBApplication::boardController->changeBackground(false, false);
-    emit backgroundChanged();
-}
-
-void UBAppController::setBackgroundPlainDark()
-{
-    UBApplication::boardController->changeBackground(true, false);
-    emit backgroundChanged();
-}
-
-void UBAppController::toggleGrid()
-{
-    if (UBApplication::isClosing() || !UBApplication::boardController)
-        return;
-    auto* scene = UBApplication::boardController->activeScene();
-    if (scene)
-    {
-        bool dark = scene->isDarkBackground();
-        bool crossed = !scene->isCrossedBackground();
-        UBApplication::boardController->changeBackground(dark, crossed);
-        emit backgroundChanged();
-    }
 }
 
 // --- Undo/Redo ---
