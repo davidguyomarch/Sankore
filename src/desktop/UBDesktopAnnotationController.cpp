@@ -551,7 +551,6 @@ void UBDesktopAnnotationController::goToUniboard()
     hideWindow();
 
     UBPlatformUtils::setDesktopMode(false);
-    UBToolController::toolController()->setInDesktopMode(false);
 
     emit restoreUniboard();
 }
