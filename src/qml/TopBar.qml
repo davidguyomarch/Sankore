@@ -40,7 +40,7 @@ Rectangle {
         anchors.rightMargin: 12
         spacing: 4
 
-        // === Mode Tabs ===
+        // === Group VUE — full-screen views (exclusive): Tableau / Documents ===
         Rectangle {
             Layout.preferredHeight: 34
             Layout.preferredWidth: modeTabs.implicitWidth + 4
@@ -106,17 +106,17 @@ Rectangle {
             }
         }
 
-        // === Separator ===
+        // === Separator (VUE | ACTIONS) ===
         ToolbarSeparator {}
 
-        // === Undo/Redo ===
+        // === Group ACTIONS — undo/redo (global one-shot actions) ===
         ToolbarButton { icon: "arrow-counter-clockwise"; tooltip: "Annuler"; enabled: appController.canUndo; onClicked: appController.undo() }
         ToolbarButton { icon: "arrow-clockwise"; tooltip: "Refaire"; enabled: appController.canRedo; onClicked: appController.redo() }
 
-        // === Separator ===
+        // === Separator (ACTIONS | PAGE) ===
         ToolbarSeparator {}
 
-        // === Page Navigation ===
+        // === Group PAGE — navigate + quick add (works with the sidebar closed) ===
         ToolbarButton { icon: "caret-left"; tooltip: "Page précédente"; enabled: pageController.canGoBack; onClicked: pageController.previousPage() }
 
         Text {
@@ -132,10 +132,10 @@ Rectangle {
         ToolbarButton { icon: "plus"; tooltip: "Nouvelle page"; onClicked: pageController.addPage() }
         ToolbarButton { icon: "copy"; tooltip: "Dupliquer"; onClicked: pageController.duplicatePage() }
 
-        // === Separator ===
+        // === Separator (PAGE | FOND) ===
         ToolbarSeparator {}
 
-        // === Background ===
+        // === Group FOND — page background (persisted page property) ===
         ToolbarButton { icon: "sun"; tooltip: "Fond clair"; active: !appController.isDarkBackground; onClicked: appController.setBackgroundLight() }
         ToolbarButton { icon: "moon"; tooltip: "Fond sombre"; active: appController.isDarkBackground; onClicked: appController.setBackgroundDark() }
 
@@ -158,10 +158,13 @@ Rectangle {
             id: gridMenu
         }
 
-        // === Spacer ===
+        // === Spacer (pushes the app actions to the right edge) ===
         Item { Layout.fillWidth: true }
 
-        // === Right Actions ===
+        // === Separator (| APPLICATION) ===
+        ToolbarSeparator {}
+
+        // === Group APPLICATION — preferences / quit ===
         ToolbarButton { icon: "gear"; tooltip: "Préférences"; onClicked: appController.openPreferences() }
         ToolbarButton { icon: "sign-out"; tooltip: "Quitter"; onClicked: appController.quit() }
     }
