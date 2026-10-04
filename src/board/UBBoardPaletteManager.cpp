@@ -91,7 +91,6 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPageNavQml(nullptr)
     , mDrawingPropsBarQml(nullptr)
     , mShapesPaletteV2Qml(nullptr)
-    , mLibraryPanelQml(nullptr)
     , mLibraryController(nullptr)
     , mLinkPalette(0)
     , mAddItemPalette(0)
@@ -107,9 +106,9 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
 
 UBBoardPaletteManager::~UBBoardPaletteManager()
 {
-    // Destroy QML widgets BEFORE their controllers are deleted.
-    delete mLibraryPanelQml;   // #258 — delete before mLibraryController (QObject-parented)
-    mLibraryPanelQml = nullptr;
+    // Destroy QML widgets BEFORE their controllers are deleted. The Library view
+    // lives inside mPageNavQml (LeftSidebar.qml), deleted below; its controller
+    // (mLibraryController) is QObject-parented to this manager.
     delete mShapesPaletteV2Qml;
     mShapesPaletteV2Qml = nullptr;
     delete mDrawingPropsBarQml;
@@ -297,17 +296,23 @@ void UBBoardPaletteManager::setupPalettes()
     mTopBarQml->show();
     mTopBarQml->raise();
 
-    // --- QML Page Navigator Sidebar (Issue #121 Step 4) ---
+    // --- QML Left Sidebar: Pages ⇄ Bibliothèque toggle (#258 / #121 Step 4) ---
+    // One left panel hosting LeftSidebar.qml, which embeds PageNavigator and
+    // LibraryPanel and shows one at a time via its header toggle. mPageNavQml is
+    // reused as the host (kept its name to minimise churn in the layout/show-hide
+    // code below). Both controllers are injected as context properties.
+    mLibraryController = new UBLibraryController(this);
     mPageNavQml = new QQuickWidget(mContainer);
     mPageNavQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mPageNavQml->setClearColor(Qt::transparent);
     mPageNavQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mPageNavQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mPageNavQml->rootContext()->setContextProperty("pageController", mPageController);
-    mPageNavQml->setSource(QUrl("qrc:/qml/PageNavigator.qml"));
+    mPageNavQml->rootContext()->setContextProperty("libraryController", mLibraryController);
+    mPageNavQml->setSource(QUrl("qrc:/qml/LeftSidebar.qml"));
     if (mPageNavQml->status() == QQuickWidget::Error)
         for (const auto& e : mPageNavQml->errors())
-            qWarning() << "PageNavigator QML error:" << e.toString();
+            qWarning() << "LeftSidebar QML error:" << e.toString();
     int sidebarWidth = 180;
     mPageNavQml->setFixedSize(sidebarWidth, mContainer->height() - 48 - 52); // between top bar and bottom bar
     mPageNavQml->move(0, 48);
@@ -401,33 +406,10 @@ void UBBoardPaletteManager::setupPalettes()
         }
     });
 
-    // --- QML Media Library panel (right sidebar, #258) ---
-    // Restores the Library that was dropped in the QML V2 migration. The
-    // controller/model already existed and are unit-tested (tst_UBLibraryModel);
-    // this wires the QML view and feeds it from the existing UBFeaturesController
-    // scan. Mirrors the PageNavigator hosting pattern, placed on the RIGHT edge.
-    mLibraryController = new UBLibraryController(this);
-    mLibraryPanelQml = new QQuickWidget(mContainer);
-    mLibraryPanelQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mLibraryPanelQml->setClearColor(Qt::transparent);
-    mLibraryPanelQml->setAttribute(Qt::WA_AlwaysStackOnTop);
-    mLibraryPanelQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
-    mLibraryPanelQml->rootContext()->setContextProperty("libraryController", mLibraryController);
-    mLibraryPanelQml->setSource(QUrl("qrc:/qml/LibraryPanel.qml"));
-    if (mLibraryPanelQml->status() == QQuickWidget::Error)
-        for (const auto& e : mLibraryPanelQml->errors())
-            qWarning() << "LibraryPanel QML error:" << e.toString();
-    {
-        int libW = 200;
-        mLibraryPanelQml->setFixedSize(libW, mContainer->height() - 48 - 52);
-        mLibraryPanelQml->move(mContainer->width() - libW, 48);
-        mLibraryPanelQml->show();
-        mLibraryPanelQml->raise();
-    }
-
-    // Feed the panel from the existing features controller. The scan is async
-    // (UBFeaturesController::scanFS runs on a thread); repopulate on scanFinished,
-    // not just once — otherwise the tree is empty/partial at startup. #258.
+    // Feed the Library (embedded in the left sidebar) from the existing features
+    // controller. The scan is async (UBFeaturesController::scanFS runs on a
+    // thread); repopulate on scanFinished, not just once — otherwise the tree is
+    // empty/partial at startup. #258.
     if (mpFeaturesWidget && mpFeaturesWidget->getFeaturesController())
     {
         UBFeaturesController* fc = mpFeaturesWidget->getFeaturesController();
@@ -613,14 +595,6 @@ void UBBoardPaletteManager::containerResized()
         mPageNavQml->move(0, 48);
         if (isBoardMode) { mPageNavQml->show(); mPageNavQml->raise(); }
     }
-    if (mLibraryPanelQml)   // #258: right sidebar
-    {
-        int libW = 200;
-        int libHeight = mContainer->height() - 48 - 52;
-        mLibraryPanelQml->setFixedSize(libW, qMax(100, libHeight));
-        mLibraryPanelQml->move(mContainer->width() - libW, 48);
-        if (isBoardMode) { mLibraryPanelQml->show(); mLibraryPanelQml->raise(); }
-    }
     if (mDrawingPropsBarQml)
     {
         int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
@@ -771,8 +745,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->show();
                 if (mPageNavQml)
                     mPageNavQml->show();
-                if (mLibraryPanelQml)   // #258
-                    mLibraryPanelQml->show();
                 if (mDrawingPropsBarQml && mToolController && mToolController->showDrawingProps())
                     mDrawingPropsBarQml->show();
 
@@ -816,8 +788,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->hide();
                 if (mPageNavQml)
                     mPageNavQml->hide();
-                if (mLibraryPanelQml)   // #258
-                    mLibraryPanelQml->hide();
                 if (mDrawingPropsBarQml)
                     mDrawingPropsBarQml->hide();
                 if (mShapesPaletteV2Qml)
@@ -893,8 +863,6 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->hide();
                 if (mPageNavQml)
                     mPageNavQml->hide();
-                if (mLibraryPanelQml)   // #258
-                    mLibraryPanelQml->hide();
                 if (mDrawingPropsBarQml)
                     mDrawingPropsBarQml->hide();
                 if (mShapesPaletteV2Qml)

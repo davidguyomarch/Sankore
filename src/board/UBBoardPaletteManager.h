@@ -117,8 +117,9 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mPageNavQml;
         QQuickWidget *mDrawingPropsBarQml;
         QQuickWidget *mShapesPaletteV2Qml;
-        // #258: QML V2 media Library (right sidebar) + its controller.
-        QQuickWidget *mLibraryPanelQml;
+        // #258: media Library controller. The Library VIEW is embedded in the
+        // left sidebar (LeftSidebar.qml, hosted by mPageNavQml), toggled with the
+        // Pages view — no separate widget.
         UBLibraryController *mLibraryController;
 
         UBCreateLinkPalette* mLinkPalette;
