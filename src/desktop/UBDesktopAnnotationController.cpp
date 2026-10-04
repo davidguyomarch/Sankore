@@ -99,6 +99,13 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     connect(UBApplication::boardController, &UBBoardController::activeSceneChanged,
             this, &UBDesktopAnnotationController::onActiveSceneChanged);
 
+    // #421: let the shape factory also receive THIS overlay view's mouse signals
+    // so shapes can be created/sized when drawing on the desktop (the factory is
+    // otherwise bound only to the control view, so a shape drag on the overlay
+    // created nothing — only stray ink, now also fixed in UBBoardView). The
+    // factory maps coordinates via the sending view (activeView()).
+    UBApplication::boardController->shapeFactory().connectView(mTransparentDrawingView);
+
     if (UBPlatformUtils::hasVirtualKeyboard())
     {
         connect(UBApplication::boardController->paletteManager()->mKeyboardPalette, &UBKeyboardPalette::keyboardActivated,

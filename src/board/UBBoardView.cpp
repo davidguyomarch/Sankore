@@ -1287,6 +1287,17 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
             qDebug() << "on est dans le cas du pot de peinture, on va remplir l'objet si possible";
             UBApplication::boardController->shapeFactory().changeFillColor(mapToScene(mMouseDownPos));             
         }
+        else if (currentTool == UBStylusTool::Drawing)
+        {
+            // #421: the Shapes tool is driven entirely by UBShapeFactory (via the
+            // mousePress/Move/Release SIGNALS emitted at the top of these
+            // handlers). It must NOT also feed the scene's freehand ink path —
+            // otherwise dragging to size a shape lays down a trail of pen dots
+            // ("many circles") on top of (or, on the desktop overlay where the
+            // factory isn't connected, instead of) the shape. So accept the
+            // event here and do nothing: the factory owns shape creation.
+            event->accept();
+        }
         else
         {
             if(UBToolController::toolController()->mActiveRuler==nullptr)
@@ -1423,6 +1434,13 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
       {
           scene()->inputDeviceMove(mapToScene(UBGeometryUtils::pointConstrainedInRect(event->pos(), rect())), mMouseButtonIsPressed);
       }
+      event->accept ();
+    }
+  else if (currentTool == UBStylusTool::Drawing)
+    {
+      // #421: do NOT feed the freehand ink path while sizing a shape — the
+      // UBShapeFactory resizes the shape via the mouseMove signal. Without this,
+      // the drag also painted a trail of pen dots ("many circles").
       event->accept ();
     }
   else

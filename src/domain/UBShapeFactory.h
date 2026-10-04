@@ -20,6 +20,13 @@ public:
     UBShapeFactory();
     void init();
 
+    // #421: also drive shape creation from another view's mouse signals (the
+    // desktop overlay, which shares the board scene since #414). Without this
+    // the factory only listened to the control view, so dragging a shape on the
+    // overlay created nothing. The handlers map coordinates using the view that
+    // actually sent the event (see activeView()).
+    void connectView(UBBoardView* view);
+
     static bool isShape(QGraphicsItem *item);
     static void desactivateEditionMode(QGraphicsItem *item);
     static bool isInEditMode(QGraphicsItem *item);
@@ -130,6 +137,10 @@ private:
 
 protected:
     UBAbstractGraphicsItem *instanciateCurrentShape();
+
+    // #421: the view that sent the current mouse event (control view OR desktop
+    // overlay) — used for mapToScene/scene(). Falls back to mBoardView.
+    UBBoardView* activeView();
 
 };
 
