@@ -14,12 +14,61 @@ Vérifier ici avant de toucher au code desktop.
 
 | Élément | Classe / fichier | Rôle |
 |---------|------------------|------|
-| Contrôleur du mode | `UBDesktopAnnotationController` (`src/desktop/`) | Possède l'overlay, la scène, la toolbar QML, les captures, le retour au tableau |
+| Contrôleur du mode | `UBDesktopAnnotationController` (`src/desktop/`) | Possède l'overlay (vue + toolbar QML + captures + retour au tableau). **Ne possède plus de scène** (#414). |
 | Instance unique | `UBApplicationController::mUninoteController` | Créée une fois ; accessible via `UBApplication::applicationController->uninotesController()` |
-| Overlay plein écran | `mTransparentDrawingView` (`UBBoardView`) | Top-level `Qt::Window`, frameless, always-on-top, translucide |
-| Scène de l'overlay | `mTransparentDrawingScene` (`UBGraphicsScene`) | `setDrawingMode(true)`, brush transparent |
+| Overlay plein écran | `mTransparentDrawingView` (`UBBoardView`, `bIsDesktop=true`) | Top-level `Qt::Window`, frameless, always-on-top, translucide — **la fenêtre qui présente** (voir ADR-0007 / #397) |
+| **Scène rendue par l'overlay** | **`UBApplication::boardController->activeScene()`** (la scène **board partagée**) | **#414 : plus de scène overlay privée.** Un trait fait au bureau EST un trait de la page board, et vice-versa. Accès via le helper `boardScene()`. |
 | Barre d'outils | `mToolbarQml` (`QQuickWidget`) → `DesktopToolbar.qml` | Fenêtre **top-level** (bas-centre) ; overlay = **transient parent** |
 | Outil / couleurs | `UBToolController::toolController()` (singleton) | Partagé avec le mode tableau |
+
+## Surface de dessin UNIFIÉE (#393 / #414, ADR-0007) — à lire avant tout
+
+Depuis **#414 (brique 3 de #393)**, board et bureau partagent **une seule scène
+de dessin**. C'est l'état cible d'ADR-0007 (R1). Points structurants :
+
+- **L'overlay rend la scène board active** (`boardController->activeScene()`), pas
+  une scène séparée. L'ancienne `mTransparentDrawingScene` **n'existe plus**. Donc
+  un trait tracé en mode bureau est un item de la page board (visible au tableau,
+  et persisté avec la page), et réciproquement.
+- **L'overlay ne possède pas la scène** : ne jamais la `delete` dans
+  `UBDesktopAnnotationController`. `setScene(boardScene())` dans `showWindow()`
+  (pas dans le constructeur — la scène active peut ne pas exister encore),
+  `setScene(nullptr)` dans `hideWindow()`. `onActiveSceneChanged()` suit la
+  navigation de page quand l'overlay est visible.
+- **Une scène, deux vues** (board `controlView` + overlay) : Qt le supporte
+  nativement. L'input router (`UBInputRouter`) travaille en coordonnées scène,
+  sans hypothèse de vue unique. `drawBackground` est **par vue** : l'overlay
+  (`bIsDesktop`) défère à `QGraphicsView::drawBackground` (pas de fond opaque,
+  bureau visible) ; la board view peint son fond normal.
+
+### Transparence : l'overlay, JAMAIS la fenêtre principale (mur #397)
+
+**Décision dure, mesurée (#413, #408) — ne pas la rejouer :** rendre la **fenêtre
+principale** translucide pour voir le bureau à travers **ne fonctionne pas** sur le
+backend software de la VM — le trait est *peint mais non présenté* (classe #397 ;
+`repaint()`/`requestUpdate()` ne présentent pas). C'est pourquoi **l'overlay reste
+la fenêtre qui présente** : fenêtre top-level dédiée et simple, elle composite
+correctement. La brique 4 « fenêtre unique / fenêtre board plein écran translucide »
+(#415) a été **abandonnée** pour cette raison. Ne JAMAIS poser
+`WA_TranslucentBackground` sur `controlView`/`mMainWindow`.
+
+### See-through = flip transitoire NON persisté
+
+Le bureau est vu à travers l'overlay parce que, pendant le mode bureau, la scène
+partagée est mise en **see-through transitoire** via `scene->setDrawingMode(true)`
+dans `showWindow()`, restauré (`setDrawingMode(mSavedSeeThrough)`) dans
+`hideWindow()` et re-appliqué dans `onActiveSceneChanged()`. **`setDrawingMode()`
+agit au niveau du renderer et n'appelle PAS `setModified()`** → le see-through est
+**d'affichage uniquement, jamais sérialisé**. Ne pas remplacer ce flip par
+`scene->setBackgroundKind(SeeThrough)` : ce dernier marque la scène modifiée et
+risque de **persister** une page en see-through par effet de bord. Le brush
+alpha-0/alpha-1 (click-through Windows, #390) est posé sur la scène partagée par
+`updateBackground()` et reste lui aussi d'affichage (non persisté).
+
+> Le **modèle** de fond, lui (type `BackgroundKind { Opaque | SeeThrough | Image }`,
+> axe orthogonal au ruling), est défini par #412 / ADR-0009 et EST persisté quand
+> l'utilisateur choisit explicitement un fond. À ne pas confondre avec le flip
+> transitoire ci-dessus, qui ne touche pas le kind persisté.
 
 ## Machine à états de présentation (#399, ADR-0008 D2)
 
@@ -57,12 +106,17 @@ anciens signaux `desktopMode(bool)` / `mainModeChanged(MainMode)` (supprimés).
 4. `toolController()->setInDesktopMode(true)`. **Ne force pas Selector** : c'est
    `showWindow()` qui pose un **Pen** déterministe à l'entrée (#390).
 
-**`showWindow()`** : affiche la toolbar, pose l'outil **Pen** (sauve l'outil
-tableau dans `mBoardStylusTool`), applique la transparence sur l'overlay
-(Windows : `WA_TranslucentBackground` + brush scène alpha-1 pour voir le vrai
-bureau à travers tout en recevant les clics, cf #241/#390), `showFullScreen()`
-(Linux : `show()` + `updateMask`), `UBPlatformUtils::setDesktopMode(true)`, remet
-la toolbar au premier plan.
+**`showWindow()`** : **pointe l'overlay sur la scène board partagée**
+(`setScene(boardScene())`) et met cette scène en **see-through transitoire**
+(`setDrawingMode(true)`, non persisté — voir la section « Surface unifiée »),
+affiche la toolbar, pose l'outil **Pen** (sauve l'outil tableau dans
+`mBoardStylusTool`), applique la transparence sur l'overlay (Windows :
+`WA_TranslucentBackground` + brush scène alpha-1 pour voir le vrai bureau à
+travers tout en recevant les clics, cf #241/#390), `showFullScreen()` (Linux :
+`show()` + `updateMask`), `UBPlatformUtils::setDesktopMode(true)`, remet la
+toolbar au premier plan. `hideWindow()` fait l'inverse : restaure le see-through
+réel de la page (`setDrawingMode(mSavedSeeThrough)`), détache la scène
+(`setScene(nullptr)`), restaure l'outil tableau (`mBoardStylusTool`).
 
 **Sortie** — le bouton « Retour au tableau » de la toolbar appelle
 `UBDesktopAnnotationController::goToUniboard()` :
