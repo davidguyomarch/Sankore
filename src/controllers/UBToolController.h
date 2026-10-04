@@ -147,10 +147,6 @@ public:
     // --- Geometric instrument tracking ---
     UBAbstractDrawRuler* mActiveRuler = nullptr;
 
-    // --- Desktop mode ---
-    void setInDesktopMode(bool mode) { m_isDesktopMode = mode; }
-    bool isInDesktopMode() const { return m_isDesktopMode; }
-
 public slots:
     void toggleShapes();
     void undo();
@@ -186,7 +182,6 @@ private:
     int m_activeTool;
     UBStylusTool::Enum m_latestDrawingTool;
     bool m_shapesVisible;
-    bool m_isDesktopMode;
     UBSettings* mSettings;
 
     // #319: shape tool stroke color/width (the shape factory stores the color

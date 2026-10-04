@@ -44,7 +44,6 @@ UBToolController::UBToolController(QObject* parent)
     , m_activeTool(Pen)
     , m_latestDrawingTool((UBStylusTool::Enum)-1)
     , m_shapesVisible(false)
-    , m_isDesktopMode(false)
     , mSettings(UBSettings::settings())
 {
     connect(mSettings, &UBSettings::colorContextChanged, this, &UBToolController::colorPaletteChanged);
