@@ -188,6 +188,8 @@ private:
     // and width but not the palette indices the DrawingPropsBar binds to).
     int m_shapeColorIndex = 0;
     int m_shapeWidthIndex = 1;
+    // #429-followup: shape FILL color index (fill tool, separate from stroke).
+    int m_shapeFillColorIndex = 0;
 
     // #318: currently selected shape action, for the palette highlight.
     QString m_currentShape;

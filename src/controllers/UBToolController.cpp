@@ -432,6 +432,8 @@ int UBToolController::currentColorIndex() const
 {
     if (m_activeTool == Drawing)   // #319: shape stroke color
         return m_shapeColorIndex;
+    if (m_activeTool == ChangeFill)   // #429-followup: shape FILL color
+        return m_shapeFillColorIndex;
     if (m_activeTool == Marker)
         return markerColorIndex();
     return penColorIndex();
@@ -449,6 +451,25 @@ void UBToolController::setCurrentColorIndex(int index)
             && UBApplication::boardController)
         {
             UBApplication::boardController->shapeFactory().setStrokeColor(palette.at(index));
+        }
+        emit currentColorIndexChanged();
+        emit currentColorsChanged();
+        return;
+    }
+
+    if (m_activeTool == ChangeFill)
+    {
+        // #429-followup: in fill mode the palette picks the FILL color. Store it
+        // and push it to the factory (solid fill) so the NEXT bucket click uses
+        // it — no retroactive recolor of already-filled shapes.
+        m_shapeFillColorIndex = index;
+        const QList<QColor> palette = penColors();
+        if (index >= 0 && index < palette.size()
+            && UBApplication::boardController)
+        {
+            auto& factory = UBApplication::boardController->shapeFactory();
+            factory.setFillType(UBShapeFactory::Full);
+            factory.setFillingFirstColor(palette.at(index));
         }
         emit currentColorIndexChanged();
         emit currentColorsChanged();
@@ -527,9 +548,12 @@ bool UBToolController::showDrawingProps() const
 {
     // #319: also show the color/width bar while a shape is being drawn (Drawing),
     // so shapes get the same stroke color + width controls as the Pen.
+    // #429-followup: also in fill mode (ChangeFill) — colours only, no widths —
+    // so the user can pick the fill colour from the bar (DrawingPropsBar hides
+    // the width group for ChangeFill).
     return (m_activeTool == Pen || m_activeTool == Marker
          || m_activeTool == Line || m_activeTool == Eraser
-         || m_activeTool == Drawing);
+         || m_activeTool == Drawing || m_activeTool == ChangeFill);
 }
 
 // --- Shapes ---
@@ -604,10 +628,10 @@ void UBToolController::activateFillTool()
     {
         auto& factory = UBApplication::boardController->shapeFactory();
         const QList<QColor> palette = penColors();
-        if (m_shapeColorIndex >= 0 && m_shapeColorIndex < palette.size())
+        if (m_shapeFillColorIndex >= 0 && m_shapeFillColorIndex < palette.size())
         {
             factory.setFillType(UBShapeFactory::Full);
-            factory.setFillingFirstColor(palette.at(m_shapeColorIndex));
+            factory.setFillingFirstColor(palette.at(m_shapeFillColorIndex));
         }
     }
     setActiveTool(ChangeFill);

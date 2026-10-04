@@ -342,8 +342,10 @@ void UBBoardPaletteManager::setupPalettes()
             return;
         }
         bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
-        // Eraser bar holds widths + 2 action buttons (erase ink / erase page, #249)
-        int barW = isEraser ? 210 : 280;
+        bool isFill = (mToolController->activeTool() == UBStylusTool::ChangeFill);
+        // Eraser bar holds widths + 2 action buttons (erase ink / erase page, #249);
+        // fill bar holds colours only (#429-followup) → narrower, like the eraser.
+        int barW = (isEraser || isFill) ? 210 : 280;
         mDrawingPropsBarQml->setFixedSize(barW, 48);
         // Apply rounded mask so clicks outside the rounded shape pass through
         QPainterPath path;

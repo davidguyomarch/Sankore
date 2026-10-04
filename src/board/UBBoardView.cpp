@@ -2082,6 +2082,9 @@ UBBoardView::setToolCursor (int tool)
     case UBStylusTool::Drawing:
       controlViewport->setCursor (Qt::CrossCursor);
       break;
+    case UBStylusTool::ChangeFill:   // #429-followup: paint-bucket cursor
+      controlViewport->setCursor (UBResources::resources ()->fillCursor);
+      break;
     default:
       //Q_ASSERT (false);
       //failsafe
