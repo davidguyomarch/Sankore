@@ -79,6 +79,10 @@ void UBResources::init()
     rotateCursor    = QCursor(QPixmap(":/images/cursors/rotate.png"), 16, 16);
     drawLineRulerCursor = QCursor(QPixmap(":/images/cursors/drawRulerLine.png"), 3, 12);
     ocrCursor           = QCursor(QPixmap(":/images/cursors/ocr.svg").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation), 4, 28);
+    // #429-followup: paint-bucket cursor for the fill tool (ChangeFill). Built
+    // from the Phosphor paint-bucket SVG, hotspot near the bucket's spout
+    // (bottom-left of the 32px glyph).
+    fillCursor          = QCursor(QPixmap(":/icons/phosphor/paint-bucket.svg").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation), 6, 26);
 }
 
 void UBResources::buildFontList()

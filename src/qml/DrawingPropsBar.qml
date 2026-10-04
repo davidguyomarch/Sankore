@@ -36,6 +36,9 @@ Rectangle {
 
     // Is this eraser mode? (show only widths, no colors)
     property bool isEraser: toolController.activeTool === 1
+    // #429-followup: fill mode (ChangeFill = 13) — show colors only, no widths
+    // (stroke width is irrelevant to the fill bucket).
+    property bool isFill: toolController.activeTool === 13
 
     Row {
         id: propsRow
@@ -77,15 +80,17 @@ Rectangle {
             }
         }
 
-        // === Separator ===
+        // === Separator (hidden in fill mode — no widths there) ===
         Rectangle {
+            visible: !root.isFill
             width: 1; height: 24
             color: themeManager.border
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        // === Widths ===
+        // === Widths (hidden in fill mode: #429-followup) ===
         Row {
+            visible: !root.isFill
             spacing: 4
             anchors.verticalCenter: parent.verticalCenter
 

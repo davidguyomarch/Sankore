@@ -67,6 +67,7 @@ class UBResources : public QObject
          QCursor rotateCursor;
 		 QCursor drawLineRulerCursor;
          QCursor ocrCursor;
+         QCursor fillCursor;   // #429-followup: paint-bucket cursor for ChangeFill
 };
 
 #endif /* UBRESOURCES_H_ */
