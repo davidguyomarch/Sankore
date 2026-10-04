@@ -57,10 +57,11 @@ Rectangle {
                 spacing: 2
 
                 Repeater {
+                    // #407: "Bureau" removed as a mode tab — it is now a page
+                    // background kind chosen from the board's Fond d'écran menu.
                     model: [
                         { mode: 0, icon: "chalkboard-teacher", label: "Tableau",   enabled: true },
-                        { mode: 1, icon: "folders",            label: "Documents", enabled: true },
-                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: true }
+                        { mode: 1, icon: "folders",            label: "Documents", enabled: true }
                     ]
 
                     Rectangle {

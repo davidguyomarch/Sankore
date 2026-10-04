@@ -114,11 +114,59 @@ int UBAppController::gridType() const
                  : UBBackgroundGrid::toInt(UBBackgroundGrid::Type::Plain);
 }
 
+bool UBAppController::isSeeThrough() const
+{
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    return scene ? scene->isSeeThrough() : false;
+}
+
+bool UBAppController::leaveSeeThroughIfActive()
+{
+    // #407: the user picked a normal background while the page is the Bureau
+    // (see-through) kind → persist the kind back to Opaque and LEAVE desktop
+    // via the EXISTING guarded transition (never a parallel path — keeps the
+    // #135/#397/#390/#399 protections). Decide from the PERSISTED kind, not the
+    // transient drawing-mode flip.
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    if (!scene || !scene->isSeeThrough())
+        return false;
+
+    scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Opaque);
+    if (UBApplication::applicationController)
+        UBApplication::applicationController->hideDesktop();  // guarded
+    return true;
+}
+
+void UBAppController::setBackgroundSeeThrough()
+{
+    // #407 (ADR-0007 R2/R5): make the current page's background the see-through
+    // "Bureau" kind (PERSISTED via setBackgroundKind — this is the deliberate
+    // user choice, unlike the overlay's transient setDrawingMode flip) and enter
+    // desktop mode through the EXISTING guarded showDesktop(). No new overlay
+    // path — the #135/#397/#390/#399 guards all apply. mInModeTransition +
+    // setState no-op absorb any accidental double transition.
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return;
+    auto* scene = UBApplication::boardController->activeScene();
+    if (!scene)
+        return;
+    scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::SeeThrough);
+    emit backgroundChanged();
+    if (UBApplication::applicationController)
+        UBApplication::applicationController->showDesktop();  // guarded
+}
+
 void UBAppController::setGridType(int gridType)
 {
     auto* scene = UBApplication::boardController->activeScene();
     if (!scene)
         return;
+    // #407: picking a ruling leaves the Bureau (see-through) background.
+    leaveSeeThroughIfActive();
     UBApplication::boardController->changeBackgroundType(
         scene->isDarkBackground(), UBBackgroundGrid::fromInt(gridType));
     emit backgroundChanged();
@@ -126,12 +174,14 @@ void UBAppController::setGridType(int gridType)
 
 void UBAppController::setBackgroundLight()
 {
+    leaveSeeThroughIfActive();  // #407: choosing a normal bg leaves Bureau
     UBApplication::boardController->changeBackground(false, false);
     emit backgroundChanged();
 }
 
 void UBAppController::setBackgroundDark()
 {
+    leaveSeeThroughIfActive();  // #407
     UBApplication::boardController->changeBackground(true, false);
     emit backgroundChanged();
 }
