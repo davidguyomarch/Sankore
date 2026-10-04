@@ -7,6 +7,7 @@
         <file>arrow-clockwise.svg</file>
         <file>arrow-counter-clockwise.svg</file>
         <file>arrow-down.svg</file>
+        <file>arrow-left.svg</file>
         <file>arrow-square-out.svg</file>
         <file>arrow-up.svg</file>
         <file>arrows-in-line-vertical.svg</file>
@@ -33,6 +34,7 @@
         <file>dots-three.svg</file>
         <file>download-simple.svg</file>
         <file>eraser.svg</file>
+        <file>file.svg</file>
         <file>file-plus.svg</file>
         <file>file-text.svg</file>
         <file>folder.svg</file>

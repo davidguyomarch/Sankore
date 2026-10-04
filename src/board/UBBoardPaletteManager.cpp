@@ -74,6 +74,8 @@
 #include "controllers/UBToolController.h"
 #include "controllers/UBPageController.h"
 #include "controllers/UBAppController.h"
+#include "controllers/UBLibraryController.h"   // #258
+#include "board/UBFeaturesController.h"        // #258 (scan source)
 
 
 UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardController* pBoardController)
@@ -89,6 +91,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPageNavQml(nullptr)
     , mDrawingPropsBarQml(nullptr)
     , mShapesPaletteV2Qml(nullptr)
+    , mLibraryPanelQml(nullptr)
+    , mLibraryController(nullptr)
     , mLinkPalette(0)
     , mAddItemPalette(0)
     , mImageBackgroundPalette(nullptr)
@@ -104,6 +108,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
 UBBoardPaletteManager::~UBBoardPaletteManager()
 {
     // Destroy QML widgets BEFORE their controllers are deleted.
+    delete mLibraryPanelQml;   // #258 — delete before mLibraryController (QObject-parented)
+    mLibraryPanelQml = nullptr;
     delete mShapesPaletteV2Qml;
     mShapesPaletteV2Qml = nullptr;
     delete mDrawingPropsBarQml;
@@ -395,6 +401,44 @@ void UBBoardPaletteManager::setupPalettes()
         }
     });
 
+    // --- QML Media Library panel (right sidebar, #258) ---
+    // Restores the Library that was dropped in the QML V2 migration. The
+    // controller/model already existed and are unit-tested (tst_UBLibraryModel);
+    // this wires the QML view and feeds it from the existing UBFeaturesController
+    // scan. Mirrors the PageNavigator hosting pattern, placed on the RIGHT edge.
+    mLibraryController = new UBLibraryController(this);
+    mLibraryPanelQml = new QQuickWidget(mContainer);
+    mLibraryPanelQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    mLibraryPanelQml->setClearColor(Qt::transparent);
+    mLibraryPanelQml->setAttribute(Qt::WA_AlwaysStackOnTop);
+    mLibraryPanelQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
+    mLibraryPanelQml->rootContext()->setContextProperty("libraryController", mLibraryController);
+    mLibraryPanelQml->setSource(QUrl("qrc:/qml/LibraryPanel.qml"));
+    if (mLibraryPanelQml->status() == QQuickWidget::Error)
+        for (const auto& e : mLibraryPanelQml->errors())
+            qWarning() << "LibraryPanel QML error:" << e.toString();
+    {
+        int libW = 200;
+        mLibraryPanelQml->setFixedSize(libW, mContainer->height() - 48 - 52);
+        mLibraryPanelQml->move(mContainer->width() - libW, 48);
+        mLibraryPanelQml->show();
+        mLibraryPanelQml->raise();
+    }
+
+    // Feed the panel from the existing features controller. The scan is async
+    // (UBFeaturesController::scanFS runs on a thread); repopulate on scanFinished,
+    // not just once — otherwise the tree is empty/partial at startup. #258.
+    if (mpFeaturesWidget && mpFeaturesWidget->getFeaturesController())
+    {
+        UBFeaturesController* fc = mpFeaturesWidget->getFeaturesController();
+        auto feed = [this, fc]() {
+            if (mLibraryController && fc->getFeatures())
+                mLibraryController->setFeatures(*fc->getFeatures());
+        };
+        feed();  // in case the scan already finished
+        connect(fc, &UBFeaturesController::scanFinished, this, feed);
+    }
+
     // Debug: log QML widget positions
     // Diagnostic: write widget positions to startup.log
     {
@@ -569,6 +613,14 @@ void UBBoardPaletteManager::containerResized()
         mPageNavQml->move(0, 48);
         if (isBoardMode) { mPageNavQml->show(); mPageNavQml->raise(); }
     }
+    if (mLibraryPanelQml)   // #258: right sidebar
+    {
+        int libW = 200;
+        int libHeight = mContainer->height() - 48 - 52;
+        mLibraryPanelQml->setFixedSize(libW, qMax(100, libHeight));
+        mLibraryPanelQml->move(mContainer->width() - libW, 48);
+        if (isBoardMode) { mLibraryPanelQml->show(); mLibraryPanelQml->raise(); }
+    }
     if (mDrawingPropsBarQml)
     {
         int posX = (mContainer->width() - mDrawingPropsBarQml->width()) / 2;
@@ -719,6 +771,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->show();
                 if (mPageNavQml)
                     mPageNavQml->show();
+                if (mLibraryPanelQml)   // #258
+                    mLibraryPanelQml->show();
                 if (mDrawingPropsBarQml && mToolController && mToolController->showDrawingProps())
                     mDrawingPropsBarQml->show();
 
@@ -762,6 +816,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->hide();
                 if (mPageNavQml)
                     mPageNavQml->hide();
+                if (mLibraryPanelQml)   // #258
+                    mLibraryPanelQml->hide();
                 if (mDrawingPropsBarQml)
                     mDrawingPropsBarQml->hide();
                 if (mShapesPaletteV2Qml)
@@ -837,6 +893,8 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
                     mTopBarQml->hide();
                 if (mPageNavQml)
                     mPageNavQml->hide();
+                if (mLibraryPanelQml)   // #258
+                    mLibraryPanelQml->hide();
                 if (mDrawingPropsBarQml)
                     mDrawingPropsBarQml->hide();
                 if (mShapesPaletteV2Qml)

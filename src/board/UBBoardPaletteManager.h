@@ -49,6 +49,7 @@ class QQuickWidget;
 class UBToolController;
 class UBPageController;
 class UBAppController;
+class UBLibraryController;   // #258
 
 class UBBoardPaletteManager : public QObject
 {
@@ -116,6 +117,9 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mPageNavQml;
         QQuickWidget *mDrawingPropsBarQml;
         QQuickWidget *mShapesPaletteV2Qml;
+        // #258: QML V2 media Library (right sidebar) + its controller.
+        QQuickWidget *mLibraryPanelQml;
+        UBLibraryController *mLibraryController;
 
         UBCreateLinkPalette* mLinkPalette;
 
