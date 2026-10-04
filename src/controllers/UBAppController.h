@@ -62,11 +62,6 @@ public slots:
 
     void setBackgroundLight();
     void setBackgroundDark();
-    void setBackgroundCrossedLight();
-    void setBackgroundCrossedDark();
-    void setBackgroundPlainLight();
-    void setBackgroundPlainDark();
-    void toggleGrid();
     /// #289: set the ruling type (keeps the current dark/light).
     void setGridType(int gridType);
 
