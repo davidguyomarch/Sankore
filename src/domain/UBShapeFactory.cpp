@@ -189,9 +189,29 @@ void UBShapeFactory::init()
     //Our custom dash is a point follow by a space
     mDotDashes << 0.1 << 3;
 
-    connect(mBoardView, &UBBoardView::mouseMove, this, &UBShapeFactory::onMouseMove);
-    connect(mBoardView, &UBBoardView::mouseRelease, this, &UBShapeFactory::onMouseRelease);
-    connect(mBoardView, &UBBoardView::mousePress, this, &UBShapeFactory::onMousePress);
+    connectView(mBoardView);
+}
+
+void UBShapeFactory::connectView(UBBoardView* view)
+{
+    // #421: connect a view's mouse signals to the shape handlers. Used for the
+    // control view (init) and the desktop overlay (shares the board scene since
+    // #414). UniqueConnection so a re-connect is harmless.
+    if (!view)
+        return;
+    connect(view, &UBBoardView::mouseMove, this, &UBShapeFactory::onMouseMove, Qt::UniqueConnection);
+    connect(view, &UBBoardView::mouseRelease, this, &UBShapeFactory::onMouseRelease, Qt::UniqueConnection);
+    connect(view, &UBBoardView::mousePress, this, &UBShapeFactory::onMousePress, Qt::UniqueConnection);
+}
+
+UBBoardView* UBShapeFactory::activeView()
+{
+    // #421: the view that sent the current mouse event — map coordinates and add
+    // items relative to it (control view OR desktop overlay). Fall back to the
+    // control view when called outside a signal.
+    if (UBBoardView* v = qobject_cast<UBBoardView*>(sender()))
+        return v;
+    return mBoardView;
 }
 
 
@@ -404,7 +424,8 @@ void UBShapeFactory::onMouseMove(QMouseEvent *event)
 {
     if(mIsCreating && mIsPress){
         mCursorMoved = true;
-        QPointF cursorPosition = mBoardView->mapToScene(event->pos());
+        UBBoardView* view = activeView();   // #421: control view or overlay
+        QPointF cursorPosition = view->mapToScene(event->pos());
 
         if(mIsRegularShape)
         {
@@ -486,7 +507,8 @@ void UBShapeFactory::onMousePress(QMouseEvent *event)
         mCursorMoved = false;
         mIsPress = true;
 
-        QPointF cursorPosition = mBoardView->mapToScene(event->pos());
+        UBBoardView* view = activeView();   // #421: control view or overlay
+        QPointF cursorPosition = view->mapToScene(event->pos());
 
         if(mIsRegularShape){
             // #327: guard every dynamic_cast<...>(instanciateCurrentShape()).
