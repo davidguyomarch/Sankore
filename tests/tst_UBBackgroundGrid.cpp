@@ -98,13 +98,13 @@ void TestUBBackgroundGrid::testGridIsUniform8mm()
 
 void TestUBBackgroundGrid::testSeyesInterlineSpacing()
 {
-    // #379: within a doubled 16 mm cell there are 4 horizontal lines (1 Major at
-    // the cell boundary + 3 Minor interlines), spaced 4 mm apart.
-    const double cell = 16.0 * UPM;  // 64
-    const double inter = 4.0 * UPM;  // 16
+    // #363: within the enlarged 24 mm cell there are 4 horizontal lines (1 Major
+    // at the cell boundary + 3 Minor interlines), spaced 6 mm apart.
+    const double cell = 24.0 * UPM;  // 96
+    const double inter = 6.0 * UPM;  // 24
 
-    // A window covering exactly one cell [0, 64) must yield the 4 lines of that
-    // cell (Major at 0, Minor at 16, 32, 48).
+    // A window covering exactly one cell [0, 96) must yield the 4 lines of that
+    // cell (Major at 0, Minor at 24, 48, 72).
     auto lines = generateLines(Type::Seyes, QRectF(0, 0, 320, cell));
     std::vector<Line> h;
     for (const auto& l : lines)
@@ -206,13 +206,13 @@ void TestUBBackgroundGrid::testSeyesLargeIsScaled()
     int largeH = countLines(large, Orientation::Horizontal);
     QVERIFY(largeH < normalH);
 
-    // #379: interline for large == 6 mm (doubled 4 mm * 1.5) == 24 units.
+    // #363: interline for large == 9 mm (enlarged 6 mm base * 1.5) == 36 units.
     std::vector<double> ys;
     for (const auto& l : large)
         if (l.orientation == Orientation::Horizontal) ys.push_back(l.pos);
     std::sort(ys.begin(), ys.end());
     QVERIFY(ys.size() >= 2);
-    QVERIFY(qFuzzyCompare(ys[1] - ys[0], 4.0 * UPM * 1.5));
+    QVERIFY(qFuzzyCompare(ys[1] - ys[0], 6.0 * UPM * 1.5));
 }
 
 void TestUBBackgroundGrid::testDoubleLine3mmPairs()

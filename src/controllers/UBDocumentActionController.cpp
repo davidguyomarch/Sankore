@@ -32,9 +32,9 @@ void UBDocumentActionController::setActiveMode(int mode)
 {
     if (mode == 0) // Board
         UBApplication::applicationController->showBoard();
-    else if (mode == 2) // Desktop
-        UBApplication::applicationController->showDesktop();
-    // mode == 1 is already Documents — no-op
+    // mode == 1 is already Documents — no-op.
+    // #407: Desktop (mode 2) removed as a mode tab — it is now a page background
+    // kind selected from the board's Fond d'écran menu, not reachable here.
     emit activeModeChanged();
 }
 
