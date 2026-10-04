@@ -154,6 +154,39 @@ palette dédiée aux formes). L'index 0 de la palette pen est noir pur (`#000000
 fond clair, blanc pur (`#FFFFFF`) sur fond sombre (`UBSettings.cpp`), ce qui se marie
 avec `recoloredDefaultInk`.
 
+## Remplissage des formes (outil pot / `ChangeFill`, #429/#436)
+
+Le remplissage est un **axe distinct** du trait, longtemps resté inerte. Points clés :
+
+- **Le pot n'a pas de couleur par défaut** : `mCurrentFillFirstColor` du factory vaut
+  `Qt::transparent` et `mFillType == Transparent` à la construction. Donc, sans
+  câblage, cliquer une forme avec le pot la remplit… en transparent (rien de
+  visible). C'était le bug #429.
+- **Il faut poser couleur + type AVANT d'utiliser le pot.**
+  `UBToolController::activateFillTool()` pose `setFillType(Full)` +
+  `setFillingFirstColor(palette[m_shapeFillColorIndex])` puis `setActiveTool(ChangeFill)`.
+- **Index de remplissage SÉPARÉ du trait.** `m_shapeFillColorIndex` ≠
+  `m_shapeColorIndex`. En mode `ChangeFill`, les propriétés tool-aware
+  (`currentColors`/`currentColorIndex`/`setCurrentColorIndex`) routent vers la couleur
+  de **remplissage** (pas le trait) ; la `DrawingPropsBar` masque le groupe
+  **épaisseurs** (`isFill`, `activeTool === 13`) et montre les couleurs seules.
+  `showDrawingProps()` inclut `ChangeFill`.
+- **Pas de recolor rétroactif** : choisir une couleur en mode pot vise le **prochain**
+  clic de pot (cohérent avec le reste, cf. #319). Le remplissage effectif passe par
+  `UBBoardView` (branche `ChangeFill`) → `shapeFactory().changeFillColor(pos)` →
+  `applyCurrentStyle` sur la forme cliquée.
+- **Curseur** : tout outil doit avoir son cas dans `UBBoardView::setToolCursor`,
+  sinon il tombe sur le **curseur pen** par défaut (bug vécu : le pot montrait le
+  stylo). `ChangeFill` → `fillCursor` (construit depuis `:/icons/phosphor/paint-bucket.svg`
+  dans `UBResources`, motif identique à `ocrCursor`).
+
+> Rappel du piège sélection (voir plus haut) : `setStrokeColor`/`setFillingFirstColor`/
+> `updateFillingPropertyOnSelectedItems` n'agissent que sur `scene()->selectedItems()`,
+> **vide par défaut** après tracé (#319). Les boutons « Contour »/« Aligner » de
+> `ShapesPaletteV2` (#430/#431) sont donc **inertes sans modèle de sélection** (#366) :
+> le fil QML est correct, c'est la sélection qui manque. Ne pas « corriger » en
+> réintroduisant un fallback « dernière forme ».
+
 ## Palette d'outils et sélection de forme (surlignage)
 
 - Chaque bouton de `StylusPaletteV2.qml` est lié à un `id` = valeur de
