@@ -53,10 +53,12 @@ Rectangle {
                 spacing: 2
 
                 Repeater {
+                    // #407: "Bureau" is no longer a mode tab — it is a page
+                    // background kind (see-through) chosen from the Fond d'écran
+                    // menu below. Only Tableau / Documents remain as modes.
                     model: [
                         { mode: 0, icon: "chalkboard-teacher", label: "Tableau",   enabled: true },
-                        { mode: 1, icon: "folders",            label: "Documents", enabled: true },
-                        { mode: 2, icon: "desktop",            label: "Bureau",    enabled: true }
+                        { mode: 1, icon: "folders",            label: "Documents", enabled: true }
                     ]
 
                     Rectangle {
@@ -257,6 +259,14 @@ Rectangle {
         RulingMenuItem { rulingType: 2; rulingIcon: "rows-plus-top";    rulingLabel: "Séyès" }
         RulingMenuItem { rulingType: 3; rulingIcon: "rows-plus-bottom"; rulingLabel: "Séyès agrandi" }
         RulingMenuItem { rulingType: 4; rulingIcon: "list";             rulingLabel: "Double lignage 3 mm" }
+
+        MenuSeparator {}
+
+        // #407 (ADR-0007): "Bureau" is a page background kind (see-through), at
+        // the same level as the rulings. Picking it makes the page transparent
+        // and enters desktop mode (the desktop shows through); its check mark
+        // follows the persisted see-through kind.
+        RulingMenuItem { seeThrough: true; rulingIcon: "desktop"; rulingLabel: "Bureau (transparent)" }
     }
 
     // One row of the ruling dropdown: leading themed icon, label, trailing
@@ -266,11 +276,19 @@ Rectangle {
         property int rulingType: 0
         property string rulingIcon: ""
         property string rulingLabel: ""
+        // #407: when true this entry is the see-through "Bureau" background, not
+        // a ruling — it enters desktop mode and its check follows isSeeThrough.
+        property bool seeThrough: false
 
         text: rulingLabel
         implicitHeight: 34
 
-        onTriggered: appController.setGridType(rulingType)
+        onTriggered: {
+            if (item.seeThrough)
+                appController.setBackgroundSeeThrough()
+            else
+                appController.setGridType(rulingType)
+        }
 
         contentItem: Item {
             Image {
@@ -312,7 +330,11 @@ Rectangle {
                 anchors.fill: checkIcon
                 source: checkIcon
                 color: themeManager.onSurface
-                visible: appController.gridType === item.rulingType
+                // #407: the Bureau entry checks on isSeeThrough; a ruling entry
+                // checks on its type AND only when the page is not see-through.
+                visible: item.seeThrough
+                         ? appController.isSeeThrough
+                         : (appController.gridType === item.rulingType && !appController.isSeeThrough)
             }
         }
     }
