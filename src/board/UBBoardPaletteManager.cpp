@@ -74,6 +74,8 @@
 #include "controllers/UBToolController.h"
 #include "controllers/UBPageController.h"
 #include "controllers/UBAppController.h"
+#include "controllers/UBLibraryController.h"   // #258
+#include "board/UBFeaturesController.h"        // #258 (scan source)
 
 
 UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardController* pBoardController)
@@ -89,6 +91,7 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mPageNavQml(nullptr)
     , mDrawingPropsBarQml(nullptr)
     , mShapesPaletteV2Qml(nullptr)
+    , mLibraryController(nullptr)
     , mLinkPalette(0)
     , mAddItemPalette(0)
     , mImageBackgroundPalette(nullptr)
@@ -103,7 +106,9 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
 
 UBBoardPaletteManager::~UBBoardPaletteManager()
 {
-    // Destroy QML widgets BEFORE their controllers are deleted.
+    // Destroy QML widgets BEFORE their controllers are deleted. The Library view
+    // lives inside mPageNavQml (LeftSidebar.qml), deleted below; its controller
+    // (mLibraryController) is QObject-parented to this manager.
     delete mShapesPaletteV2Qml;
     mShapesPaletteV2Qml = nullptr;
     delete mDrawingPropsBarQml;
@@ -291,17 +296,23 @@ void UBBoardPaletteManager::setupPalettes()
     mTopBarQml->show();
     mTopBarQml->raise();
 
-    // --- QML Page Navigator Sidebar (Issue #121 Step 4) ---
+    // --- QML Left Sidebar: Pages ⇄ Bibliothèque toggle (#258 / #121 Step 4) ---
+    // One left panel hosting LeftSidebar.qml, which embeds PageNavigator and
+    // LibraryPanel and shows one at a time via its header toggle. mPageNavQml is
+    // reused as the host (kept its name to minimise churn in the layout/show-hide
+    // code below). Both controllers are injected as context properties.
+    mLibraryController = new UBLibraryController(this);
     mPageNavQml = new QQuickWidget(mContainer);
     mPageNavQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
     mPageNavQml->setClearColor(Qt::transparent);
     mPageNavQml->setAttribute(Qt::WA_AlwaysStackOnTop);
     mPageNavQml->rootContext()->setContextProperty("themeManager", UBThemeManager::instance());
     mPageNavQml->rootContext()->setContextProperty("pageController", mPageController);
-    mPageNavQml->setSource(QUrl("qrc:/qml/PageNavigator.qml"));
+    mPageNavQml->rootContext()->setContextProperty("libraryController", mLibraryController);
+    mPageNavQml->setSource(QUrl("qrc:/qml/LeftSidebar.qml"));
     if (mPageNavQml->status() == QQuickWidget::Error)
         for (const auto& e : mPageNavQml->errors())
-            qWarning() << "PageNavigator QML error:" << e.toString();
+            qWarning() << "LeftSidebar QML error:" << e.toString();
     int sidebarWidth = 180;
     mPageNavQml->setFixedSize(sidebarWidth, mContainer->height() - 48 - 52); // between top bar and bottom bar
     mPageNavQml->move(0, 48);
@@ -394,6 +405,21 @@ void UBBoardPaletteManager::setupPalettes()
             mShapesPaletteV2Qml->hide();
         }
     });
+
+    // Feed the Library (embedded in the left sidebar) from the existing features
+    // controller. The scan is async (UBFeaturesController::scanFS runs on a
+    // thread); repopulate on scanFinished, not just once — otherwise the tree is
+    // empty/partial at startup. #258.
+    if (mpFeaturesWidget && mpFeaturesWidget->getFeaturesController())
+    {
+        UBFeaturesController* fc = mpFeaturesWidget->getFeaturesController();
+        auto feed = [this, fc]() {
+            if (mLibraryController && fc->getFeatures())
+                mLibraryController->setFeatures(*fc->getFeatures());
+        };
+        feed();  // in case the scan already finished
+        connect(fc, &UBFeaturesController::scanFinished, this, feed);
+    }
 
     // Debug: log QML widget positions
     // Diagnostic: write widget positions to startup.log

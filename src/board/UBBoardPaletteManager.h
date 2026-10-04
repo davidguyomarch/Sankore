@@ -49,6 +49,7 @@ class QQuickWidget;
 class UBToolController;
 class UBPageController;
 class UBAppController;
+class UBLibraryController;   // #258
 
 class UBBoardPaletteManager : public QObject
 {
@@ -116,6 +117,10 @@ class UBBoardPaletteManager : public QObject
         QQuickWidget *mPageNavQml;
         QQuickWidget *mDrawingPropsBarQml;
         QQuickWidget *mShapesPaletteV2Qml;
+        // #258: media Library controller. The Library VIEW is embedded in the
+        // left sidebar (LeftSidebar.qml, hosted by mPageNavQml), toggled with the
+        // Pages view — no separate widget.
+        UBLibraryController *mLibraryController;
 
         UBCreateLinkPalette* mLinkPalette;
 

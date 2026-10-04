@@ -7,6 +7,8 @@
         <file>ShapesPaletteV2.qml</file>
         <file>DesktopToolbar.qml</file>
         <file>DocumentsTopBar.qml</file>
+        <file>LeftSidebar.qml</file>
+        <file>LibraryPanel.qml</file>
         <file>TooltipLabel.qml</file>
         <file>MainToolbar.qml</file>
         <file>UBToolbar.qml</file>
