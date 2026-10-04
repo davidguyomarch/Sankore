@@ -206,16 +206,19 @@ namespace UBBackgroundGrid
 
         if (type == Type::Seyes || type == Type::SeyesLarge)
         {
-            // Séyès: major horizontal lines every 8 mm, with 3 faint interlines
-            // 2 mm apart between them; vertical major lines every 8 mm; a single
-            // red margin line 40 mm (5 cells) from the left of the page origin 0.
-            // #379: doubled base spacing (cell 8->16 mm, interline 2->4 mm) so
-            // a pupil can write letters between the interlines and it stays
-            // legible from a distance. SeyesLarge keeps its extra 1.5x on top
-            // (16 * 1.5 = 24 mm cell). The red margin below is unchanged.
+            // Séyès: a major horizontal line every cell, with 3 faint interlines
+            // evenly spaced between them; faint vertical guides every cell; a
+            // single red margin line 40 mm from the page left edge. The cell size
+            // is set just below (24 mm default, 36 mm for SeyesLarge — #363).
+            // #379: doubled base spacing (cell 8->16 mm) for legibility from the
+            // back of the class. #363: the 16 mm default was still judged too
+            // small in classroom review (#350) — enlarge the DEFAULT Séyès to
+            // 24 mm (interline 6 mm) so a teacher can write immediately without
+            // zooming. SeyesLarge keeps its extra 1.5x on top (24 * 1.5 = 36 mm
+            // cell, 9 mm interline), staying clearly larger than the default.
             const double scale = (type == Type::SeyesLarge) ? 1.5 : 1.0;
-            const double cell = 16.0 * upm * scale;   // major spacing
-            const double inter = 4.0 * upm * scale;   // interline spacing
+            const double cell = 24.0 * upm * scale;   // major spacing (#363: 16 -> 24 mm)
+            const double inter = 6.0 * upm * scale;   // interline spacing (#363: 4 -> 6 mm)
 
             // Horizontal: emit interlines everywhere, promote every 4th (cell
             // boundary) to Major so the 8 mm rhythm reads clearly.
