@@ -594,6 +594,22 @@ void UBToolController::createShape(const QString& shape)
 
 void UBToolController::activateFillTool()
 {
+    // #429: the fill bucket did nothing visible because the factory's fill color
+    // defaulted to Qt::transparent and the fill type to Transparent, and nothing
+    // ever set them from the UI. Give the bucket a real colour (the current
+    // shape palette colour — the one shown selected in the DrawingPropsBar, same
+    // shared palette as the stroke, ADR-0005) and a solid fill type BEFORE
+    // activating the ChangeFill tool, so clicking a shape fills it visibly.
+    if (UBApplication::boardController)
+    {
+        auto& factory = UBApplication::boardController->shapeFactory();
+        const QList<QColor> palette = penColors();
+        if (m_shapeColorIndex >= 0 && m_shapeColorIndex < palette.size())
+        {
+            factory.setFillType(UBShapeFactory::Full);
+            factory.setFillingFirstColor(palette.at(m_shapeColorIndex));
+        }
+    }
     setActiveTool(ChangeFill);
 }
 
