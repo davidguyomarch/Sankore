@@ -28,10 +28,15 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QSvgRenderer>
+#include <QImage>
 
 #include "core/UBApplication.h"
 #include "core/UBSettings.h"
 #include "frameworks/UBFileSystemUtils.h"
+#include "qml/UBThemeManager.h"
+#include "board/UBBoardController.h"
+#include "controllers/UBToolController.h"
 
 
 UBResources* UBResources::sSingleton = 0;
@@ -64,8 +69,8 @@ UBResources* UBResources::resources()
 
 void UBResources::init()
 {
-    // Cursors
-    penCursor       = QCursor(QPixmap(":/images/cursors/pen.svg"), 4, 28);
+    // Static (non-themed) cursors — legacy raster assets that already read on
+    // any background.
     eraserCursor    = QCursor(QPixmap(":/images/cursors/eraser.png"), 21, 21);
     markerCursor    = QCursor(QPixmap(":/images/cursors/marker.png"), 3, 30);
     pointerCursor   = QCursor(QPixmap(":/images/cursors/laser.png"), 2, 1);
@@ -78,11 +83,106 @@ void UBResources::init()
     richTextCursor  = QCursor(Qt::ArrowCursor);
     rotateCursor    = QCursor(QPixmap(":/images/cursors/rotate.png"), 16, 16);
     drawLineRulerCursor = QCursor(QPixmap(":/images/cursors/drawRulerLine.png"), 3, 12);
-    ocrCursor           = QCursor(QPixmap(":/images/cursors/ocr.svg").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation), 4, 28);
-    // #429-followup: paint-bucket cursor for the fill tool (ChangeFill). Built
-    // from the Phosphor paint-bucket SVG, hotspot near the bucket's spout
-    // (bottom-left of the 32px glyph).
-    fillCursor          = QCursor(QPixmap(":/icons/phosphor/paint-bucket.svg").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation), 6, 26);
+
+    // #439: SVG tool cursors (pen, OCR, fill) are built from monochrome Phosphor
+    // glyphs. Build them tinted to the current theme so they stay visible on the
+    // scene background (which follows dark/light mode too), and rebuild them when
+    // the theme changes.
+    buildThemedCursors();
+    connect(UBThemeManager::instance(), &UBThemeManager::themeChanged,
+            this, &UBResources::updateThemedCursors);
+}
+
+QPixmap UBResources::renderCursorSvg(const QString& svgResource, int size,
+                                     const QColor& glyph, const QColor& outline)
+{
+    QSvgRenderer renderer(svgResource);
+    if (!renderer.isValid())
+        return QPixmap();
+
+    // Render the raw glyph (alpha mask) once at the target size.
+    const qreal dpr = qApp ? qApp->devicePixelRatio() : 1.0;
+    const int px = qMax(1, int(size * dpr));
+
+    QImage mask(px, px, QImage::Format_ARGB32_Premultiplied);
+    mask.fill(Qt::transparent);
+    {
+        QPainter p(&mask);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        renderer.render(&p, QRectF(0, 0, px, px));
+    }
+
+    // Tint the glyph: keep the alpha of the rendered shape, replace RGB.
+    auto tint = [&](const QColor& c) {
+        QImage out = mask;
+        QPainter p(&out);
+        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        p.fillRect(out.rect(), c);
+        p.end();
+        return out;
+    };
+
+    QImage glyphImg = tint(glyph);
+    QImage outlineImg = tint(outline);
+
+    // Compose: draw the outline shifted by 1px in 8 directions to form a thin
+    // halo, then the tinted glyph on top. This gives a contrasting border so the
+    // cursor reads on both dark and light backgrounds.
+    QImage composed(px, px, QImage::Format_ARGB32_Premultiplied);
+    composed.fill(Qt::transparent);
+    {
+        QPainter p(&composed);
+        const int d = qMax(1, int(dpr));
+        for (int dx = -d; dx <= d; ++dx)
+            for (int dy = -d; dy <= d; ++dy)
+                if (dx != 0 || dy != 0)
+                    p.drawImage(dx, dy, outlineImg);
+        p.drawImage(0, 0, glyphImg);
+    }
+
+    QPixmap pix = QPixmap::fromImage(composed);
+    pix.setDevicePixelRatio(dpr);
+    return pix;
+}
+
+void UBResources::buildThemedCursors()
+{
+    auto* tm = UBThemeManager::instance();
+    // Glyph tinted to the theme foreground; outline is the opposite so the
+    // cursor stays visible whatever the background underneath.
+    const QColor glyph   = tm->isDark() ? QColor(Qt::white) : QColor(0x33, 0x33, 0x33);
+    const QColor outline = tm->isDark() ? QColor(0x11, 0x11, 0x11) : QColor(Qt::white);
+
+    const int sz = 32;
+    QPixmap penPix  = renderCursorSvg(":/images/cursors/pen.svg", sz, glyph, outline);
+    QPixmap ocrPix  = renderCursorSvg(":/images/cursors/ocr.svg", sz, glyph, outline);
+    QPixmap fillPix = renderCursorSvg(":/icons/phosphor/paint-bucket.svg", sz, glyph, outline);
+
+    // Fallbacks keep the previous behaviour if an SVG fails to render.
+    if (penPix.isNull())
+        penPix = QPixmap(":/images/cursors/pen.svg");
+    if (ocrPix.isNull())
+        ocrPix = QPixmap(":/images/cursors/ocr.svg").scaled(sz, sz, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (fillPix.isNull())
+        fillPix = QPixmap(":/icons/phosphor/paint-bucket.svg").scaled(sz, sz, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    penCursor  = QCursor(penPix, 4, 28);
+    ocrCursor  = QCursor(ocrPix, 4, 28);
+    // #429-followup: hotspot near the bucket's spout (bottom-left of the glyph).
+    fillCursor = QCursor(fillPix, 6, 26);
+}
+
+void UBResources::updateThemedCursors()
+{
+    buildThemedCursors();
+
+    // Re-apply the active tool cursor so the change is visible immediately
+    // without the user having to switch tools.
+    if (UBApplication::boardController && UBToolController::toolController())
+    {
+        UBApplication::boardController->setToolCursor(
+            UBToolController::toolController()->stylusTool());
+    }
 }
 
 void UBResources::buildFontList()

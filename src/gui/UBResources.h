@@ -28,6 +28,8 @@
 #include <QWidget>
 #include <QApplication>
 #include <QPainter>
+#include <QColor>
+#include <QPixmap>
 
 class UBSettings;
 
@@ -40,12 +42,24 @@ class UBResources : public QObject
          QStringList customFontList() { return mCustomFontList; }
 
 
+    private slots:
+         // #439: rebuild theme-aware cursors when the UI theme changes so the
+         // SVG tool cursors stay visible on both light and dark backgrounds,
+         // then re-apply the active tool cursor.
+         void updateThemedCursors();
+
     private:
     UBSettings* mSettings;
          UBResources(QObject* pParent = 0);
          virtual ~UBResources();
 
          void init();
+         void buildThemedCursors();
+
+         // #439: render an SVG resource recoloured to `glyph`, with a thin
+         // contrasting `outline` halo so the cursor reads on any background.
+         static QPixmap renderCursorSvg(const QString& svgResource, int size,
+                                        const QColor& glyph, const QColor& outline);
 
          static UBResources* sSingleton;
          void buildFontList();
