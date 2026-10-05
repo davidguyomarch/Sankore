@@ -78,6 +78,26 @@ Instrumenter/valider sur la VM avant de conclure.
   `UBToolButton`, `UBToolbar`. (`ToolbarSeparator` est OK — pas de type built-in
   de ce nom.)
 
+## Piège n°4 — curseur d'outil manquant → curseur pen par défaut
+
+`UBBoardView::setToolCursor(int tool)` est un `switch` sur `UBStylusTool::Enum`
+avec un `default` qui pose le **curseur pen**. **Tout nouvel outil doit avoir son
+cas** dans ce switch (et un `QCursor` dans `UBResources`), sinon il affiche le
+curseur stylo — symptôme vécu : l'outil Remplissage (`ChangeFill`) montrait le
+stylo (#436). Un curseur se construit depuis un SVG comme `ocrCursor`/`fillCursor`
+(`QCursor(QPixmap(":/icons/phosphor/<name>.svg").scaled(32,32,...), hotX, hotY)`).
+
+## Piège n°5 — icône Phosphor absente du build → tuile vide
+
+Une icône référencée en QML (`qrc:/icons/phosphor/<name>.svg`) mais **absente de
+`phosphor.qrc`** ne charge pas (tuile vide, `Image.status === Error`), sans erreur
+de build ni de `qmllint`. Avant d'utiliser une icône : vérifier qu'elle est dans
+`resources/icons/phosphor/`. Si manquante, la **télécharger depuis le dépôt
+officiel** (`https://raw.githubusercontent.com/phosphor-icons/core/main/assets/regular/<name>.svg`)
+et l'ajouter au `phosphor.qrc` **en ordre alphabétique** — jamais la dessiner à la
+main (vécu cette session : `arrow-left`, `file`, pour #258). Le même SVG sert aussi
+de curseur (piège n°4).
+
 ## Warnings `qmllint` à ignorer / à corriger
 
 - **À corriger (bloquant runtime)** : `non-existent property`, `Could not find

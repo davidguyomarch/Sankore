@@ -521,6 +521,11 @@ format et du workflow : voir `.kiro/steering/adr.md`.
 2. **Toujours lire le fichier avant de le modifier** — ne jamais proposer des changements sur du code pas lu
 3. **Ne PAS compiler localement pour Windows** — pas de toolchain MSVC sur la machine
 4. **Ne JAMAIS push sur master** — toujours pousser la branche feature/fix
+5. **Vérifier qu'une issue n'a pas une prémisse périmée** — après un pivot d'archi
+   récent (ex. unification board/bureau #393, machine à états #399), relire l'issue
+   et confirmer que son besoin tient encore avant de l'implémenter. Plusieurs issues
+   (#415, #416, #355) étaient devenues sans objet suite à un pivot ; les détecter
+   avant de coder évite du travail jeté.
 
 ### Correction de bug — reproduire d'abord en test unitaire
 

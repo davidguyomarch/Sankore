@@ -92,6 +92,33 @@ abandonnées). Le see-through bureau est un flip **transitoire non persisté**
 Image }`, axe orthogonal au ruling) est défini par ADR-0009/#412 et persisté.
 Détails dans **`desktop-mode.md`**, ADR-0007 et ADR-0009.
 
+### Modèle de navigation UI (vues / panneaux / propriétés / actions)
+
+Quatre registres distincts cohabitent dans l'UI — ne pas les confondre quand on
+ajoute ou déplace un contrôle :
+
+| Registre | Nature | Portée | Exemples | Où ça vit |
+|----------|--------|--------|----------|-----------|
+| **Vues plein écran** | Modes mutuellement exclusifs de l'écran | Toute la fenêtre | Tableau, Documents, Bibliothèque | `UBPresentationController::State` (source de vérité), boutons VUE dans `TopBar.qml` |
+| **Panneaux latéraux** | Sidebars affichées *par-dessus* une vue | Bande gauche/droite | Pages (miniatures), Médias (bibliothèque) | `LeftSidebar.qml` avec bascule segmentée Pages⇄Médias |
+| **Propriétés de page** | Attributs de la page courante | La page active | Fond (ruling + `BackgroundKind`) | Palettes de fond, boutons FOND dans `TopBar.qml` |
+| **Actions** | Commandes ponctuelles sans état d'écran | Instantané | Undo/redo, ajout/suppression de page, préférences, quit | Boutons ACTIONS/APPLICATION dans `TopBar.qml` |
+
+Règles pour Kiro :
+- Un **changement de vue** passe toujours par `UBPresentationController` (jamais
+  un flag ad hoc). Une vue est exclusive : on ne superpose pas deux vues.
+- Un **panneau latéral** est orthogonal à la vue : il se montre/cache sans changer
+  l'état de présentation. La bascule Pages⇄Médias est interne à `LeftSidebar.qml`,
+  pas un état de `UBPresentationController`.
+- Une **propriété de page** (le fond notamment) n'est ni une vue ni une action :
+  elle modifie et persiste l'état de la page courante.
+- Avant d'ajouter un bouton à `TopBar.qml`, identifier son registre et le placer
+  dans le bon groupe (séparateurs VUE | ACTIONS | PAGE | FOND | APPLICATION,
+  cf. #434). Ne pas mélanger une action ponctuelle avec un bouton de vue.
+
+Questions encore ouvertes (voir notes de design) : la Bibliothèque est-elle une
+vue plein écran, un panneau latéral, ou les deux ? refonte Documents (#285).
+
 ### QML Files (src/qml/)
 
 | File | Widget | Position |
