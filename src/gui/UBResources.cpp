@@ -148,10 +148,15 @@ QPixmap UBResources::renderCursorSvg(const QString& svgResource, int size,
 void UBResources::buildThemedCursors()
 {
     auto* tm = UBThemeManager::instance();
-    // Glyph tinted to the theme foreground; outline is the opposite so the
-    // cursor stays visible whatever the background underneath.
-    const QColor glyph   = tm->isDark() ? QColor(Qt::white) : QColor(0x33, 0x33, 0x33);
-    const QColor outline = tm->isDark() ? QColor(0x11, 0x11, 0x11) : QColor(Qt::white);
+    // #441: colours come from UBThemeManager roles (no hard-coded literals,
+    // #297 ratchet). The glyph takes the theme foreground (`onSurface`: white on
+    // dark, near-black on light); the outline halo takes the theme `surface`,
+    // forced opaque, which is the contrasting background colour — so the cursor
+    // reads whatever is underneath.
+    QColor glyph = tm->onSurface();
+    glyph.setAlpha(255);
+    QColor outline = tm->surface();
+    outline.setAlpha(255);
 
     const int sz = 32;
     QPixmap penPix  = renderCursorSvg(":/images/cursors/pen.svg", sz, glyph, outline);
