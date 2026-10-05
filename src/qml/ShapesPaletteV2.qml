@@ -122,9 +122,14 @@ Rectangle {
             spacing: 4
 
             Repeater {
+                // #430: the "Contour" (stroke) button was removed. Stroke
+                // colour/width for shapes is set via the DrawingPropsBar swatches
+                // (prepares the next shape, ADR-0005 shared palette). The old
+                // button called the FILL updater on an empty selection — a no-op
+                // that also mis-painted fill. Fill = paint-bucket tool; alignment
+                // tracked separately in #431.
                 model: [
                     { icon: "paint-bucket",             tooltip: "Remplissage",  action: "fill" },
-                    { icon: "pencil-line",              tooltip: "Contour",      action: "stroke" },
                     { icon: "align-center-horizontal",  tooltip: "Aligner",      action: "align" }
                 ]
 
@@ -155,8 +160,6 @@ Rectangle {
                         onClicked: {
                             if (modelData.action === "fill")
                                 toolController.activateFillTool()
-                            else if (modelData.action === "stroke")
-                                toolController.applyStrokeToSelection()
                             else if (modelData.action === "align")
                                 toolController.alignSelection()
                         }

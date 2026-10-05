@@ -137,7 +137,6 @@ public:
     QString currentShape() const { return m_currentShape; }
     Q_INVOKABLE void createShape(const QString& shape);
     Q_INVOKABLE void activateFillTool();
-    Q_INVOKABLE void applyStrokeToSelection();
     Q_INVOKABLE void alignSelection();
 
     // --- Eraser options (issue #249) ---
