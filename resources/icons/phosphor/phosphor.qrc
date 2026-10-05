@@ -34,6 +34,8 @@
         <file>dots-three.svg</file>
         <file>download-simple.svg</file>
         <file>eraser.svg</file>
+        <file>eye.svg</file>
+        <file>eye-slash.svg</file>
         <file>file.svg</file>
         <file>file-plus.svg</file>
         <file>file-text.svg</file>
@@ -41,6 +43,7 @@
         <file>folder-plus.svg</file>
         <file>folders.svg</file>
         <file>gear.svg</file>
+        <file>globe.svg</file>
         <file>grid-four.svg</file>
         <file>hand.svg</file>
         <file>hexagon.svg</file>
@@ -51,6 +54,8 @@
         <file>list-bullets.svg</file>
         <file>list-numbers.svg</file>
         <file>list.svg</file>
+        <file>lock.svg</file>
+        <file>lock-open.svg</file>
         <file>magic-wand.svg</file>
         <file>magnifying-glass-minus.svg</file>
         <file>magnifying-glass-plus.svg</file>
@@ -66,6 +71,8 @@
         <file>play.svg</file>
         <file>plus-circle.svg</file>
         <file>plus.svg</file>
+        <file>push-pin.svg</file>
+        <file>push-pin-slash.svg</file>
         <file>rectangle.svg</file>
         <file>rows-plus-bottom.svg</file>
         <file>rows-plus-top.svg</file>
@@ -73,6 +80,7 @@
         <file>shapes.svg</file>
         <file>sign-out.svg</file>
         <file>sliders.svg</file>
+        <file>snowflake.svg</file>
         <file>stack.svg</file>
         <file>star.svg</file>
         <file>sun.svg</file>
