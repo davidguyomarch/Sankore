@@ -34,4 +34,4 @@ tradeoffs. Not implementation details. See the workflow in
 | [0007](0007-unify-board-desktop-modes.md) | Unify Board and Desktop annotation modes on a single scene/view | Accepted |
 | [0008](0008-target-architecture-and-strangler-strategy.md) | Target architecture and incremental (strangler) migration strategy | Accepted |
 | [0009](0009-background-kind-axis.md) | Page background is two orthogonal axes — ruling type and background kind | Accepted |
-| [0010](0010-object-menu-capability-model.md) | Homogeneous capability model for object context menus | Proposed |
+| [0010](0010-object-menu-capability-model.md) | Homogeneous capability model for object context menus | Accepted |

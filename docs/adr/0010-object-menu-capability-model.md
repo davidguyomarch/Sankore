@@ -1,6 +1,6 @@
 # ADR-0010: Homogeneous capability model for object context menus
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-05
 - **Deciders:** David Guyomarch (maintainer)
 - **Related:** #450, #367 (shape fill colour via menu), #251 (add image via context menu), ADR-0005 (shared pen/shape palette)
@@ -70,35 +70,40 @@ behaviours to that matrix.
    object in Play mode. Three link types exist (`eUBGraphicsItemLinkType`): go to
    a page (`eLinkToPage`), open a web URL (`eLinkToWebUrl`), play an audio file
    (`eLinkToAudio`). The misleading label is **renamed to "Link an action…"**
-   (the "…" marks that it opens a dialog, `UBCreateLinkPalette`). We then enable
-   it for every content object for which an on-click link is meaningful, or
-   document per type why not (e.g. media already has transport controls, so a
-   "play audio" link is likely redundant there).
+   (the "…" marks that it opens a dialog, `UBCreateLinkPalette`). For this ADR we
+   keep the link action on the object types that already have it (shapes,
+   strokes, text, image, SVG, group) and do **not** add it to media, widget or
+   PDF — extending it there is new functionality, deferred to a follow-up ADR.
 5. **Remove latent empty toolbars**: an item either provides `buildButtons()`
    content or does not request `useToolBar`.
 6. **Treat #367 (shape fill/stroke colour) as a cell of this matrix**, not a
    one-off: shapes with `hasFillingProperty()`/`hasStrokeProperty()` expose a
    colour affordance wired to the existing `setFillColor`/`setStrokeColor`.
 
-### Target capability matrix (to ratify)
+### Target capability matrix (ratified)
 
-Legend: ✅ = exposed, ✖ = intentionally not exposed, (tbd) = decision pending.
+Legend: ✅ = exposed, ✖ = not exposed. A ✖ cell reflects today's existing
+behaviour; cells that would require **new** functionality (e.g. ungroup, a colour
+affordance on freehand, link actions on media/widget/PDF) are intentionally ✖ for
+now and may be reopened in a follow-up ADR if we decide to add those functions.
 
 | Type | Delete | Duplicate | Z-order | Lock | Visible-ext | Flip | Link action | Colour (fill/stroke) | Go-to-source | Type-specific |
 |------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|
 | Shape (rect/ellipse/line/poly…) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (#367) | ✖ | Return-to-creation (polygon) |
-| Freehand shape | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | (tbd) | ✖ | — |
+| Freehand shape | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✖ | — |
 | Pen/marker stroke | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✖ | — |
 | Text | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✅ | ✖ | ✖ | Editable + rich toolbar |
 | Image | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✅ | — |
 | SVG | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✅ | — |
-| PDF | ✅ | (tbd) | ✅ | ✅ | ✅ | ✖ | (tbd) | ✖ | ✖ | — |
-| Widget/app | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | (tbd) | ✖ | ✅ | Frozen, Transform-as-Tool |
-| Media (video/audio) | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | (tbd) | ✖ | ✅ | Transport toolbar |
-| Group | ✅ | ✅ | ✅ | ✅ | ✅ | (tbd) | ✅ | ✖ | ✖ | (Ungroup — tbd) |
+| PDF | ✅ | ✖ | ✅ | ✅ | ✅ | ✖ | ✖ | ✖ | ✖ | — |
+| Widget/app | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✖ | ✖ | ✅ | Frozen, Transform-as-Tool |
+| Media (video/audio) | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✖ | ✖ | ✅ | Transport toolbar |
+| Group | ✅ | ✅ | ✅ | ✅ | ✅ | ✖ | ✅ | ✖ | ✖ | — |
 
-The `(tbd)` cells are the ones to arbitrate before implementation; the ✅/✖ cells
-record the intended homogeneous baseline.
+The ✖ cells record what we deliberately do **not** expose today. Reopening any
+of them (e.g. link actions on media/widget/PDF, a colour affordance on freehand,
+an ungroup entry) means adding new functionality and is deferred to a follow-up
+ADR — not part of this homogenisation of the existing behaviour.
 
 ## Consequences
 
@@ -113,19 +118,21 @@ Harder / to watch:
 - Touching the shared base `decorateMenu` affects all types — changes need the VM
   visual check (menu rendering is not verifiable headless) across several object
   types.
-- Behaviour changes are user-visible (e.g. Duplicate possibly removed from PDF,
-  flip appearing on more types); each change should land as its own small PR with
-  a VM check, not a big-bang.
-- The matrix must be ratified first: the `(tbd)` cells (PDF duplicate, Add-action
-  on media/widget/PDF, group flip/ungroup, colour on freehand) are product calls.
+- Behaviour changes are user-visible (e.g. Duplicate removed from PDF, flip
+  appearing on more types); each change should land as its own small PR with a VM
+  check, not a big-bang.
+- The matrix is ratified over **today's existing behaviour**: every ✖ that would
+  need new functionality (link actions on media/widget/PDF, a colour affordance
+  on freehand, an ungroup entry) stays ✖ and is deferred to a follow-up ADR.
 
-Follow-up work (separate issues/PRs, after the matrix is Accepted):
+Follow-up work (separate issues/PRs):
 - Deduplicate `UBGraphicsGroupContainerItemDelegate` onto the base.
 - Introduce the capability declaration and route `decorateMenu`/`init` through it.
 - Couple flip menu entries to flippability.
 - Wire shape colour entry (#367).
-- Decide and implement the `(tbd)` cells.
 - Remove empty-toolbar requests (image/widget).
+- Align the matrix: PDF loses Duplicate; flip appears wherever an item is
+  flippable (image/SVG/strokes).
 
 ## Alternatives considered
 
