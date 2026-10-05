@@ -637,12 +637,12 @@ void UBToolController::activateFillTool()
     setActiveTool(ChangeFill);
 }
 
-void UBToolController::applyStrokeToSelection()
-{
-    auto& factory = UBApplication::boardController->shapeFactory();
-    factory.setStrokeColor(currentToolColor());
-    factory.updateFillingPropertyOnSelectedItems();
-}
+// #430: applyStrokeToSelection() was removed. It called the FILL updater
+// (updateFillingPropertyOnSelectedItems) by mistake and only acted on
+// scene()->selectedItems(), which is empty by design after a shape is drawn
+// (#319/#421 deselect). Stroke colour/width for shapes is handled by the
+// DrawingPropsBar swatches (setCurrentColorIndex/setCurrentWidthIndex →
+// shapeFactory, prepares the next shape). The redundant palette button is gone.
 
 void UBToolController::alignSelection()
 {
