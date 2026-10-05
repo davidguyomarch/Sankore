@@ -83,11 +83,17 @@ UBToolWidget::~UBToolWidget()
 
 void UBToolWidget::initialize()
 {
+    // #448: Phosphor icons, loaded at the legacy 26x26 size so the widget's
+    // margins, hit-test zones and background rect (computed from the close
+    // pixmap size) stay identical. close -> x-circle (= delegate Delete),
+    // unpin -> push-pin-slash (= widget delegate "Transform as Tool" off, #445).
     if (!sClosePixmap)
-        sClosePixmap = new QPixmap(":/images/close.svg");
+        sClosePixmap = new QPixmap(QPixmap(":/icons/phosphor/x-circle.svg")
+                                       .scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     if(!sUnpinPixmap)
-        sUnpinPixmap = new QPixmap(":/images/unpin.svg");
+        sUnpinPixmap = new QPixmap(QPixmap(":/icons/phosphor/push-pin-slash.svg")
+                                       .scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     UBGraphicsScene *wscene = dynamic_cast<UBGraphicsScene *>(mToolWidget->scene());
     if (wscene)

@@ -75,9 +75,10 @@ void UBGraphicsWidgetItemDelegate::decorateMenu(QMenu* menu)
 
     freezeAction = menu->addAction(tr("Frozen"), this, &UBGraphicsWidgetItemDelegate::freeze);
 
+    // #445: Phosphor snowflake icon (frozen state)
     QIcon freezeIcon;
-    freezeIcon.addPixmap(QPixmap(":/images/frozen.svg"), QIcon::Normal, QIcon::On);
-    freezeIcon.addPixmap(QPixmap(":/images/unfrozen.svg"), QIcon::Normal, QIcon::Off);
+    freezeIcon.addPixmap(QPixmap(":/icons/phosphor/snowflake.svg"), QIcon::Normal, QIcon::On);
+    freezeIcon.addPixmap(QPixmap(":/icons/phosphor/snowflake.svg"), QIcon::Normal, QIcon::Off);
     freezeAction->setIcon(freezeIcon);
 
     freezeAction->setCheckable(true);
@@ -85,9 +86,10 @@ void UBGraphicsWidgetItemDelegate::decorateMenu(QMenu* menu)
     if (delegated()->canBeTool())
     {
         setAsToolAction = mMenu->addAction(tr("Transform as Tool "), this, [this]() { pin(); });
+        // #445: Phosphor push-pin icons (On = pinned, Off = unpinned)
         QIcon pinIcon;
-        pinIcon.addPixmap(QPixmap(":/images/unpin.svg"), QIcon::Normal, QIcon::On);
-        pinIcon.addPixmap(QPixmap(":/images/pin.svg"), QIcon::Normal, QIcon::Off);
+        pinIcon.addPixmap(QPixmap(":/icons/phosphor/push-pin-slash.svg"), QIcon::Normal, QIcon::On);
+        pinIcon.addPixmap(QPixmap(":/icons/phosphor/push-pin.svg"), QIcon::Normal, QIcon::Off);
         setAsToolAction->setIcon(pinIcon);
     }
 }
