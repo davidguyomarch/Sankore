@@ -59,6 +59,15 @@ behaviours to that matrix.
    entries / frame buttons each object type exposes. Each item type declares its
    capabilities in one place; `decorateMenu()` and `init()` read that declaration
    rather than a scattered set of setters.
+   - **Implementation shape (decided): an explicit capability struct.** Introduce
+     a plain value type (e.g. `UBItemCapabilities { bool duplicate; bool flip;
+     bool linkAction; bool fillColour; bool goToSource; … }`) that each item type
+     fills in one place. The delegate base reads this struct to build the frame
+     buttons and the menu. Deliberately *not* a per-type virtual that re-wraps
+     the old scattered setters: the struct makes the matrix a single declarative
+     datum, and the **capability logic becomes pure and unit-testable** (a struct
+     in → the expected set of entries out), while the menu rendering itself stays
+     VM-only. This is the one piece of this ADR that gets real unit tests.
 2. **Make the group delegate reuse the base** `decorateMenu()` and the base
    action handlers — delete the duplicated `//TODO claudio` blocks.
 3. **Couple flip to flippability**: a "Flip" menu affordance appears whenever the
