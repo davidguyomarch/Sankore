@@ -739,7 +739,10 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
     }
 
     if(mCanTrigAnAction)
-        mShowPanelToAddAnAction = menu->addAction(tr("Add an action"), this, [this]() { onAddActionClicked(); });
+        // #450/ADR-0010: label clarified — this attaches an on-click link
+        // (page / web URL / audio) to the SELECTED object; it does not add a
+        // new object.
+        mShowPanelToAddAnAction = menu->addAction(tr("Link an action…"), this, [this]() { onAddActionClicked(); });
 
     if (mCanReturnInCreationMode)
         menu->addAction(tr("Return to creation mode"), this, [this]() { onReturnToCreationModeClicked(); });

@@ -26,9 +26,11 @@ current state does not meet it. An inventory of the delegate code shows:
     Image, SVG and smooth strokes are `setFlippable(true)` (resize-handle flip)
     but expose **no** flip menu entry — two unrelated axes (`mFlippable` vs the
     mirror flags) applied inconsistently.
-  - **"Add an action"** is present on shapes, strokes, text, image, SVG, group,
-    but **absent** on PDF, widget and media (`canTrigAnAction` left false) with
-    no stated rationale.
+  - The **on-click link action** (historically mislabelled "Add an action" — it
+    attaches an on-click link to the selected object, it does not add a new
+    object) is present on shapes, strokes, text, image, SVG, group, but
+    **absent** on PDF, widget and media (`canTrigAnAction` left false) with no
+    stated rationale.
   - **PDF** is the most degenerate: Locked + Visible only.
   - **Duplicate** is universal-by-accident: `mCanDuplicate` defaults to `true`
     and nothing ever disables it (even a PDF background page shows Duplicate).
@@ -62,8 +64,16 @@ behaviours to that matrix.
 3. **Couple flip to flippability**: a "Flip" menu affordance appears whenever the
    object is flippable, so flip is consistent with the resize-handle flip
    behaviour (no more "flippable but no flip entry").
-4. **Rationalise "Add an action"**: enable it for every content object for which
-   an action is meaningful, or document per type why not.
+4. **Clarify and rationalise the on-click link action.** The entry historically
+   labelled "Add an action" does **not** add a new object: it attaches an
+   **on-click link** to the *selected* object, played when the user clicks that
+   object in Play mode. Three link types exist (`eUBGraphicsItemLinkType`): go to
+   a page (`eLinkToPage`), open a web URL (`eLinkToWebUrl`), play an audio file
+   (`eLinkToAudio`). The misleading label is **renamed to "Link an action…"**
+   (the "…" marks that it opens a dialog, `UBCreateLinkPalette`). We then enable
+   it for every content object for which an on-click link is meaningful, or
+   document per type why not (e.g. media already has transport controls, so a
+   "play audio" link is likely redundant there).
 5. **Remove latent empty toolbars**: an item either provides `buildButtons()`
    content or does not request `useToolBar`.
 6. **Treat #367 (shape fill/stroke colour) as a cell of this matrix**, not a
@@ -74,7 +84,7 @@ behaviours to that matrix.
 
 Legend: ✅ = exposed, ✖ = intentionally not exposed, (tbd) = decision pending.
 
-| Type | Delete | Duplicate | Z-order | Lock | Visible-ext | Flip | Add action | Colour (fill/stroke) | Go-to-source | Type-specific |
+| Type | Delete | Duplicate | Z-order | Lock | Visible-ext | Flip | Link action | Colour (fill/stroke) | Go-to-source | Type-specific |
 |------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|
 | Shape (rect/ellipse/line/poly…) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (#367) | ✖ | Return-to-creation (polygon) |
 | Freehand shape | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | (tbd) | ✖ | — |
