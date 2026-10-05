@@ -74,6 +74,7 @@
 
 #include "frameworks/UBFileSystemUtils.h"
 #include "controllers/UBToolController.h"
+#include "qml/UBThemeManager.h"
 
 #include "gui/UBCreateLinkPalette.h"
 
@@ -712,33 +713,61 @@ void UBGraphicsItemDelegate::buildButtons()
 {
 }
 
+QIcon UBGraphicsItemDelegate::themedMenuIcon(const QString& svgResource)
+{
+    // #452: render a monochrome Phosphor SVG tinted to the theme foreground so
+    // the icon is readable on the dark (and light) QMenu, matching the label
+    // colour. Rendered at a menu-appropriate size.
+    QSvgRenderer renderer(svgResource);
+    if (!renderer.isValid())
+        return QIcon(svgResource);
+
+    const int sz = 20;
+    QImage img(sz, sz, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::transparent);
+    {
+        QPainter p(&img);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        renderer.render(&p, QRectF(0, 0, sz, sz));
+        // Replace the glyph RGB with the theme foreground, keeping its alpha.
+        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        QColor tint = UBThemeManager::instance()->onSurface();
+        tint.setAlpha(255);
+        p.fillRect(img.rect(), tint);
+    }
+    return QIcon(QPixmap::fromImage(img));
+}
+
+QIcon UBGraphicsItemDelegate::themedMenuIcon(const QString& onResource, const QString& offResource)
+{
+    QIcon icon;
+    const QIcon on = themedMenuIcon(onResource);
+    const QIcon off = themedMenuIcon(offResource);
+    const int sz = 20;
+    icon.addPixmap(on.pixmap(sz, sz), QIcon::Normal, QIcon::On);
+    icon.addPixmap(off.pixmap(sz, sz), QIcon::Normal, QIcon::Off);
+    return icon;
+}
+
 void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 {
     mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsItemDelegate::lock);
-    // #445: Phosphor icons (On = locked, Off = unlocked)
-    QIcon lockIcon;
-    lockIcon.addPixmap(QPixmap(":/icons/phosphor/lock.svg"), QIcon::Normal, QIcon::On);
-    lockIcon.addPixmap(QPixmap(":/icons/phosphor/lock-open.svg"), QIcon::Normal, QIcon::Off);
-    mLockAction->setIcon(lockIcon);
+    // #445/#452: Phosphor icons, theme-tinted (On = locked, Off = unlocked)
+    mLockAction->setIcon(themedMenuIcon(":/icons/phosphor/lock.svg", ":/icons/phosphor/lock-open.svg"));
     mLockAction->setCheckable(true);
 
     mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsItemDelegate::showHide);
     mShowOnDisplayAction->setCheckable(true);
 
-    // #445: Phosphor icons (On = visible, Off = hidden)
-    QIcon showIcon;
-    showIcon.addPixmap(QPixmap(":/icons/phosphor/eye.svg"), QIcon::Normal, QIcon::On);
-    showIcon.addPixmap(QPixmap(":/icons/phosphor/eye-slash.svg"), QIcon::Normal, QIcon::Off);
-    mShowOnDisplayAction->setIcon(showIcon);
+    // #445/#452: Phosphor icons, theme-tinted (On = visible, Off = hidden)
+    mShowOnDisplayAction->setIcon(themedMenuIcon(":/icons/phosphor/eye.svg", ":/icons/phosphor/eye-slash.svg"));
 
     if (mShowGoContentButton)
     {
         mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, [this]() { gotoContentSource(); });
 
-        // #445: Phosphor globe icon
-        QIcon sourceIcon;
-        sourceIcon.addPixmap(QPixmap(":/icons/phosphor/globe.svg"), QIcon::Normal, QIcon::On);
-        mGotoContentSourceAction->setIcon(sourceIcon);
+        // #445/#452: Phosphor globe icon, theme-tinted
+        mGotoContentSourceAction->setIcon(themedMenuIcon(":/icons/phosphor/globe.svg"));
     }
 
     if(mCanTrigAnAction)

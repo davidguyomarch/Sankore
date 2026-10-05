@@ -67,21 +67,15 @@ UBGraphicsGroupContainerItem *UBGraphicsGroupContainerItemDelegate::delegated()
 void UBGraphicsGroupContainerItemDelegate::decorateMenu(QMenu *menu)
 {
     mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsGroupContainerItemDelegate::lock);
-    // #445: Phosphor icons (On = locked, Off = unlocked)
-    QIcon lockIcon;
-    lockIcon.addPixmap(QPixmap(":/icons/phosphor/lock.svg"), QIcon::Normal, QIcon::On);
-    lockIcon.addPixmap(QPixmap(":/icons/phosphor/lock-open.svg"), QIcon::Normal, QIcon::Off);
-    mLockAction->setIcon(lockIcon);
+    // #445/#452: Phosphor icons, theme-tinted (On = locked, Off = unlocked)
+    mLockAction->setIcon(themedMenuIcon(":/icons/phosphor/lock.svg", ":/icons/phosphor/lock-open.svg"));
     mLockAction->setCheckable(true);
 
     mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsGroupContainerItemDelegate::showHide);
     mShowOnDisplayAction->setCheckable(true);
 
-    // #445: Phosphor icons (On = visible, Off = hidden)
-    QIcon showIcon;
-    showIcon.addPixmap(QPixmap(":/icons/phosphor/eye.svg"), QIcon::Normal, QIcon::On);
-    showIcon.addPixmap(QPixmap(":/icons/phosphor/eye-slash.svg"), QIcon::Normal, QIcon::Off);
-    mShowOnDisplayAction->setIcon(showIcon);
+    // #445/#452: Phosphor icons, theme-tinted (On = visible, Off = hidden)
+    mShowOnDisplayAction->setIcon(themedMenuIcon(":/icons/phosphor/eye.svg", ":/icons/phosphor/eye-slash.svg"));
 
     mShowPanelToAddAnAction = menu->addAction(tr("Add an action"), this, [this]() { onAddActionClicked(); });
 }

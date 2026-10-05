@@ -371,6 +371,13 @@ class UBGraphicsItemDelegate : public QObject
         virtual void decorateMenu(QMenu *menu);
         virtual void updateMenuActionState();
 
+        // #452: build a QIcon from a (monochrome Phosphor) SVG resource,
+        // tinted to the current theme foreground so menu icons stay readable on
+        // both the dark and light QMenu. For a checkable action, pass distinct
+        // on/off resources; the same tint applies to both states.
+        static QIcon themedMenuIcon(const QString& svgResource);
+        static QIcon themedMenuIcon(const QString& onResource, const QString& offResource);
+
         QGraphicsItem* mDelegated;
 
         //buttons from the top left section of delegate frame
