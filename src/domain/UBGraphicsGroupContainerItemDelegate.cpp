@@ -83,7 +83,9 @@ void UBGraphicsGroupContainerItemDelegate::decorateMenu(QMenu *menu)
     showIcon.addPixmap(QPixmap(":/icons/phosphor/eye-slash.svg"), QIcon::Normal, QIcon::Off);
     mShowOnDisplayAction->setIcon(showIcon);
 
-    mShowPanelToAddAnAction = menu->addAction(tr("Add an action"), this, [this]() { onAddActionClicked(); });
+    // #450/ADR-0010: label clarified (attaches an on-click link to the selected
+    // group; does not add a new object).
+    mShowPanelToAddAnAction = menu->addAction(tr("Link an action…"), this, [this]() { onAddActionClicked(); });
 }
 
 //TODO claudio
