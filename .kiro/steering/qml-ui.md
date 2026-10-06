@@ -123,3 +123,46 @@ pas reproductibles en headless. Le smoke test offscreen valide le **chargement**
 (`status=1`, absence d'erreur de binding) mais pas l'affichage. Valider le visuel
 sur la VM ; instrumenter avec des logs `[TAG]`/`[ICON]` dans `startup.log` en cas
 de doute (voir `dev-workflow.md`).
+
+## Menus contextuels des objets du tableau (modèle de capacités, ADR-0010)
+
+Les objets du tableau (formes, traits, texte, image, SVG, PDF, widget, média,
+groupe) n'ont **pas** de menu au clic droit natif. Un objet sélectionné affiche
+un **cadre** (`UBGraphicsDelegateFrame`) avec des boutons flottants
+(Supprimer / Dupliquer / « … » / Z-ordre) ; le bouton **« … »** ouvre le QMenu
+construit par `UBGraphicsItemDelegate::decorateMenu()`. Détail complet et décision
+dans **l'ADR-0010** — ce qui suit est le réflexe à avoir avant d'y toucher.
+
+- **Le menu est piloté par une matrice de capacités**, pas par des flags épars.
+  La composition et l'**ordre** des entrées de base viennent de la fonction pure
+  `UBItemMenu::baseMenuEntries(caps)` (`src/domain/UBItemCapabilities.h`), qui est
+  **testée en TU** (`tst_UBItemCapabilities`). Pour changer quelles entrées
+  existent ou leur ordre, c'est **là** qu'on édite — et on met à jour le TU.
+- **Un type déclare ses capacités en un seul endroit** via un profil pur
+  (`UBItemMenu::forShape()` / `forImage()` / `forPdf()` / …), que son constructeur
+  applique par `Delegate()->applyMenuCapabilities(UBItemMenu::forXxx())`
+  **après `init()`**. Ne pas revenir aux anciens setters menu épars
+  (`setHorizontalMirror`/`setVerticalMirror`/`setCanTrigAnAction`/
+  `setCanReturnInCreationMode`) dans les constructeurs : passer par le profil.
+- **Ajouter un type d'objet** : écrire un `forXxx()` (+ son test), l'appliquer dans
+  le constructeur après `init()`. **Ajouter une entrée de menu** : ajouter une
+  valeur à l'enum `Entry`, la gater dans `baseMenuEntries()`, la mapper vers un
+  `QAction` dans `decorateMenu()`, l'exposer via un champ de `Capabilities`.
+- **Flags à NE PAS migrer vers le profil** (double usage ou runtime) :
+  `setFlippable`/`setRotatable` (pilotent aussi le cadre), `setCanDuplicate`
+  (bouton Dupliquer, et **PDF le pose à `false` AVANT `init()`** car `init()`
+  construit les boutons). Mutations runtime à préserver : le **groupe** recalcule
+  flippable/rotatable depuis ses enfants (`addToGroup`/`removeFromGroup`),
+  `setAction()` force l'entrée « Link an action », le widget `setOwnFolder` pose
+  rotatable. Ces comportements ne sont pas exprimables en profil statique.
+- **Flip = `horizontalMirror || flippable`** : les formes utilisent les flags
+  mirror, image/SVG/traits utilisent `flippable` — les deux montrent Flip. Ne pas
+  fusionner ces deux champs.
+- **Icônes de menu** : via le helper `UBGraphicsItemDelegate::themedMenuIcon()`
+  (SVG Phosphor reteinté au thème `onSurface`, lisible sur menu clair/sombre).
+  Les sous-delegates (texte « Editable », widget « Frozen »/« Transform as Tool »)
+  **appellent la base** puis ajoutent leurs entrées — ne pas réimplémenter la base
+  (piège historique du groupe, corrigé #455).
+- **Non validable en headless** : le rendu réel du menu et l'instanciation d'un
+  vrai item (constructeur = delegate + frame) restent VM-only. Seule la logique de
+  capacités (`baseMenuEntries` + profils `forXxx()`) est testable en TU.
