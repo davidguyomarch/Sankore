@@ -749,44 +749,75 @@ QIcon UBGraphicsItemDelegate::themedMenuIcon(const QString& onResource, const QS
     return icon;
 }
 
+UBItemMenu::Capabilities UBGraphicsItemDelegate::menuCapabilities() const
+{
+    // ADR-0010 (#454): derive the declarative capability struct from the legacy
+    // per-type flags. For now the flags remain the source; this centralises the
+    // menu composition decision in one place and feeds the pure, unit-tested
+    // UBItemMenu::baseMenuEntries(). (Option ii — migrating each item type to
+    // declare its own capabilities() and dropping the flags — is deferred.)
+    UBItemMenu::Capabilities caps;
+    caps.duplicate        = mCanDuplicate;
+    caps.goToSource       = mShowGoContentButton;
+    caps.linkAction       = mCanTrigAnAction;
+    caps.returnToCreation = mCanReturnInCreationMode;
+    caps.horizontalMirror = mHorizontalMirror;
+    caps.verticalMirror   = mVerticalMirror;
+    return caps;
+}
+
 void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 {
-    mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsItemDelegate::lock);
-    // #445/#452: Phosphor icons, theme-tinted (On = locked, Off = unlocked)
-    mLockAction->setIcon(themedMenuIcon(":/icons/phosphor/lock.svg", ":/icons/phosphor/lock-open.svg"));
-    mLockAction->setCheckable(true);
+    // ADR-0010 (#454): the base menu composition and ORDER come from the pure
+    // UBItemMenu::baseMenuEntries(); this method only maps each entry to its
+    // concrete QAction (label, icon, slot). Behaviour is identical to the former
+    // hand-written sequence.
+    const UBItemMenu::Capabilities caps = menuCapabilities();
 
-    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsItemDelegate::showHide);
-    mShowOnDisplayAction->setCheckable(true);
-
-    // #445/#452: Phosphor icons, theme-tinted (On = visible, Off = hidden)
-    mShowOnDisplayAction->setIcon(themedMenuIcon(":/icons/phosphor/eye.svg", ":/icons/phosphor/eye-slash.svg"));
-
-    if (mShowGoContentButton)
+    for (UBItemMenu::Entry entry : UBItemMenu::baseMenuEntries(caps))
     {
-        mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, [this]() { gotoContentSource(); });
+        switch (entry)
+        {
+        case UBItemMenu::Entry::Locked:
+            mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsItemDelegate::lock);
+            // #445/#452: Phosphor icons, theme-tinted (On = locked, Off = unlocked)
+            mLockAction->setIcon(themedMenuIcon(":/icons/phosphor/lock.svg", ":/icons/phosphor/lock-open.svg"));
+            mLockAction->setCheckable(true);
+            break;
 
-        // #445/#452: Phosphor globe icon, theme-tinted
-        mGotoContentSourceAction->setIcon(themedMenuIcon(":/icons/phosphor/globe.svg"));
+        case UBItemMenu::Entry::VisibleOnDisplay:
+            mShowOnDisplayAction = menu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsItemDelegate::showHide);
+            mShowOnDisplayAction->setCheckable(true);
+            // #445/#452: Phosphor icons, theme-tinted (On = visible, Off = hidden)
+            mShowOnDisplayAction->setIcon(themedMenuIcon(":/icons/phosphor/eye.svg", ":/icons/phosphor/eye-slash.svg"));
+            break;
+
+        case UBItemMenu::Entry::GoToContentSource:
+            mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, [this]() { gotoContentSource(); });
+            // #445/#452: Phosphor globe icon, theme-tinted
+            mGotoContentSourceAction->setIcon(themedMenuIcon(":/icons/phosphor/globe.svg"));
+            break;
+
+        case UBItemMenu::Entry::LinkAction:
+            // #450/ADR-0010: label clarified — this attaches an on-click link
+            // (page / web URL / audio) to the SELECTED object; it does not add a
+            // new object.
+            mShowPanelToAddAnAction = menu->addAction(tr("Link an action…"), this, [this]() { onAddActionClicked(); });
+            break;
+
+        case UBItemMenu::Entry::ReturnToCreation:
+            menu->addAction(tr("Return to creation mode"), this, [this]() { onReturnToCreationModeClicked(); });
+            break;
+
+        case UBItemMenu::Entry::FlipHorizontal:
+            menu->addAction(tr("Flip on horizontal axis"), this, [this]() { flipHorizontally(); });
+            break;
+
+        case UBItemMenu::Entry::FlipVertical:
+            menu->addAction(tr("Flip on vertical axis"), this, [this]() { flipVertically(); });
+            break;
+        }
     }
-
-    if(mCanTrigAnAction)
-        // #450/ADR-0010: label clarified — this attaches an on-click link
-        // (page / web URL / audio) to the SELECTED object; it does not add a
-        // new object.
-        mShowPanelToAddAnAction = menu->addAction(tr("Link an action…"), this, [this]() { onAddActionClicked(); });
-
-    if (mCanReturnInCreationMode)
-        menu->addAction(tr("Return to creation mode"), this, [this]() { onReturnToCreationModeClicked(); });
-
-    //N/C - NNE - 20140505 : add vertical and horizontal flip
-    if(mHorizontalMirror)
-        menu->addAction(tr("Flip on horizontal axis"), this, [this]() { flipHorizontally(); });
-
-    if(mVerticalMirror)
-        menu->addAction(tr("Flip on vertical axis"), this, [this]() { flipVertically(); });
-    //N/C - NNE - 20140505 : END
-
 }
 
 //N/C - NNE - 20140505 : add vertical and horizontal flip

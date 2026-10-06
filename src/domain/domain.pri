@@ -27,6 +27,7 @@ HEADERS += src/domain/UBGraphicsScene.h \
     src/domain/UBGraphicsGroupContainerItemDelegate.h \
     src/domain/UBGraphicsStrokesGroup.h \
     src/domain/UBGraphicsItemGroupUndoCommand.h \
+    src/domain/UBItemCapabilities.h \
     src/domain/UBGraphicsItemDelegate.h \
     src/domain/UBGraphicsTextItemDelegate.h \
     src/domain/UBGraphicsDelegateFrame.h \
