@@ -34,6 +34,7 @@ private slots:
     void testWidgetProfile();
     void testFlippableYieldsBothFlips();
     void testShapeMirrorStillFlips();
+    void testFillColourGated();
 };
 
 #endif // TST_UBITEMCAPABILITIES_H

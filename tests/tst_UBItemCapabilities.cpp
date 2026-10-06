@@ -31,6 +31,7 @@ void TestUBItemCapabilities::testOrderIsStable()
 {
     // All flags on: the order must match decorateMenu()'s build order exactly.
     Capabilities caps;
+    caps.fillColour = true;
     caps.goToSource = true;
     caps.linkAction = true;
     caps.returnToCreation = true;
@@ -41,11 +42,27 @@ void TestUBItemCapabilities::testOrderIsStable()
     const QList<Entry> expected = {
         Entry::Locked,
         Entry::VisibleOnDisplay,
+        Entry::FillColour,
         Entry::GoToContentSource,
         Entry::LinkAction,
         Entry::ReturnToCreation,
         Entry::FlipHorizontal,
         Entry::FlipVertical
+    };
+    QCOMPARE(e, expected);
+}
+
+void TestUBItemCapabilities::testFillColourGated()
+{
+    // #458: Fill colour appears only when the item has a fill (shapes), right
+    // after Visible; absent by default.
+    QVERIFY(!baseMenuEntries(Capabilities{}).contains(Entry::FillColour));
+
+    Capabilities caps;
+    caps.fillColour = true;
+    const QList<Entry> e = baseMenuEntries(caps);
+    const QList<Entry> expected = {
+        Entry::Locked, Entry::VisibleOnDisplay, Entry::FillColour
     };
     QCOMPARE(e, expected);
 }
@@ -63,8 +80,10 @@ void TestUBItemCapabilities::testGatedEntriesHiddenByDefault()
 
 void TestUBItemCapabilities::testShapeProfile()
 {
-    // Shape (UBAbstractGraphicsItem): canTrigAnAction + H/V mirror, no go-to-source.
+    // Shape (UBAbstractGraphicsItem): fill colour (#458) + canTrigAnAction +
+    // H/V mirror, no go-to-source.
     Capabilities caps;
+    caps.fillColour = true;
     caps.linkAction = true;
     caps.horizontalMirror = true;
     caps.verticalMirror = true;
@@ -73,6 +92,7 @@ void TestUBItemCapabilities::testShapeProfile()
     const QList<Entry> expected = {
         Entry::Locked,
         Entry::VisibleOnDisplay,
+        Entry::FillColour,
         Entry::LinkAction,
         Entry::FlipHorizontal,
         Entry::FlipVertical

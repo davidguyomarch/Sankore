@@ -41,6 +41,7 @@
 #include <QDrag>
 #include <QMenu>
 #include <QComboBox>
+#include <QColorDialog>
 #include <QGraphicsSceneMouseEvent>
 
 #include "UBGraphicsItemDelegate.h"
@@ -69,6 +70,7 @@
 #include "domain/UBGraphicsTextItem.h"
 #include "domain/UBGraphicsMediaItem.h"
 #include "domain/UBGraphicsGroupContainerItem.h"
+#include "domain/UBAbstractGraphicsItem.h"
 
 #include "web/UBWebController.h"
 
@@ -764,6 +766,11 @@ UBItemMenu::Capabilities UBGraphicsItemDelegate::menuCapabilities() const
     caps.horizontalMirror = mHorizontalMirror;
     caps.verticalMirror   = mVerticalMirror;
     caps.flippable        = mFlippable;   // #456: flippable items also get Flip
+    // #458: shapes that actually carry a fill property get a "Fill colour…"
+    // entry. Gated on the item being a shape with hasFillingProperty() so it
+    // never shows on images/text/etc. that share this base delegate.
+    if (UBAbstractGraphicsItem* shape = dynamic_cast<UBAbstractGraphicsItem*>(mDelegated))
+        caps.fillColour = shape->hasFillingProperty();
     return caps;
 }
 
@@ -792,6 +799,15 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
             // #445/#452: Phosphor icons, theme-tinted (On = visible, Off = hidden)
             mShowOnDisplayAction->setIcon(themedMenuIcon(":/icons/phosphor/eye.svg", ":/icons/phosphor/eye-slash.svg"));
             break;
+
+        case UBItemMenu::Entry::FillColour:
+        {
+            // #458: fill colour of the selected shape, via the menu. The paint-
+            // bucket tool stays available separately. Icon = paint-bucket.
+            QAction* fillAction = menu->addAction(tr("Fill colour…"), this, [this]() { pickFillColour(); });
+            fillAction->setIcon(themedMenuIcon(":/icons/phosphor/paint-bucket.svg"));
+            break;
+        }
 
         case UBItemMenu::Entry::GoToContentSource:
             mGotoContentSourceAction = menu->addAction(tr("Go to Content Source"), this, [this]() { gotoContentSource(); });
@@ -840,6 +856,31 @@ void UBGraphicsItemDelegate::flipVertically()
     mDelegated->moveBy(-dx, 0);
 }
 //N/C - NNE - 20140505 : END
+
+void UBGraphicsItemDelegate::pickFillColour()
+{
+    // #458: set the fill colour of the SELECTED shape via the "…" menu. The
+    // paint-bucket tool (ChangeFill) remains available separately. Seeds the
+    // dialog with the shape's current fill colour; applies a solid fill.
+    UBAbstractGraphicsItem* shape = dynamic_cast<UBAbstractGraphicsItem*>(mDelegated);
+    if (!shape || !shape->hasFillingProperty())
+        return;
+
+    QWidget* parent = UBApplication::boardController ? UBApplication::boardController->controlView() : nullptr;
+    QColorDialog colorDialog(shape->brush().color(), parent);
+    colorDialog.setOption(QColorDialog::ShowAlphaChannel, true);
+    colorDialog.setWindowTitle(tr("Fill colour"));
+    // Keep the dialog legible on the dark theme (same guard as the text delegate).
+    if (UBSettings::settings()->isDarkBackground())
+        colorDialog.setStyleSheet("background-color: white;");
+
+    if (colorDialog.exec())
+    {
+        shape->setStyle(Qt::SolidPattern);
+        shape->setFillColor(colorDialog.selectedColor());
+        shape->update();
+    }
+}
 
 void UBGraphicsItemDelegate::onAddActionClicked()
 {
