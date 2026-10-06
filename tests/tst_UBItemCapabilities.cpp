@@ -90,19 +90,50 @@ void TestUBItemCapabilities::testPdfProfile()
 
 void TestUBItemCapabilities::testImageProfile()
 {
-    // Image: go-to-source + link action (image sets showGoContent + canTrigAnAction).
+    // Image: go-to-source + link action + flippable (showGoContent +
+    // canTrigAnAction + setFlippable(true)). #456: being flippable now yields
+    // both Flip entries.
     Capabilities caps;
     caps.goToSource = true;
     caps.linkAction = true;
+    caps.flippable = true;
 
     const QList<Entry> e = baseMenuEntries(caps);
     const QList<Entry> expected = {
         Entry::Locked,
         Entry::VisibleOnDisplay,
         Entry::GoToContentSource,
-        Entry::LinkAction
+        Entry::LinkAction,
+        Entry::FlipHorizontal,
+        Entry::FlipVertical
     };
     QCOMPARE(e, expected);
+}
+
+void TestUBItemCapabilities::testFlippableYieldsBothFlips()
+{
+    // #456: an item that is only flippable (strokes/SVG — no mirror flags) still
+    // gets both Flip entries.
+    Capabilities caps;
+    caps.flippable = true;
+
+    const QList<Entry> e = baseMenuEntries(caps);
+    QVERIFY(e.contains(Entry::FlipHorizontal));
+    QVERIFY(e.contains(Entry::FlipVertical));
+}
+
+void TestUBItemCapabilities::testShapeMirrorStillFlips()
+{
+    // #456 regression guard: shapes set the mirror flags (not flippable) and
+    // must keep both Flip entries.
+    Capabilities caps;
+    caps.horizontalMirror = true;
+    caps.verticalMirror = true;
+    caps.flippable = false;
+
+    const QList<Entry> e = baseMenuEntries(caps);
+    QVERIFY(e.contains(Entry::FlipHorizontal));
+    QVERIFY(e.contains(Entry::FlipVertical));
 }
 
 void TestUBItemCapabilities::testWidgetProfile()

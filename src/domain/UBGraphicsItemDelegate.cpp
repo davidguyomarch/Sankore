@@ -763,6 +763,7 @@ UBItemMenu::Capabilities UBGraphicsItemDelegate::menuCapabilities() const
     caps.returnToCreation = mCanReturnInCreationMode;
     caps.horizontalMirror = mHorizontalMirror;
     caps.verticalMirror   = mVerticalMirror;
+    caps.flippable        = mFlippable;   // #456: flippable items also get Flip
     return caps;
 }
 
