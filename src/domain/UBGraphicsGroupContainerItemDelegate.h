@@ -38,20 +38,12 @@ public:
     void setAction(UBGraphicsItemAction* action);
 
 protected:
-    virtual void decorateMenu(QMenu *menu);
-    virtual void buildButtons();
-
     virtual bool mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual bool mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
     DelegateButton *mDestroyGroupButton;
-
-private slots:
-    void onAddActionClicked();
-    void onRemoveActionClicked();
-    void saveAction(UBGraphicsItemAction *action);
 };
 
 #endif // UBGRAPHICSGROUPCONTAINERITEMDELEGATE_H

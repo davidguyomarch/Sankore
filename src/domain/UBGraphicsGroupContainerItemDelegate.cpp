@@ -64,74 +64,15 @@ UBGraphicsGroupContainerItem *UBGraphicsGroupContainerItemDelegate::delegated()
     return dynamic_cast<UBGraphicsGroupContainerItem*>(mDelegated);
 }
 
-void UBGraphicsGroupContainerItemDelegate::decorateMenu(QMenu *menu)
-{
-    mLockAction = menu->addAction(tr("Locked"), this, &UBGraphicsGroupContainerItemDelegate::lock);
-    // #445/#452: Phosphor icons, theme-tinted (On = locked, Off = unlocked)
-    mLockAction->setIcon(themedMenuIcon(":/icons/phosphor/lock.svg", ":/icons/phosphor/lock-open.svg"));
-    mLockAction->setCheckable(true);
-
-    mShowOnDisplayAction = mMenu->addAction(tr("Visible on Extended Screen"), this, &UBGraphicsGroupContainerItemDelegate::showHide);
-    mShowOnDisplayAction->setCheckable(true);
-
-    // #445/#452: Phosphor icons, theme-tinted (On = visible, Off = hidden)
-    mShowOnDisplayAction->setIcon(themedMenuIcon(":/icons/phosphor/eye.svg", ":/icons/phosphor/eye-slash.svg"));
-
-    // #450/ADR-0010: label clarified (attaches an on-click link to the selected
-    // group; does not add a new object).
-    mShowPanelToAddAnAction = menu->addAction(tr("Link an action…"), this, [this]() { onAddActionClicked(); });
-}
-
-//TODO claudio
-// duplicated code UBGraphicsDelegateItem
-void UBGraphicsGroupContainerItemDelegate::onAddActionClicked()
-{
-    UBCreateLinkPalette* linkPalette = UBApplication::boardController->paletteManager()->linkPalette();
-    linkPalette->show();
-    connect(linkPalette, &UBCreateLinkPalette::definedAction, this, &UBGraphicsGroupContainerItemDelegate::saveAction);
-}
-
-//TODO claudio
-// duplicated code UBGraphicsDelegateItem
-void UBGraphicsGroupContainerItemDelegate::saveAction(UBGraphicsItemAction* action)
-{
-    mAction = action;
-    mMenu->removeAction(mShowPanelToAddAnAction);
-    QString actionLabel;
-    switch (mAction->linkType()) {
-    case eLinkToAudio:
-        actionLabel= tr("Remove link to audio");
-        break;
-    case eLinkToPage:
-        actionLabel = tr("Remove link to page");
-        break;
-    case eLinkToWebUrl:
-        actionLabel = tr("Remove link to web url");
-    default:
-        break;
-    }
-
-    mRemoveAnAction = mMenu->addAction(actionLabel, this, [this]() { onRemoveActionClicked(); });
-    mMenu->addAction(mRemoveAnAction);
-}
-
-//TODO claudio
-// duplicated code UBGraphicsDelegateItem
-void UBGraphicsGroupContainerItemDelegate::onRemoveActionClicked()
-{
-    if(mAction){
-        mAction->actionRemoved();
-        delete mAction;
-        mAction = nullptr;
-    }
-    mMenu->removeAction(mRemoveAnAction);
-    mMenu->addAction(mShowPanelToAddAnAction);
-}
-
-void UBGraphicsGroupContainerItemDelegate::buildButtons()
-{
-    UBGraphicsItemDelegate::buildButtons();
-}
+// #455/ADR-0010: decorateMenu(), onAddActionClicked(), saveAction() and
+// onRemoveActionClicked() were verbatim copies of the base delegate (the old
+// //TODO claudio "duplicated code"). They are removed: the group now inherits
+// the base decorateMenu(), which — because the constructor sets
+// setCanTrigAnAction(true) — produces the same Locked / Visible / Link-action
+// menu, and the base's link-action handlers (which also fix an audio source
+// leak on delete). The buildButtons() override that merely forwarded to the
+// base is likewise dropped. The group keeps only its genuinely specific mouse
+// handling below (deselect current + play the action in Play mode).
 
 bool UBGraphicsGroupContainerItemDelegate::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
