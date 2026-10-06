@@ -40,6 +40,10 @@ UBGraphicsPDFItem::UBGraphicsPDFItem(PDFRenderer *renderer, int pageNumber, QGra
     setData(UBGraphicsItemData::itemLayerType, QVariant(itemLayerType::BackgroundItem)); //Necessary to set if we want z value to be assigned correctly
 
     setDelegate(new UBGraphicsItemDelegate(this,0, true, false, false));
+    // #457/ADR-0010: a PDF page is background content — it must not be
+    // duplicated. Disable the Duplicate frame button BEFORE init(), which builds
+    // the buttons based on canDuplicate().
+    Delegate()->setCanDuplicate(false);
     Delegate()->init();
 }
 
