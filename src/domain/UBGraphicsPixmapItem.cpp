@@ -47,7 +47,9 @@
 UBGraphicsPixmapItem::UBGraphicsPixmapItem(QGraphicsItem* parent)
     : QGraphicsPixmapItem(parent)
 {
-    setDelegate(new UBGraphicsItemDelegate(this, 0, true, false, true, true));
+    // #459/ADR-0010: useToolBar=false — the image delegate has no buildButtons()
+    // override, so requesting a toolbar only created an empty UBGraphicsToolBarItem.
+    setDelegate(new UBGraphicsItemDelegate(this, 0, true, false, false, true));
     Delegate()->init();
     Delegate()->setFlippable(true);
     Delegate()->setRotatable(true);
