@@ -448,6 +448,7 @@ private:
 
 private slots:
         void onAddActionClicked();
+        void pickFillColour();   // #458: fill colour of the selected shape
         void onReturnToCreationModeClicked();
         void onRemoveActionClicked();
         void saveAction(UBGraphicsItemAction *action);

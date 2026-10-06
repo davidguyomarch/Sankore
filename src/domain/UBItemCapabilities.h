@@ -41,6 +41,7 @@ namespace UBItemMenu
     {
         Locked,            // always (checkable)
         VisibleOnDisplay,  // always (checkable) — "Visible on Extended Screen"
+        FillColour,        // if fillColour — "Fill colour…" (shapes, #458)
         GoToContentSource, // if goToSource
         LinkAction,        // if linkAction — "Link an action…"
         ReturnToCreation,  // if returnToCreation
@@ -60,6 +61,7 @@ namespace UBItemMenu
         bool duplicate = true;      // mCanDuplicate (default true in the base ctor)
 
         // Base menu entries.
+        bool fillColour = false;       // #458: shapes with a fill property
         bool goToSource = false;       // mShowGoContentButton
         bool linkAction = false;       // mCanTrigAnAction
         bool returnToCreation = false; // mCanReturnInCreationMode
@@ -84,6 +86,8 @@ namespace UBItemMenu
         QList<Entry> entries;
         entries << Entry::Locked;
         entries << Entry::VisibleOnDisplay;
+        if (caps.fillColour)
+            entries << Entry::FillColour;
         if (caps.goToSource)
             entries << Entry::GoToContentSource;
         if (caps.linkAction)
