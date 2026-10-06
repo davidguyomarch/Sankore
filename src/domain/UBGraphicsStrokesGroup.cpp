@@ -41,9 +41,9 @@ UBGraphicsStrokesGroup::UBGraphicsStrokesGroup(QGraphicsItem *parent)
 {
     setDelegate(new UBGraphicsItemDelegate(this, 0, true, true, false));
     Delegate()->init();
-    Delegate()->setFlippable(true);
+    // #461: stroke menu profile (flippable + link action).
+    Delegate()->applyMenuCapabilities(UBItemMenu::forStroke());
     Delegate()->setRotatable(true);
-    Delegate()->setCanTrigAnAction(true);
 
     setData(UBGraphicsItemData::ItemLayerType, UBItemLayerType::Object);
 

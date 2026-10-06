@@ -19,6 +19,10 @@
 
 #include <QGraphicsScene>
 #include "core/UB.h"
+// #461: the pure capability header is dependency-free (Qt core only), so the
+// testable stub can include it to satisfy the UBSmoothStrokeItem ctor's
+// applyMenuCapabilities(UBItemMenu::forStroke()) call.
+#include "domain/UBItemCapabilities.h"
 
 // Minimal UBGraphicsItemDelegate stub — just the methods the UBSmoothStrokeItem
 // constructor calls (#243). No frame, no scene wiring: enough to verify the item
@@ -33,6 +37,7 @@ public:
     void setFlippable(bool) {}
     void setRotatable(bool) {}
     void setCanTrigAnAction(bool) {}
+    void applyMenuCapabilities(const UBItemMenu::Capabilities&) {}   // #461
 };
 
 #include "domain/UBItem.h"

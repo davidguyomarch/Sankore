@@ -12,11 +12,9 @@ UBAbstractGraphicsItem::UBAbstractGraphicsItem(QGraphicsItem *parent):
 {
     setDelegate(new UBGraphicsItemDelegate(this, 0, true, false, false));
     Delegate()->init();
-    Delegate()->setFlippable(false);
+    // #461: shape menu profile (link action + H/V mirror, not flippable).
+    Delegate()->applyMenuCapabilities(UBItemMenu::forShape());
     Delegate()->setRotatable(true);
-    Delegate()->setCanTrigAnAction(true);
-    Delegate()->setHorizontalMirror(true);
-    Delegate()->setVerticalMirror(true);
     Delegate()->frame()->setOperationMode(UBGraphicsDelegateFrame::NoResizing);
 
     setUuid(QUuid::createUuid());

@@ -102,6 +102,122 @@ namespace UBItemMenu
             entries << Entry::FlipVertical;
         return entries;
     }
+
+    // ---------------------------------------------------------------------
+    // #461/ADR-0010 (option ii): per-type capability PROFILES.
+    //
+    // Each board item type declares its menu capabilities in ONE place, via one
+    // of these pure factory functions, instead of a scattered sequence of
+    // setXxx() calls in its constructor. The item passes the result to
+    // UBGraphicsItemDelegate::applyMenuCapabilities() right after init().
+    //
+    // These functions are dependency-free and unit-tested (tst_UBItemCapabilities):
+    // they freeze the ADR-0010 matrix per type. They describe the STATIC starting
+    // profile only — a few flags are mutated at runtime by the delegate itself
+    // (e.g. a group recomputes flippable/rotatable as children change; attaching
+    // an action forces linkAction) and stay the delegate's responsibility.
+    //
+    // `fillColour` is intentionally NOT set here: it is decided dynamically by
+    // the delegate from the item's hasFillingProperty() (a filled shape vs an
+    // outline-only one), not statically per type.
+    // ---------------------------------------------------------------------
+
+    // Shapes (rect/square/ellipse/circle/regular/freehand): rotatable + link
+    // action + explicit H/V mirror (shapes flip via the mirror flags, not the
+    // flippable resize handle).
+    inline Capabilities forShape()
+    {
+        Capabilities c;
+        c.linkAction = true;
+        c.horizontalMirror = true;
+        c.verticalMirror = true;
+        return c;
+    }
+
+    // Free polygon: a shape that can also return to creation mode.
+    inline Capabilities forPolygon()
+    {
+        Capabilities c = forShape();
+        c.returnToCreation = true;
+        return c;
+    }
+
+    // Line: a shape, explicitly WITHOUT return-to-creation.
+    inline Capabilities forLine()
+    {
+        Capabilities c = forShape();
+        c.returnToCreation = false;
+        return c;
+    }
+
+    // Pen/marker strokes (UBSmoothStrokeItem, UBGraphicsStrokesGroup): flippable
+    // + link action, no mirror flags.
+    inline Capabilities forStroke()
+    {
+        Capabilities c;
+        c.flippable = true;
+        c.linkAction = true;
+        return c;
+    }
+
+    // Text: link action, not flippable, no go-to-source.
+    inline Capabilities forText()
+    {
+        Capabilities c;
+        c.linkAction = true;
+        return c;
+    }
+
+    // Image (pixmap): flippable + link action + go-to-source.
+    inline Capabilities forImage()
+    {
+        Capabilities c;
+        c.flippable = true;
+        c.linkAction = true;
+        c.goToSource = true;
+        return c;
+    }
+
+    // SVG: same profile as image.
+    inline Capabilities forSvg()
+    {
+        return forImage();
+    }
+
+    // PDF: background content — minimal menu, and NOT duplicable.
+    inline Capabilities forPdf()
+    {
+        Capabilities c;
+        c.duplicate = false;
+        return c;
+    }
+
+    // Widget/app: go-to-source only (Frozen / Transform-as-Tool are added by the
+    // widget delegate override, not part of the base profile).
+    inline Capabilities forWidget()
+    {
+        Capabilities c;
+        c.goToSource = true;
+        return c;
+    }
+
+    // Media (video/audio): go-to-source only (transport controls are a toolbar,
+    // not menu entries).
+    inline Capabilities forMedia()
+    {
+        Capabilities c;
+        c.goToSource = true;
+        return c;
+    }
+
+    // Group: link action; flippable/rotatable are recomputed at runtime from the
+    // children by the group item, so they start false here.
+    inline Capabilities forGroup()
+    {
+        Capabilities c;
+        c.linkAction = true;
+        return c;
+    }
 }
 
 #endif // UBITEMCAPABILITIES_H

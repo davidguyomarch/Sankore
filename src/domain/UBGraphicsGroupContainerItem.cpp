@@ -58,7 +58,9 @@ UBGraphicsGroupContainerItem::UBGraphicsGroupContainerItem(QGraphicsItem *parent
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
-    Delegate()->setCanTrigAnAction(true);
+    // #461: group menu profile (link action). flippable/rotatable are
+    // recomputed from the children at runtime in add/removeFromGroup().
+    Delegate()->applyMenuCapabilities(UBItemMenu::forGroup());
 
     UBGraphicsGroupContainerItem::setAcceptHoverEvents(true);
 

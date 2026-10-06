@@ -76,9 +76,9 @@ void UBGraphicsSvgItem::init()
 
     setDelegate(new UBGraphicsItemDelegate(this, 0, true, true, false, true));
     Delegate()->init();
-    Delegate()->setFlippable(true);
+    // #461: SVG menu profile (same as image: flippable + link action + go-to-source).
+    Delegate()->applyMenuCapabilities(UBItemMenu::forSvg());
     Delegate()->setRotatable(true);
-    Delegate()->setCanTrigAnAction(true);
 
 
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
