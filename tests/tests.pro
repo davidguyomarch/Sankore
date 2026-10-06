@@ -49,6 +49,8 @@ HEADERS += ../src/frameworks/UBStringUtils.h \
            tst_UBBackgroundGrid.h \
            tst_UBInkColorUtils.h \
            ../src/domain/UBInkColorUtils.h \
+           tst_UBItemCapabilities.h \
+           ../src/domain/UBItemCapabilities.h \
            tst_UBKeyboardPaletteColors.h \
            ../src/gui/UBKeyboardPaletteColors.h \
            tst_UBThemeManager.h \
@@ -204,6 +206,7 @@ SOURCES += main.cpp \
            tst_UBPageNumber.cpp \
            tst_UBBackgroundGrid.cpp \
            tst_UBInkColorUtils.cpp \
+           tst_UBItemCapabilities.cpp \
            tst_UBKeyboardPaletteColors.cpp \
            tst_UBThemeManager.cpp \
            tst_UBPresentationController.cpp \

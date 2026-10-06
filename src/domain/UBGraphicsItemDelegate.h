@@ -45,6 +45,7 @@
 
 #include "core/UB.h"
 #include "core/UBSettings.h"
+#include "domain/UBItemCapabilities.h"
 
 #include "domain/UBGraphicsProxyWidget.h"
 
@@ -370,6 +371,10 @@ class UBGraphicsItemDelegate : public QObject
         virtual void buildButtons();
         virtual void decorateMenu(QMenu *menu);
         virtual void updateMenuActionState();
+
+        // ADR-0010 (#454): derive the declarative capability struct from the
+        // legacy per-type flags, feeding the pure UBItemMenu::baseMenuEntries().
+        UBItemMenu::Capabilities menuCapabilities() const;
 
         // #452: build a QIcon from a (monochrome Phosphor) SVG resource,
         // tinted to the current theme foreground so menu icons stay readable on

@@ -50,6 +50,7 @@
 #include "tst_UBPageNumber.h"
 #include "tst_UBBackgroundGrid.h"
 #include "tst_UBInkColorUtils.h"
+#include "tst_UBItemCapabilities.h"
 #include "tst_UBLibraryModel.h"
 // #include "tst_UBBoardSubControllers.h" -- disabled until premoc is fixed
 
@@ -206,6 +207,10 @@ int main(int argc, char *argv[])
     }
     {
         TestUBInkColorUtils test;
+        status |= QTest::qExec(&test, argc, argv);
+    }
+    {
+        TestUBItemCapabilities test;
         status |= QTest::qExec(&test, argc, argv);
     }
     {
