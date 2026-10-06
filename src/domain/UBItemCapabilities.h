@@ -65,6 +65,12 @@ namespace UBItemMenu
         bool returnToCreation = false; // mCanReturnInCreationMode
         bool horizontalMirror = false; // mHorizontalMirror
         bool verticalMirror = false;   // mVerticalMirror
+
+        // #456/ADR-0010: an item that is flippable (resize-handle flip) also
+        // gets the Flip menu entries, so flip is consistent across types.
+        // Shapes historically set the mirror flags (not flippable); image / SVG /
+        // strokes set flippable (not the mirror flags) — both must show Flip.
+        bool flippable = false;        // mFlippable
     };
 
     /**
@@ -84,9 +90,11 @@ namespace UBItemMenu
             entries << Entry::LinkAction;
         if (caps.returnToCreation)
             entries << Entry::ReturnToCreation;
-        if (caps.horizontalMirror)
+        // #456: Flip entries follow flippability OR an explicit mirror flag, so
+        // flippable items (image/SVG/strokes) get Flip too, not just shapes.
+        if (caps.horizontalMirror || caps.flippable)
             entries << Entry::FlipHorizontal;
-        if (caps.verticalMirror)
+        if (caps.verticalMirror || caps.flippable)
             entries << Entry::FlipVertical;
         return entries;
     }

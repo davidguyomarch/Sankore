@@ -32,6 +32,8 @@ private slots:
     void testPdfProfile();
     void testImageProfile();
     void testWidgetProfile();
+    void testFlippableYieldsBothFlips();
+    void testShapeMirrorStillFlips();
 };
 
 #endif // TST_UBITEMCAPABILITIES_H
