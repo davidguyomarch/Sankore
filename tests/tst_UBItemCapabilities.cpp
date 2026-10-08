@@ -67,6 +67,75 @@ void TestUBItemCapabilities::testFillColourGated()
     QCOMPARE(e, expected);
 }
 
+// --- #461: per-type capability profiles ---------------------------------
+
+void TestUBItemCapabilities::testProfileShape()
+{
+    // forShape(): link action + H/V mirror (flip via mirror), no go-to-source,
+    // no return-to-creation. (fillColour is decided dynamically, not here.)
+    const QList<Entry> e = baseMenuEntries(UBItemMenu::forShape());
+    const QList<Entry> expected = {
+        Entry::Locked, Entry::VisibleOnDisplay,
+        Entry::LinkAction, Entry::FlipHorizontal, Entry::FlipVertical
+    };
+    QCOMPARE(e, expected);
+}
+
+void TestUBItemCapabilities::testProfilePolygonAndLine()
+{
+    // forPolygon() adds Return-to-creation; forLine() removes it again.
+    QVERIFY(baseMenuEntries(UBItemMenu::forPolygon()).contains(Entry::ReturnToCreation));
+    QVERIFY(!baseMenuEntries(UBItemMenu::forLine()).contains(Entry::ReturnToCreation));
+}
+
+void TestUBItemCapabilities::testProfileStroke()
+{
+    // forStroke(): flippable + link action (flip via flippable), no mirror flags.
+    const QList<Entry> e = baseMenuEntries(UBItemMenu::forStroke());
+    const QList<Entry> expected = {
+        Entry::Locked, Entry::VisibleOnDisplay,
+        Entry::LinkAction, Entry::FlipHorizontal, Entry::FlipVertical
+    };
+    QCOMPARE(e, expected);
+}
+
+void TestUBItemCapabilities::testProfileImageAndSvg()
+{
+    // forImage()/forSvg(): go-to-source + link action + flip (flippable).
+    const QList<Entry> expected = {
+        Entry::Locked, Entry::VisibleOnDisplay,
+        Entry::GoToContentSource, Entry::LinkAction,
+        Entry::FlipHorizontal, Entry::FlipVertical
+    };
+    QCOMPARE(baseMenuEntries(UBItemMenu::forImage()), expected);
+    QCOMPARE(baseMenuEntries(UBItemMenu::forSvg()), expected);
+}
+
+void TestUBItemCapabilities::testProfilePdf()
+{
+    // forPdf(): minimal menu (Locked + Visible) and NOT duplicable.
+    const UBItemMenu::Capabilities caps = UBItemMenu::forPdf();
+    QCOMPARE(caps.duplicate, false);
+    const QList<Entry> expected = { Entry::Locked, Entry::VisibleOnDisplay };
+    QCOMPARE(baseMenuEntries(caps), expected);
+}
+
+void TestUBItemCapabilities::testProfileWidgetMediaGroup()
+{
+    // Widget / media: go-to-source only in the base menu (type-specific extras
+    // like Frozen are added by overrides). Group: link action.
+    const QList<Entry> wm = {
+        Entry::Locked, Entry::VisibleOnDisplay, Entry::GoToContentSource
+    };
+    QCOMPARE(baseMenuEntries(UBItemMenu::forWidget()), wm);
+    QCOMPARE(baseMenuEntries(UBItemMenu::forMedia()), wm);
+
+    const QList<Entry> grp = {
+        Entry::Locked, Entry::VisibleOnDisplay, Entry::LinkAction
+    };
+    QCOMPARE(baseMenuEntries(UBItemMenu::forGroup()), grp);
+}
+
 void TestUBItemCapabilities::testGatedEntriesHiddenByDefault()
 {
     // A default-constructed Capabilities exposes no optional entry.

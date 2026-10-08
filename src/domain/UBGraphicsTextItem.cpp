@@ -72,9 +72,9 @@ UBGraphicsTextItem::UBGraphicsTextItem(QGraphicsItem * parent) :
     Delegate()->init();
 
     Delegate()->frame()->setOperationMode(UBGraphicsDelegateFrame::Resizing);
-    Delegate()->setFlippable(false);
+    // #461: text menu profile (link action, not flippable).
+    Delegate()->applyMenuCapabilities(UBItemMenu::forText());
     Delegate()->setRotatable(true);
-    Delegate()->setCanTrigAnAction(true);
 
     mTypeTextHereLabel = tr("<Type Text Here>");
 

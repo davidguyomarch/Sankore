@@ -51,9 +51,9 @@ UBGraphicsPixmapItem::UBGraphicsPixmapItem(QGraphicsItem* parent)
     // override, so requesting a toolbar only created an empty UBGraphicsToolBarItem.
     setDelegate(new UBGraphicsItemDelegate(this, 0, true, false, false, true));
     Delegate()->init();
-    Delegate()->setFlippable(true);
+    // #461: image menu profile (flippable + link action + go-to-source).
+    Delegate()->applyMenuCapabilities(UBItemMenu::forImage());
     Delegate()->setRotatable(true);
-    Delegate()->setCanTrigAnAction(true);
 
     setData(UBGraphicsItemData::ItemLayerType, UBItemLayerType::Object);
     setTransformationMode(Qt::SmoothTransformation);

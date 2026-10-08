@@ -986,6 +986,21 @@ void UBGraphicsItemDelegate::setCanReturnInCreationMode(bool canReturn)
     mCanReturnInCreationMode = canReturn;
 }
 
+void UBGraphicsItemDelegate::applyMenuCapabilities(const UBItemMenu::Capabilities& caps)
+{
+    // #461: single declarative entry point for the per-type menu profile. Sets
+    // the purely-menu flags plus flippable (setFlippable also updates the
+    // ItemFlippable data used by the frame). rotate / duplicate / go-to-source
+    // keep their own setters / ctor arg (double-use or build-order sensitive),
+    // and runtime mutations (group recompute, setAction, setOwnFolder) still go
+    // through the individual setters.
+    mCanTrigAnAction        = caps.linkAction;
+    mCanReturnInCreationMode = caps.returnToCreation;
+    mHorizontalMirror       = caps.horizontalMirror;
+    mVerticalMirror         = caps.verticalMirror;
+    setFlippable(caps.flippable);
+}
+
 void UBGraphicsItemDelegate::setRotatable(bool pCanRotate)
 {
     mCanRotate = pCanRotate;

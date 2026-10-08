@@ -35,6 +35,13 @@ private slots:
     void testFlippableYieldsBothFlips();
     void testShapeMirrorStillFlips();
     void testFillColourGated();
+    // #461: per-type profiles
+    void testProfileShape();
+    void testProfilePolygonAndLine();
+    void testProfileStroke();
+    void testProfileImageAndSvg();
+    void testProfilePdf();
+    void testProfileWidgetMediaGroup();
 };
 
 #endif // TST_UBITEMCAPABILITIES_H

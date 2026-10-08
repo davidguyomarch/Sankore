@@ -44,9 +44,9 @@ UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
     // that replaced it forgot to. Mirror the strokes-group delegate setup.
     setDelegate(new UBGraphicsItemDelegate(this, 0, true, true, false));
     Delegate()->init();
-    Delegate()->setFlippable(true);
+    // #461: stroke menu profile (flippable + link action).
+    Delegate()->applyMenuCapabilities(UBItemMenu::forStroke());
     Delegate()->setRotatable(true);
-    Delegate()->setCanTrigAnAction(true);
 
     setData(UBGraphicsItemData::ItemLayerType, QVariant(UBItemLayerType::Graphic));
     // #364: assign the *new* itemLayerType key too. The z-value controller

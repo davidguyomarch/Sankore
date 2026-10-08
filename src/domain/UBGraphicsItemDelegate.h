@@ -330,6 +330,15 @@ class UBGraphicsItemDelegate : public QObject
 
         void setCanReturnInCreationMode(bool canReturn);
 
+        // #461/ADR-0010 (option ii): declare an item's menu capabilities in one
+        // call, from a per-type profile (UBItemMenu::forShape()/forImage()/…),
+        // instead of scattered setXxx() calls. Call AFTER init() (which resets
+        // the mirror/flip flags). Sets the purely-menu flags (mirror H/V, link
+        // action, return-to-creation) and the flippable flag (which also drives
+        // the frame flip). Does NOT touch rotate/duplicate/go-to-source, which
+        // keep their existing double-use setters / ctor arg.
+        void applyMenuCapabilities(const UBItemMenu::Capabilities& caps);
+
         void setButtonsVisible(bool visible);
 
         UBGraphicsToolBarItem* getToolBarItem() const { return mToolBarItem; }

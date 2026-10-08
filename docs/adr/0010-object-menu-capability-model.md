@@ -155,3 +155,26 @@ Follow-up work (separate issues/PRs):
   rejected: text (rich formatting), media (transport) and widget (freeze/pin)
   have legitimately type-specific needs; the goal is a consistent *baseline* plus
   declared type-specific extensions, not forced uniformity.
+
+## Implementation status
+
+Recorded as the follow-up work landed (the decision above is unchanged):
+
+| Follow-up | Issue / PR | Status |
+|-----------|-----------|--------|
+| Capability struct + pure `baseMenuEntries()`, route `decorateMenu()` through it | #454 / #460 | Done |
+| Deduplicate the group delegate onto the base | #455 / #462 | Done |
+| Couple flip menu entries to flippability | #456 / #463 | Done |
+| Shape "Fill colour…" menu entry (#367) | #458 / #464 | Done |
+| PDF loses the Duplicate button | #457 / #466 | Done |
+| Remove the latent empty toolbar (image) | #459 / #467 | Done |
+| Per-type capability profiles (`forShape()`/…`) + `applyMenuCapabilities()` | #461 / #468 | Done |
+
+Note on the per-type migration (originally framed as "option ii, deferred"): it
+was implemented in #461 as **pure per-type profile functions** (`UBItemMenu::forShape()`,
+`forImage()`, `forPdf()`, …) that are unit-tested, with the item constructors
+calling `applyMenuCapabilities(forXxx())`. The double-use flags (`setFlippable`/
+`setRotatable`/`setCanDuplicate`) and the runtime mutations (group recompute from
+children, `setAction()` forcing link-action, widget `setOwnFolder`) were kept as
+setters on purpose — they are not purely-menu state and could not be expressed as
+a static per-type datum without losing behaviour.
