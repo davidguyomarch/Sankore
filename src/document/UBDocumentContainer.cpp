@@ -114,6 +114,11 @@ void UBDocumentContainer::updatePage(int index)
 
 void UBDocumentContainer::deleteThumbPage(int index)
 {
+    // #470: guard the bounds. The thumbnail list can be transiently out of sync
+    // with pageCount() during a page move (files are renamed on disk first),
+    // and an unguarded removeAt() out of range crashes.
+    if (index < 0 || index >= mDocumentThumbs.count())
+        return;
     mDocumentThumbs.removeAt(index);
 }
 
@@ -129,6 +134,12 @@ void UBDocumentContainer::updateThumbPage(int index)
 
 void UBDocumentContainer::insertThumbPage(int index)
 {
+    // #470: clamp the insert index into [0, size] (QList::insert asserts out of
+    // range). Mirrors the guard already present in addPixmapAt().
+    if (index < 0)
+        index = 0;
+    if (index > mDocumentThumbs.size())
+        index = mDocumentThumbs.size();
     mDocumentThumbs.insert(index, UBThumbnailAdaptor::get(mCurrentDocument, index));
 }
 
@@ -165,5 +176,10 @@ int UBDocumentContainer::sceneIndexFromPage(int page)
 
 const QPixmap* UBDocumentContainer::pageAt(int index)
 {
+    // #471: guard the bounds. Opening a document via its first page reads row 0
+    // while the thumbnail list may still be empty/short, and an unguarded
+    // operator[] out of range crashes.
+    if (index < 0 || index >= mDocumentThumbs.size())
+        return nullptr;
     return mDocumentThumbs[index];
 }

@@ -96,7 +96,10 @@ void UBDocumentNavigator::generateThumbnails(UBDocumentContainer* source)
     for(int i = 0; i < source->pageCount(); i++)
     {
         const QPixmap* pix = source->pageAt(i);
-        Q_ASSERT(!pix->isNull());
+        // #471: pageAt() can now return null if the thumb list is transiently
+        // short; skip rather than deref.
+        if (!pix || pix->isNull())
+            continue;
         int pageIndex = UBDocumentContainer::pageFromSceneIndex(i);
 
         UBSceneThumbnailNavigPixmap* pixmapItem = 0;
@@ -180,6 +183,9 @@ void UBDocumentNavigator::updateSpecificThumbnail(int iPage)
 {
     // Generate the new thumbnail
     const QPixmap* pix = UBApplication::boardController->pageAt(iPage);
+    // #471: pageAt() can now return null if the index is out of range.
+    if (!pix)
+        return;
     QGraphicsItem* newItem = new UBSceneThumbnailNavigPixmap(*pix, UBApplication::boardController->selectedDocument(), iPage);
 
 
