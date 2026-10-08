@@ -2041,7 +2041,12 @@ UBBoardView::setToolCursor (int tool)
       break;
     case UBStylusTool::Eraser:
       controlViewport->setCursor (UBResources::resources ()->eraserCursor);
-      scene()->hideEraser();
+      // #469: guard scene(). This is the only tool case that dereferences
+      // scene(), and the tool-change signal can fire before the view has a
+      // scene attached (selecting the Eraser as a first action at startup) —
+      // an unguarded scene()->hideEraser() was a null-deref crash on Windows.
+      if (UBGraphicsScene* s = scene())
+        s->hideEraser();
       break;
     case UBStylusTool::Marker:
       controlViewport->setCursor (UBResources::resources ()->markerCursor);
