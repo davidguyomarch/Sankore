@@ -2708,6 +2708,10 @@ void UBDocumentController::exportDocumentAt(int index)
         return;
 
     UBDocumentProxy* proxy = firstSelectedTreeProxy();
+    // #472: guard the null proxy (no document / only a folder selected). The
+    // adaptors silently no-op on null, which looked like "export does nothing".
+    if (!proxy)
+        return;
 
     selectedExportAdaptor->persist(proxy);
     emit exportDone();

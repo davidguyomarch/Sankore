@@ -516,12 +516,15 @@ protected:
     public slots:
         void TreeViewSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
         void TreeViewSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+        // #472: public so the QML-facing UBDocumentActionController can run an
+        // export for a chosen adaptor index (the legacy toolbutton menu that used
+        // to host this is hidden under the QML V2 UI).
+        void exportDocumentAt(int index);
 
    private slots:
         void documentZoomSliderValueChanged (int value);
         void itemSelectionChanged(LastSelectedElementType newSelection);
         void exportDocument();
-        void exportDocumentAt(int index);
         void exportDocumentSet();
 
         void thumbnailViewResized();
