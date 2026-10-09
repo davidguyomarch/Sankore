@@ -3007,10 +3007,20 @@ void UBDocumentController::addToDocument()
 
 void UBDocumentController::renameSelectedItem()
 {
+    // #473: firstSelectedTreeIndex() returns a SOURCE-model index (it maps
+    // through the proxy), but the tree view edits in its own (proxy) model. The
+    // Rename button passed a source index to edit(), which the view did not
+    // recognise, so nothing happened — while a double-click worked because the
+    // view edits with its own proxy index. Map back to the proxy before edit().
     QModelIndex selectedIndex = firstSelectedTreeIndex();
-    if (selectedIndex.isValid()) {
-        mDocumentUI->documentTreeView->edit(selectedIndex);
-    }
+    if (!selectedIndex.isValid())
+        return;
+
+    QModelIndex viewIndex = mSortFilterProxyModel
+        ? mSortFilterProxyModel->mapFromSource(selectedIndex)
+        : selectedIndex;
+    if (viewIndex.isValid())
+        mDocumentUI->documentTreeView->edit(viewIndex);
 }
 
 bool UBDocumentController::isOKToOpenDocument(UBDocumentProxy* proxy)
