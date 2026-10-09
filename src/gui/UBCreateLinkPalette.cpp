@@ -35,9 +35,12 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 #include <QComboBox>
+#include <QFileDialog>
+#include <QFileInfo>
 
 #include "core/UBApplication.h"
 #include "core/UBDownloadManager.h"
+#include "core/UBSettings.h"
 
 #include "document/UBDocumentController.h"
 
@@ -177,9 +180,16 @@ void UBCreateLinkPalette::init()
     audioBackButtonLayout->addStretch();
     audioWidgetLayout->addLayout(audioBackButtonLayout);
     connect(audioBackButton, &QPushButton::clicked, this, [this]() { onBackButtonClicked(); });
-    mpAudioLabel = new UBCreateLinkLabel(tr("Drag and drop the audio file from the library in this box"),mAudioWidget);
+    mpAudioLabel = new UBCreateLinkLabel(tr("Drag and drop an audio file here, or use \"Choose a file…\" below"),mAudioWidget);
     connect(mpAudioLabel, &UBCreateLinkLabel::droppedFile, this, &UBCreateLinkPalette::onDroppedAudioFile);
     audioWidgetLayout->addWidget(mpAudioLabel);
+    // #443: the only way to supply an audio file used to be drag-and-drop "from
+    // the library" — but the media library browser is not available in the QML
+    // V2 UI, so there was no source to drag from and the feature was dead. Add a
+    // direct file picker that works independently of the library.
+    QPushButton* audioBrowseButton = new QPushButton(tr("Choose a file…"), mAudioWidget);
+    audioWidgetLayout->addWidget(audioBrowseButton);
+    connect(audioBrowseButton, &QPushButton::clicked, this, [this]() { onBrowseAudioClicked(); });
     QHBoxLayout* audioOkButtonLayout = new QHBoxLayout();
     audioOkButtonLayout->addStretch();
     QPushButton* audioOkButton = new QPushButton(tr("Ok"),mAudioWidget);
@@ -311,8 +321,26 @@ void UBCreateLinkPalette::onAddLinkToWebClicked()
     mStackedWidget->setCurrentIndex(3);
 }
 
+void UBCreateLinkPalette::onBrowseAudioClicked()
+{
+    // #443: direct audio file picker (no dependency on the media library).
+    const QString start = UBSettings::settings()->lastImportFilePath->get().toString();
+    const QString path = QFileDialog::getOpenFileName(
+        this, tr("Choose an audio file"), start,
+        tr("Audio files (*.mp3 *.wav *.ogg *.m4a *.aac *.flac *.wma);;All files (*.*)"));
+    if (path.isEmpty())
+        return;
+
+    mAudioFilePath = path;
+    if (mpAudioLabel)
+        mpAudioLabel->setText(QFileInfo(path).completeBaseName());
+}
+
 void UBCreateLinkPalette::onOkAudioClicked()
 {
+    // #443: do not create an empty/aborted audio action when no file was chosen.
+    if (mAudioFilePath.isEmpty())
+        return;
     emit definedAction(new UBGraphicsItemPlayAudioAction(mAudioFilePath));
     close();
 }
