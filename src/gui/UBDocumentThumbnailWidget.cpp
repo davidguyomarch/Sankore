@@ -79,21 +79,21 @@ void UBDocumentThumbnailWidget::mouseMoveEvent(QMouseEvent *event)
 
     if (sceneItem)
     {
-        int pageIndex = UBDocumentContainer::pageFromSceneIndex(sceneItem->sceneIndex());
-        if(pageIndex != 0){
-        	QDrag *drag = new QDrag(this);
-        	QList<UBMimeDataItem> mimeDataItems;
-        	for (QGraphicsItem *item : selectedItems())
-        		mimeDataItems.append(UBMimeDataItem(sceneItem->proxy(), mGraphicItems.indexOf(item)));
+        // #485: no first-page special status — every page (incl. the first) is
+        // draggable. (The old `pageIndex != 0` guard was also dead code:
+        // pageFromSceneIndex = sceneIndex + 1, never 0 for a real page.)
+        QDrag *drag = new QDrag(this);
+        QList<UBMimeDataItem> mimeDataItems;
+        for (QGraphicsItem *item : selectedItems())
+            mimeDataItems.append(UBMimeDataItem(sceneItem->proxy(), mGraphicItems.indexOf(item)));
 
-        	UBMimeData *mime = new UBMimeData(mimeDataItems);
-        	drag->setMimeData(mime);
+        UBMimeData *mime = new UBMimeData(mimeDataItems);
+        drag->setMimeData(mime);
 
-        	drag->setPixmap(sceneItem->pixmap().scaledToWidth(100));
-        	drag->setHotSpot(QPoint(drag->pixmap().width()/2, drag->pixmap().height() / 2));
+        drag->setPixmap(sceneItem->pixmap().scaledToWidth(100));
+        drag->setHotSpot(QPoint(drag->pixmap().width()/2, drag->pixmap().height() / 2));
 
-        	drag->exec(Qt::MoveAction);
-        }
+        drag->exec(Qt::MoveAction);
     }
 
     UBThumbnailWidget::mouseMoveEvent(event);
@@ -162,14 +162,10 @@ void UBDocumentThumbnailWidget::dragMoveEvent(QDragMoveEvent *event)
     QGraphicsItem *underlyingItem = itemAt(event->pos());
     mClosestDropItem = dynamic_cast<UBSceneThumbnailPixmap*>(underlyingItem);
 
-    int pageIndex = -1;
-    if(mClosestDropItem){
-    	pageIndex = UBDocumentContainer::pageFromSceneIndex(mClosestDropItem->sceneIndex());
-    	if(pageIndex == 0){
-    		 event->acceptProposedAction();
-    		 return;
-    	}
-    }
+    // #485: no first-page special status — the former `pageIndex == 0`
+    // early-return and `pageIndex != 0` drop-caret gate were dead code
+    // (pageFromSceneIndex is never 0 for a real page). Any page can be a drop
+    // target.
     if (!mClosestDropItem)
     {
         for (UBSceneThumbnailPixmap *item : pixmapItems)
@@ -184,12 +180,11 @@ void UBDocumentThumbnailWidget::dragMoveEvent(QDragMoveEvent *event)
             {
                 mClosestDropItem = item;
                 minDistance = distance;
-                pageIndex = UBDocumentContainer::pageFromSceneIndex(mClosestDropItem->sceneIndex());
             }
         }
     }
 
-    if (mClosestDropItem && pageIndex != 0)
+    if (mClosestDropItem)
     {
         qreal scale = mClosestDropItem->transform().m11();
 
@@ -232,10 +227,9 @@ void UBDocumentThumbnailWidget::dropEvent(QDropEvent *event)
     if (mClosestDropItem)
     {
         int targetIndex = mDropIsRight ? mGraphicItems.indexOf(mClosestDropItem) + 1 : mGraphicItems.indexOf(mClosestDropItem);
-        if(UBDocumentContainer::pageFromSceneIndex(targetIndex) == 0){
-        	event->ignore();
-        	return;
-        }
+        // #485: no first-page special status — the former `pageFromSceneIndex
+        // (targetIndex) == 0` drop-refusal was dead code; a page may be dropped
+        // at any index, including the first.
 
         QList<UBMimeDataItem> mimeDataItems;
         if (event->mimeData()->hasFormat(UBApplication::mimeTypeUniboardPage))

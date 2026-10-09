@@ -3497,11 +3497,10 @@ void UBDocumentController::refreshDocumentThumbnailsView(UBDocumentContainer*)
             }
 
             items << pixmapItem;
+            // #485: uniform labelling — no 'Title page' special status (the old
+            // else branch was dead: pageFromSceneIndex = i + 1, always truthy).
             int pageIndex = pageFromSceneIndex(i);
-            if(pageIndex)
-                labels << tr("Page %1").arg(pageIndex);
-            else
-                labels << tr("Title page");
+            labels << tr("Page %1").arg(pageIndex);
 
             itemsPath.append(QUrl::fromLocalFile(currentDocumentProxy->persistencePath() + QString("/pages/%1").arg(UBDocumentContainer::pageFromSceneIndex(i))));
         }

@@ -104,7 +104,9 @@ void UBDocumentNavigator::generateThumbnails(UBDocumentContainer* source)
 
         UBSceneThumbnailNavigPixmap* pixmapItem = 0;
 
-        QString label = pageIndex == 0 ? tr("Title page") : tr("Page %0").arg(pageIndex);
+        // #485: uniform labelling — the first page is a page like any other
+        // (no 'Title page' special status).
+        QString label = tr("Page %0").arg(pageIndex);
         UBThumbnailTextItem *labelItem = new UBThumbnailTextItem(label);
 
 
