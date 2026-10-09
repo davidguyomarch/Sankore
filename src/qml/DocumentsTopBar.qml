@@ -119,7 +119,7 @@ Rectangle {
         ToolbarSeparator {}
 
         ToolbarButton { icon: "download-simple"; tooltip: "Importer";         onClicked: docActionController.importFile() }
-        ToolbarButton { icon: "arrow-square-out"; tooltip: "Exporter";        onClicked: docActionController.exportDocument() }
+        ToolbarButton { icon: "arrow-square-out"; tooltip: "Exporter";        enabled: docActionController.hasSelection; onClicked: docActionController.exportDocument() }
         ToolbarButton { icon: "pencil-simple";   tooltip: "Renommer";         onClicked: docActionController.renameItem() }
 
         ToolbarSeparator {}

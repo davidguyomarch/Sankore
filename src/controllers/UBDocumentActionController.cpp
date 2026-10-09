@@ -10,11 +10,15 @@
 
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"
+#include "core/UBDocumentManager.h"
 #include "document/UBDocumentController.h"
+#include "adaptors/UBExportAdaptor.h"
 #include "gui/UBMainWindow.h"
 
 #include <QCoreApplication>
+#include <QCursor>
 #include <QFile>
+#include <QMenu>
 #include <QTextStream>
 #include <QTimer>
 
@@ -76,8 +80,29 @@ void UBDocumentActionController::importFile()
 
 void UBDocumentActionController::exportDocument()
 {
-    if (UBApplication::mainWindow->actionExport)
-        UBApplication::mainWindow->actionExport->trigger();
+    // #472: the QML "Exporter" button used to call actionExport->trigger(), but
+    // that QAction has no slot — the real export menu was pinned to a QToolButton
+    // in the legacy documentToolBar, which is hidden under the QML V2 UI, so
+    // export was unreachable. Build the adaptor menu here and run the chosen one
+    // directly via UBDocumentController::exportDocumentAt().
+    UBDocumentController* dc = UBApplication::documentController;
+    if (!dc || !dc->firstSelectedTreeProxy())
+        return;  // nothing to export (no document selected)
+
+    const QList<UBExportAdaptor*> adaptors =
+        UBDocumentManager::documentManager()->supportedExportAdaptors();
+    if (adaptors.isEmpty())
+        return;
+
+    QMenu menu;
+    for (int i = 0; i < adaptors.length(); ++i)
+    {
+        UBExportAdaptor* adaptor = adaptors.at(i);
+        QAction* act = menu.addAction(adaptor->exportName());
+        QObject::connect(act, &QAction::triggered, dc, [dc, i]() { dc->exportDocumentAt(i); });
+    }
+
+    menu.exec(QCursor::pos());
 }
 
 void UBDocumentActionController::renameItem()
