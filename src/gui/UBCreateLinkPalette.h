@@ -80,6 +80,7 @@ private:
     void adjustGeometry();
     void init();
     QToolButton* addInitiaWidgetButton(QString textButton, QString iconPath);
+    void styleBackButton(class QPushButton* button);   // #490: Phosphor back arrow
     QWidget* addBasicFunctionaliltiesToWidget(QWidget* centralWidget);
 
     QVBoxLayout* mLayout;
