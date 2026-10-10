@@ -107,7 +107,9 @@ QString UBGraphicsItemPlayAudioAction::fullPath()
 
 UBGraphicsItemPlayAudioAction::~UBGraphicsItemPlayAudioAction()
 {
-    if(!mMediaObject && mMediaObject->playbackState() == QMediaPlayer::PlayingState)
+    // #443: the guard was inverted (`!mMediaObject && mMediaObject->...`), which
+    // dereferenced a null player. Stop only when the player exists and is playing.
+    if(mMediaObject && mMediaObject->playbackState() == QMediaPlayer::PlayingState)
         mMediaObject->stop();
 }
 
@@ -120,6 +122,9 @@ void UBGraphicsItemPlayAudioAction::onSourceHide()
 
 void UBGraphicsItemPlayAudioAction::play()
 {
+    // #443: guard — the default ctor leaves mMediaObject null until setPath().
+    if(!mMediaObject)
+        return;
     if(mMediaObject->playbackState() == QMediaPlayer::PlayingState){
         mMediaObject->stop();
     }

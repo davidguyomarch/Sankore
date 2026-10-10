@@ -102,6 +102,7 @@ private slots:
     void onAddLinkToPageClicked();
     void onAddLinkToWebClicked();
 
+    void onBrowseAudioClicked();   // #443: pick an audio file via a file dialog
     void onOkAudioClicked();
     void onOkLinkToPageClicked();
     void onOkLinkToWebClicked();
