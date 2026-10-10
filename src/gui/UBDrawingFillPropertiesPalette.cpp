@@ -22,7 +22,7 @@
 
 
 #include "UBDrawingFillPropertiesPalette.h"
-#include <QColorDialog>
+#include "UBColorPickerDialog.h"
 
 #include "core/UBApplication.h"
 #include "UBMainWindow.h"
@@ -144,46 +144,33 @@ void UBDrawingFillPropertiesPalette::onBtnColorGradient()
 
 void UBDrawingFillPropertiesPalette::onBtnSelectFillFirstColor()
 {
-    QColorDialog colorPicker(this);
-    colorPicker.setOption(QColorDialog::ShowAlphaChannel);
+    // #475: unified colour picker.
+    QColor selectedColor = UBColorPickerDialog::pick(QColor(), this);
+    if (!selectedColor.isValid())
+        return;   // cancelled
 
-#ifdef Q_OS_MACOS
-    colorPicker.setOption(QColorDialog::DontUseNativeDialog);
-#endif
+    if (selectedColor.alpha() == 0)
+        selectedColor = Qt::transparent;
 
-    if ( colorPicker.exec() )
+    UBApplication::boardController->shapeFactory().setFillingFirstColor(selectedColor);
+    mBtnColorPicker->setColor(selectedColor); // udpate Color icon in palette.
+    if (UBApplication::boardController->shapeFactory().fillType() == UBShapeFactory::Transparent)
     {
-        QColor selectedColor = colorPicker.selectedColor();
-        if (selectedColor.alpha() == 0)
-            selectedColor = Qt::transparent;
-
-        UBApplication::boardController->shapeFactory().setFillingFirstColor(selectedColor);
-        mBtnColorPicker->setColor(selectedColor); // udpate Color icon in palette.        
-        if (UBApplication::boardController->shapeFactory().fillType() == UBShapeFactory::Transparent)
-        {
-            UBApplication::mainWindow->actionColorStyleFull->setChecked(true);
-            onBtnColorFull();
-        }
+        UBApplication::mainWindow->actionColorStyleFull->setChecked(true);
+        onBtnColorFull();
     }
 }
 
 void UBDrawingFillPropertiesPalette::onBtnSelectFillSecondColor()
 {
+    // #475: unified colour picker.
+    QColor selectedColor = UBColorPickerDialog::pick(QColor(), this);
+    if (!selectedColor.isValid())
+        return;   // cancelled
 
-    QColorDialog colorPicker(this);
-    colorPicker.setOption(QColorDialog::ShowAlphaChannel);
+    if (selectedColor.alpha() == 0)
+        selectedColor = Qt::transparent;
 
-#ifdef Q_OS_MACOS
-    colorPicker.setOption(QColorDialog::DontUseNativeDialog);
-#endif
-
-    if ( colorPicker.exec() )
-    {
-        QColor selectedColor = colorPicker.selectedColor();
-        if (selectedColor.alpha() == 0)
-            selectedColor = Qt::transparent;
-
-        UBApplication::boardController->shapeFactory().setFillingSecondColor(selectedColor);
-        mBtnColor2Picker->setColor(selectedColor); // udpate Color icon in palette.
-    }
+    UBApplication::boardController->shapeFactory().setFillingSecondColor(selectedColor);
+    mBtnColor2Picker->setColor(selectedColor); // udpate Color icon in palette.
 }

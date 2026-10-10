@@ -543,6 +543,11 @@ QColor UBSettings::currentPenColor()
 
 QColor UBSettings::penColor(bool onDarkBackground)
 {
+    // #475: a transient free colour wins over the palette slot. A free colour
+    // has a single value, returned for both backgrounds (preserved on a
+    // day/night flip, like a user-chosen shape colour).
+    if (mTransientPenColor.isValid())
+        return mTransientPenColor;
     QList<QColor> colors = penColors(onDarkBackground);
     return colors.at(penColorIndex());
 }
@@ -625,6 +630,11 @@ QColor UBSettings::currentMarkerColor()
 
 QColor UBSettings::markerColor(bool onDarkBackground)
 {
+    // #475: a transient free colour wins over the palette slot (see penColor).
+    // setTransientMarkerColor already forced the marker alpha so the renderer
+    // still treats it as a semi-transparent highlighter.
+    if (mTransientMarkerColor.isValid())
+        return mTransientMarkerColor;
     QList<QColor> colors = markerColors(onDarkBackground);
     return colors.at(markerColorIndex());
 }
@@ -640,6 +650,68 @@ QList<QColor> UBSettings::markerColors(bool onDarkBackground)
     {
         return boardMarkerLightBackgroundSelectedColors->colors();
     }
+}
+
+
+// --- #475: transient free (non-palette) ink colour ---
+
+bool UBSettings::hasTransientPenColor() const
+{
+    return mTransientPenColor.isValid();
+}
+
+bool UBSettings::hasTransientMarkerColor() const
+{
+    return mTransientMarkerColor.isValid();
+}
+
+QColor UBSettings::transientPenColor() const
+{
+    return mTransientPenColor;
+}
+
+QColor UBSettings::transientMarkerColor() const
+{
+    return mTransientMarkerColor;
+}
+
+void UBSettings::setTransientPenColor(const QColor& color)
+{
+    if (!color.isValid())
+    {
+        clearTransientPenColor();
+        return;
+    }
+    // A pen is opaque: force alpha 1.0 so UBSmoothStrokeItem::paint never
+    // mistakes it for a (semi-transparent) marker.
+    QColor opaque = color;
+    opaque.setAlphaF(1.0);
+    mTransientPenColor = opaque;
+}
+
+void UBSettings::setTransientMarkerColor(const QColor& color)
+{
+    if (!color.isValid())
+    {
+        clearTransientMarkerColor();
+        return;
+    }
+    // A marker reads as a highlighter only while its colour alpha < 1. Force the
+    // configured marker alpha (same value baked into the palette swatches) so
+    // the single-pass translucent render path kicks in on board AND desktop.
+    QColor translucent = color;
+    translucent.setAlphaF(boardMarkerAlpha->get().toDouble());
+    mTransientMarkerColor = translucent;
+}
+
+void UBSettings::clearTransientPenColor()
+{
+    mTransientPenColor = QColor();   // invalid → fall back to the palette slot
+}
+
+void UBSettings::clearTransientMarkerColor()
+{
+    mTransientMarkerColor = QColor();
 }
 
 //----------------------------------------//

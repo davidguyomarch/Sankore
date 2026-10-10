@@ -93,6 +93,33 @@ class UBSettings : public QObject
         QColor markerColor(bool onDarkBackground);
         QList<QColor> markerColors(bool onDarkBackground);
 
+        // #475: transient free (non-palette) ink colour.
+        //
+        // The pen/marker draw pipeline resolves its colour exclusively from the
+        // selected palette slot (penColor/markerColor = list.at(index)). To let
+        // the user pick an arbitrary colour WITHOUT overwriting one of the fixed
+        // palette swatches, we add a transient override, read by penColor()/
+        // markerColor() when active. It is NOT persisted (session-only) and is
+        // cleared as soon as the user re-selects a palette swatch.
+        //
+        // Constraints the override honours so the rest of the pipeline needs no
+        // change (see UBSmoothStrokeItem/UBInputRouter):
+        //  - a free colour has a single value → the same colour is returned for
+        //    both the light and dark background variant (preserved across a
+        //    day/night flip, like a user-chosen shape colour);
+        //  - setTransientPenColor forces alpha 1.0 (opaque pen), while
+        //    setTransientMarkerColor forces alpha = boardMarkerAlpha so the
+        //    renderer still recognises it as a semi-transparent highlighter
+        //    (UBSmoothStrokeItem::paint keys marker-ness off alpha < 1).
+        bool hasTransientPenColor() const;
+        bool hasTransientMarkerColor() const;
+        QColor transientPenColor() const;
+        QColor transientMarkerColor() const;
+        void setTransientPenColor(const QColor& color);
+        void setTransientMarkerColor(const QColor& color);
+        void clearTransientPenColor();
+        void clearTransientMarkerColor();
+
         // Eraser related
         int eraserWidthIndex();
         qreal eraserFineWidth();
@@ -317,6 +344,11 @@ class UBSettings : public QObject
 
         UBColorListSetting* boardMarkerDarkBackgroundColors;
         UBColorListSetting* boardMarkerDarkBackgroundSelectedColors;
+
+        // #475: transient free-colour override (session-only, not persisted).
+        // Invalid QColor means "no override, use the palette slot".
+        QColor mTransientPenColor;
+        QColor mTransientMarkerColor;
 
         UBSetting* webUseExternalBrowser;
         UBSetting* webShowPageImmediatelyOnMirroredScreen;

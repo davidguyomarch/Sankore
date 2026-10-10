@@ -22,7 +22,7 @@
 
 
 #include "UBColorPicker.h"
-#include <QColorDialog>
+#include "UBColorPickerDialog.h"
 #include "UBDrawingStrokePropertiesPalette.h"
 
 #include "core/UBApplication.h"
@@ -132,23 +132,16 @@ UBDrawingStrokePropertiesPalette::~UBDrawingStrokePropertiesPalette()
 
 void UBDrawingStrokePropertiesPalette::onBtnSelectStrokeColor()
 {
-    QColorDialog colorPicker(this);
-    colorPicker.setOption(QColorDialog::ShowAlphaChannel);
+    // #475: unified colour picker.
+    QColor selectedColor = UBColorPickerDialog::pick(QColor(), this);
+    if (!selectedColor.isValid())
+        return;   // cancelled
 
-#ifdef Q_OS_MACOS
-    colorPicker.setOption(QColorDialog::DontUseNativeDialog);
-#endif
+    if (selectedColor.alpha() == 0)
+        selectedColor = Qt::transparent;
 
-    if ( colorPicker.exec() )
-    {
-        QColor selectedColor = colorPicker.selectedColor();
-
-        if (selectedColor.alpha() == 0)
-            selectedColor = Qt::transparent;
-
-        UBApplication::boardController->shapeFactory().setStrokeColor(selectedColor);
-        mBtnColorPicker->setColor(selectedColor); // udpate Color icon in palette.
-    }
+    UBApplication::boardController->shapeFactory().setStrokeColor(selectedColor);
+    mBtnColorPicker->setColor(selectedColor); // udpate Color icon in palette.
 }
 
 void UBDrawingStrokePropertiesPalette::onBtnSelectThickness()
