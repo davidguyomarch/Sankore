@@ -24,6 +24,7 @@
 
 #include "UBCreateLinkPalette.h"
 #include "qml/UBThemeManager.h"
+#include "gui/UBIconUtils.h"
 
 #include <QVBoxLayout>
 #include <QStackedWidget>
@@ -51,6 +52,9 @@
 #include "domain/UBPageNumberUtils.h"
 
 #include "frameworks/UBFileSystemUtils.h"
+
+// #490: size of the themed Phosphor close glyph drawn top-left of the palette.
+static const int kCloseGlyphSize = 24;
 
 
 UBCreateLinkLabel::UBCreateLinkLabel(QString labelText, QWidget *parent) :
@@ -145,24 +149,52 @@ UBCreateLinkPalette::~UBCreateLinkPalette()
 
 QToolButton* UBCreateLinkPalette::addInitiaWidgetButton(QString textButton, QString iconPath)
 {
+    // #490: discreet V2 look — a compact, icon-only Phosphor button tinted with
+    // the theme, with the label as a tooltip (not text under a 100px icon).
+    // iconPath is now a Phosphor glyph NAME (e.g. "speaker-high").
+    auto* tm = UBThemeManager::instance();
     QToolButton* button = new QToolButton(mInitialWidget);
-    button->setIcon(QIcon(iconPath));
-    button->setIconSize(QSize(100,100));
-    button->setText(textButton);
-    button->setStyleSheet("background-color:transparent; board : none;");
-    button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    button->setIcon(UBIconUtils::phosphorIcon(iconPath, tm->onSurface(), 48));
+    button->setIconSize(QSize(32, 32));
+    button->setToolTip(textButton);
+    button->setCursor(Qt::PointingHandCursor);
+    button->setAutoRaise(true);
+    button->setFixedSize(48, 48);
+    button->setStyleSheet(
+        QString("QToolButton{background:transparent; border:none; border-radius:8px;}"
+                "QToolButton:hover{background:%1;}")
+            .arg(UBThemeManager::css(tm->surfaceHover())));
     return button;
+}
+
+void UBCreateLinkPalette::styleBackButton(QPushButton* button)
+{
+    // #490: discreet Phosphor back arrow, flat, themed (was :/images/toolbar/undoOn.png).
+    auto* tm = UBThemeManager::instance();
+    button->setIcon(UBIconUtils::phosphorIcon("arrow-left", tm->onSurface(), 32));
+    button->setIconSize(QSize(20, 20));
+    button->setFlat(true);
+    button->setCursor(Qt::PointingHandCursor);
+    button->setFixedSize(32, 32);
+    button->setToolTip(tr("Back"));
+    button->setStyleSheet(
+        QString("QPushButton{background:transparent; border:none; border-radius:6px;}"
+                "QPushButton:hover{background:%1;}")
+            .arg(UBThemeManager::css(tm->surfaceHover())));
 }
 
 void UBCreateLinkPalette::init()
 {
     mInitialWidget = new QWidget(this);
     QHBoxLayout* initialWidgetLayout = new QHBoxLayout(mInitialWidget);
+    initialWidgetLayout->setContentsMargins(4, 4, 4, 4);
+    initialWidgetLayout->setSpacing(6);
     mInitialWidget->setLayout(initialWidgetLayout);
 
-    QToolButton* actionPlayAudio = addInitiaWidgetButton(tr("Play an audio file"),":images/createLinkPalette/PlayAudio.svg");
-    QToolButton* actionAddLinkToPage = addInitiaWidgetButton(tr("Add Link to Page"),":images/createLinkPalette/LinkPage.svg");
-    QToolButton* actionAddLinkToWeb = addInitiaWidgetButton(tr("Add Link to a Web page"),":images/createLinkPalette/LinkWeb.svg");
+    // #490: Phosphor glyphs — speaker-high (audio), file-text (page), globe (web).
+    QToolButton* actionPlayAudio = addInitiaWidgetButton(tr("Play an audio file"), "speaker-high");
+    QToolButton* actionAddLinkToPage = addInitiaWidgetButton(tr("Add Link to Page"), "file-text");
+    QToolButton* actionAddLinkToWeb = addInitiaWidgetButton(tr("Add Link to a Web page"), "globe");
 
     initialWidgetLayout->addWidget(actionPlayAudio);
     initialWidgetLayout->addWidget(actionAddLinkToPage);
@@ -175,7 +207,7 @@ void UBCreateLinkPalette::init()
     mAudioWidget->setLayout(audioWidgetLayout);
     QHBoxLayout* audioBackButtonLayout = new QHBoxLayout();
     QPushButton* audioBackButton = new QPushButton(mAudioWidget);
-    audioBackButton->setIcon(QIcon(":images/toolbar/undoOn.png"));
+    styleBackButton(audioBackButton);
     audioBackButtonLayout->addWidget(audioBackButton);
     audioBackButtonLayout->addStretch();
     audioWidgetLayout->addLayout(audioBackButtonLayout);
@@ -205,7 +237,7 @@ void UBCreateLinkPalette::init()
     mPageLinkWidget->setLayout(pageLinkWidgetLayout);
     QHBoxLayout* pageLinkBackButtonLayout = new QHBoxLayout();
     QPushButton* pageLinkBackButton = new QPushButton(mPageLinkWidget);
-    pageLinkBackButton->setIcon(QIcon(":images/toolbar/undoOn.png"));
+    styleBackButton(pageLinkBackButton);
     pageLinkBackButtonLayout->addWidget(pageLinkBackButton);
     pageLinkBackButtonLayout->addStretch();
     pageLinkWidgetLayout->addLayout(pageLinkBackButtonLayout);
@@ -267,7 +299,7 @@ void UBCreateLinkPalette::init()
     mUrlLinkWidget->setLayout(urlLinkWidgetLayout);
     QHBoxLayout* urlLinkBackButtonLayout = new QHBoxLayout();
     QPushButton* urlLinkBackButton = new QPushButton(mUrlLinkWidget);
-    urlLinkBackButton->setIcon(QIcon(":images/toolbar/undoOn.png"));
+    styleBackButton(urlLinkBackButton);
     urlLinkBackButtonLayout->addWidget(urlLinkBackButton);
     urlLinkBackButtonLayout->addStretch();
     urlLinkWidgetLayout->addLayout(urlLinkBackButtonLayout);
@@ -369,8 +401,11 @@ void UBCreateLinkPalette::paintEvent(QPaintEvent *event)
 {
     UBFloatingPalette::paintEvent(event);
 
+    // #490: themed Phosphor close glyph (was the :/images/close.svg blit).
     QPainter painter(this);
-    painter.drawPixmap(0, 0, QPixmap(":/images/close.svg"));
+    const QPixmap closePm = UBIconUtils::phosphorPixmap(
+        "x-circle", UBThemeManager::instance()->onSurface(), kCloseGlyphSize);
+    painter.drawPixmap(4, 4, closePm);
 }
 
 
@@ -382,8 +417,9 @@ void UBCreateLinkPalette::close()
 
 void UBCreateLinkPalette::mouseReleaseEvent(QMouseEvent * event)
 {
-    if (event->pos().x() >= 0 && event->pos().x() < QPixmap(":/images/close.svg").width()
-        && event->pos().y() >= 0 && event->pos().y() < QPixmap(":/images/close.svg").height())
+    // #490: hit-test the themed close glyph drawn at (4,4), size kCloseGlyphSize.
+    if (event->pos().x() >= 4 && event->pos().x() < 4 + kCloseGlyphSize
+        && event->pos().y() >= 4 && event->pos().y() < 4 + kCloseGlyphSize)
     {
         event->accept();
         close();
