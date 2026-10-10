@@ -139,6 +139,16 @@ public:
     Q_INVOKABLE void activateFillTool();
     Q_INVOKABLE void alignSelection();
 
+    // #475: open the unified colour picker (UBColorPickerDialog) and apply the
+    // chosen free colour to the ACTIVE tool, without touching the 4 fixed
+    // palette swatches:
+    //  - Pen/Line/Marker → a transient free-colour override in UBSettings read
+    //    by the draw pipeline (see UBSettings::setTransient{Pen,Marker}Color);
+    //  - Drawing (shapes) → shapeFactory().setStrokeColor (plain QColor, no slot);
+    //  - ChangeFill (bucket) → shapeFactory().setFillingFirstColor.
+    // No-op if the user cancels the dialog.
+    Q_INVOKABLE void pickCustomColor();
+
     // --- Eraser options (issue #249) ---
     Q_INVOKABLE void eraseAllInk();     // erase all strokes/annotations on the page
     Q_INVOKABLE void eraseWholePage();  // erase the entire page content

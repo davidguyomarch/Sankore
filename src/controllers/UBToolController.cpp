@@ -17,6 +17,7 @@
 #include "domain/UBShapeFactory.h"
 #include "domain/UBAlignObjectManager.h"
 #include "domain/UBEditableGraphicsPolygonItem.h"
+#include "gui/UBColorPickerDialog.h"
 
 #include <QAction>
 
@@ -435,8 +436,10 @@ int UBToolController::currentColorIndex() const
     if (m_activeTool == ChangeFill)   // #429-followup: shape FILL color
         return m_shapeFillColorIndex;
     if (m_activeTool == Marker)
-        return markerColorIndex();
-    return penColorIndex();
+        // #475: a transient free colour is active → no fixed swatch is selected.
+        return mSettings->hasTransientMarkerColor() ? -1 : markerColorIndex();
+    // #475: same for pen/line.
+    return mSettings->hasTransientPenColor() ? -1 : penColorIndex();
 }
 
 void UBToolController::setCurrentColorIndex(int index)
@@ -477,11 +480,20 @@ void UBToolController::setCurrentColorIndex(int index)
     }
 
     if (m_activeTool == Marker)
+    {
+        // #475: re-selecting a palette swatch clears any transient free colour
+        // so the fixed slot takes over again.
+        mSettings->clearTransientMarkerColor();
         setMarkerColorIndex(index);
+    }
     else
+    {
+        mSettings->clearTransientPenColor();
         setPenColorIndex(index);
+    }
 
     emit penColorChanged();
+    emit markerColorChanged();
     emit currentColorIndexChanged();
     emit currentColorsChanged();
 }
@@ -648,6 +660,56 @@ void UBToolController::alignSelection()
 {
     UBAlignObjectManager mgr;
     mgr.horizontalAlign();
+}
+
+void UBToolController::pickCustomColor()
+{
+    // #475: open the unified colour picker, seeded with the active tool's
+    // current colour, and apply the choice to the active tool without touching
+    // the 4 fixed palette swatches.
+    QWidget* parent = UBApplication::boardController
+                          ? UBApplication::boardController->controlView()
+                          : nullptr;
+
+    const QColor seed = currentToolColor();
+    const QColor chosen = UBColorPickerDialog::pick(seed, parent, /*withAlpha*/ true,
+                                                    tr("Custom colour"));
+    if (!chosen.isValid())
+        return;   // cancelled
+
+    if (m_activeTool == Drawing)
+    {
+        // Shapes store a plain QColor (no palette slot) — push it straight to
+        // the factory for the next shape / current selection.
+        if (UBApplication::boardController)
+            UBApplication::boardController->shapeFactory().setStrokeColor(chosen);
+    }
+    else if (m_activeTool == ChangeFill)
+    {
+        if (UBApplication::boardController)
+        {
+            auto& factory = UBApplication::boardController->shapeFactory();
+            factory.setFillType(UBShapeFactory::Full);
+            factory.setFillingFirstColor(chosen);
+        }
+    }
+    else if (m_activeTool == Marker)
+    {
+        // Transient free colour read by the draw pipeline (alpha forced to the
+        // marker alpha inside setTransientMarkerColor).
+        mSettings->setTransientMarkerColor(chosen);
+        emit markerColorChanged();
+    }
+    else
+    {
+        // Pen / Line (and any other drawing tool): transient free colour,
+        // forced opaque inside setTransientPenColor.
+        mSettings->setTransientPenColor(chosen);
+        emit penColorChanged();
+    }
+
+    emit currentColorIndexChanged();
+    emit currentColorsChanged();
 }
 
 // --- Eraser options (issue #249) ---

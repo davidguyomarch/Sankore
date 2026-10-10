@@ -80,6 +80,50 @@ Rectangle {
             }
         }
 
+        // === Custom colour button (#475) — opens the unified colour picker.
+        // Shown wherever colours are (hidden for the eraser). Applies a free
+        // colour to the active tool without touching the 4 fixed swatches.
+        Rectangle {
+            visible: !root.isEraser
+            width: 28; height: 28
+            radius: 6
+            anchors.verticalCenter: parent.verticalCenter
+            // Highlighted when a free colour is active (no fixed swatch selected).
+            color: (toolController.currentColorIndex === -1) ? themeManager.primary
+                 : customMouse.containsMouse ? themeManager.surfaceHover
+                 : "transparent"
+
+            Image {
+                id: customIcon
+                anchors.centerIn: parent
+                width: 18; height: 18
+                source: "qrc:/icons/phosphor/palette.svg"
+                sourceSize: Qt.size(18, 18)
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: customIcon
+                source: customIcon
+                color: (toolController.currentColorIndex === -1) ? themeManager.onPrimary
+                                                                 : themeManager.onSurface
+            }
+
+            MouseArea {
+                id: customMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: toolController.pickCustomColor()
+            }
+
+            TooltipLabel {
+                anchor: parent
+                text: "Couleur personnalisée"
+                show: customMouse.containsMouse
+                placeBelow: false
+            }
+        }
+
         // === Separator (hidden in fill mode — no widths there) ===
         Rectangle {
             visible: !root.isFill
