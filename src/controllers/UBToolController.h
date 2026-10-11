@@ -149,6 +149,14 @@ public:
     // No-op if the user cancels the dialog.
     Q_INVOKABLE void pickCustomColor();
 
+    // #475: explicit swatch selection, called from the DrawingPropsBar on a REAL
+    // click. Prefer this over writing the currentColorIndex property: a property
+    // write-back from a QML binding re-evaluation (e.g. a Repeater delegate
+    // rebuild on the software backend) is indistinguishable from a user click and
+    // would silently reset the selection. Routing clicks through an explicit
+    // invokable makes a binding re-eval a no-op (it does not call this).
+    Q_INVOKABLE void selectColorIndex(int index);
+
     // --- Eraser options (issue #249) ---
     Q_INVOKABLE void eraseAllInk();     // erase all strokes/annotations on the page
     Q_INVOKABLE void eraseWholePage();  // erase the entire page content

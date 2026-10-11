@@ -708,8 +708,25 @@ void UBToolController::pickCustomColor()
         emit penColorChanged();
     }
 
+    // #475: emit ONLY the selection-changed signal, NOT currentColorsChanged.
+    // The palette LIST did not change (we applied a free colour, we did not edit
+    // a swatch), so emitting currentColorsChanged would make the DrawingPropsBar
+    // swatch Repeater rebuild its delegates; on the software backend the rebuilt
+    // delegate re-fires its MouseArea.onClicked, writing currentColorIndex = 0
+    // back into setCurrentColorIndex, which clears the transient colour we just
+    // set (pen) / overwrites the fill with palette slot 0 = black (fill). The
+    // highlight only needs currentColorIndexChanged.
     emit currentColorIndexChanged();
-    emit currentColorsChanged();
+}
+
+void UBToolController::selectColorIndex(int index)
+{
+    // #475: explicit, click-only entry point for the DrawingPropsBar swatches.
+    // It shares setCurrentColorIndex's per-tool routing (which also clears any
+    // transient free colour), but being an invokable it is NEVER triggered by a
+    // QML binding re-evaluation — only by a real onClicked. That is the fix for
+    // the custom colour being reset to palette slot 0 right after a pick.
+    setCurrentColorIndex(index);
 }
 
 // --- Eraser options (issue #249) ---

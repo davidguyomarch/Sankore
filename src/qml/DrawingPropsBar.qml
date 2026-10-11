@@ -74,7 +74,10 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: toolController.currentColorIndex = index
+                        // #475: explicit invokable (not a property write-back) so a
+                        // Repeater delegate rebuild can't masquerade as a click and
+                        // reset the custom colour.
+                        onClicked: toolController.selectColorIndex(index)
                     }
                 }
             }
