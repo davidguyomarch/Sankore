@@ -123,6 +123,15 @@ public:
 protected:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
+    // #366: route scene mouse events + itemChange through the delegate so the
+    // stroke can be SELECTED and MOVED like a shape / legacy strokes group. The
+    // delegate draws the selection frame, pushes the move undo command, and
+    // marks the scene modified. Mirrors UBGraphicsStrokesGroup.
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+
 private:
     /** Rebuild the QPainterPath from raw points using Catmull-Rom → cubic Bézier. */
     void rebuildPath();

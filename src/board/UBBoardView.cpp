@@ -646,6 +646,17 @@ Here we determines cases when items should to get mouse press event at pressing 
         if (currentTool == UBStylusTool::Play)
             return true;
         break;
+
+    // #366: modern pen/marker strokes (UBSmoothStrokeItem) must be selectable
+    // with the Selector tool, like the legacy strokes group above. Without this
+    // case the item falls through to `return !isUBItem(item)` = false (it IS a
+    // UB item), so the press is never forwarded and the stroke can't be picked.
+    case UBGraphicsItemType::SmoothStrokeItemType:
+        if (currentTool == UBStylusTool::Play)
+            return true;
+        if (currentTool == UBStylusTool::Selector)
+            return true;
+        break;
     // Groups shouldn't reacts on any presses and moves for Play tool.
     case UBGraphicsGroupContainerItem::Type:
         if(currentTool == UBStylusTool::Play)
@@ -772,6 +783,8 @@ bool UBBoardView::itemShouldBeMoved(QGraphicsItem *item)
             return false;
     case UBGraphicsMediaItem::Type:
     case UBGraphicsStrokesGroup::Type:
+    // #366: a modern stroke moves like the legacy strokes group.
+    case UBGraphicsItemType::SmoothStrokeItemType:
         return true;
     case UBGraphicsTextItem::Type:
         return !item->isSelected();
@@ -859,28 +872,6 @@ void UBBoardView::handleItemMousePress(QMouseEvent *event)
 {
     mLastPressedMousePos = mapToScene(event->pos());
 
-    // --- Diagnostics #243 follow-up: pen strokes (UBSmoothStrokeItem) are not
-    //     selected by the Selector tool. Trace the selection decision path.
-    //     Only in Selector mode to avoid flooding startup.log.
-    const bool selDiag =
-        ((UBStylusTool::Enum)UBToolController::toolController()->stylusTool() == UBStylusTool::Selector);
-    if (selDiag)
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text))
-        {
-            QTextStream out(&logFile);
-            const int t = movingItem ? movingItem->type() : -1;
-            out << "[SEL] press: itemType=" << t
-                << " (SmoothStroke=" << (int)UBGraphicsItemType::SmoothStrokeItemType
-                << " StrokesGroup=" << (int)UBGraphicsStrokesGroup::Type << ")"
-                << " isUBItem=" << (movingItem ? (isUBItem(movingItem) ? 1 : 0) : -1)
-                << " hasParent=" << (movingItem && movingItem->parentItem() ? 1 : 0)
-                << " selectableFlag=" << (movingItem && (movingItem->flags() & QGraphicsItem::ItemIsSelectable) ? 1 : 0);
-            logFile.close();
-        }
-    }
-
     // Determining item who will take mouse press event
     //all other items will be deselected and if all item will be deselected, then
     // wrong item can catch mouse press. because selected items placed on the top
@@ -891,19 +882,6 @@ void UBBoardView::handleItemMousePress(QMouseEvent *event)
         return;
 
     const bool willReceivePress = itemShouldReceiveMousePressEvent(movingItem);
-    if (selDiag)
-    {
-        QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-        if (logFile.open(QIODevice::Append | QIODevice::Text))
-        {
-            QTextStream out(&logFile);
-            out << " -> afterDetermine type=" << (movingItem ? movingItem->type() : -1)
-                << " shouldReceivePress=" << (willReceivePress ? 1 : 0)
-                << " isSelected=" << (movingItem ? (movingItem->isSelected() ? 1 : 0) : -1) << "\n";
-            logFile.close();
-        }
-    }
-
     if (willReceivePress)
     {
         QGraphicsView::mousePressEvent (event);
