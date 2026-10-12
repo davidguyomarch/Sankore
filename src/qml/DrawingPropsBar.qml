@@ -93,15 +93,39 @@ Rectangle {
             width: 28; height: 28
             radius: 6
             anchors.verticalCenter: parent.verticalCenter
-            // Active custom colour → show it; otherwise blend into the bar.
+            // Active custom colour → show it as the fill; otherwise blend into
+            // the bar. The palette icon stays ON TOP in both states so this
+            // swatch always reads as "custom colour picker", distinct from the
+            // 4 fixed swatches.
             property bool hasCustom: toolController.hasCurrentCustomColor
-            color: hasCustom ? toolController.currentCustomColor
-                 : customMouse.containsMouse ? themeManager.surfaceHover
-                 : themeManager.surface
-            // Thin border so an empty (surface-coloured) swatch is still a hint
-            // that it is clickable, without looking like a filled colour.
+            property color fillColor: hasCustom ? toolController.currentCustomColor
+                                     : customMouse.containsMouse ? themeManager.surfaceHover
+                                     : themeManager.surface
+            color: fillColor
             border.width: hasCustom ? 2 : 1
             border.color: hasCustom ? themeManager.onPrimary : themeManager.border
+
+            // Palette icon, always visible, tinted for contrast against the
+            // current fill (dark icon on a light fill, light icon on a dark one)
+            // so it stays legible whatever custom colour is chosen.
+            Image {
+                id: customIcon
+                anchors.centerIn: parent
+                width: 16; height: 16
+                source: "qrc:/icons/phosphor/palette.svg"
+                sourceSize: Qt.size(16, 16)
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: customIcon
+                source: customIcon
+                // Luminance of the fill decides black vs white icon. Use
+                // onSurface when idle (no custom colour) to match the bar.
+                color: !parent.hasCustom ? themeManager.onSurfaceDim
+                     : (0.299 * parent.fillColor.r + 0.587 * parent.fillColor.g
+                        + 0.114 * parent.fillColor.b) > 0.5 ? themeManager.onSurface
+                                                            : themeManager.surface
+            }
 
             // Selection ring, same as the 4 fixed swatches, when the custom
             // colour is the active one (currentColorIndex === -1).
