@@ -358,6 +358,12 @@ sur du noir (V=0) — sinon choisir une teinte vive dans la roue rendait du noir
 - `setPenColor(onDark, color, index)` / `setMarkerColor(onDark, color, index)` :
   **écrasent un slot de palette** (persisté) et émettent `colorPaletteChanged`.
   C'est l'édition **explicite** d'une pastille — à distinguer du canal transitoire.
+- `editColorSwatch(index)` (Q_INVOKABLE, #492) : ouvre le picker unifié seedé avec
+  la couleur du slot, puis **écrase ce slot pour le fond courant** (pen ou marker
+  selon l'outil) via `setPenColor`/`setMarkerColor`, re-sélectionne le slot édité,
+  et émet `currentColorsChanged` + `currentColorIndexChanged` pour rafraîchir la
+  barre. Déclenché par **long-press / clic-droit** sur une pastille (le clic court
+  reste la sélection). N'édite que la variante du **fond courant** (pas l'autre).
 
 ### Règles pour Kiro (évolutions/bugs couleur)
 

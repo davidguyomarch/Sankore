@@ -74,10 +74,20 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        // #492: right-click (desktop) also edits the swatch.
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
                         // #475: explicit invokable (not a property write-back) so a
                         // Repeater delegate rebuild can't masquerade as a click and
                         // reset the custom colour.
-                        onClicked: toolController.selectColorIndex(index)
+                        onClicked: (mouse) => {
+                            if (mouse.button === Qt.RightButton)
+                                toolController.editColorSwatch(index)   // #492
+                            else
+                                toolController.selectColorIndex(index)
+                        }
+                        // #492: long-press (touch / TNI, where there is no right
+                        // click) opens the editor for this fixed swatch.
+                        onPressAndHold: toolController.editColorSwatch(index)
                     }
                 }
             }

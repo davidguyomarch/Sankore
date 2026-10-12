@@ -160,6 +160,13 @@ public:
     // No-op if the user cancels the dialog.
     Q_INVOKABLE void pickCustomColor();
 
+    // #492: edit one of the 4 FIXED palette swatches. Opens the unified picker
+    // seeded with the slot's current colour and, on accept, overwrites that slot
+    // for the CURRENT background (pen or marker palette depending on the active
+    // tool) — persisted. Triggered by a long-press / right-click on a swatch;
+    // distinct from pickCustomColor (which never touches the swatches).
+    Q_INVOKABLE void editColorSwatch(int index);
+
     // #475: explicit swatch selection, called from the DrawingPropsBar on a REAL
     // click. Prefer this over writing the currentColorIndex property: a property
     // write-back from a QML binding re-evaluation (e.g. a Repeater delegate
