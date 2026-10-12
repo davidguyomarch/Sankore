@@ -774,6 +774,79 @@ void UBToolController::pickCustomColor()
     emit currentColorIndexChanged();
 }
 
+void UBToolController::editColorSwatch(int index)
+{
+    // #492: overwrite a FIXED palette swatch (long-press / right-click), as
+    // opposed to pickCustomColor which applies a free colour without touching
+    // the swatches. Marker tool edits the marker palette; every other
+    // drawing/shape/fill tool shares the pen palette (see currentColors()).
+    const bool isMarkerTool = (m_activeTool == Marker);
+    const QList<QColor> palette = isMarkerTool ? markerColors() : penColors();
+    if (index < 0 || index >= palette.size())
+        return;
+
+    QWidget* parent = UBApplication::boardController
+                          ? UBApplication::boardController->controlView()
+                          : nullptr;
+
+    // Seed with the slot's current colour. For the marker, strip the baked alpha
+    // so the dialog shows the pure hue (the alpha is re-applied on write).
+    QColor seed = palette.at(index);
+    if (isMarkerTool)
+        seed.setAlphaF(1.0);
+
+    const QColor chosen = UBColorPickerDialog::pick(seed, parent, /*withAlpha*/ !isMarkerTool,
+                                                    tr("Edit palette colour"));
+    if (!chosen.isValid())
+        return;   // cancelled
+
+    // Overwrite only the CURRENT background's variant (what the user sees).
+    const bool onDark = mSettings->isDarkBackground();
+    if (isMarkerTool)
+    {
+        // setMarkerColor stores the colour; the marker alpha is enforced by the
+        // UBColorListSetting's own alpha (set from boardMarkerAlpha).
+        setMarkerColor(onDark, chosen, index);
+        // Re-select this slot so the newly edited colour becomes active, and
+        // drop any transient free marker colour.
+        mSettings->clearTransientMarkerColor();
+        setMarkerColorIndex(index);
+    }
+    else
+    {
+        setPenColor(onDark, chosen, index);
+        mSettings->clearTransientPenColor();
+        m_shapeCustomColor = QColor();
+        m_shapeFillCustomColor = QColor();
+        // Make the edited slot the active selection for the current tool.
+        if (m_activeTool == Drawing)
+        {
+            m_shapeColorIndex = index;
+            if (UBApplication::boardController)
+                UBApplication::boardController->shapeFactory().setStrokeColor(chosen);
+        }
+        else if (m_activeTool == ChangeFill)
+        {
+            m_shapeFillColorIndex = index;
+            if (UBApplication::boardController)
+            {
+                auto& factory = UBApplication::boardController->shapeFactory();
+                factory.setFillType(UBShapeFactory::Full);
+                factory.setFillingFirstColor(chosen);
+            }
+        }
+        else
+        {
+            setPenColorIndex(index);
+        }
+    }
+
+    // Refresh the DrawingPropsBar: the palette list changed (currentColors) and
+    // the selection moved to the edited slot (currentColorIndex).
+    emit currentColorsChanged();
+    emit currentColorIndexChanged();
+}
+
 void UBToolController::selectColorIndex(int index)
 {
     // #475: explicit, click-only entry point for the DrawingPropsBar swatches.
