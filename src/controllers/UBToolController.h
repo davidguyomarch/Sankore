@@ -51,6 +51,15 @@ class UBToolController : public QObject
     Q_PROPERTY(QList<QColor> currentColors READ currentColors NOTIFY currentColorsChanged)
     Q_PROPERTY(int currentColorIndex READ currentColorIndex WRITE setCurrentColorIndex NOTIFY currentColorIndexChanged)
     Q_PROPERTY(int currentWidthIndex READ currentWidthIndex WRITE setCurrentWidthIndex NOTIFY currentWidthIndexChanged)
+    // #475: the active tool's custom (free, non-palette) colour, or an invalid
+    // QColor when none is set. Drives the 5th "custom" swatch in the
+    // DrawingPropsBar: invisible at rest (invalid), shows the chosen colour and
+    // is highlighted when active. NOTIFY shared with the selection signal since
+    // picking a custom colour / selecting a swatch both change it.
+    Q_PROPERTY(QColor currentCustomColor READ currentCustomColor NOTIFY currentColorIndexChanged)
+    // Whether the active tool currently has a custom colour (QColor validity is
+    // not exposed to QML, so expose an explicit bool for the 5th swatch).
+    Q_PROPERTY(bool hasCurrentCustomColor READ hasCurrentCustomColor NOTIFY currentColorIndexChanged)
 
     // Drawing properties panel visibility
     Q_PROPERTY(bool showDrawingProps READ showDrawingProps NOTIFY activeToolChanged)
@@ -121,6 +130,8 @@ public:
     QList<QColor> currentColors() const;
     int currentColorIndex() const;
     void setCurrentColorIndex(int index);
+    QColor currentCustomColor() const;   // #475: active tool's free colour (invalid if none)
+    bool hasCurrentCustomColor() const;  // #475: whether a custom colour is active
     int currentWidthIndex() const;
     void setCurrentWidthIndex(int index);
     int currentToolWidthIndex() const;
@@ -196,6 +207,11 @@ signals:
 private:
     explicit UBToolController(QObject* parent = nullptr);
 
+    // #475: the colour the custom picker should open on for the active tool —
+    // the free colour if one is set, else the tool's effective colour (pen slot,
+    // marker slot, shape stroke, or fill). Used by pickCustomColor().
+    QColor seedColorForActiveTool() const;
+
     int m_activeTool;
     UBStylusTool::Enum m_latestDrawingTool;
     bool m_shapesVisible;
@@ -207,6 +223,13 @@ private:
     int m_shapeWidthIndex = 1;
     // #429-followup: shape FILL color index (fill tool, separate from stroke).
     int m_shapeFillColorIndex = 0;
+
+    // #475: custom (free, non-palette) colour per shape-side tool. Pen/Marker use
+    // the transient channel in UBSettings instead; these cover Drawing (stroke)
+    // and ChangeFill (fill), which push straight to the factory with no slot.
+    // Invalid QColor = no custom colour → the fixed palette index is in effect.
+    QColor m_shapeCustomColor;
+    QColor m_shapeFillCustomColor;
 
     // #318: currently selected shape action, for the palette highlight.
     QString m_currentShape;

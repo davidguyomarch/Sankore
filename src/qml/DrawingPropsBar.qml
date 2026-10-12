@@ -83,32 +83,36 @@ Rectangle {
             }
         }
 
-        // === Custom colour button (#475) — opens the unified colour picker.
-        // Shown wherever colours are (hidden for the eraser). Applies a free
-        // colour to the active tool without touching the 4 fixed swatches.
+        // === 5th "custom colour" swatch (#475) — opens the unified colour picker.
+        // Shown wherever colours are (hidden for the eraser). At rest it is
+        // INVISIBLE (filled with the bar's surface colour): no custom colour set.
+        // Once a custom colour is picked it shows that colour, like a 5th swatch,
+        // and gets the same selection ring when it is the active colour.
         Rectangle {
             visible: !root.isEraser
             width: 28; height: 28
             radius: 6
             anchors.verticalCenter: parent.verticalCenter
-            // Highlighted when a free colour is active (no fixed swatch selected).
-            color: (toolController.currentColorIndex === -1) ? themeManager.primary
+            // Active custom colour → show it; otherwise blend into the bar.
+            property bool hasCustom: toolController.hasCurrentCustomColor
+            color: hasCustom ? toolController.currentCustomColor
                  : customMouse.containsMouse ? themeManager.surfaceHover
-                 : "transparent"
+                 : themeManager.surface
+            // Thin border so an empty (surface-coloured) swatch is still a hint
+            // that it is clickable, without looking like a filled colour.
+            border.width: hasCustom ? 2 : 1
+            border.color: hasCustom ? themeManager.onPrimary : themeManager.border
 
-            Image {
-                id: customIcon
-                anchors.centerIn: parent
-                width: 18; height: 18
-                source: "qrc:/icons/phosphor/palette.svg"
-                sourceSize: Qt.size(18, 18)
-                visible: false
-            }
-            ColorOverlay {
-                anchors.fill: customIcon
-                source: customIcon
-                color: (toolController.currentColorIndex === -1) ? themeManager.onPrimary
-                                                                 : themeManager.onSurface
+            // Selection ring, same as the 4 fixed swatches, when the custom
+            // colour is the active one (currentColorIndex === -1).
+            Rectangle {
+                visible: parent.hasCustom && toolController.currentColorIndex === -1
+                anchors.fill: parent
+                anchors.margins: -3
+                radius: 8
+                color: "transparent"
+                border.width: 2
+                border.color: themeManager.primary
             }
 
             MouseArea {

@@ -311,10 +311,45 @@ fond), `UBDrawingStrokePropertiesPalette`, `UBDrawingFillPropertiesPalette`
 `UBColorPickerDialog::pick()`. **Ne jamais** réintroduire un `QColorDialog` brut
 (sinon on recrée la divergence parenting/alpha/thème que #475 a supprimée).
 
+### Le 5e carré « couleur personnalisée » de la `DrawingPropsBar`
+
+À droite des 4 pastilles fixes, un **5e carré** matérialise la couleur libre de
+l'outil actif :
+- **au repos** (aucune couleur libre) : rempli de la couleur de la barre
+  (`themeManager.surface`) → **invisible**, juste une fine bordure ;
+- **couleur libre active** : il montre cette couleur et porte l'anneau de
+  sélection bleu (les 4 pastilles ne sont alors plus surlignées) ;
+- clic → `toolController.pickCustomColor()`.
+
+Il est piloté par **une seule source de vérité par outil** dans `UBToolController` :
+- Pen/Marker : couleur transitoire de `UBSettings` (`transient{Pen,Marker}Color`) ;
+- Drawing (contour) / ChangeFill (remplissage) : `m_shapeCustomColor` /
+  `m_shapeFillCustomColor` (le factory n'a pas de slot, la couleur libre est donc
+  mémorisée côté contrôleur).
+Exposé à QML par `currentCustomColor` (la couleur) + `hasCurrentCustomColor` (bool
+— **la validité d'un `QColor` n'est pas exposée à QML**, d'où le bool explicite).
+`currentColorIndex()` renvoie **-1 pour les 4 outils** dès qu'une couleur libre
+est active (sinon une pastille resterait surlignée à tort — bug vécu en Fill).
+
+Sélectionner une pastille fixe (`setCurrentColorIndex`) **efface** la couleur
+libre de l'outil (les 4 branches le font), rendant le 5e carré de nouveau invisible.
+
+### Seed du picker : fourni par l'outil appelant
+
+`pickCustomColor()` ouvre le picker sur la **dernière couleur de l'outil actif**
+(`seedColorForActiveTool()`) : couleur libre si active, sinon la couleur effective
+(slot pen/marker, `shapeFactory().strokeColor()` pour Drawing,
+`fillFirstColor()` pour ChangeFill). On ne seed **pas** depuis la forme
+sélectionnée (modifier une forme existante reste une action explicite via le menu
+contextuel « Fill colour… » #458). `UBColorPickerDialog::seedColor()` relève en
+plus la **valeur HSV** du seed à un plancher (0.5) pour que la roue n'ouvre jamais
+sur du noir (V=0) — sinon choisir une teinte vive dans la roue rendait du noir.
+
 ### Surface publique couleur de `UBToolController`
 
 - Lecture tool-aware pour la `DrawingPropsBar` : `currentColors()`,
-  `currentColorIndex()` (**-1** si couleur libre active), `currentToolColor()`.
+  `currentColorIndex()` (**-1** si couleur libre active), `currentToolColor()`,
+  `currentCustomColor()` / `hasCurrentCustomColor()` (5e carré).
 - `setCurrentColorIndex(index)` : route selon l'outil (Drawing → stroke factory ;
   ChangeFill → fill factory ; Marker/Pen → index de palette + **clear override**).
 - `pickCustomColor()` (Q_INVOKABLE, bouton « couleur perso » de la
