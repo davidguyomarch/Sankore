@@ -183,9 +183,12 @@ Le remplissage est un **axe distinct** du trait, longtemps resté inerte. Points
 > Rappel du piège sélection (voir plus haut) : `setStrokeColor`/`setFillingFirstColor`/
 > `updateFillingPropertyOnSelectedItems` n'agissent que sur `scene()->selectedItems()`,
 > **vide par défaut** après tracé (#319). Les boutons « Contour »/« Aligner » de
-> `ShapesPaletteV2` (#430/#431) sont donc **inertes sans modèle de sélection** (#366) :
-> le fil QML est correct, c'est la sélection qui manque. Ne pas « corriger » en
-> réintroduisant un fallback « dernière forme ».
+> `ShapesPaletteV2` (#430/#431) étaient donc **inertes faute de modèle de
+> sélection** : le fil QML est correct, c'est la re-sélection d'un objet qui
+> manquait. #366 ajoute la sélection/déplacement des traits (et re-sélection des
+> formes avec l'outil Sélection) — voir « Sélection et déplacement d'un trait »
+> plus bas ; #355/#431 doivent redevenir fonctionnels une fois #366 testé en VM.
+> Ne jamais « corriger » en réintroduisant un fallback « dernière forme ».
 
 ## Palette d'outils et sélection de forme (surlignage)
 
@@ -217,6 +220,35 @@ Piège à éviter : NE PAS réintroduire un fallback « appliquer à la dernièr
 dessinée » dans `setStrokeColor`/`setThickness`. La forme restant sélectionnée après
 tracé, cela recolorait silencieusement la forme précédente (bug rapporté puis corrigé
 en #319).
+
+## Sélection et déplacement d'un trait (#366)
+
+Un trait moderne (`UBSmoothStrokeItem`) est **sélectionnable et déplaçable** avec
+l'outil Sélection, comme une forme ou un trait groupé legacy. Ce qu'il faut savoir :
+
+- Le trait possède **déjà** un `UBGraphicsItemDelegate` (ajouté en #243 pour éviter
+  un crash) et les flags `ItemIsSelectable`/`ItemIsMovable` dans son constructeur.
+  La sélection ne tenait qu'à **deux trous** dans la dispatch de `UBBoardView`, qui
+  ne connaissait que l'ancien `UBGraphicsStrokesGroup::Type` (= `StrokeItemType`) :
+  il manquait le `case UBGraphicsItemType::SmoothStrokeItemType` dans
+  `itemShouldReceiveMousePressEvent` (sinon le clic tombe sur `return !isUBItem()` =
+  false → jamais transmis) **et** dans `itemShouldBeMoved`.
+- Comme `UBGraphicsStrokesGroup`, le trait **route ses événements souris +
+  `itemChange` vers son delegate** (`mousePressEvent`/`mouseMoveEvent`/
+  `mouseReleaseEvent`/`itemChange` → `Delegate()->…`) : c'est le delegate qui dessine
+  le cadre de sélection, pousse l'undo de déplacement
+  (`UBGraphicsItemTransformUndoCommand` via `commitUndoStep`) et marque la scène
+  modifiée (`itemChange` → `setModified`). `paint()` retire `State_Selected` pour ne
+  pas dessiner le rectangle pointillé natif de Qt (le cadre vient du delegate).
+- **Règle** : tout nouveau type d'item dessinable doit (1) posséder un delegate +
+  flags, (2) router ses événements vers le delegate, (3) avoir ses `case` dans les
+  `switch(type())` de `UBBoardView` (`itemShouldReceiveMousePressEvent`,
+  `itemShouldBeMoved`, et `determineItemTo*` s'il peut être groupé). Les `switch` par
+  type ont déjà oublié `SmoothStrokeItemType` plusieurs fois (#307 recolor, #308
+  gomme, #366 sélection) — penser à les 3 endroits.
+- Déblocage attendu : une fois les traits (et formes) re-sélectionnables, les
+  boutons contour/alignement de `ShapesPaletteV2` (#355/#431) ne sont plus inertes,
+  car ils lisent `scene()->selectedItems()`. À vérifier/fermer après test VM de #366.
 
 ## Diagnostics runtime
 

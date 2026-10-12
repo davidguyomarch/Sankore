@@ -18,6 +18,7 @@
 #define UBGRAPHICSITEMDELEGATE_H_
 
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include "core/UB.h"
 // #461: the pure capability header is dependency-free (Qt core only), so the
 // testable stub can include it to satisfy the UBSmoothStrokeItem ctor's
@@ -38,6 +39,13 @@ public:
     void setRotatable(bool) {}
     void setCanTrigAnAction(bool) {}
     void applyMenuCapabilities(const UBItemMenu::Capabilities&) {}   // #461
+    // #366: the item now routes its scene mouse events + itemChange through the
+    // delegate. The test does not exercise interaction, so no-op stand-ins are
+    // enough to satisfy the calls at link time.
+    void mousePressEvent(QGraphicsSceneMouseEvent*) {}
+    bool mouseMoveEvent(QGraphicsSceneMouseEvent*) { return false; }
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent*) {}
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange, const QVariant& value) { return value; }
 };
 
 #include "domain/UBItem.h"

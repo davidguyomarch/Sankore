@@ -33,6 +33,7 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
 #include <QtMath>
 
 UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
@@ -69,6 +70,39 @@ UBSmoothStrokeItem::UBSmoothStrokeItem(QGraphicsItem* parent)
 UBSmoothStrokeItem::~UBSmoothStrokeItem()
 {
     // NOOP
+}
+
+// #366: delegate-routing so the stroke behaves like a selectable/movable board
+// object (selection frame, move undo, scene-modified), mirroring
+// UBGraphicsStrokesGroup. The Qt flags + delegate are set in the constructor.
+
+void UBSmoothStrokeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    Delegate()->mousePressEvent(event);
+}
+
+void UBSmoothStrokeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (Delegate()->mouseMoveEvent(event))
+    {
+        // NOOP — the delegate handled it (e.g. a drag it manages).
+    }
+    else
+    {
+        QGraphicsPathItem::mouseMoveEvent(event);
+    }
+}
+
+void UBSmoothStrokeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    Delegate()->mouseReleaseEvent(event);
+    QGraphicsPathItem::mouseReleaseEvent(event);
+}
+
+QVariant UBSmoothStrokeItem::itemChange(GraphicsItemChange change, const QVariant& value)
+{
+    QVariant newValue = Delegate()->itemChange(change, value);
+    return QGraphicsPathItem::itemChange(change, newValue);
 }
 
 void UBSmoothStrokeItem::addPoint(const QPointF& scenePos, qreal pressure)
@@ -293,8 +327,12 @@ bool UBSmoothStrokeItem::subtractPath(const QPainterPath& eraserPath, QList<QGra
 
 void UBSmoothStrokeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    Q_UNUSED(option);
     Q_UNUSED(widget);
+
+    // #366: never draw Qt's native dashed selection rectangle — the selection
+    // visual is the delegate's UBGraphicsDelegateFrame (same as the strokes
+    // group and shapes).
+    const_cast<QStyleOptionGraphicsItem*>(option)->state &= ~QStyle::State_Selected;
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
