@@ -74,9 +74,84 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: toolController.currentColorIndex = index
+                        // #475: explicit invokable (not a property write-back) so a
+                        // Repeater delegate rebuild can't masquerade as a click and
+                        // reset the custom colour.
+                        onClicked: toolController.selectColorIndex(index)
                     }
                 }
+            }
+        }
+
+        // === 5th "custom colour" swatch (#475) — opens the unified colour picker.
+        // Shown wherever colours are (hidden for the eraser). At rest it is
+        // INVISIBLE (filled with the bar's surface colour): no custom colour set.
+        // Once a custom colour is picked it shows that colour, like a 5th swatch,
+        // and gets the same selection ring when it is the active colour.
+        Rectangle {
+            visible: !root.isEraser
+            width: 28; height: 28
+            radius: 6
+            anchors.verticalCenter: parent.verticalCenter
+            // Active custom colour → show it as the fill; otherwise blend into
+            // the bar. The palette icon stays ON TOP in both states so this
+            // swatch always reads as "custom colour picker", distinct from the
+            // 4 fixed swatches.
+            property bool hasCustom: toolController.hasCurrentCustomColor
+            property color fillColor: hasCustom ? toolController.currentCustomColor
+                                     : customMouse.containsMouse ? themeManager.surfaceHover
+                                     : themeManager.surface
+            color: fillColor
+            border.width: hasCustom ? 2 : 1
+            border.color: hasCustom ? themeManager.onPrimary : themeManager.border
+
+            // Palette icon, always visible, tinted for contrast against the
+            // current fill (dark icon on a light fill, light icon on a dark one)
+            // so it stays legible whatever custom colour is chosen.
+            Image {
+                id: customIcon
+                anchors.centerIn: parent
+                width: 16; height: 16
+                source: "qrc:/icons/phosphor/palette.svg"
+                sourceSize: Qt.size(16, 16)
+                visible: false
+            }
+            ColorOverlay {
+                anchors.fill: customIcon
+                source: customIcon
+                // Luminance of the fill decides black vs white icon. Use
+                // onSurface when idle (no custom colour) to match the bar.
+                color: !parent.hasCustom ? themeManager.onSurfaceDim
+                     : (0.299 * parent.fillColor.r + 0.587 * parent.fillColor.g
+                        + 0.114 * parent.fillColor.b) > 0.5 ? themeManager.onSurface
+                                                            : themeManager.surface
+            }
+
+            // Selection ring, same as the 4 fixed swatches, when the custom
+            // colour is the active one (currentColorIndex === -1).
+            Rectangle {
+                visible: parent.hasCustom && toolController.currentColorIndex === -1
+                anchors.fill: parent
+                anchors.margins: -3
+                radius: 8
+                color: "transparent"
+                border.width: 2
+                border.color: themeManager.primary
+            }
+
+            MouseArea {
+                id: customMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: toolController.pickCustomColor()
+            }
+
+            TooltipLabel {
+                anchor: parent
+                text: "Couleur personnalisée"
+                show: customMouse.containsMouse
+                placeBelow: false
             }
         }
 

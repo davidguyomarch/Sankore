@@ -17,6 +17,7 @@
 #include "domain/UBShapeFactory.h"
 #include "domain/UBAlignObjectManager.h"
 #include "domain/UBEditableGraphicsPolygonItem.h"
+#include "gui/UBColorPickerDialog.h"
 
 #include <QAction>
 
@@ -430,13 +431,35 @@ QList<QColor> UBToolController::currentColors() const
 
 int UBToolController::currentColorIndex() const
 {
+    // #475: a custom free colour is active for the tool → no fixed swatch is
+    // selected (the 5th custom swatch is highlighted instead).
     if (m_activeTool == Drawing)   // #319: shape stroke color
-        return m_shapeColorIndex;
+        return m_shapeCustomColor.isValid() ? -1 : m_shapeColorIndex;
     if (m_activeTool == ChangeFill)   // #429-followup: shape FILL color
-        return m_shapeFillColorIndex;
+        return m_shapeFillCustomColor.isValid() ? -1 : m_shapeFillColorIndex;
     if (m_activeTool == Marker)
-        return markerColorIndex();
-    return penColorIndex();
+        return mSettings->hasTransientMarkerColor() ? -1 : markerColorIndex();
+    return mSettings->hasTransientPenColor() ? -1 : penColorIndex();
+}
+
+QColor UBToolController::currentCustomColor() const
+{
+    // #475: the active tool's custom (free) colour, or an invalid QColor if the
+    // tool is on a fixed palette slot. Source of truth for the 5th swatch.
+    if (m_activeTool == Drawing)
+        return m_shapeCustomColor;
+    if (m_activeTool == ChangeFill)
+        return m_shapeFillCustomColor;
+    if (m_activeTool == Marker)
+        return mSettings->hasTransientMarkerColor() ? mSettings->transientMarkerColor()
+                                                    : QColor();
+    return mSettings->hasTransientPenColor() ? mSettings->transientPenColor()
+                                             : QColor();
+}
+
+bool UBToolController::hasCurrentCustomColor() const
+{
+    return currentCustomColor().isValid();
 }
 
 void UBToolController::setCurrentColorIndex(int index)
@@ -445,6 +468,8 @@ void UBToolController::setCurrentColorIndex(int index)
     {
         // #319: apply the chosen palette color as the shape stroke color, both
         // to new shapes and to the current selection.
+        // #475: selecting a fixed swatch clears any custom stroke colour.
+        m_shapeCustomColor = QColor();
         m_shapeColorIndex = index;
         const QList<QColor> palette = penColors();
         if (index >= 0 && index < palette.size()
@@ -462,6 +487,8 @@ void UBToolController::setCurrentColorIndex(int index)
         // #429-followup: in fill mode the palette picks the FILL color. Store it
         // and push it to the factory (solid fill) so the NEXT bucket click uses
         // it — no retroactive recolor of already-filled shapes.
+        // #475: selecting a fixed swatch clears any custom fill colour.
+        m_shapeFillCustomColor = QColor();
         m_shapeFillColorIndex = index;
         const QList<QColor> palette = penColors();
         if (index >= 0 && index < palette.size()
@@ -477,11 +504,20 @@ void UBToolController::setCurrentColorIndex(int index)
     }
 
     if (m_activeTool == Marker)
+    {
+        // #475: re-selecting a palette swatch clears any transient free colour
+        // so the fixed slot takes over again.
+        mSettings->clearTransientMarkerColor();
         setMarkerColorIndex(index);
+    }
     else
+    {
+        mSettings->clearTransientPenColor();
         setPenColorIndex(index);
+    }
 
     emit penColorChanged();
+    emit markerColorChanged();
     emit currentColorIndexChanged();
     emit currentColorsChanged();
 }
@@ -648,6 +684,104 @@ void UBToolController::alignSelection()
 {
     UBAlignObjectManager mgr;
     mgr.horizontalAlign();
+}
+
+QColor UBToolController::seedColorForActiveTool() const
+{
+    // #475: last colour used by the active tool (free colour wins, else the
+    // tool's effective colour).
+    if (m_activeTool == Drawing)
+    {
+        if (m_shapeCustomColor.isValid())
+            return m_shapeCustomColor;
+        if (UBApplication::boardController)
+            return UBApplication::boardController->shapeFactory().strokeColor();
+        return QColor();
+    }
+    if (m_activeTool == ChangeFill)
+    {
+        if (m_shapeFillCustomColor.isValid())
+            return m_shapeFillCustomColor;
+        if (UBApplication::boardController)
+            return UBApplication::boardController->shapeFactory().fillFirstColor();
+        return QColor();
+    }
+    // Pen / Line / Marker: currentToolColor() already returns the transient free
+    // colour when active, else the palette slot.
+    return currentToolColor();
+}
+
+void UBToolController::pickCustomColor()
+{
+    // #475: open the unified colour picker, seeded with the active tool's
+    // current colour, and apply the choice to the active tool without touching
+    // the 4 fixed palette swatches.
+    QWidget* parent = UBApplication::boardController
+                          ? UBApplication::boardController->controlView()
+                          : nullptr;
+
+    // #475: seed the picker with the LAST colour used by the active tool, so it
+    // opens on what the user currently has (free colour if active, else the
+    // tool's effective colour). The seed comes from the caller/tool, not a
+    // global default.
+    QColor seed = seedColorForActiveTool();
+    const QColor chosen = UBColorPickerDialog::pick(seed, parent, /*withAlpha*/ true,
+                                                    tr("Custom colour"));
+    if (!chosen.isValid())
+        return;   // cancelled
+
+    if (m_activeTool == Drawing)
+    {
+        // Shapes store a plain QColor (no palette slot) — push it straight to
+        // the factory, and remember it so the 5th swatch shows it.
+        m_shapeCustomColor = chosen;
+        if (UBApplication::boardController)
+            UBApplication::boardController->shapeFactory().setStrokeColor(chosen);
+    }
+    else if (m_activeTool == ChangeFill)
+    {
+        m_shapeFillCustomColor = chosen;
+        if (UBApplication::boardController)
+        {
+            auto& factory = UBApplication::boardController->shapeFactory();
+            factory.setFillType(UBShapeFactory::Full);
+            factory.setFillingFirstColor(chosen);
+        }
+    }
+    else if (m_activeTool == Marker)
+    {
+        // Transient free colour read by the draw pipeline (alpha forced to the
+        // marker alpha inside setTransientMarkerColor).
+        mSettings->setTransientMarkerColor(chosen);
+        emit markerColorChanged();
+    }
+    else
+    {
+        // Pen / Line (and any other drawing tool): transient free colour,
+        // forced opaque inside setTransientPenColor.
+        mSettings->setTransientPenColor(chosen);
+        emit penColorChanged();
+    }
+
+    // #475: emit ONLY the selection-changed signal, NOT currentColorsChanged.
+    // The palette LIST did not change (we applied a free colour, we did not edit
+    // a swatch), so emitting currentColorsChanged would make the DrawingPropsBar
+    // swatch Repeater rebuild its delegates; on the software backend the rebuilt
+    // delegate re-fires its MouseArea.onClicked, writing currentColorIndex = 0
+    // back into setCurrentColorIndex, which clears the transient colour we just
+    // set (pen) / overwrites the fill with palette slot 0 = black (fill). The
+    // highlight only needs currentColorIndexChanged.
+    emit currentColorIndexChanged();
+}
+
+void UBToolController::selectColorIndex(int index)
+{
+    // #475: explicit, click-only entry point for the DrawingPropsBar swatches.
+    // It shares setCurrentColorIndex's per-tool routing (which also clears any
+    // transient free colour), but being an invokable it is NEVER triggered by a
+    // QML binding re-evaluation — only by a real onClicked. That is the fix for
+    // the custom colour being reset to palette slot 0 right after a pick.
+    setCurrentColorIndex(index);
 }
 
 // --- Eraser options (issue #249) ---

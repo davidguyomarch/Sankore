@@ -41,7 +41,6 @@
 #include <QDrag>
 #include <QMenu>
 #include <QComboBox>
-#include <QColorDialog>
 #include <QGraphicsSceneMouseEvent>
 
 #include "UBGraphicsItemDelegate.h"
@@ -79,6 +78,7 @@
 #include "qml/UBThemeManager.h"
 
 #include "gui/UBCreateLinkPalette.h"
+#include "gui/UBColorPickerDialog.h"
 
 #include "customWidgets/UBGraphicsItemAction.h"
 
@@ -867,17 +867,13 @@ void UBGraphicsItemDelegate::pickFillColour()
         return;
 
     QWidget* parent = UBApplication::boardController ? UBApplication::boardController->controlView() : nullptr;
-    QColorDialog colorDialog(shape->brush().color(), parent);
-    colorDialog.setOption(QColorDialog::ShowAlphaChannel, true);
-    colorDialog.setWindowTitle(tr("Fill colour"));
-    // Keep the dialog legible on the dark theme (same guard as the text delegate).
-    if (UBSettings::settings()->isDarkBackground())
-        colorDialog.setStyleSheet("background-color: white;");
-
-    if (colorDialog.exec())
+    // #475: unified colour picker.
+    const QColor chosen = UBColorPickerDialog::pick(shape->brush().color(), parent,
+                                                    /*withAlpha*/ true, tr("Fill colour"));
+    if (chosen.isValid())
     {
         shape->setStyle(Qt::SolidPattern);
-        shape->setFillColor(colorDialog.selectedColor());
+        shape->setFillColor(chosen);
         shape->update();
     }
 }

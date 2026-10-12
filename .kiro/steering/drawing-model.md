@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: '**/{UBShapeFactory,UBAbstractGraphicsItem,UBAbstractGraphicsPathItem,UBGraphicsRectItem,UBGraphicsEllipseItem,UBGraphicsLineItem,UBEditableGraphicsRegularShapeItem,UBEditableGraphicsPolygonItem,UBGraphicsFreehandItem,UBSmoothStrokeItem,UBGraphicsStrokesGroup,UBBackgroundRenderer,UBInkColorUtils,UBToolController,DrawingPropsBar,StylusPaletteV2,ShapesPaletteV2}*'
+fileMatchPattern: '**/{UBShapeFactory,UBAbstractGraphicsItem,UBAbstractGraphicsPathItem,UBGraphicsRectItem,UBGraphicsEllipseItem,UBGraphicsLineItem,UBEditableGraphicsRegularShapeItem,UBEditableGraphicsPolygonItem,UBGraphicsFreehandItem,UBSmoothStrokeItem,UBGraphicsStrokesGroup,UBBackgroundRenderer,UBInkColorUtils,UBToolController,UBSettings,UBSceneContext,UBColorPickerDialog,UBColorPicker,UBDrawingStrokePropertiesPalette,UBDrawingFillPropertiesPalette,UBTextDelegateDialogHandler,DrawingPropsBar,StylusPaletteV2,ShapesPaletteV2}*'
 ---
 
 # Open-Sankoré — Modèle de dessin (traits, formes, couleurs)
@@ -239,3 +239,153 @@ Voir `dev-workflow.md` → diagnostics `startup.log`.
 Ce qui n'est PAS raisonnablement testable : le rendu, l'interaction souris, le
 comportement d'un `UBAbstractGraphicsItem` instancié (constructeur = delegate + frame).
 Le documenter dans la PR plutôt que de forcer un TU artificiel.
+
+## Architecture des couleurs (#475) — à lire avant TOUTE évolution couleur
+
+Le traitement de la couleur de dessin repose sur **deux pipelines distincts** plus
+**un canal de couleur libre** et **un sélecteur UI unifié**. Toute nouvelle
+fonctionnalité ou correction autour des couleurs DOIT suivre ce pattern — ne pas
+réintroduire de `QColorDialog` ad hoc ni de nouveau canal de résolution couleur.
+
+### Les deux pipelines (ne pas les confondre)
+
+| | **Stylo / Marqueur (traits)** | **Formes / Remplissage / Texte** |
+|---|---|---|
+| Stockage | palette **indexée** + paire jour/nuit (`UBSettings`) | `QColor` simple (pas d'index, pas de paire) |
+| Résolution | `index → liste.at(index)` via `UBSettings::penColor(onDark)` / `markerColor(onDark)` | couleur directe poussée dans `UBShapeFactory` |
+| Point de lecture au tracé | `UBSceneContext::penColorOn{Light,Dark}Background()` lu par `UBInputRouter::inputDevicePress` → baké dans `UBSmoothStrokeItem` (paire) | `UBShapeFactory::instanciateCurrentShape` relit `mCurrentStrokeColor`/`mCurrentFillFirstColor` |
+| Alpha marqueur | **bakée dans le stockage** (0.5 via `boardMarkerAlpha`, posée par `UBColorListSetting`) | — |
+
+Conséquence structurante : **la couleur d'un trait pen/marker ne vient QUE de la
+pastille sélectionnée** (il n'existe pas de « couleur directe » dans ce pipeline,
+contrairement aux formes). C'est pourquoi une couleur libre a besoin d'un canal
+dédié (ci-dessous).
+
+### Le canal de couleur libre transitoire (#475)
+
+Pour appliquer une couleur **arbitraire** au stylo/marqueur **sans écraser** une des
+4 pastilles (décision produit = option B) :
+
+- **Stockage** : `UBSettings::mTransientPenColor` / `mTransientMarkerColor`
+  (`QColor` invalide = pas d'override). **Non persisté** (session uniquement).
+- **Écriture** : `setTransientPenColor()` force **alpha 1.0** (stylo opaque) ;
+  `setTransientMarkerColor()` force **alpha = `boardMarkerAlpha`** (surligneur
+  translucide). C'est indispensable : `UBSmoothStrokeItem::paint` décide
+  « est-ce un marqueur ? » **uniquement** sur `alphaF() < 1` — une couleur libre
+  marqueur sans alpha serait peinte comme un stylo opaque.
+- **Résolution** : `penColor()` / `markerColor()` renvoient l'override s'il est
+  valide, sinon la pastille. Donc `UBSceneContext` et `UBInputRouter` le lisent
+  **sans aucun changement** — le canal se branche au seul point de résolution.
+- **Paire jour/nuit** : une couleur libre n'a qu'une valeur → elle est renvoyée
+  **identique** sur light et dark (préservée au flip jour/nuit, exactement comme
+  une couleur utilisateur de forme). Un override jour/nuit « intelligent » n'est
+  PAS fait ici (piste pour #494, au bureau, via luminance).
+- **Reset** : `UBToolController::setCurrentColorIndex` (clic sur une pastille)
+  **efface** l'override → retour à la pastille. `currentColorIndex()` renvoie
+  **-1** quand un override est actif (aucune pastille surlignée dans la
+  `DrawingPropsBar`).
+
+**Règle** : pour toute nouvelle couleur libre d'un trait, passer par ce canal
+(`setTransient*Color`), jamais par un écrasement de slot de palette (ça, c'est
+l'édition explicite des pastilles — #492, voir ci-dessous).
+
+### Le sélecteur UI unifié : `UBColorPickerDialog::pick()`
+
+`src/gui/UBColorPickerDialog.h` — **header-only** (namespace + `inline`, pas de
+moc, à la `UBIconUtils`), donc appelable depuis les contrôleurs QML **et** les
+delegates C++ sans câblage moc/premoc.
+
+```cpp
+QColor c = UBColorPickerDialog::pick(initial, parentWidget, /*withAlpha*/ true, tr("…"));
+if (c.isValid()) { /* appliquer */ }   // invalide == annulé
+```
+
+Il centralise ce qui était dupliqué dans **6 sites** : parenting, canal alpha,
+garde de lisibilité thème sombre (`setStyleSheet("background-color: white;")`),
+opt-out dialogue natif macOS. Les 6 sites migrés :
+`UBGraphicsItemDelegate::pickFillColour`, `UBTextDelegateDialogHandler` (texte +
+fond), `UBDrawingStrokePropertiesPalette`, `UBDrawingFillPropertiesPalette`
+(1re + 2de couleur).
+
+**Règle** : tout nouveau choix de couleur arbitraire passe par
+`UBColorPickerDialog::pick()`. **Ne jamais** réintroduire un `QColorDialog` brut
+(sinon on recrée la divergence parenting/alpha/thème que #475 a supprimée).
+
+### Le 5e carré « couleur personnalisée » de la `DrawingPropsBar`
+
+À droite des 4 pastilles fixes, un **5e carré** matérialise la couleur libre de
+l'outil actif :
+- **au repos** (aucune couleur libre) : rempli de la couleur de la barre
+  (`themeManager.surface`) → **invisible**, juste une fine bordure ;
+- **couleur libre active** : il montre cette couleur et porte l'anneau de
+  sélection bleu (les 4 pastilles ne sont alors plus surlignées) ;
+- clic → `toolController.pickCustomColor()`.
+
+Il est piloté par **une seule source de vérité par outil** dans `UBToolController` :
+- Pen/Marker : couleur transitoire de `UBSettings` (`transient{Pen,Marker}Color`) ;
+- Drawing (contour) / ChangeFill (remplissage) : `m_shapeCustomColor` /
+  `m_shapeFillCustomColor` (le factory n'a pas de slot, la couleur libre est donc
+  mémorisée côté contrôleur).
+Exposé à QML par `currentCustomColor` (la couleur) + `hasCurrentCustomColor` (bool
+— **la validité d'un `QColor` n'est pas exposée à QML**, d'où le bool explicite).
+`currentColorIndex()` renvoie **-1 pour les 4 outils** dès qu'une couleur libre
+est active (sinon une pastille resterait surlignée à tort — bug vécu en Fill).
+
+Sélectionner une pastille fixe (`setCurrentColorIndex`) **efface** la couleur
+libre de l'outil (les 4 branches le font), rendant le 5e carré de nouveau invisible.
+
+### Seed du picker : fourni par l'outil appelant
+
+`pickCustomColor()` ouvre le picker sur la **dernière couleur de l'outil actif**
+(`seedColorForActiveTool()`) : couleur libre si active, sinon la couleur effective
+(slot pen/marker, `shapeFactory().strokeColor()` pour Drawing,
+`fillFirstColor()` pour ChangeFill). On ne seed **pas** depuis la forme
+sélectionnée (modifier une forme existante reste une action explicite via le menu
+contextuel « Fill colour… » #458). `UBColorPickerDialog::seedColor()` relève en
+plus la **valeur HSV** du seed à un plancher (0.5) pour que la roue n'ouvre jamais
+sur du noir (V=0) — sinon choisir une teinte vive dans la roue rendait du noir.
+
+### Surface publique couleur de `UBToolController`
+
+- Lecture tool-aware pour la `DrawingPropsBar` : `currentColors()`,
+  `currentColorIndex()` (**-1** si couleur libre active), `currentToolColor()`,
+  `currentCustomColor()` / `hasCurrentCustomColor()` (5e carré).
+- `setCurrentColorIndex(index)` : route selon l'outil (Drawing → stroke factory ;
+  ChangeFill → fill factory ; Marker/Pen → index de palette + **clear override**).
+- `pickCustomColor()` (Q_INVOKABLE, bouton « couleur perso » de la
+  `DrawingPropsBar`) : ouvre le picker, applique selon l'outil (Drawing/ChangeFill
+  → factory ; Pen/Marker → `setTransient*Color`).
+- `setPenColor(onDark, color, index)` / `setMarkerColor(onDark, color, index)` :
+  **écrasent un slot de palette** (persisté) et émettent `colorPaletteChanged`.
+  C'est l'édition **explicite** d'une pastille — à distinguer du canal transitoire.
+
+### Règles pour Kiro (évolutions/bugs couleur)
+
+1. **Trait pen/marker, couleur arbitraire** → canal transitoire
+   (`setTransient*Color`), jamais écraser un slot sauf édition explicite demandée.
+2. **Forme / remplissage / texte, couleur arbitraire** → pousser la `QColor`
+   directement dans `UBShapeFactory` / le delegate (pas d'index).
+3. **Choisir une couleur dans l'UI** → `UBColorPickerDialog::pick()`. Jamais de
+   `QColorDialog` nu.
+4. **Alpha marqueur** : toute couleur marqueur (slot OU libre) doit porter
+   l'alpha marqueur, sinon elle se peint en opaque (détection par `alphaF() < 1`).
+5. **Paire jour/nuit** : les traits portent une paire (préservée par
+   `applyBackgroundColor`) ; les formes ne flippent que l'encre par défaut
+   (`recoloredDefaultInk`) ; une couleur libre est stable au flip (même valeur).
+6. **Thème UI** (chrome : boutons, pastilles de la `DrawingPropsBar`) → couleurs
+   `UBThemeManager` uniquement (voir `ui-theming.md`), **jamais** de littéral.
+   Ne pas confondre avec la couleur d'**encre** (contenu de scène), qui elle vient
+   du modèle couleur ci-dessus.
+
+### Ce qui EST testable / évolutions ouvertes
+
+- Testable en TU : la logique de résolution pure (ex. l'override transitoire
+  renvoyé par `penColor()`/`markerColor()`, le forçage d'alpha) si on l'exerce via
+  `UBSettings` sans graphe UI. Le rendu réel du trait et l'ouverture du picker
+  restent **VM-only** (non headless).
+- **#492** : édition explicite des 4 pastilles (long-press/clic-droit → picker →
+  `setPenColor`/`setMarkerColor`). Suit le pattern : réutilise le picker unifié et
+  les setters de slot persistés.
+- **#494** : au bureau, choisir la variante jour/nuit du trait depuis la luminance
+  réelle du bureau (et non le flag de la page board). N'affecte que le choix de
+  **variante de pastille** — la couleur libre, elle, n'a pas de paire.

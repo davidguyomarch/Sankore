@@ -30,12 +30,12 @@
 #include "UBTextDelegateDialogHandler.h"
 
 #include <QFontDialog>
-#include <QColorDialog>
 #include <QListView>
 #include <QComboBox>
 #include <QStringListModel>
 
 #include "core/UBSettings.h"
+#include "UBColorPickerDialog.h"
 #include "UBResources.h"
 #include "domain/UBGraphicsTextItemDelegate.h"
 
@@ -87,17 +87,11 @@ void UBTextDelegateDialogHandler::onTextColorChangeRequested(const QColor& curre
     if (!delegate)
         return;
 
-    QColorDialog colorDialog(currentColor, mParentWidget);
-    colorDialog.setWindowTitle(tr("Text Color"));
-    if (mSettings->isDarkBackground())
-    {
-        colorDialog.setStyleSheet("background-color: white;");
-    }
-
-    if (colorDialog.exec())
-    {
-        delegate->applyTextColor(colorDialog.selectedColor());
-    }
+    // #475: unified colour picker (parenting, alpha, dark-theme guard centralised).
+    const QColor chosen = UBColorPickerDialog::pick(currentColor, mParentWidget,
+                                                    /*withAlpha*/ true, tr("Text Color"));
+    if (chosen.isValid())
+        delegate->applyTextColor(chosen);
 }
 
 void UBTextDelegateDialogHandler::onBackgroundColorChangeRequested(const QColor& currentColor)
@@ -106,17 +100,11 @@ void UBTextDelegateDialogHandler::onBackgroundColorChangeRequested(const QColor&
     if (!delegate)
         return;
 
-    QColorDialog colorDialog(currentColor, mParentWidget);
-    colorDialog.setWindowTitle(tr("Background Color"));
-    if (mSettings->isDarkBackground())
-    {
-        colorDialog.setStyleSheet("background-color: white;");
-    }
-
-    if (colorDialog.exec())
-    {
-        delegate->applyBackgroundColor(colorDialog.selectedColor());
-    }
+    // #475: unified colour picker.
+    const QColor chosen = UBColorPickerDialog::pick(currentColor, mParentWidget,
+                                                    /*withAlpha*/ true, tr("Background Color"));
+    if (chosen.isValid())
+        delegate->applyBackgroundColor(chosen);
 }
 
 void UBTextDelegateDialogHandler::customizeFontDialog(QFontDialog& fontDialog)

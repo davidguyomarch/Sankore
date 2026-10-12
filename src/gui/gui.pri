@@ -7,6 +7,7 @@ HEADERS += src/gui/UBThumbnailView.h \
     src/gui/UBThumbnailWidget.h \
     src/gui/UBCircleFrame.h \
     src/gui/UBColorPicker.h \
+    src/gui/UBColorPickerDialog.h \
     src/gui/UBWidgetMirror.h \
     src/gui/UBScreenMirror.h \
     src/gui/UBResources.h \
