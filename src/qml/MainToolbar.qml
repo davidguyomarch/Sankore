@@ -71,6 +71,7 @@ UBToolbar {
         { kind: "tool",   id: 0,  icon: "pen",                tooltip: "Stylo" },
         { kind: "tool",   id: 1,  icon: "eraser",             tooltip: "Gomme" },
         { kind: "tool",   id: 2,  icon: "highlighter-circle", tooltip: "Marqueur" },
+        { kind: "tool",   id: 9,  icon: "line-segment",       tooltip: "Ligne" },
         { kind: "tool",   id: 3,  icon: "cursor",             tooltip: "Sélection" },
         { kind: "tool",   id: 8,  icon: "crosshair",          tooltip: "Pointeur" },
         { kind: "separator" },
