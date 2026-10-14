@@ -155,6 +155,34 @@ namespace UBBackgroundGrid
     }
 
     /**
+     * #389 / ADR-0011: destination rectangle for a background image painted in
+     * "cover" fit — the image is scaled to fully cover `target` while preserving
+     * its aspect ratio, centered, with overflow cropped (so the whole page is
+     * painted, no letterboxing). Pure geometry so it is unit-testable without a
+     * QPainter.
+     *
+     * @param target     the rect to cover (the page, in scene units)
+     * @param srcWidth   intrinsic image width in pixels (> 0)
+     * @param srcHeight  intrinsic image height in pixels (> 0)
+     * @return the rect to draw the (full) image into; may extend beyond `target`
+     *         on one axis — the caller clips to `target`.
+     */
+    inline QRectF coverRect(const QRectF& target, double srcWidth, double srcHeight)
+    {
+        if (srcWidth <= 0.0 || srcHeight <= 0.0
+            || target.width() <= 0.0 || target.height() <= 0.0)
+            return target;
+
+        const double scale = std::max(target.width() / srcWidth,
+                                      target.height() / srcHeight);
+        const double w = srcWidth * scale;
+        const double h = srcHeight * scale;
+        const double x = target.x() + (target.width() - w) / 2.0;
+        const double y = target.y() + (target.height() - h) / 2.0;
+        return QRectF(x, y, w, h);
+    }
+
+    /**
      * Compute every line to draw for `type` within the visible `rect`.
      *
      * `upm` is units-per-mm (defaults to the board calibration). The returned

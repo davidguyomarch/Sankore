@@ -32,6 +32,12 @@ private slots:
     void testGridVerticalsAnchoredToPageLeft_regression362();
     void testSeyesLargeIsScaled();
     void testDoubleLine3mmPairs();
+
+    // #389 / ADR-0011 — background image "cover" fit geometry.
+    void testCoverRectWiderImageOverflowsHorizontally();
+    void testCoverRectTallerImageOverflowsVertically();
+    void testCoverRectSameAspectExactlyFills();
+    void testCoverRectDegenerateInputs();
 };
 
 #endif // TST_UBBACKGROUNDGRID_H
