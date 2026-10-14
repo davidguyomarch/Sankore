@@ -130,6 +130,14 @@ bool UBAppController::isSeeThrough() const
     return scene ? scene->isSeeThrough() : false;
 }
 
+bool UBAppController::isImageBackground() const
+{
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    return scene && scene->backgroundKind() == UBBackgroundGrid::BackgroundKind::Image;
+}
+
 bool UBAppController::leaveSeeThroughIfActive()
 {
     // #407: the user picked a normal background while the page is the Bureau

@@ -292,12 +292,18 @@ Rectangle {
         implicitHeight: 34
 
         onTriggered: {
-            if (item.imagePick)
-                appController.pickBackgroundImage()
-            else if (item.seeThrough)
+            if (item.imagePick) {
+                // #389: close the menu FIRST, then open the (modal) file dialog
+                // on the next event loop turn — otherwise the modal dialog blocks
+                // the loop while this QML popup is still up, leaving the menu
+                // stuck open behind it (VM bug).
+                menuRoot.dismiss()
+                Qt.callLater(function() { appController.pickBackgroundImage() })
+            } else if (item.seeThrough) {
                 appController.setBackgroundSeeThrough()
-            else
+            } else {
                 appController.setGridType(rulingType)
+            }
         }
 
         contentItem: Item {
@@ -340,11 +346,16 @@ Rectangle {
                 anchors.fill: checkIcon
                 source: checkIcon
                 color: themeManager.onSurface
-                // #407: the Bureau entry checks on isSeeThrough; a ruling entry
-                // checks on its type AND only when the page is not see-through.
-                visible: item.seeThrough
-                         ? appController.isSeeThrough
-                         : (appController.gridType === item.rulingType && !appController.isSeeThrough)
+                // #407/#389: Image entry checks on isImageBackground; Bureau on
+                // isSeeThrough; a ruling entry on its type AND only when the page
+                // is neither see-through nor an image.
+                visible: item.imagePick
+                         ? appController.isImageBackground
+                         : item.seeThrough
+                           ? appController.isSeeThrough
+                           : (appController.gridType === item.rulingType
+                              && !appController.isSeeThrough
+                              && !appController.isImageBackground)
             }
         }
     }

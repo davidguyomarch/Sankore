@@ -32,6 +32,8 @@ class UBAppController : public QObject
     // kind (BackgroundKind::SeeThrough). Picking it in the Fond d'écran menu
     // enters desktop mode; picking any other background leaves it.
     Q_PROPERTY(bool isSeeThrough READ isSeeThrough NOTIFY backgroundChanged)
+    // #389 / ADR-0011: the page background is a custom image (BackgroundKind::Image).
+    Q_PROPERTY(bool isImageBackground READ isImageBackground NOTIFY backgroundChanged)
 
     // Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
@@ -54,6 +56,7 @@ public:
     bool isCrossedBackground() const;
     int gridType() const;
     bool isSeeThrough() const;  // #407
+    bool isImageBackground() const;  // #389
 
     bool canUndo() const;
     bool canRedo() const;
