@@ -413,6 +413,19 @@ UBBackgroundGrid::BackgroundKind UBGraphicsScene::backgroundKind() const
     return mBackgroundRenderer->backgroundKind();
 }
 
+QString UBGraphicsScene::backgroundImageFile() const
+{
+    return mBackgroundRenderer->backgroundImageFile();
+}
+
+void UBGraphicsScene::setBackgroundImage(const QString& fileName, const QPixmap& pixmap)
+{
+    // #389 / ADR-0011: store the image on the renderer and mark the scene
+    // modified so the choice is persisted.
+    mBackgroundRenderer->setBackgroundImage(fileName, pixmap);
+    setModified(true);
+}
+
 bool UBGraphicsScene::isSeeThrough() const
 {
     return mBackgroundRenderer && mBackgroundRenderer->isSeeThrough();
