@@ -50,3 +50,29 @@ void TestUBInkColorUtils::testIdempotentOnCorrectDefault()
     // White is already correct on a dark background: leave it white.
     QCOMPARE(recoloredDefaultInk(QColor(Qt::white), /*nowLight*/ false), QColor(Qt::white));
 }
+
+// #494 ---------------------------------------------------------------------
+
+void TestUBInkColorUtils::testWantsDarkInkVariantFromLuminance()
+{
+    // A dark desktop → use the dark-background (bright) ink variant.
+    QVERIFY(wantsDarkInkVariant(QColor(Qt::black)));
+    QVERIFY(wantsDarkInkVariant(QColor(30, 30, 30)));
+    // A light desktop → use the light-background ink variant.
+    QVERIFY(!wantsDarkInkVariant(QColor(Qt::white)));
+    QVERIFY(!wantsDarkInkVariant(QColor(230, 230, 230)));
+}
+
+void TestUBInkColorUtils::testActiveDarkInkVariantUsesPageFlagWithoutHint()
+{
+    // No desktop hint → follow the page's own dark/light flag (board behaviour).
+    QCOMPARE(activeDarkInkVariant(/*pageIsDark*/ true,  /*hasHint*/ false, /*desktopDark*/ false), true);
+    QCOMPARE(activeDarkInkVariant(/*pageIsDark*/ false, /*hasHint*/ false, /*desktopDark*/ true),  false);
+}
+
+void TestUBInkColorUtils::testActiveDarkInkVariantUsesHintWhenPresent()
+{
+    // Desktop hint present → override the page flag with the desktop state.
+    QCOMPARE(activeDarkInkVariant(/*pageIsDark*/ false, /*hasHint*/ true, /*desktopDark*/ true),  true);
+    QCOMPARE(activeDarkInkVariant(/*pageIsDark*/ true,  /*hasHint*/ true, /*desktopDark*/ false), false);
+}

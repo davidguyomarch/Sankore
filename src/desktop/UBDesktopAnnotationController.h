@@ -107,6 +107,11 @@ class UBDesktopAnnotationController : public QObject
         void onActiveSceneChanged();
 
     private:
+        // #494: compute the desktop's average luminance and store a dark/light
+        // ink hint so the pen/marker day/night variant follows the real desktop,
+        // not the board page flag. Called on desktop entry.
+        void updateDesktopInkHint();
+
         void updateMask(bool bTransparent);
         void setupToolbar();
         void positionToolbar();

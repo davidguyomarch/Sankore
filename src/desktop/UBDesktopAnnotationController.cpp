@@ -50,6 +50,7 @@
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBGraphicsPolygonItem.h"
 #include "domain/UBSceneContext.h"
+#include "domain/UBInkColorUtils.h"
 
 #include "qml/UBThemeManager.h"
 
@@ -468,9 +469,34 @@ void UBDesktopAnnotationController::showWindow()
     // Keep the toolbar on top of the overlay after the view is shown.
     showToolbar();
 
+    // #494: pick the pen/marker day/night variant from the real desktop
+    // luminance (not the board page flag) while annotating the desktop.
+    updateDesktopInkHint();
+
 #ifdef Q_OS_LINUX
     updateMask(true);
 #endif
+}
+
+
+void UBDesktopAnnotationController::updateDesktopInkHint()
+{
+    // #494: compute the desktop's average luminance ONCE (on entry / page change)
+    // and store a dark/light hint. The draw pipeline reads it to choose the ink
+    // variant on the overlay. Grabbing the screen is costly, so this is never
+    // done per stroke.
+    const QPixmap shot = getScreenPixmap();
+    if (shot.isNull())
+    {
+        UBSettings::settings()->clearDesktopInkDarkHint();
+        return;
+    }
+
+    // Average colour via a 1x1 downscale (fast, GPU/driver-friendly).
+    const QImage avg = shot.toImage().scaled(1, 1, Qt::IgnoreAspectRatio,
+                                             Qt::SmoothTransformation);
+    const QColor mean = avg.pixelColor(0, 0);
+    UBSettings::settings()->setDesktopInkDarkHint(UBInkColors::wantsDarkInkVariant(mean));
 }
 
 
@@ -522,6 +548,9 @@ void UBDesktopAnnotationController::updateBackground()
 
 void UBDesktopAnnotationController::hideWindow()
 {
+    // #494: back on the board, the ink variant follows the page flag again.
+    UBSettings::settings()->clearDesktopInkDarkHint();
+
     if (mToolbarQml)
         mToolbarQml->hide();
     if (mPropsBarQml)

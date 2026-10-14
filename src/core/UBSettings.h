@@ -120,6 +120,21 @@ class UBSettings : public QObject
         void clearTransientPenColor();
         void clearTransientMarkerColor();
 
+        // #494: transient desktop ink dark/light hint.
+        //
+        // On the desktop overlay the stroke sits over the real desktop, whose
+        // luminance is unrelated to the board page's dark/light flag. The
+        // desktop controller computes the desktop's average luminance on entry
+        // and sets this hint; the draw pipeline then picks the pen/marker day or
+        // night VARIANT from it instead of the page flag. Session-only, not
+        // persisted. Cleared on exit (back to the page flag on the board).
+        //
+        // Does NOT affect a transient free colour (which has no day/night pair).
+        bool hasDesktopInkDarkHint() const;
+        bool desktopInkDarkHint() const;
+        void setDesktopInkDarkHint(bool dark);
+        void clearDesktopInkDarkHint();
+
         // Eraser related
         int eraserWidthIndex();
         qreal eraserFineWidth();
@@ -349,6 +364,11 @@ class UBSettings : public QObject
         // Invalid QColor means "no override, use the palette slot".
         QColor mTransientPenColor;
         QColor mTransientMarkerColor;
+
+        // #494: transient desktop ink dark/light hint (session-only).
+        // mHasDesktopInkDarkHint false = no hint → use the page's dark/light flag.
+        bool mHasDesktopInkDarkHint = false;
+        bool mDesktopInkDarkHint = false;
 
         UBSetting* webUseExternalBrowser;
         UBSetting* webShowPageImmediatelyOnMirroredScreen;
