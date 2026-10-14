@@ -73,6 +73,9 @@ public slots:
     /// "Bureau" kind (persisted) and enter desktop mode via the guarded
     /// transition. Choosing any other background (light/dark/grid) leaves it.
     void setBackgroundSeeThrough();
+    /// #389 / ADR-0011: pick an image file, embed it in the document package,
+    /// and set the current page's background to that image (kind == Image).
+    void pickBackgroundImage();
 
 signals:
     void activeModeChanged();

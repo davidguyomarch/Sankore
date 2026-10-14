@@ -12,12 +12,20 @@
 
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"
+#include "core/UBPersistenceManager.h"
+#include "core/UBSettings.h"
 #include "gui/UBMainWindow.h"
 #include "board/UBBoardController.h"
 #include "domain/UBGraphicsScene.h"
+#include "document/UBDocumentProxy.h"
 
 #include <QUndoStack>
 #include <QFile>
+#include <QDir>
+#include <QUuid>
+#include <QFileInfo>
+#include <QPixmap>
+#include <QFileDialog>
 #include <QTextStream>
 #include <QApplication>
 
@@ -158,6 +166,64 @@ void UBAppController::setBackgroundSeeThrough()
     emit backgroundChanged();
     if (UBApplication::applicationController)
         UBApplication::applicationController->showDesktop();  // guarded
+}
+
+void UBAppController::pickBackgroundImage()
+{
+    // #389 / ADR-0011: let the user pick an image, embed it in the document
+    // package (images/<uuid>.<ext>, same convention as pixmap items), and set
+    // the current page's background to that image (kind == Image).
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return;
+    auto* scene = UBApplication::boardController->activeScene();
+    auto* proxy = UBApplication::boardController->selectedDocument();
+    if (!scene || !proxy)
+        return;
+
+    const QString filters = tr("Images (*.png *.jpg *.jpeg *.bmp *.gif *.svg)");
+    const QString start = UBSettings::settings()
+        ? UBSettings::settings()->lastImportFilePath->get().toString() : QString();
+    const QString src = QFileDialog::getOpenFileName(
+        UBApplication::mainWindow, tr("Choose a background image"), start, filters);
+    if (src.isEmpty())
+        return;
+
+    QPixmap pix(src);
+    if (pix.isNull())
+    {
+        if (UBApplication::mainWindow)
+            UBApplication::mainWindow->warning(tr("Background image"),
+                                               tr("The selected file is not a readable image."));
+        return;
+    }
+
+    // Remember the folder for next time.
+    if (UBSettings::settings())
+        UBSettings::settings()->lastImportFilePath->set(QFileInfo(src).absolutePath());
+
+    // Embed a copy in the package under images/<uuid>.<ext>.
+    QString ext = QFileInfo(src).suffix().toLower();
+    if (ext.isEmpty())
+        ext = QStringLiteral("png");
+    const QString rel = UBPersistenceManager::imageDirectory + "/"
+                        + QUuid::createUuid().toString() + "." + ext;
+    const QString dstDir = proxy->persistencePath() + "/" + UBPersistenceManager::imageDirectory;
+    QDir().mkpath(dstDir);
+    const QString dst = proxy->persistencePath() + "/" + rel;
+    if (!QFile::copy(src, dst))
+    {
+        if (UBApplication::mainWindow)
+            UBApplication::mainWindow->warning(tr("Background image"),
+                                               tr("Could not copy the image into the document."));
+        return;
+    }
+
+    // Leave any see-through (Bureau) background, then apply the image.
+    // (setBackgroundImage / setBackgroundKind already reset the view cache.)
+    leaveSeeThroughIfActive();
+    scene->setBackgroundImage(rel, pix);
+    scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Image);
+    emit backgroundChanged();
 }
 
 void UBAppController::setGridType(int gridType)

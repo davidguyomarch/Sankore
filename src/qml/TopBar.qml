@@ -270,6 +270,9 @@ Rectangle {
         // and enters desktop mode (the desktop shows through); its check mark
         // follows the persisted see-through kind.
         RulingMenuItem { seeThrough: true; rulingIcon: "desktop"; rulingLabel: "Bureau (transparent)" }
+
+        // #389 / ADR-0011: pick a custom background image for the page.
+        RulingMenuItem { imagePick: true; rulingIcon: "image"; rulingLabel: "Image…" }
     }
 
     // One row of the ruling dropdown: leading themed icon, label, trailing
@@ -282,12 +285,16 @@ Rectangle {
         // #407: when true this entry is the see-through "Bureau" background, not
         // a ruling — it enters desktop mode and its check follows isSeeThrough.
         property bool seeThrough: false
+        // #389: when true this entry opens the background-image picker.
+        property bool imagePick: false
 
         text: rulingLabel
         implicitHeight: 34
 
         onTriggered: {
-            if (item.seeThrough)
+            if (item.imagePick)
+                appController.pickBackgroundImage()
+            else if (item.seeThrough)
                 appController.setBackgroundSeeThrough()
             else
                 appController.setGridType(rulingType)
