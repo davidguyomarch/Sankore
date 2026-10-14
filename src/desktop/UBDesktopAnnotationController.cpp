@@ -489,6 +489,7 @@ void UBDesktopAnnotationController::updateDesktopInkHint()
     if (shot.isNull())
     {
         UBSettings::settings()->clearDesktopInkDarkHint();
+        UBToolController::toolController()->notifyColorVariantChanged();  // #494
         return;
     }
 
@@ -497,6 +498,8 @@ void UBDesktopAnnotationController::updateDesktopInkHint()
                                              Qt::SmoothTransformation);
     const QColor mean = avg.pixelColor(0, 0);
     UBSettings::settings()->setDesktopInkDarkHint(UBInkColors::wantsDarkInkVariant(mean));
+    // #494: the displayed palette variant must follow the desktop luminance too.
+    UBToolController::toolController()->notifyColorVariantChanged();
 }
 
 
@@ -550,6 +553,7 @@ void UBDesktopAnnotationController::hideWindow()
 {
     // #494: back on the board, the ink variant follows the page flag again.
     UBSettings::settings()->clearDesktopInkDarkHint();
+    UBToolController::toolController()->notifyColorVariantChanged();
 
     if (mToolbarQml)
         mToolbarQml->hide();

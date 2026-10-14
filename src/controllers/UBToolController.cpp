@@ -12,6 +12,7 @@
 #include "core/UBSettings.h"
 #include "board/UBBoardController.h"
 #include "board/UBBoardView.h"
+#include "domain/UBInkColorUtils.h"
 #include "gui/UBMainWindow.h"
 #include "domain/UBGraphicsScene.h"
 #include "domain/UBShapeFactory.h"
@@ -322,12 +323,36 @@ void UBToolController::setPenWidthIndex(int index)
     emit currentWidthIndexChanged();
 }
 
+void UBToolController::notifyColorVariantChanged()
+{
+    // #494: the day/night variant source changed (desktop hint set/cleared), so
+    // the palette lists and the active colour may differ now — refresh the bar.
+    emit penColorsChanged();
+    emit markerColorsChanged();
+    emit currentColorsChanged();
+    emit currentColorIndexChanged();
+    emit penColorChanged();
+    emit markerColorChanged();
+}
+
+bool UBToolController::activeDarkVariant() const
+{
+    // #494: mirror the draw pipeline — desktop luminance hint when annotating the
+    // desktop, else the board page's dark/light flag — so the palette swatches
+    // match the colour that will actually be drawn.
+    const bool pageDark = UBApplication::boardController
+                          && UBApplication::boardController->activeScene()
+                          && UBApplication::boardController->activeScene()->isDarkBackground();
+    return UBInkColors::activeDarkInkVariant(
+        pageDark,
+        mSettings && mSettings->hasDesktopInkDarkHint(),
+        mSettings && mSettings->desktopInkDarkHint());
+}
+
 QList<QColor> UBToolController::penColors() const
 {
-    bool dark = UBApplication::boardController && UBApplication::boardController->activeScene()
-                && UBApplication::boardController->activeScene()->isDarkBackground();
-    return dark ? mSettings->boardPenDarkBackgroundSelectedColors->colors()
-                : mSettings->boardPenLightBackgroundSelectedColors->colors();
+    return activeDarkVariant() ? mSettings->boardPenDarkBackgroundSelectedColors->colors()
+                               : mSettings->boardPenLightBackgroundSelectedColors->colors();
 }
 
 void UBToolController::setPenColor(bool onDarkBackground, const QColor& color, int pIndex)
@@ -372,10 +397,8 @@ void UBToolController::setMarkerWidthIndex(int index)
 
 QList<QColor> UBToolController::markerColors() const
 {
-    bool dark = UBApplication::boardController && UBApplication::boardController->activeScene()
-                && UBApplication::boardController->activeScene()->isDarkBackground();
-    return dark ? mSettings->boardMarkerDarkBackgroundSelectedColors->colors()
-                : mSettings->boardMarkerLightBackgroundSelectedColors->colors();
+    return activeDarkVariant() ? mSettings->boardMarkerDarkBackgroundSelectedColors->colors()
+                               : mSettings->boardMarkerLightBackgroundSelectedColors->colors();
 }
 
 void UBToolController::setMarkerColor(bool onDarkBackground, const QColor& color, int pIndex)
