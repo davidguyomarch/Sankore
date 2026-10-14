@@ -265,6 +265,7 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         // what the .ubz serializes; setBackgroundImage stores it + the decoded
         // pixmap (the caller sets backgroundKind == Image separately).
         QString backgroundImageFile() const;
+        const QPixmap& backgroundImagePixmap() const;
         void setBackgroundImage(const QString& fileName, const QPixmap& pixmap);
 
         bool hasBackground()

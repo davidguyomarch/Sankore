@@ -418,6 +418,11 @@ QString UBGraphicsScene::backgroundImageFile() const
     return mBackgroundRenderer->backgroundImageFile();
 }
 
+const QPixmap& UBGraphicsScene::backgroundImagePixmap() const
+{
+    return mBackgroundRenderer->backgroundImagePixmap();
+}
+
 void UBGraphicsScene::setBackgroundImage(const QString& fileName, const QPixmap& pixmap)
 {
     // #389 / ADR-0011: store the image on the renderer and mark the scene
