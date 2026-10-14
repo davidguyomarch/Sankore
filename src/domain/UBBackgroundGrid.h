@@ -173,8 +173,10 @@ namespace UBBackgroundGrid
             || target.width() <= 0.0 || target.height() <= 0.0)
             return target;
 
-        const double scale = std::max(target.width() / srcWidth,
-                                      target.height() / srcHeight);
+        // Parenthesise std::max so the Windows <windows.h> max() macro cannot
+        // expand it (MSVC: "C2589 '(' illegal token on right side of '::'").
+        const double scale = (std::max)(target.width() / srcWidth,
+                                        target.height() / srcHeight);
         const double w = srcWidth * scale;
         const double h = srcHeight * scale;
         const double x = target.x() + (target.width() - w) / 2.0;
