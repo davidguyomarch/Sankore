@@ -70,6 +70,12 @@ public:
     void setStartArrowType(UBAbstractGraphicsPathItem::ArrowType arrowType);
     void setEndArrowType(UBAbstractGraphicsPathItem::ArrowType arrowType);
 
+    // #369: current line-endpoint / stroke-style state, so the V2 props bar can
+    // highlight the active option.
+    UBAbstractGraphicsPathItem::ArrowType startArrowType() const { return mStartArrowType; }
+    UBAbstractGraphicsPathItem::ArrowType endArrowType() const { return mEndArrowType; }
+    Qt::PenStyle strokeStyle() const { return mCurrentPenStyle; }
+
     QRectF reverseRect(const QRectF &rect);
 
     QVector<qreal> dashPattern() const;

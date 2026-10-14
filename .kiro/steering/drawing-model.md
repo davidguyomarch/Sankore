@@ -250,6 +250,33 @@ l'outil Sélection, comme une forme ou un trait groupé legacy. Ce qu'il faut sa
   boutons contour/alignement de `ShapesPaletteV2` (#355/#431) ne sont plus inertes,
   car ils lisent `scene()->selectedItems()`. À vérifier/fermer après test VM de #366.
 
+## Options de la forme Ligne : flèches + style de trait (#369)
+
+La forme **Ligne** (`UBEditableGraphicsLineItem`, créée via la palette Formes)
+supporte des **extrémités** (flèches) et un **style de trait** (plein / pointillé).
+Toute l'infra modèle **existait déjà** (ancienne palette QWidget
+`UBDrawingArrowsPropertiesPalette` / `UBDrawingStrokePropertiesPalette`, non
+exposée en V2) ; #369 ne fait que l'exposer dans la `DrawingPropsBar` V2.
+
+- **Modèle (factory)** : `UBShapeFactory::setStartArrowType`/`setEndArrowType`
+  (enum `UBAbstractGraphicsPathItem::ArrowType {None=0, Round=1, Arrow=2}` —
+  **ne pas réordonner**, les valeurs sont persistées dans le SVG du document) et
+  `setStrokeStyle(Qt::SolidLine | Qt::CustomDashLine)` (motif `mDotDashes`).
+  Getters d'état ajoutés (#369) pour le surlignage : `startArrowType()`,
+  `endArrowType()`, `strokeStyle()`.
+- **Contrôleur** : `UBToolController::showLineOptions` (vrai quand
+  `activeTool==Drawing && currentShape=="line"`), + Q_INVOKABLE
+  `setStartArrowType`/`setEndArrowType`/`setLineDashed` et getters
+  `startArrowType`/`endArrowType`/`lineDashed` (ints d'arrow = valeurs de l'enum).
+  Les signaux `lineOptionsChanged` / `currentShapeChanged` rafraîchissent la barre.
+- **UI (`DrawingPropsBar`)** : 3 groupes contextuels visibles seulement si
+  `showLineOptions` — style (plein/pointillé), flèche début (none/arrow/round),
+  flèche fin — via le composant partagé `LineOptionButton` (toggle 28×28, icône
+  Phosphor, surlignage `primary`). Couleur et épaisseur restent les contrôles
+  génériques de forme déjà présents (pas de doublon).
+- **Cible** : la **forme Ligne**, PAS l'outil-stylo-ligne (`UBStylusTool::Line`,
+  id 9), qui reste un trait simple sans modèle d'extrémité.
+
 ## Diagnostics runtime
 
 Le comportement de dessin (souris, rendu, sélection) n'est pas reproductible en test
