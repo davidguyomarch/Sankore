@@ -135,6 +135,14 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     // Show/hide + resize the props bar when the active tool changes.
     connect(UBToolController::toolController(), &UBToolController::activeToolChanged,
             this, [this]() { updatePropsBarVisibility(); });
+    // #369: the Line options appear on currentShapeChanged and grow the bar.
+    connect(UBToolController::toolController(), &UBToolController::currentShapeChanged,
+            this, [this]() { updatePropsBarVisibility(); });
+    // #369: re-size when the QML root's implicit width settles (after the
+    // visible groups re-evaluate), so the Line options are never truncated.
+    if (QQuickItem* propsRoot = mPropsBarQml ? mPropsBarQml->rootObject() : nullptr)
+        connect(propsRoot, &QQuickItem::implicitWidthChanged,
+                this, [this]() { updatePropsBarVisibility(); });
 }
 
 UBDesktopAnnotationController::~UBDesktopAnnotationController()

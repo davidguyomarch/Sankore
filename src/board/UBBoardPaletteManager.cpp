@@ -381,6 +381,18 @@ void UBBoardPaletteManager::setupPalettes()
     connect(mToolController, &UBToolController::activeToolChanged, this, [updatePropsBarSize]() {
         QTimer::singleShot(0, updatePropsBarSize);
     });
+    // #369: the Line options appear on currentShapeChanged (not activeToolChanged)
+    // and grow the bar; re-size on that too.
+    connect(mToolController, &UBToolController::currentShapeChanged, this, [updatePropsBarSize]() {
+        QTimer::singleShot(0, updatePropsBarSize);
+    });
+    // #369: the authoritative width is the QML root's implicitWidth. It settles
+    // AFTER the visible bindings re-evaluate, so react to its own change signal
+    // rather than reading it (possibly stale) only on the tool/shape signals.
+    if (QQuickItem* propsRoot = mDrawingPropsBarQml->rootObject())
+        connect(propsRoot, &QQuickItem::implicitWidthChanged, this, [updatePropsBarSize]() {
+            updatePropsBarSize();
+        });
 
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
     mShapesPaletteV2Qml = new QQuickWidget(mContainer);
