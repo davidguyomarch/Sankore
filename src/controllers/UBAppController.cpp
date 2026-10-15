@@ -246,17 +246,40 @@ void UBAppController::setGridType(int gridType)
     emit backgroundChanged();
 }
 
+bool UBAppController::leaveImageIfActive()
+{
+    // #389/#434: choosing a normal background (Jour/Nuit) must leave the Image
+    // kind, resetting it to Opaque so isImageBackground() becomes false (else
+    // the Jour/Nuit check mark, gated on an opaque page, never shows).
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    if (!scene || scene->backgroundKind() != UBBackgroundGrid::BackgroundKind::Image)
+        return false;
+    scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Opaque);
+    return true;
+}
+
 void UBAppController::setBackgroundLight()
 {
-    leaveSeeThroughIfActive();  // #407: choosing a normal bg leaves Bureau
-    UBApplication::boardController->changeBackground(false, false);
+    // #434: Jour flips the dark/light flag ONLY — it must keep the current
+    // ruling (passing crossed=false to the legacy changeBackground reset it to
+    // Plain) and leave the Bureau/Image kinds for a normal opaque page.
+    leaveSeeThroughIfActive();  // #407
+    leaveImageIfActive();       // #389
+    auto* scene = UBApplication::boardController->activeScene();
+    UBApplication::boardController->changeBackgroundType(
+        false, scene ? scene->gridType() : UBBackgroundGrid::Type::Plain);
     emit backgroundChanged();
 }
 
 void UBAppController::setBackgroundDark()
 {
     leaveSeeThroughIfActive();  // #407
-    UBApplication::boardController->changeBackground(true, false);
+    leaveImageIfActive();       // #389
+    auto* scene = UBApplication::boardController->activeScene();
+    UBApplication::boardController->changeBackgroundType(
+        true, scene ? scene->gridType() : UBBackgroundGrid::Type::Plain);
     emit backgroundChanged();
 }
 

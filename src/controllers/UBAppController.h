@@ -96,6 +96,9 @@ private:
     // background setters so choosing light/dark/grid exits Bureau. Returns true
     // if it left desktop (so the caller can skip conflicting work).
     bool leaveSeeThroughIfActive();
+    // #389/#434: reset an Image background to Opaque when choosing Jour/Nuit, so
+    // the opaque-page check marks update. Returns true if it left Image.
+    bool leaveImageIfActive();
 
     int m_mode;
 };
