@@ -95,6 +95,9 @@ void UBAppController::syncMode(int mode)
         return;
     m_mode = mode;
     emit activeModeChanged();
+    // #507: a mode transition (notably returning from Desktop) can change the
+    // page background kind (Bureau→Opaque); refresh the Fond/Lignage menu checks.
+    emit backgroundChanged();
 }
 
 // --- Background ---
