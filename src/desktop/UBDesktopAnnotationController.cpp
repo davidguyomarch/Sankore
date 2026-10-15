@@ -290,11 +290,15 @@ void UBDesktopAnnotationController::positionPropsBar()
     if (!mPropsBarQml || !mTransparentDrawingView || !mToolbarQml)
         return;
 
-    // Same sizes as the board (UBBoardPaletteManager): 210 for the eraser
-    // (widths + actions), 280 otherwise (colors + widths).
-    const bool isEraser =
-        (UBToolController::toolController()->activeTool() == UBStylusTool::Eraser);
-    const int barW = isEraser ? 210 : 280;
+    // #369: width driven by the QML root implicitWidth (same as the board), so
+    // the Line options (style + arrows) are not truncated. Fallback 280.
+    int barW = 280;
+    if (QQuickItem* root = mPropsBarQml->rootObject())
+    {
+        const int iw = qRound(root->implicitWidth());
+        if (iw > 0)
+            barW = iw;
+    }
     const int barH = 48;
     mPropsBarQml->setFixedSize(barW, barH);
     {

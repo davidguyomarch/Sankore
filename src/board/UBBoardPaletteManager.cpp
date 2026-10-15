@@ -47,6 +47,7 @@
 #include "desktop/UBDesktopAnnotationController.h"
 
 #include <QQuickWidget>
+#include <QQuickItem>
 #include <QQmlContext>
 #include <QTimer>
 #include <QToolBar>
@@ -341,11 +342,18 @@ void UBBoardPaletteManager::setupPalettes()
             mDrawingPropsBarQml->hide();
             return;
         }
-        bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
-        bool isFill = (mToolController->activeTool() == UBStylusTool::ChangeFill);
-        // Eraser bar holds widths + 2 action buttons (erase ink / erase page, #249);
-        // fill bar holds colours only (#429-followup) → narrower, like the eraser.
-        int barW = (isEraser || isFill) ? 210 : 280;
+        // #369: the bar width is driven by the QML root object's implicitWidth,
+        // which already accounts for every visible group (colours, widths,
+        // eraser actions, and the Line options — style + start/end arrows). A
+        // fixed per-tool width truncated the Line groups. Fall back to 280 if
+        // the implicit width is not available yet.
+        int barW = 280;
+        if (QQuickItem* root = mDrawingPropsBarQml->rootObject())
+        {
+            const int iw = qRound(root->implicitWidth());
+            if (iw > 0)
+                barW = iw;
+        }
         mDrawingPropsBarQml->setFixedSize(barW, 48);
         // Apply rounded mask so clicks outside the rounded shape pass through
         QPainterPath path;
