@@ -359,6 +359,32 @@ void UBBoardPaletteManager::setupPalettes()
         QPainterPath path;
         path.addRoundedRect(0, 0, barW, 48, 12, 12);
         mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
+
+        // #512 diagnostics: the Line props groups render fine on the desktop but
+        // distorted on the BOARD. Log the real sizes to compare the host widget
+        // vs the QML root implicit size (and DPR) so we fix on a fact, not a
+        // guess. Only when drawing the Line to avoid flooding the log.
+        if (mToolController->activeTool() == UBStylusTool::Drawing
+            && mToolController->currentShape() == QLatin1String("line"))
+        {
+            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (logFile.open(QIODevice::Append | QIODevice::Text))
+            {
+                QTextStream out(&logFile);
+                QQuickItem* root = mDrawingPropsBarQml->rootObject();
+                out << "\n[PROPSBAR] board line: widget=" << mDrawingPropsBarQml->width()
+                    << "x" << mDrawingPropsBarQml->height()
+                    << " barW=" << barW
+                    << " rootImplicit=" << (root ? root->implicitWidth() : -1)
+                    << "x" << (root ? root->implicitHeight() : -1)
+                    << " rootSize=" << (root ? root->width() : -1)
+                    << "x" << (root ? root->height() : -1)
+                    << " dpr=" << mDrawingPropsBarQml->devicePixelRatioF()
+                    << " resizeMode=" << (int)mDrawingPropsBarQml->resizeMode()
+                    << "\n";
+                logFile.close();
+            }
+        }
         int posX = (mContainer->width() - barW) / 2;
         int posY = mStylusPaletteQml->y() - 48 - 8;
         mDrawingPropsBarQml->move(posX, posY);
