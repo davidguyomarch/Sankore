@@ -514,8 +514,14 @@ void UBDesktopAnnotationController::updateBackground()
 {
     QBrush newBrush;
 
-    if (mIsFullyTransparent
-            || UBToolController::toolController()->stylusTool() == UBStylusTool::Selector)
+    // #509: only a screen capture needs the overlay fully click-through (alpha 0)
+    // so the bare desktop is captured. The Selector tool must NOT be
+    // click-through anymore: since #366/#369 the user selects/moves objects
+    // DRAWN on the shared scene with the Selector, which needs the overlay to
+    // RECEIVE clicks (alpha-1 brush, like the drawing tools). The old #390 rule
+    // made the Selector click-through to "interact with the desktop", which
+    // conflicts with selecting board objects on the unified surface (ADR-0012).
+    if (mIsFullyTransparent)
     {
         newBrush = QBrush(Qt::transparent);
 #ifdef Q_OS_LINUX
