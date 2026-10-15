@@ -1152,7 +1152,10 @@ void UBBoardView::mousePressEvent (QMouseEvent *event)
         }
         else if (currentTool == UBStylusTool::Selector || currentTool == UBStylusTool::Play)
         {
-            if (bIsDesktop) {
+            // #509 (ADR-0012): on the unified surface the Selector must select
+            // objects on the desktop overlay too, so no longer swallow its
+            // press. Only Play stays click-through on the overlay.
+            if (bIsDesktop && currentTool == UBStylusTool::Play) {
                 event->ignore();
                 return;
             }
@@ -1335,7 +1338,9 @@ UBBoardView::mouseMoveEvent (QMouseEvent *event)
           return;
       }
 
-      if (bIsDesktop) {
+      // #509: the Selector must move objects on the desktop overlay; only Play
+      // stays click-through there.
+      if (bIsDesktop && currentTool == UBStylusTool::Play) {
           event->ignore();
           return;
       }
@@ -1449,10 +1454,8 @@ UBBoardView::mouseReleaseEvent (QMouseEvent *event)
 
   if (currentTool == UBStylusTool::Selector)
   {
-      if (bIsDesktop) {
-          event->ignore();
-          return;
-      }
+      // #509 (ADR-0012): the Selector works on the desktop overlay too — do not
+      // swallow the release here anymore, so selection/move commits normally.
 
       UBGraphicsItem *graphicsItem = dynamic_cast<UBGraphicsItem*>(movingItem);
       if (graphicsItem && graphicsItem->Delegate())  // #243: guard null delegate
