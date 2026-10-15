@@ -36,3 +36,4 @@ tradeoffs. Not implementation details. See the workflow in
 | [0009](0009-background-kind-axis.md) | Page background is two orthogonal axes — ruling type and background kind | Accepted |
 | [0010](0010-object-menu-capability-model.md) | Homogeneous capability model for object context menus | Accepted |
 | [0011](0011-custom-background-image.md) | Custom page background image — embedded in the .ubz, rendered via BackgroundKind::Image | Accepted |
+| [0012](0012-keep-active-tool-across-board-desktop.md) | Keep the active tool across the Board ↔ Desktop transition (amends ADR-0007/#390) | Accepted |

@@ -103,20 +103,22 @@ anciens signaux `desktopMode(bool)` / `mainModeChanged(MainMode)` (supprimés).
    `slot_changePresentationState` → `changeMode(DESKTOP)` cache les palettes QML V2
    du tableau (elles sont parentées à `mContainer`, la board view) ;
 3. cache la main window, appelle `mUninoteController->showWindow()` ;
-4. `toolController()->setInDesktopMode(true)`. **Ne force pas Selector** : c'est
-   `showWindow()` qui pose un **Pen** déterministe à l'entrée (#390).
+4. `toolController()->setInDesktopMode(true)`. **L'outil actif est conservé**
+   (#506, ADR-0012) : board et bureau étant une surface unifiée, on ne force plus
+   d'outil à l'entrée (l'ancien forçage **Pen** de #390 est supprimé).
 
 **`showWindow()`** : **pointe l'overlay sur la scène board partagée**
 (`setScene(boardScene())`) et met cette scène en **see-through transitoire**
 (`setDrawingMode(true)`, non persisté — voir la section « Surface unifiée »),
-affiche la toolbar, pose l'outil **Pen** (sauve l'outil tableau dans
-`mBoardStylusTool`), applique la transparence sur l'overlay (Windows :
-`WA_TranslucentBackground` + brush scène alpha-1 pour voir le vrai bureau à
-travers tout en recevant les clics, cf #241/#390), `showFullScreen()` (Linux :
-`show()` + `updateMask`), `UBPlatformUtils::setDesktopMode(true)`, remet la
-toolbar au premier plan. `hideWindow()` fait l'inverse : restaure le see-through
-réel de la page (`setDrawingMode(mSavedSeeThrough)`), détache la scène
-(`setScene(nullptr)`), restaure l'outil tableau (`mBoardStylusTool`).
+affiche la toolbar, **conserve l'outil actif** (#506, ADR-0012 — plus de forçage
+Pen ni de sauvegarde `mBoardStylusTool`), applique la transparence sur l'overlay
+(Windows : `WA_TranslucentBackground` + brush scène alpha-1 pour voir le vrai
+bureau à travers tout en recevant les clics, cf #241/#390), `showFullScreen()`
+(Linux : `show()` + `updateMask`), `UBPlatformUtils::setDesktopMode(true)`, remet
+la toolbar au premier plan. `hideWindow()` fait l'inverse : restaure le
+see-through réel de la page (`setDrawingMode(mSavedSeeThrough)`), détache la scène
+(`setScene(nullptr)`). **L'outil n'est pas restauré** : il est partagé (singleton
+`UBToolController`) et reste simplement celui que l'utilisateur avait.
 
 **Sortie** — le bouton « Retour au tableau » de la toolbar appelle
 `UBDesktopAnnotationController::goToUniboard()` :
@@ -125,8 +127,8 @@ réel de la page (`setDrawingMode(mSavedSeeThrough)`), détache la scène
 réactive la board view et appelle (via les corps privés) `doShowBoard()/
 doShowInternet()/doShowDocument()` selon `mMainMode`. Chaque `doShow*()` appelle
 `setState(...)`, dont le `stateChanged` (p. ex. `DesktopAnnotation → Board`)
-restaure les palettes. `hideWindow()` cache la toolbar + l'overlay et **restaure
-l'outil tableau** précédent (`mBoardStylusTool`).
+restaure les palettes. `hideWindow()` cache la toolbar + l'overlay ; **l'outil
+actif est conservé** (#506, ADR-0012), pas restauré.
 
 ### Fix #397 — la fenêtre principale reste Maximized (jamais Fullscreen)
 
