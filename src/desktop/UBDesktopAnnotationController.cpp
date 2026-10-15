@@ -298,16 +298,18 @@ void UBDesktopAnnotationController::positionPropsBar()
     if (!mPropsBarQml || !mTransparentDrawingView || !mToolbarQml)
         return;
 
-    // #369: width driven by the QML root implicitWidth (same as the board), so
-    // the Line options (style + arrows) are not truncated. Fallback 280.
-    int barW = 280;
+    // #369/#512: size from the QML root's REAL implicit width AND height.
+    // Forcing 48px while the bar's implicitHeight is 44 stretched the root
+    // (SizeRootObjectToView) and distorted the icons on the overlay. Fallback
+    // 280x44.
+    int barW = 280, barH = 44;
     if (QQuickItem* root = mPropsBarQml->rootObject())
     {
         const int iw = qRound(root->implicitWidth());
-        if (iw > 0)
-            barW = iw;
+        const int ih = qRound(root->implicitHeight());
+        if (iw > 0) barW = iw;
+        if (ih > 0) barH = ih;
     }
-    const int barH = 48;
     mPropsBarQml->setFixedSize(barW, barH);
     {
         QPainterPath path;

@@ -347,54 +347,32 @@ void UBBoardPaletteManager::setupPalettes()
         // eraser actions, and the Line options — style + start/end arrows). A
         // fixed per-tool width truncated the Line groups. Fall back to 280 if
         // the implicit width is not available yet.
-        int barW = 280;
+        // #512: size the host to the QML root's REAL implicit size, both width
+        // AND height. Forcing a 48px height while the bar's implicitHeight is 44
+        // stretched the root (SizeRootObjectToView) and distorted the icons.
+        int barW = 280, barH = 44;
         if (QQuickItem* root = mDrawingPropsBarQml->rootObject())
         {
             const int iw = qRound(root->implicitWidth());
-            if (iw > 0)
-                barW = iw;
+            const int ih = qRound(root->implicitHeight());
+            if (iw > 0) barW = iw;
+            if (ih > 0) barH = ih;
         }
-        mDrawingPropsBarQml->setFixedSize(barW, 48);
+        mDrawingPropsBarQml->setFixedSize(barW, barH);
         // Apply rounded mask so clicks outside the rounded shape pass through
         QPainterPath path;
-        path.addRoundedRect(0, 0, barW, 48, 12, 12);
+        path.addRoundedRect(0, 0, barW, barH, 12, 12);
         mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
-
-        // #512 diagnostics: the Line props groups render fine on the desktop but
-        // distorted on the BOARD. Log the real sizes to compare the host widget
-        // vs the QML root implicit size (and DPR) so we fix on a fact, not a
-        // guess. Only when drawing the Line to avoid flooding the log.
-        if (mToolController->activeTool() == UBStylusTool::Drawing
-            && mToolController->currentShape() == QLatin1String("line"))
-        {
-            QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-            if (logFile.open(QIODevice::Append | QIODevice::Text))
-            {
-                QTextStream out(&logFile);
-                QQuickItem* root = mDrawingPropsBarQml->rootObject();
-                out << "\n[PROPSBAR] board line: widget=" << mDrawingPropsBarQml->width()
-                    << "x" << mDrawingPropsBarQml->height()
-                    << " barW=" << barW
-                    << " rootImplicit=" << (root ? root->implicitWidth() : -1)
-                    << "x" << (root ? root->implicitHeight() : -1)
-                    << " rootSize=" << (root ? root->width() : -1)
-                    << "x" << (root ? root->height() : -1)
-                    << " dpr=" << mDrawingPropsBarQml->devicePixelRatioF()
-                    << " resizeMode=" << (int)mDrawingPropsBarQml->resizeMode()
-                    << "\n";
-                logFile.close();
-            }
-        }
         int posX = (mContainer->width() - barW) / 2;
-        int posY = mStylusPaletteQml->y() - 48 - 8;
+        int posY = mStylusPaletteQml->y() - barH - 8;
         mDrawingPropsBarQml->move(posX, posY);
         mDrawingPropsBarQml->show();
         mDrawingPropsBarQml->raise();
     };
-    mDrawingPropsBarQml->setFixedSize(280, 48);
+    mDrawingPropsBarQml->setFixedSize(280, 44);
     {
         QPainterPath path;
-        path.addRoundedRect(0, 0, 280, 48, 12, 12);
+        path.addRoundedRect(0, 0, 280, 44, 12, 12);
         mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
     }
     int propsX = (mContainer->width() - 280) / 2;
