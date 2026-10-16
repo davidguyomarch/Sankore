@@ -47,6 +47,7 @@
 #include "UBGraphicsMediaItemDelegate.h"
 #include "UBGraphicsDelegateFrame.h"
 #include "UBGraphicsScene.h"
+#include "UBInkColorUtils.h"
 #include "UBGraphicsItemUndoCommand.h"
 #include "UBGraphicsItemTransformUndoCommand.h"
 
@@ -171,23 +172,59 @@ void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
     QRectF br = boundingRect();
 
+    // #515: the frame controls (delete / duplicate / "…" / z-order / resize /
+    // rotate) are monochrome dark Phosphor glyphs. They read on a light page but
+    // vanish on a dark/black page (follow-up to #511, which fixed only the
+    // border). Pick a contrast-aware tint + a subtle backing disc from the
+    // page's dark/light flag so the controls read on ANY background.
+    bool darkPage = false;
+    if (auto* ubScene = dynamic_cast<UBGraphicsScene*>(mDelegated ? mDelegated->scene() : nullptr))
+        darkPage = ubScene->isDarkBackground();
+
     // Draw hover/press background for toolbar buttons
     if (mButtonAlignmentSection == Qt::TitleBarArea || mButtonAlignmentSection == Qt::NoSection) {
         if (mIsPressed) {
-            painter->setBrush(QColor(0, 0, 0, 30));
+            painter->setBrush(darkPage ? QColor(255, 255, 255, 60) : QColor(0, 0, 0, 30));
             painter->setPen(Qt::NoPen);
             painter->drawRoundedRect(br, 4, 4);
         } else if (mIsHovered) {
-            painter->setBrush(QColor(0, 0, 0, 15));
+            painter->setBrush(darkPage ? QColor(255, 255, 255, 35) : QColor(0, 0, 0, 15));
             painter->setPen(Qt::NoPen);
             painter->drawRoundedRect(br, 4, 4);
         }
     }
 
-    // Render the SVG icon with padding, centered in the bounding rect
+    // #515: on a dark page, a subtle backing disc behind the glyph so the
+    // control keeps a readable halo even over busy content.
+    if (darkPage && !mIsPressed && !mIsHovered) {
+        painter->setBrush(UBInkColors::frameControlBacking(darkPage));
+        painter->setPen(Qt::NoPen);
+        painter->drawRoundedRect(br, 4, 4);
+    }
+
+    // Render the SVG icon with padding, centered in the bounding rect.
     if (renderer() && renderer()->isValid()) {
         QRectF iconRect = br.adjusted(kButtonPadding, kButtonPadding, -kButtonPadding, -kButtonPadding);
-        renderer()->render(painter, iconRect);
+        if (darkPage) {
+            // #515: tint the monochrome glyph light so it reads on a dark page.
+            // Render the SVG to an ARGB image, then recolour its RGB with the
+            // frame-control tint via CompositionMode_SourceIn (keeps the glyph
+            // alpha), the same idiom as UBGraphicsItemDelegate::themedMenuIcon.
+            const QSize px = iconRect.size().toSize();
+            if (px.width() > 0 && px.height() > 0) {
+                QImage glyph(px, QImage::Format_ARGB32_Premultiplied);
+                glyph.fill(Qt::transparent);
+                QPainter gp(&glyph);
+                gp.setRenderHint(QPainter::Antialiasing, true);
+                renderer()->render(&gp, QRectF(QPointF(0, 0), QSizeF(px)));
+                gp.setCompositionMode(QPainter::CompositionMode_SourceIn);
+                gp.fillRect(glyph.rect(), UBInkColors::frameControlTint(darkPage));
+                gp.end();
+                painter->drawImage(iconRect.topLeft(), glyph);
+            }
+        } else {
+            renderer()->render(painter, iconRect);
+        }
     }
 
     // Progress indicator for long-press (z-order buttons)
