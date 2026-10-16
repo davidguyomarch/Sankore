@@ -424,6 +424,16 @@ sur du noir (V=0) — sinon choisir une teinte vive dans la roue rendait du noir
 - **#492** : édition explicite des 4 pastilles (long-press/clic-droit → picker →
   `setPenColor`/`setMarkerColor`). Suit le pattern : réutilise le picker unifié et
   les setters de slot persistés.
-- **#494** : au bureau, choisir la variante jour/nuit du trait depuis la luminance
-  réelle du bureau (et non le flag de la page board). N'affecte que le choix de
-  **variante de pastille** — la couleur libre, elle, n'a pas de paire.
+- **#494** (fait) : au bureau, la variante jour/nuit du trait suit la **luminance
+  réelle du bureau**, pas le flag de la page board. Mécanisme :
+  `UBDesktopAnnotationController::updateDesktopInkHint()` calcule la luminance
+  moyenne du bureau (downscale 1×1 de `getScreenPixmap()`,
+  `UBInkColors::wantsDarkInkVariant`) à l'**entrée** du mode bureau et pose un hint
+  transitoire dans `UBSettings` (`setDesktopInkDarkHint`), effacé à la **sortie**
+  (`hideWindow`). Les deux pipelines de tracé (`UBInputRouter` smooth stroke,
+  `UBDrawingHandler` legacy/Ligne) choisissent la variante via le helper pur
+  `UBInkColors::activeDarkInkVariant(pageIsDark, hasHint, desktopIsDark)` — hint si
+  présent, sinon flag de page. N'affecte **que** le choix de variante de pastille ;
+  la couleur libre (#475) n'a pas de paire et n'est pas concernée. Indice **global**
+  (bureau entier), calculé **une fois** à l'entrée (grab écran coûteux). Règle pure
+  testée (`tst_UBInkColorUtils`) ; le calcul réel sur capture reste VM-only.

@@ -12,6 +12,7 @@
 #include "UBGraphicsPolygonItem.h"
 #include "UBGraphicsStroke.h"
 #include "UBSceneContext.h"
+#include "UBInkColorUtils.h"
 #include "core/UB.h"
 #include "core/UBSettings.h"
 #include "frameworks/UBCoreGraphicsScene.h"
@@ -52,7 +53,12 @@ void UBDrawingHandler::drawLineTo(UBGraphicsScene* scene, const UBSceneContext& 
     if (mPreviousPoint == endPoint)
         return;
 
-    bool isDark = scene->isDarkBackground();
+    // #494: desktop luminance hint overrides the page flag for the ink variant.
+    UBSettings* s = scene->settings();
+    bool isDark = UBInkColors::activeDarkInkVariant(
+        scene->isDarkBackground(),
+        s && s->hasDesktopInkDarkHint(),
+        s && s->desktopInkDarkHint());
     UBGraphicsPolygonItem* polygonItem = lineToPolygonItem(ctx, isDark, QLineF(mPreviousPoint, endPoint), width);
 
     if (!polygonItem->brush().isOpaque())
@@ -169,7 +175,12 @@ void UBDrawingHandler::drawArcTo(UBGraphicsScene* scene, const UBSceneContext& c
     penWidth /= ctx.systemScaleFactor();
     penWidth /= ctx.currentZoom();
 
-    bool isDark = scene->isDarkBackground();
+    // #494: desktop luminance hint overrides the page flag for the ink variant.
+    UBSettings* sArc = scene->settings();
+    bool isDark = UBInkColors::activeDarkInkVariant(
+        scene->isDarkBackground(),
+        sArc && sArc->hasDesktopInkDarkHint(),
+        sArc && sArc->desktopInkDarkHint());
     mArcPolygonItem = arcToPolygonItem(ctx, isDark, QLineF(centerPoint, mPreviousPoint), spanAngle, penWidth);
     mArcPolygonItem->setStroke(mCurrentStroke);
     scene->addedItemsRef().insert(mArcPolygonItem);

@@ -714,6 +714,30 @@ void UBSettings::clearTransientMarkerColor()
     mTransientMarkerColor = QColor();
 }
 
+
+// --- #494: transient desktop ink dark/light hint ---
+
+bool UBSettings::hasDesktopInkDarkHint() const
+{
+    return mHasDesktopInkDarkHint;
+}
+
+bool UBSettings::desktopInkDarkHint() const
+{
+    return mDesktopInkDarkHint;
+}
+
+void UBSettings::setDesktopInkDarkHint(bool dark)
+{
+    mHasDesktopInkDarkHint = true;
+    mDesktopInkDarkHint = dark;
+}
+
+void UBSettings::clearDesktopInkDarkHint()
+{
+    mHasDesktopInkDarkHint = false;
+}
+
 //----------------------------------------//
 // eraser
 

@@ -131,6 +131,11 @@ public:
     int currentColorIndex() const;
     void setCurrentColorIndex(int index);
     QColor currentCustomColor() const;   // #475: active tool's free colour (invalid if none)
+
+    // #494: re-emit the palette signals so the DrawingPropsBar re-reads the
+    // displayed swatches after the desktop ink variant hint changed (enter /
+    // leave desktop mode). The displayed variant must match what will be drawn.
+    void notifyColorVariantChanged();
     bool hasCurrentCustomColor() const;  // #475: whether a custom colour is active
     int currentWidthIndex() const;
     void setCurrentWidthIndex(int index);
@@ -213,6 +218,12 @@ signals:
 
 private:
     explicit UBToolController(QObject* parent = nullptr);
+
+    // #494: the day/night variant the DrawingPropsBar palette must show — the
+    // SAME criterion the draw pipeline uses (desktop luminance hint when on the
+    // overlay, else the page's dark/light flag). Keeps the displayed swatches in
+    // sync with the colour that will actually be drawn.
+    bool activeDarkVariant() const;
 
     // #475: the colour the custom picker should open on for the active tool —
     // the free colour if one is set, else the tool's effective colour (pen slot,

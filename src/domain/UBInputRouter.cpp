@@ -17,6 +17,7 @@
 #include "UBGraphicsStroke.h"
 #include "UBGraphicsPolygonItem.h"
 #include "UBGraphicsStrokesGroup.h"
+#include "UBInkColorUtils.h"
 #include "UBGraphicsItemUndoCommand.h"
 
 #include "core/UB.h"
@@ -99,7 +100,16 @@ bool UBInputRouter::inputDevicePress(const QPointF& scenePos, qreal pressure)
                 mCurrentSmoothStroke->setColorOnDarkBackground(colorOnDarkBG);
                 mCurrentSmoothStroke->setColorOnLightBackground(colorOnLightBG);
 
-                if (mScene->isDarkBackground())
+                // #494: on the desktop overlay the active variant follows the
+                // real desktop luminance (hint set by the desktop controller),
+                // not the board page's dark/light flag. The stored pair is
+                // unchanged, so a later day/night flip still works.
+                UBSettings* s = mScene->settings();
+                const bool darkVariant = UBInkColors::activeDarkInkVariant(
+                    mScene->isDarkBackground(),
+                    s && s->hasDesktopInkDarkHint(),
+                    s && s->desktopInkDarkHint());
+                if (darkVariant)
                     mCurrentSmoothStroke->setStrokeColor(colorOnDarkBG);
                 else
                     mCurrentSmoothStroke->setStrokeColor(colorOnLightBG);

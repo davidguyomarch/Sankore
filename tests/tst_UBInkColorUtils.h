@@ -29,6 +29,11 @@ private slots:
     void testUserColorPreserved();
     void testTransparentPreserved();
     void testIdempotentOnCorrectDefault();
+
+    // #494: desktop luminance → ink variant decision.
+    void testWantsDarkInkVariantFromLuminance();
+    void testActiveDarkInkVariantUsesPageFlagWithoutHint();
+    void testActiveDarkInkVariantUsesHintWhenPresent();
 };
 
 #endif // TST_UBINKCOLORUTILS_H
