@@ -709,6 +709,62 @@ void UBToolController::alignSelection()
     mgr.horizontalAlign();
 }
 
+// #369: line-shape endpoint (arrow) + stroke-style options -----------------
+
+bool UBToolController::showLineOptions() const
+{
+    // Only when the active shape being drawn is the Line.
+    return m_activeTool == Drawing && m_currentShape == QLatin1String("line");
+}
+
+int UBToolController::startArrowType() const
+{
+    if (!UBApplication::boardController)
+        return 0;
+    return static_cast<int>(UBApplication::boardController->shapeFactory().startArrowType());
+}
+
+int UBToolController::endArrowType() const
+{
+    if (!UBApplication::boardController)
+        return 0;
+    return static_cast<int>(UBApplication::boardController->shapeFactory().endArrowType());
+}
+
+bool UBToolController::lineDashed() const
+{
+    if (!UBApplication::boardController)
+        return false;
+    return UBApplication::boardController->shapeFactory().strokeStyle() == Qt::CustomDashLine;
+}
+
+void UBToolController::setStartArrowType(int arrowType)
+{
+    if (!UBApplication::boardController)
+        return;
+    UBApplication::boardController->shapeFactory().setStartArrowType(
+        static_cast<UBAbstractGraphicsPathItem::ArrowType>(arrowType));
+    emit lineOptionsChanged();
+}
+
+void UBToolController::setEndArrowType(int arrowType)
+{
+    if (!UBApplication::boardController)
+        return;
+    UBApplication::boardController->shapeFactory().setEndArrowType(
+        static_cast<UBAbstractGraphicsPathItem::ArrowType>(arrowType));
+    emit lineOptionsChanged();
+}
+
+void UBToolController::setLineDashed(bool dashed)
+{
+    if (!UBApplication::boardController)
+        return;
+    UBApplication::boardController->shapeFactory().setStrokeStyle(
+        dashed ? Qt::CustomDashLine : Qt::SolidLine);
+    emit lineOptionsChanged();
+}
+
 QColor UBToolController::seedColorForActiveTool() const
 {
     // #475: last colour used by the active tool (free colour wins, else the

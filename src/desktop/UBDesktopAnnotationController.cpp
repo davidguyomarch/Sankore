@@ -135,6 +135,14 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
     // Show/hide + resize the props bar when the active tool changes.
     connect(UBToolController::toolController(), &UBToolController::activeToolChanged,
             this, [this]() { updatePropsBarVisibility(); });
+    // #369: the Line options appear on currentShapeChanged and grow the bar.
+    connect(UBToolController::toolController(), &UBToolController::currentShapeChanged,
+            this, [this]() { updatePropsBarVisibility(); });
+    // #369: re-size when the QML root's implicit width settles (after the
+    // visible groups re-evaluate), so the Line options are never truncated.
+    if (QQuickItem* propsRoot = mPropsBarQml ? mPropsBarQml->rootObject() : nullptr)
+        connect(propsRoot, &QQuickItem::implicitWidthChanged,
+                this, [this]() { updatePropsBarVisibility(); });
 }
 
 UBDesktopAnnotationController::~UBDesktopAnnotationController()
@@ -290,12 +298,18 @@ void UBDesktopAnnotationController::positionPropsBar()
     if (!mPropsBarQml || !mTransparentDrawingView || !mToolbarQml)
         return;
 
-    // Same sizes as the board (UBBoardPaletteManager): 210 for the eraser
-    // (widths + actions), 280 otherwise (colors + widths).
-    const bool isEraser =
-        (UBToolController::toolController()->activeTool() == UBStylusTool::Eraser);
-    const int barW = isEraser ? 210 : 280;
-    const int barH = 48;
+    // #369/#512: size from the QML root's REAL implicit width AND height.
+    // Forcing 48px while the bar's implicitHeight is 44 stretched the root
+    // (SizeRootObjectToView) and distorted the icons on the overlay. Fallback
+    // 280x44.
+    int barW = 280, barH = 44;
+    if (QQuickItem* root = mPropsBarQml->rootObject())
+    {
+        const int iw = qRound(root->implicitWidth());
+        const int ih = qRound(root->implicitHeight());
+        if (iw > 0) barW = iw;
+        if (ih > 0) barH = ih;
+    }
     mPropsBarQml->setFixedSize(barW, barH);
     {
         QPainterPath path;

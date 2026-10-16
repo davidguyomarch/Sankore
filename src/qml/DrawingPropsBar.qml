@@ -208,6 +208,106 @@ Rectangle {
             }
         }
 
+        // === Line options (#369) — only when drawing the Line shape ===
+        // Stroke style (solid / dashed) + start/end arrowheads, reusing the
+        // existing shape-factory arrow/dash infrastructure.
+
+        // Separator before the line-style group.
+        Rectangle {
+            visible: toolController.showLineOptions
+            width: 1; height: 24
+            color: themeManager.border
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        // Stroke style: solid vs dashed.
+        Row {
+            visible: toolController.showLineOptions
+            spacing: 4
+            anchors.verticalCenter: parent.verticalCenter
+
+            LineOptionButton {
+                icon: "line-segment"
+                tooltip: "Trait plein"
+                selected: !toolController.lineDashed
+                onClicked: toolController.setLineDashed(false)
+            }
+            LineOptionButton {
+                icon: "dots-three"
+                tooltip: "Trait pointillé"
+                selected: toolController.lineDashed
+                onClicked: toolController.setLineDashed(true)
+            }
+        }
+
+        // Separator before the arrows group.
+        Rectangle {
+            visible: toolController.showLineOptions
+            width: 1; height: 24
+            color: themeManager.border
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        // Start endpoint: none / arrow / round. (0=None, 1=Round, 2=Arrow)
+        Row {
+            visible: toolController.showLineOptions
+            spacing: 4
+            anchors.verticalCenter: parent.verticalCenter
+
+            LineOptionButton {
+                icon: "minus"
+                tooltip: "Début : aucun"
+                selected: toolController.startArrowType === 0
+                onClicked: toolController.setStartArrowType(0)
+            }
+            LineOptionButton {
+                icon: "arrow-left"
+                tooltip: "Début : flèche"
+                selected: toolController.startArrowType === 2
+                onClicked: toolController.setStartArrowType(2)
+            }
+            LineOptionButton {
+                icon: "circle"
+                tooltip: "Début : rond"
+                selected: toolController.startArrowType === 1
+                onClicked: toolController.setStartArrowType(1)
+            }
+        }
+
+        // Separator between start and end groups.
+        Rectangle {
+            visible: toolController.showLineOptions
+            width: 1; height: 24
+            color: themeManager.border
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        // End endpoint: none / arrow / round.
+        Row {
+            visible: toolController.showLineOptions
+            spacing: 4
+            anchors.verticalCenter: parent.verticalCenter
+
+            LineOptionButton {
+                icon: "minus"
+                tooltip: "Fin : aucun"
+                selected: toolController.endArrowType === 0
+                onClicked: toolController.setEndArrowType(0)
+            }
+            LineOptionButton {
+                icon: "arrow-right"
+                tooltip: "Fin : flèche"
+                selected: toolController.endArrowType === 2
+                onClicked: toolController.setEndArrowType(2)
+            }
+            LineOptionButton {
+                icon: "circle"
+                tooltip: "Fin : rond"
+                selected: toolController.endArrowType === 1
+                onClicked: toolController.setEndArrowType(1)
+            }
+        }
+
         // === Eraser actions (issue #249) — only shown for the eraser ===
         Rectangle {
             visible: root.isEraser
@@ -270,6 +370,49 @@ Rectangle {
             anchor: eaBtn
             text: eaBtn.tooltip
             show: eaMouse.containsMouse && eaBtn.tooltip !== ""
+            placeBelow: false
+        }
+    }
+
+    // === Reusable line-option toggle button (#369) ===
+    // A 28x28 Phosphor-icon button that highlights (primary) when `selected`.
+    component LineOptionButton: Rectangle {
+        id: loBtn
+        property string icon
+        property string tooltip
+        property bool selected: false
+        signal clicked()
+
+        width: 28; height: 28
+        radius: 6
+        color: selected ? themeManager.primary
+             : loMouse.containsMouse ? themeManager.surfaceHover
+             : "transparent"
+
+        Image {
+            id: loIcon
+            anchors.centerIn: parent
+            width: 18; height: 18
+            source: "qrc:/icons/phosphor/" + parent.icon + ".svg"
+            sourceSize: Qt.size(18, 18)
+            visible: false
+        }
+        ColorOverlay {
+            anchors.fill: loIcon
+            source: loIcon
+            color: loBtn.selected ? themeManager.onPrimary : themeManager.onSurface
+        }
+        MouseArea {
+            id: loMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: parent.clicked()
+        }
+        TooltipLabel {
+            anchor: loBtn
+            text: loBtn.tooltip
+            show: loMouse.containsMouse && loBtn.tooltip !== ""
             placeBelow: false
         }
     }

@@ -47,6 +47,7 @@
 #include "desktop/UBDesktopAnnotationController.h"
 
 #include <QQuickWidget>
+#include <QQuickItem>
 #include <QQmlContext>
 #include <QTimer>
 #include <QToolBar>
@@ -341,26 +342,37 @@ void UBBoardPaletteManager::setupPalettes()
             mDrawingPropsBarQml->hide();
             return;
         }
-        bool isEraser = (mToolController->activeTool() == UBStylusTool::Eraser);
-        bool isFill = (mToolController->activeTool() == UBStylusTool::ChangeFill);
-        // Eraser bar holds widths + 2 action buttons (erase ink / erase page, #249);
-        // fill bar holds colours only (#429-followup) → narrower, like the eraser.
-        int barW = (isEraser || isFill) ? 210 : 280;
-        mDrawingPropsBarQml->setFixedSize(barW, 48);
+        // #369: the bar width is driven by the QML root object's implicitWidth,
+        // which already accounts for every visible group (colours, widths,
+        // eraser actions, and the Line options — style + start/end arrows). A
+        // fixed per-tool width truncated the Line groups. Fall back to 280 if
+        // the implicit width is not available yet.
+        // #512: size the host to the QML root's REAL implicit size, both width
+        // AND height. Forcing a 48px height while the bar's implicitHeight is 44
+        // stretched the root (SizeRootObjectToView) and distorted the icons.
+        int barW = 280, barH = 44;
+        if (QQuickItem* root = mDrawingPropsBarQml->rootObject())
+        {
+            const int iw = qRound(root->implicitWidth());
+            const int ih = qRound(root->implicitHeight());
+            if (iw > 0) barW = iw;
+            if (ih > 0) barH = ih;
+        }
+        mDrawingPropsBarQml->setFixedSize(barW, barH);
         // Apply rounded mask so clicks outside the rounded shape pass through
         QPainterPath path;
-        path.addRoundedRect(0, 0, barW, 48, 12, 12);
+        path.addRoundedRect(0, 0, barW, barH, 12, 12);
         mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
         int posX = (mContainer->width() - barW) / 2;
-        int posY = mStylusPaletteQml->y() - 48 - 8;
+        int posY = mStylusPaletteQml->y() - barH - 8;
         mDrawingPropsBarQml->move(posX, posY);
         mDrawingPropsBarQml->show();
         mDrawingPropsBarQml->raise();
     };
-    mDrawingPropsBarQml->setFixedSize(280, 48);
+    mDrawingPropsBarQml->setFixedSize(280, 44);
     {
         QPainterPath path;
-        path.addRoundedRect(0, 0, 280, 48, 12, 12);
+        path.addRoundedRect(0, 0, 280, 44, 12, 12);
         mDrawingPropsBarQml->setMask(QRegion(path.toFillPolygon().toPolygon()));
     }
     int propsX = (mContainer->width() - 280) / 2;
@@ -373,6 +385,18 @@ void UBBoardPaletteManager::setupPalettes()
     connect(mToolController, &UBToolController::activeToolChanged, this, [updatePropsBarSize]() {
         QTimer::singleShot(0, updatePropsBarSize);
     });
+    // #369: the Line options appear on currentShapeChanged (not activeToolChanged)
+    // and grow the bar; re-size on that too.
+    connect(mToolController, &UBToolController::currentShapeChanged, this, [updatePropsBarSize]() {
+        QTimer::singleShot(0, updatePropsBarSize);
+    });
+    // #369: the authoritative width is the QML root's implicitWidth. It settles
+    // AFTER the visible bindings re-evaluate, so react to its own change signal
+    // rather than reading it (possibly stale) only on the tool/shape signals.
+    if (QQuickItem* propsRoot = mDrawingPropsBarQml->rootObject())
+        connect(propsRoot, &QQuickItem::implicitWidthChanged, this, [updatePropsBarSize]() {
+            updatePropsBarSize();
+        });
 
     // --- QML Shapes Palette V2 (Issue #121 Step 5) ---
     mShapesPaletteV2Qml = new QQuickWidget(mContainer);

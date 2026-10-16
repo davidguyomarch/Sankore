@@ -61,7 +61,7 @@ UBToolbar {
         { kind: "tool",   id: 7,  icon: "magnifying-glass-minus", tooltip: "Zoom -" },
         { kind: "tool",   id: 8,  icon: "crosshair",              tooltip: "Pointeur" },
         { kind: "separator" },
-        { kind: "tool",   id: 9,  icon: "line-segment",           tooltip: "Ligne" },
+        { kind: "shapeTool", shape: "line", icon: "line-segment", tooltip: "Ligne" },
         { kind: "tool",   id: 10, icon: "text-aa",                tooltip: "Texte" },
         { kind: "tool",   id: 11, icon: "selection",              tooltip: "Capture" },
         { kind: "tool",   id: 15, icon: "magic-wand",             tooltip: "OCR" }
@@ -71,6 +71,8 @@ UBToolbar {
         { kind: "tool",   id: 0,  icon: "pen",                tooltip: "Stylo" },
         { kind: "tool",   id: 1,  icon: "eraser",             tooltip: "Gomme" },
         { kind: "tool",   id: 2,  icon: "highlighter-circle", tooltip: "Marqueur" },
+        // #369 option A: Line is the Line SHAPE here too (consistent with #481).
+        { kind: "shapeTool", shape: "line", icon: "line-segment", tooltip: "Ligne" },
         { kind: "tool",   id: 3,  icon: "cursor",             tooltip: "Sélection" },
         { kind: "tool",   id: 8,  icon: "crosshair",          tooltip: "Pointeur" },
         { kind: "separator" },
@@ -88,6 +90,10 @@ UBToolbar {
     isActive: function(row) {
         if (row.kind === "toggle")
             return toolController.shapesVisible || toolController.activeTool === 14
+        // #369: the Line button creates the Line SHAPE (option A) — active when
+        // the shape tool is drawing a line.
+        if (row.kind === "shapeTool")
+            return toolController.activeTool === 14 && toolController.currentShape === row.shape
         if (row.kind === "tool")
             return toolController.activeTool === row.id
         return false
@@ -97,6 +103,8 @@ UBToolbar {
     isPrimary: function(row) {
         if (row.kind === "toggle")
             return toolController.activeTool === 14
+        if (row.kind === "shapeTool")
+            return toolController.activeTool === 14 && toolController.currentShape === row.shape
         if (row.kind === "tool")
             return toolController.activeTool === row.id
         return false
@@ -105,6 +113,8 @@ UBToolbar {
     onButtonClicked: function(row) {
         if (row.kind === "toggle")
             toolController.toggleShapes()
+        else if (row.kind === "shapeTool")
+            toolController.createShape(row.shape)   // #369: Line = a Line shape
         else if (row.kind === "tool")
             toolController.activeTool = row.id
         else if (row.kind === "action") {

@@ -33,6 +33,7 @@
 #include "domain/UBGraphicsScene.h"
 
 #include <cmath>
+#include <QPainterPathStroker>
 
 UBEditableGraphicsLineItem::UBEditableGraphicsLineItem(QGraphicsItem* parent)
     : UBEditableGraphicsPolygonItem(parent)
@@ -203,7 +204,16 @@ QPainterPath UBEditableGraphicsLineItem::shape() const
     if(mMultiClickState >= 1 || isSelected()){
         p.addRect(boundingRect());
     }else{
-        p = path();
+        // #369: widen the hit area of the (otherwise ~0px-wide) line so the
+        // Selector can actually pick it when unselected. Returning the raw
+        // path() made the thin line un-clickable — the click almost never
+        // landed exactly on it, so it could never be selected (chicken-and-egg
+        // with the selected-state wide shape above). Stroke the path with a
+        // minimum pick width.
+        QPainterPathStroker stroker;
+        stroker.setWidth(qMax<qreal>(pen().widthF(), 12.0));
+        stroker.setCapStyle(Qt::RoundCap);
+        p = stroker.createStroke(path());
     }
 
     return p;

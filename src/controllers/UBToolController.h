@@ -64,6 +64,13 @@ class UBToolController : public QObject
     // Drawing properties panel visibility
     Q_PROPERTY(bool showDrawingProps READ showDrawingProps NOTIFY activeToolChanged)
 
+    // #369: line-shape endpoint (arrow) + stroke-style options, shown in the
+    // DrawingPropsBar only when the active shape is the Line.
+    Q_PROPERTY(bool showLineOptions READ showLineOptions NOTIFY currentShapeChanged)
+    Q_PROPERTY(int startArrowType READ startArrowType NOTIFY lineOptionsChanged)
+    Q_PROPERTY(int endArrowType READ endArrowType NOTIFY lineOptionsChanged)
+    Q_PROPERTY(bool lineDashed READ lineDashed NOTIFY lineOptionsChanged)
+
     // Shapes palette
     Q_PROPERTY(bool shapesVisible READ shapesVisible WRITE setShapesVisible NOTIFY shapesVisibleChanged)
     // #318: the currently selected shape action ("ellipse", "rectangle", ...),
@@ -155,6 +162,17 @@ public:
     Q_INVOKABLE void activateFillTool();
     Q_INVOKABLE void alignSelection();
 
+    // #369: line-shape endpoint + stroke-style options for the V2 props bar.
+    // Arrow type ints match UBAbstractGraphicsPathItem::ArrowType
+    // (0 = None, 1 = Round, 2 = Arrow).
+    bool showLineOptions() const;
+    int startArrowType() const;
+    int endArrowType() const;
+    bool lineDashed() const;
+    Q_INVOKABLE void setStartArrowType(int arrowType);
+    Q_INVOKABLE void setEndArrowType(int arrowType);
+    Q_INVOKABLE void setLineDashed(bool dashed);
+
     // #475: open the unified colour picker (UBColorPickerDialog) and apply the
     // chosen free colour to the ACTIVE tool, without touching the 4 fixed
     // palette swatches:
@@ -212,6 +230,7 @@ signals:
     void eraserWidthChanged();
     void shapesVisibleChanged();
     void currentShapeChanged();
+    void lineOptionsChanged();   // #369
     void currentColorsChanged();
     void currentColorIndexChanged();
     void currentWidthIndexChanged();
