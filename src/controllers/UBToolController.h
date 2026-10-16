@@ -178,11 +178,6 @@ public:
     // No-op if the user cancels the dialog.
     Q_INVOKABLE void pickCustomColor();
 
-    // #512 TEMP: let QML append a diagnostic line to startup.log so we can see
-    // the real per-group widths / currentColors length on the VM. Removed once
-    // the board props-bar distortion is understood.
-    Q_INVOKABLE void logDiag(const QString& line);
-
     // #492: edit one of the 4 FIXED palette swatches. Opens the unified picker
     // seeded with the slot's current colour and, on accept, overwrites that slot
     // for the CURRENT background (pen or marker palette depending on the active

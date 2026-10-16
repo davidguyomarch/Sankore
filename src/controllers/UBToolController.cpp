@@ -20,9 +20,6 @@
 #include "gui/UBColorPickerDialog.h"
 
 #include <QAction>
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 
 // --- Singleton ---
 
@@ -904,18 +901,6 @@ void UBToolController::editColorSwatch(int index)
     // the selection moved to the edited slot (currentColorIndex).
     emit currentColorsChanged();
     emit currentColorIndexChanged();
-}
-
-void UBToolController::logDiag(const QString& line)
-{
-    // #512 TEMP diagnostics.
-    QFile logFile(QCoreApplication::applicationDirPath() + "/startup.log");
-    if (logFile.open(QIODevice::Append | QIODevice::Text))
-    {
-        QTextStream out(&logFile);
-        out << "[PROPSBAR-QML] " << line << "\n";
-        logFile.close();
-    }
 }
 
 void UBToolController::selectColorIndex(int index)

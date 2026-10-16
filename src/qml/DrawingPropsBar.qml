@@ -34,34 +34,6 @@ Rectangle {
     border.color: themeManager.border
     border.width: 1
 
-    // #512 TEMP diagnostics: dump the real geometry when the Line options are
-    // shown, so we can tell on the VM why the board bar looks distorted while
-    // the desktop one is fine. Logged (debounced) via the controller.
-    Timer {
-        id: diagTimer
-        interval: 120
-        repeat: false
-        onTriggered: {
-            toolController.logDiag(
-                "root=" + Math.round(root.width) + "x" + Math.round(root.height)
-                + " implicit=" + Math.round(root.implicitWidth) + "x" + Math.round(root.implicitHeight)
-                + " propsRow=" + Math.round(propsRow.width) + "x" + Math.round(propsRow.height)
-                + " propsRowImplicit=" + Math.round(propsRow.implicitWidth)
-                + " propsRowX=" + Math.round(propsRow.x)
-                + " colorsN=" + (toolController.currentColors ? toolController.currentColors.length : -1)
-                + " activeTool=" + toolController.activeTool
-                + " shape=" + toolController.currentShape
-                + " showLine=" + toolController.showLineOptions
-                + " isEraser=" + root.isEraser + " isFill=" + root.isFill)
-        }
-    }
-    onWidthChanged: diagTimer.restart()
-    Connections {
-        target: toolController
-        function onCurrentShapeChanged() { diagTimer.restart() }
-        function onActiveToolChanged() { diagTimer.restart() }
-    }
-
     // Is this eraser mode? (show only widths, no colors)
     property bool isEraser: toolController.activeTool === 1
     // #429-followup: fill mode (ChangeFill = 13) — show colors only, no widths
