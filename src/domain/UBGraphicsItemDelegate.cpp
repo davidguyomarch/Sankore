@@ -175,8 +175,12 @@ void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     // #515: the frame controls (delete / duplicate / "…" / z-order / resize /
     // rotate) are monochrome dark Phosphor glyphs. They read on a light page but
     // vanish on a dark/black page (follow-up to #511, which fixed only the
-    // border). Pick a contrast-aware tint + a subtle backing disc from the
-    // page's dark/light flag so the controls read on ANY background.
+    // border). Pick a contrast-aware glyph tint from the page's dark/light flag
+    // so the controls read on ANY background. NB: no permanent backing disc —
+    // one per button painted a visible grey tile on a black page and adjacent
+    // buttons' tiles overlapped into a block (VM #515), breaking the uniform
+    // page. The light-tinted glyph alone reads fine; the backing shows only on
+    // hover/press (transient, not at rest).
     bool darkPage = false;
     if (auto* ubScene = dynamic_cast<UBGraphicsScene*>(mDelegated ? mDelegated->scene() : nullptr))
         darkPage = ubScene->isDarkBackground();
@@ -192,14 +196,6 @@ void DelegateButton::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
             painter->setPen(Qt::NoPen);
             painter->drawRoundedRect(br, 4, 4);
         }
-    }
-
-    // #515: on a dark page, a subtle backing disc behind the glyph so the
-    // control keeps a readable halo even over busy content.
-    if (darkPage && !mIsPressed && !mIsHovered) {
-        painter->setBrush(UBInkColors::frameControlBacking(darkPage));
-        painter->setPen(Qt::NoPen);
-        painter->drawRoundedRect(br, 4, 4);
     }
 
     // Render the SVG icon with padding, centered in the bounding rect.

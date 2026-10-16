@@ -35,9 +35,8 @@ private slots:
     void testActiveDarkInkVariantUsesPageFlagWithoutHint();
     void testActiveDarkInkVariantUsesHintWhenPresent();
 
-    // #515: selection-frame control tint / backing contrast by page.
+    // #515: selection-frame control tint contrast by page.
     void testFrameControlTintContrastsPage();
-    void testFrameControlBackingContrastsPage();
 };
 
 #endif // TST_UBINKCOLORUTILS_H

@@ -111,20 +111,6 @@ namespace UBInkColors
         return pageIsDark ? QColor(235, 235, 235)   // light glyph on a dark page
                           : QColor(60, 60, 60);     // dark glyph on a light page
     }
-
-    /**
-     * (#515) Backing-disc colour drawn behind a frame control so even a tinted
-     * glyph keeps a hit-target halo and reads over busy content. Subtle: a
-     * translucent dark disc on a light page, a translucent light disc on a dark
-     * page. Alpha kept low so it stays discreet on a plain page.
-     *
-     * @param pageIsDark  the current page's dark-background flag
-     */
-    inline QColor frameControlBacking(bool pageIsDark)
-    {
-        return pageIsDark ? QColor(255, 255, 255, 40)
-                          : QColor(0, 0, 0, 20);
-    }
 }
 
 #endif // UBINKCOLORUTILS_H

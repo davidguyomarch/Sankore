@@ -90,15 +90,3 @@ void TestUBInkColorUtils::testFrameControlTintContrastsPage()
     QVERIFY(relativeLuminance(onDark) > 0.5);   // light glyph on a dark page
     QVERIFY(relativeLuminance(onLight) < 0.5);  // dark glyph on a light page
 }
-
-void TestUBInkColorUtils::testFrameControlBackingContrastsPage()
-{
-    // The backing disc is translucent and opposite the page: a light disc on a
-    // dark page, a dark disc on a light page, both subtle (low alpha).
-    const QColor onDark = frameControlBacking(/*pageIsDark*/ true);
-    const QColor onLight = frameControlBacking(/*pageIsDark*/ false);
-    QVERIFY(onDark.red() > 200 && onDark.green() > 200 && onDark.blue() > 200);
-    QVERIFY(onLight.red() < 60 && onLight.green() < 60 && onLight.blue() < 60);
-    QVERIFY(onDark.alpha() > 0 && onDark.alpha() < 128);
-    QVERIFY(onLight.alpha() > 0 && onLight.alpha() < 128);
-}
