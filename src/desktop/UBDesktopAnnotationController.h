@@ -135,7 +135,8 @@ class UBDesktopAnnotationController : public QObject
 
         bool mIsFullyTransparent;
 
-        int mBoardStylusTool;  // board tool saved on entry, restored on exit (#390)
+        // #506: the active tool is now kept across board<->desktop (ADR-0012),
+        // so no board-tool is saved/restored here anymore (was mBoardStylusTool).
 
         // #393 brick 3: desktop mode must render the SHARED board scene
         // see-through (no opaque page fill) so the real desktop shows through.

@@ -66,7 +66,6 @@ UBDesktopAnnotationController::UBDesktopAnnotationController(QObject *parent)
         , mTransparentDrawingView(0)
         , mToolbarQml(nullptr)
         , mIsFullyTransparent(false)
-        , mBoardStylusTool(UBToolController::toolController()->stylusTool())
 {
     mSettings = UBSettings::settings();
 
@@ -416,17 +415,12 @@ void UBDesktopAnnotationController::showWindow()
 
     updateBackground();
 
-    // #390: enter desktop mode with a deterministic Pen tool (a teacher expects
-    // to draw immediately). Save the board tool to restore on exit. We no longer
-    // restore a remembered "last desktop tool" (mDesktopStylusTool) — that scheme
-    // caused toolbar/effective-tool desyncs. Bounce through Selector first if the
-    // tool is already Pen, so setStylusTool actually runs its effects and
-    // re-highlights the toolbar (it early-returns on an unchanged value).
-    auto* tc = UBToolController::toolController();
-    mBoardStylusTool = tc->stylusTool();
-    if (tc->stylusTool() == UBStylusTool::Pen)
-        tc->setStylusTool(UBStylusTool::Selector);
-    tc->setStylusTool(UBStylusTool::Pen);
+    // #506 (amends #390 / ADR-0007 — see ADR-0012): the board and the desktop
+    // are a single unified surface, so the ACTIVE TOOL is kept across the
+    // transition — no longer force Pen on entry nor restore a saved board tool
+    // on exit. The tool is a shared singleton (UBToolController), so it simply
+    // stays what it was. A teacher who had the Pen keeps the Pen; who had the
+    // Selector keeps the Selector, both ways.
 
 #ifdef Q_OS_WIN
     // #241: try REAL transparency (show the live desktop through the overlay)
@@ -520,8 +514,14 @@ void UBDesktopAnnotationController::updateBackground()
 {
     QBrush newBrush;
 
-    if (mIsFullyTransparent
-            || UBToolController::toolController()->stylusTool() == UBStylusTool::Selector)
+    // #509: only a screen capture needs the overlay fully click-through (alpha 0)
+    // so the bare desktop is captured. The Selector tool must NOT be
+    // click-through anymore: since #366/#369 the user selects/moves objects
+    // DRAWN on the shared scene with the Selector, which needs the overlay to
+    // RECEIVE clicks (alpha-1 brush, like the drawing tools). The old #390 rule
+    // made the Selector click-through to "interact with the desktop", which
+    // conflicts with selecting board objects on the unified surface (ADR-0012).
+    if (mIsFullyTransparent)
     {
         newBrush = QBrush(Qt::transparent);
 #ifdef Q_OS_LINUX
@@ -579,10 +579,10 @@ void UBDesktopAnnotationController::hideWindow()
         mTransparentDrawingView->setScene(nullptr);
     }
 
-    // #390: restore the board tool that was active before entering desktop mode.
-    // (No "last desktop tool" is remembered anymore — entry always defaults to
-    // Pen; see showWindow().)
-    UBToolController::toolController()->setStylusTool(mBoardStylusTool);
+    // #506 (amends #390 / ADR-0007 — see ADR-0012): the active tool is kept
+    // across the board<->desktop transition (unified surface). Nothing to
+    // restore here — the shared UBToolController still holds whatever tool the
+    // user had on the desktop, which is what they keep back on the board.
 }
 
 
