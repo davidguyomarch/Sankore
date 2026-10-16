@@ -840,20 +840,30 @@ void UBGraphicsItemDelegate::decorateMenu(QMenu* menu)
 //N/C - NNE - 20140505 : add vertical and horizontal flip
 void UBGraphicsItemDelegate::flipHorizontally()
 {
-    mDelegated->setTransform(QTransform::fromScale(1, -1), true);
-
-    qreal dy = 2.f*mDelegated->boundingRect().bottomLeft().y();
-
-    mDelegated->moveBy(0, -dy);
+    // #505: mirror LEFT<->RIGHT about the item's own centre. The previous code
+    // scaled then moveBy(2*boundingRect edge), which assumed the item origin was
+    // at its top-left; for items whose local origin isn't (0,0) (e.g. a
+    // UBSmoothStrokeItem or a Line with arbitrary local coords) that offset was
+    // wrong and translated the item off-screen — it "disappeared". Compose the
+    // mirror around the bounding-rect centre so it stays exactly in place for
+    // any item, regardless of its local origin.
+    const QPointF c = mDelegated->boundingRect().center();
+    QTransform mirror;
+    mirror.translate(c.x(), c.y());
+    mirror.scale(-1, 1);           // horizontal flip (mirror the X axis)
+    mirror.translate(-c.x(), -c.y());
+    mDelegated->setTransform(mirror, true);
 }
 
 void UBGraphicsItemDelegate::flipVertically()
 {
-    mDelegated->setTransform(QTransform::fromScale(-1, 1), true);
-
-    qreal dx = 2.f*mDelegated->boundingRect().bottomRight().x();
-
-    mDelegated->moveBy(-dx, 0);
+    // #505: mirror TOP<->BOTTOM about the item's own centre (see flipHorizontally).
+    const QPointF c = mDelegated->boundingRect().center();
+    QTransform mirror;
+    mirror.translate(c.x(), c.y());
+    mirror.scale(1, -1);           // vertical flip (mirror the Y axis)
+    mirror.translate(-c.x(), -c.y());
+    mDelegated->setTransform(mirror, true);
 }
 //N/C - NNE - 20140505 : END
 
