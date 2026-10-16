@@ -73,6 +73,21 @@ UBMainWindow::UBMainWindow(QWidget *parent, Qt::WindowFlags flags)
 #else
     actionQuit->setShortcut(QKeySequence(Qt::ALT + Qt::Key_F4));
 #endif
+
+    // #474: make Undo/Redo keyboard shortcuts work in the QML V2 UI. The actions
+    // live in the legacy boardToolBar (mainWindow.ui), which is not shown in V2,
+    // so a QAction sitting in a hidden toolbar never fires its WindowShortcut.
+    // Use the platform-standard sequences (Ctrl+Z / Ctrl+Y, plus Cmd variants on
+    // macOS), make them application-wide, and attach the actions to the main
+    // window so they trigger wherever the focus is. They are already connected
+    // to the undo stack in UBBoardController, and the TopBar undo/redo buttons
+    // call the same stack.
+    actionUndo->setShortcuts(QKeySequence::Undo);
+    actionRedo->setShortcuts(QKeySequence::Redo);
+    actionUndo->setShortcutContext(Qt::ApplicationShortcut);
+    actionRedo->setShortcutContext(Qt::ApplicationShortcut);
+    addAction(actionUndo);
+    addAction(actionRedo);
 }
 
 UBMainWindow::~UBMainWindow()
