@@ -261,6 +261,13 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         UBBackgroundGrid::BackgroundKind backgroundKind() const;
         bool isSeeThrough() const;
 
+        // #389 / ADR-0011: custom background image. The relative file name is
+        // what the .ubz serializes; setBackgroundImage stores it + the decoded
+        // pixmap (the caller sets backgroundKind == Image separately).
+        QString backgroundImageFile() const;
+        const QPixmap& backgroundImagePixmap() const;
+        void setBackgroundImage(const QString& fileName, const QPixmap& pixmap);
+
         bool hasBackground()
         {
             return (mBackgroundObject != 0);

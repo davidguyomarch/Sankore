@@ -588,6 +588,17 @@ void UBDesktopAnnotationController::hideWindow()
 
 void UBDesktopAnnotationController::goToUniboard()
 {
+    // #507: "Retour au tableau" leaves the Bureau background. The page kept the
+    // persisted SeeThrough kind while in desktop mode; returning to the board
+    // means it is no longer a see-through page, so reset it to Opaque. Otherwise
+    // the board shows a (white-looking) page whose kind is still SeeThrough, and
+    // the Fond menu stays stuck on "Bureau" with Jour/Nuit never checkable.
+    if (UBGraphicsScene* scene = boardScene())
+    {
+        if (scene->isSeeThrough())
+            scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Opaque);
+    }
+
     hideWindow();
 
     UBPlatformUtils::setDesktopMode(false);

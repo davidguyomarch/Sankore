@@ -94,6 +94,17 @@ bool UBBackgroundRenderer::setBackgroundKind(UBBackgroundGrid::BackgroundKind ki
     return true;
 }
 
+void UBBackgroundRenderer::setBackgroundImage(const QString& fileName, const QPixmap& pixmap)
+{
+    // #389 / ADR-0011: store the serialized file name + the decoded pixmap cache.
+    // Does not change the kind (caller sets kind==Image). Reset the view cache so
+    // the new image is actually repainted.
+    mBackgroundImageFile = fileName;
+    mBackgroundImagePixmap = pixmap;
+    for (QGraphicsView* view : mScene->views())
+        view->resetCachedContent();
+}
+
 void UBBackgroundRenderer::setDesktopMode(bool desktopMode)
 {
     // Backward-compatible shim (#393): the old scene-wide "desktop mode" is now
@@ -156,7 +167,39 @@ void UBBackgroundRenderer::paintBackground(QPainter* painter, const QRectF& rect
     if (isSeeThrough())
         return;  // no opaque fill: caller falls through to QGraphicsScene::drawBackground
 
-    if (mDarkBackground)
+    // #389 / ADR-0011: a background image replaces the opaque fill. It is scaled
+    // to COVER the page (aspect-preserving, centered, cropped) via the pure
+    // coverRect helper, clipped to the page bounds. A ruling, if any, is still
+    // drawn on top (axes are orthogonal, ADR-0009). If kind==Image but no usable
+    // pixmap is set, fall through to the opaque fill (degrade, ADR-0011).
+    if (isImageBackground() && !mBackgroundImagePixmap.isNull())
+    {
+        // Page bounds: nominal size centered on the scene origin (like the ruling
+        // uses pageLeft = -w/2). Fall back to the exposed rect if no UB scene.
+        QRectF pageRect = rect;
+        if (auto* ubScene = dynamic_cast<UBGraphicsScene*>(mScene))
+        {
+            const QSizeF ns = ubScene->nominalSize();
+            pageRect = QRectF(-ns.width() / 2.0, -ns.height() / 2.0,
+                              ns.width(), ns.height());
+        }
+
+        const QSize src = mBackgroundImagePixmap.size();
+        const QRectF dst = UBBackgroundGrid::coverRect(pageRect, src.width(), src.height());
+
+        painter->save();
+        // Opaque base first so any area outside the (cropped) image — e.g. a
+        // slightly smaller exposed rect at page edges — is never transparent.
+        painter->fillRect(rect, QBrush(mDarkBackground ? QColor(Qt::black)   // ui-color-allow (scene background)
+                                                        : QColor(Qt::white))); // ui-color-allow (scene background)
+        painter->setClipRect(pageRect, Qt::IntersectClip);
+        painter->drawPixmap(dst, mBackgroundImagePixmap, mBackgroundImagePixmap.rect());
+        painter->restore();
+
+        // The ruling (if any) is drawn on top of the image below; skip the
+        // opaque fill (already painted) and jump to the ruling block.
+    }
+    else if (mDarkBackground)
         painter->fillRect(rect, QBrush(QColor(Qt::black)));
     else
         painter->fillRect(rect, QBrush(QColor(Qt::white)));

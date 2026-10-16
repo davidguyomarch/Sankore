@@ -32,6 +32,8 @@ class UBAppController : public QObject
     // kind (BackgroundKind::SeeThrough). Picking it in the Fond d'écran menu
     // enters desktop mode; picking any other background leaves it.
     Q_PROPERTY(bool isSeeThrough READ isSeeThrough NOTIFY backgroundChanged)
+    // #389 / ADR-0011: the page background is a custom image (BackgroundKind::Image).
+    Q_PROPERTY(bool isImageBackground READ isImageBackground NOTIFY backgroundChanged)
 
     // Undo/Redo
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY undoStateChanged)
@@ -54,6 +56,7 @@ public:
     bool isCrossedBackground() const;
     int gridType() const;
     bool isSeeThrough() const;  // #407
+    bool isImageBackground() const;  // #389
 
     bool canUndo() const;
     bool canRedo() const;
@@ -73,6 +76,9 @@ public slots:
     /// "Bureau" kind (persisted) and enter desktop mode via the guarded
     /// transition. Choosing any other background (light/dark/grid) leaves it.
     void setBackgroundSeeThrough();
+    /// #389 / ADR-0011: pick an image file, embed it in the document package,
+    /// and set the current page's background to that image (kind == Image).
+    void pickBackgroundImage();
 
 signals:
     void activeModeChanged();
@@ -90,6 +96,9 @@ private:
     // background setters so choosing light/dark/grid exits Bureau. Returns true
     // if it left desktop (so the caller can skip conflicting work).
     bool leaveSeeThroughIfActive();
+    // #389/#434: reset an Image background to Opaque when choosing Jour/Nuit, so
+    // the opaque-page check marks update. Returns true if it left Image.
+    bool leaveImageIfActive();
 
     int m_mode;
 };

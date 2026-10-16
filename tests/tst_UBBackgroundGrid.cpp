@@ -236,3 +236,53 @@ void TestUBBackgroundGrid::testDoubleLine3mmPairs()
     if (ys.size() >= 3)
         QVERIFY(qFuzzyCompare(ys[2] - ys[0], period));
 }
+
+// #389 / ADR-0011: coverRect scales the image to fully cover the page, keeping
+// aspect ratio, centered, overflowing on the longer axis (cropped by the caller).
+
+void TestUBBackgroundGrid::testCoverRectWiderImageOverflowsHorizontally()
+{
+    // Page 100x100, image 200x100 (wider): scale = max(100/200, 100/100) = 1.0
+    // → drawn 200x100, centered → x = -50, overflow left/right, exact height.
+    const QRectF page(0, 0, 100, 100);
+    QRectF r = coverRect(page, 200, 100);
+    QVERIFY(qFuzzyCompare(r.width(), 200.0));
+    QVERIFY(qFuzzyCompare(r.height(), 100.0));
+    QVERIFY(qFuzzyCompare(r.x(), -50.0));
+    QVERIFY(qFuzzyCompare(r.y(), 0.0));
+    // Covers the page on both axes.
+    QVERIFY(r.left() <= page.left() && r.right() >= page.right());
+    QVERIFY(r.top() <= page.top() && r.bottom() >= page.bottom());
+}
+
+void TestUBBackgroundGrid::testCoverRectTallerImageOverflowsVertically()
+{
+    // Page 100x100, image 100x200 (taller): scale = max(100/100, 100/200)
+    // = max(1.0, 0.5) = 1.0 → drawn 100x200, centered → x=0, y=-50. The image
+    // overflows vertically (cropped), width exactly fills.
+    const QRectF page(0, 0, 100, 100);
+    QRectF r = coverRect(page, 100, 200);
+    QVERIFY(qFuzzyCompare(r.width(), 100.0));
+    QVERIFY(qFuzzyCompare(r.height(), 200.0));
+    QVERIFY(qFuzzyCompare(r.x(), 0.0));
+    QVERIFY(qFuzzyCompare(r.y(), -50.0));
+    QVERIFY(r.left() <= page.left() && r.right() >= page.right());
+    QVERIFY(r.top() <= page.top() && r.bottom() >= page.bottom());
+}
+
+void TestUBBackgroundGrid::testCoverRectSameAspectExactlyFills()
+{
+    // Same aspect ratio → image exactly fills the page, no overflow, no offset.
+    const QRectF page(10, 20, 300, 150);
+    QRectF r = coverRect(page, 600, 300); // 2:1, same as 300:150
+    QCOMPARE(r, page);
+}
+
+void TestUBBackgroundGrid::testCoverRectDegenerateInputs()
+{
+    const QRectF page(0, 0, 100, 100);
+    // Zero/negative source or target → return target unchanged (safe fallback).
+    QCOMPARE(coverRect(page, 0, 100), page);
+    QCOMPARE(coverRect(page, 100, 0), page);
+    QCOMPARE(coverRect(QRectF(0, 0, 0, 100), 100, 100), QRectF(0, 0, 0, 100));
+}

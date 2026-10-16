@@ -10,6 +10,8 @@
 #include <QObject>
 #include <QRectF>
 #include <QColor>
+#include <QString>
+#include <QPixmap>
 #include <functional>
 
 #include "UBBackgroundGrid.h"
@@ -55,7 +57,15 @@ public:
     // now a backward-compatible shim over the background kind (see .cpp).
     UBBackgroundGrid::BackgroundKind backgroundKind() const { return mBackgroundKind; }
     bool isSeeThrough()        const { return mBackgroundKind == UBBackgroundGrid::BackgroundKind::SeeThrough; }
+    bool isImageBackground()   const { return mBackgroundKind == UBBackgroundGrid::BackgroundKind::Image; }
     bool isDesktopMode()       const { return isSeeThrough(); }
+
+    // #389 / ADR-0011: custom background image. The RELATIVE file name is what is
+    // serialized in the .ubz (background-image attribute); the pixmap is the
+    // decoded, cached image used at paint time. An empty name / null pixmap with
+    // kind==Image degrades to Opaque at paint (ADR-0011).
+    QString backgroundImageFile() const { return mBackgroundImageFile; }
+    const QPixmap& backgroundImagePixmap() const { return mBackgroundImagePixmap; }
 
     // --- Mutators (called by scene facades) ---
 
@@ -79,6 +89,11 @@ public:
     /// Backward-compatible shim: desktopMode==true → SeeThrough, else Opaque.
     void setDesktopMode(bool desktopMode);
 
+    // #389 / ADR-0011: set the background image. @p fileName is the relative name
+    // stored in the .ubz; @p pixmap is the decoded image (may be null if not yet
+    // loaded). Does NOT change the kind — the caller sets kind==Image separately.
+    void setBackgroundImage(const QString& fileName, const QPixmap& pixmap);
+
     // --- Painting (called from scene's drawBackground override) ---
 
     void paintBackground(QPainter* painter, const QRectF& rect);
@@ -93,6 +108,10 @@ private:
     UBBackgroundGrid::Type mGridType = UBBackgroundGrid::Type::Plain;
     UBBackgroundGrid::BackgroundKind mBackgroundKind = UBBackgroundGrid::BackgroundKind::Opaque;
     qreal mZoomFactor        = 1.0;
+
+    // #389 / ADR-0011: background image (file name serialized, pixmap cached).
+    QString mBackgroundImageFile;
+    QPixmap mBackgroundImagePixmap;
 };
 
 #endif // UBBACKGROUNDRENDERER_H

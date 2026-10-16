@@ -514,6 +514,24 @@ UBGraphicsScene* UBSvgSubsetAdaptor::UBSvgSubsetReader::loadScene()
                 if (!ubBackgroundKind.isNull())
                     mScene->setBackgroundKind(UBBackgroundGrid::kindFromToken(ubBackgroundKind.toString()));
 
+                // #389 / ADR-0011: load the custom background image from the
+                // package. If the kind is Image but the file is absent/unreadable,
+                // degrade to Opaque (ADR-0009/0011 "unknown → opaque" rule).
+                if (mScene->backgroundKind() == UBBackgroundGrid::BackgroundKind::Image)
+                {
+                    QStringView ubBackgroundImage = mXmlReader.attributes().value(mNamespaceUri, "background-image");
+                    QPixmap bgPix;
+                    if (!ubBackgroundImage.isNull())
+                    {
+                        const QString rel = UBFileSystemUtils::normalizeFilePath(ubBackgroundImage.toString());
+                        bgPix.load(mDocumentPath + "/" + rel);
+                        if (!bgPix.isNull())
+                            mScene->setBackgroundImage(rel, bgPix);
+                    }
+                    if (bgPix.isNull())
+                        mScene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Opaque);
+                }
+
                 QStringView pageNominalSize = mXmlReader.attributes().value(mNamespaceUri, "nominal-size");
                 if (!pageNominalSize.isNull())
                 {
@@ -1347,6 +1365,13 @@ void UBSvgSubsetAdaptor::UBSvgSubsetWriter::writeSvgElement()
     // pages are byte-identical; absent attribute reads back as Opaque.
     if (mScene->backgroundKind() != UBBackgroundGrid::BackgroundKind::Opaque)
         mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "background-kind", QString::fromLatin1(UBBackgroundGrid::kindToToken(mScene->backgroundKind())));
+
+    // #389 / ADR-0011: custom background image. Written only when the kind is
+    // Image and a file name is set; the image file itself is embedded in the
+    // package by the UI/persistence path. Absent attribute → no image → Opaque.
+    if (mScene->backgroundKind() == UBBackgroundGrid::BackgroundKind::Image
+        && !mScene->backgroundImageFile().isEmpty())
+        mXmlWriter.writeAttribute(UBSettings::uniboardDocumentNamespaceUri, "background-image", mScene->backgroundImageFile());
 
     QScreen* desktop = QGuiApplication::primaryScreen();
     mXmlWriter.writeAttribute("pageDpi", QString("%1").arg((desktop->physicalDotsPerInchX() + desktop->physicalDotsPerInchY()) / 2));

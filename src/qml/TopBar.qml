@@ -136,27 +136,29 @@ Rectangle {
         ToolbarSeparator {}
 
         // === Group FOND — page background (persisted page property) ===
-        ToolbarButton { icon: "sun"; tooltip: "Fond clair"; active: !appController.isDarkBackground; onClicked: appController.setBackgroundLight() }
-        ToolbarButton { icon: "moon"; tooltip: "Fond sombre"; active: appController.isDarkBackground; onClicked: appController.setBackgroundDark() }
+        // #389/#434: two separate menus for the two orthogonal axes (ADR-0009):
+        //  - "Fond"    = the background KIND (exclusive): Jour / Nuit / Bureau / Image.
+        //  - "Lignage" = the RULING (exclusive): Aucun / Quadrillage / Séyès / ...
+        // Splitting them removes the "Image + Quadrillage both checked" ambiguity
+        // of the old single menu, and the sun/moon buttons move into Fond.
+        ToolbarButton {
+            id: kindButton
+            icon: "image"
+            tooltip: "Fond de page"
+            active: appController.isDarkBackground || appController.isSeeThrough
+                    || appController.isImageBackground
+            onClicked: kindMenu.popup(kindButton, 0, kindButton.height + 4)
+        }
+        BackgroundKindMenu { id: kindMenu }
 
-        // Ruling type selector (#289): dropdown with the square grid + French
-        // school rulings (Séyès, enlarged Séyès, double 3 mm).
         ToolbarButton {
             id: gridButton
             icon: "grid-four"
-            tooltip: "Quadrillage / réglures"
+            tooltip: "Lignage"
             active: appController.gridType !== 0
-            // Use a native QtQuick Menu (its own popup window) rather than a
-            // Popup: the TopBar is a 48px-tall QQuickWidget and a Popup is
-            // clipped to that widget's surface, so the dropdown rendered
-            // entirely off-screen and nothing appeared (#292). A Menu creates
-            // a separate popup that overflows the widget — same pattern as
-            // PageNavigator's context menu.
             onClicked: gridMenu.popup(gridButton, 0, gridButton.height + 4)
         }
-        GridTypeMenu {
-            id: gridMenu
-        }
+        RulingMenu { id: gridMenu }
 
         // === Spacer (pushes the app actions to the right edge) ===
         Item { Layout.fillWidth: true }
@@ -231,66 +233,86 @@ Rectangle {
     // Native QtQuick Menu so the dropdown renders in its own popup window and
     // is not clipped to the 48px TopBar QQuickWidget (#292).
     // Native QtQuick Menu so the dropdown renders in its own popup window and
-    // is not clipped to the 48px TopBar QQuickWidget (#292).
-    //
-    // The 5 rulings are listed as explicit MenuItems (not a Repeater): a
-    // Repeater is not a Menu content child and does not get laid out in the
-    // menu's vertical column, which made the entries render on a single line
-    // (#292 follow-up). Each item is a reusable RulingMenuItem.
-    component GridTypeMenu: Menu {
-        id: menuRoot
+    // is not clipped to the 48px TopBar QQuickWidget (#292). popupType window
+    // avoids the clipping; explicit MenuItems (not a Repeater) so they lay out
+    // vertically. Each row is a reusable RulingMenuItem.
 
-        // Open in a real top-level popup window (Qt 6.8+), so the menu is not
-        // clipped to the 48px TopBar QQuickWidget. Without this the default
-        // Popup.Item renders in the host window overlay, capping the menu to the
-        // widget height and forcing scroll arrows (#292 follow-up).
+    // #389/#434: RULING axis only (ADR-0009) — exclusive choice among rulings.
+    component RulingMenu: Menu {
+        id: rulingMenuRoot
         popupType: Popup.Window
-
-        // 0=Plain(none), 1=Grid, 2=Seyes, 3=SeyesLarge, 4=Double3mm — matches
-        // UBBackgroundGrid::Type / UBAppController.gridType.
         width: 240
-
         background: Rectangle {
             color: themeManager.surface
             border.color: themeManager.border
             border.width: 1
             radius: 8
         }
-
-        RulingMenuItem { rulingType: 0; rulingIcon: "circle";           rulingLabel: "Aucun" }
-        RulingMenuItem { rulingType: 1; rulingIcon: "grid-four";        rulingLabel: "Quadrillage" }
-        RulingMenuItem { rulingType: 2; rulingIcon: "rows-plus-top";    rulingLabel: "Séyès" }
-        RulingMenuItem { rulingType: 3; rulingIcon: "rows-plus-bottom"; rulingLabel: "Séyès agrandi" }
-        RulingMenuItem { rulingType: 4; rulingIcon: "list";             rulingLabel: "Double lignage 3 mm" }
-
-        MenuSeparator {}
-
-        // #407 (ADR-0007): "Bureau" is a page background kind (see-through), at
-        // the same level as the rulings. Picking it makes the page transparent
-        // and enters desktop mode (the desktop shows through); its check mark
-        // follows the persisted see-through kind.
-        RulingMenuItem { seeThrough: true; rulingIcon: "desktop"; rulingLabel: "Bureau (transparent)" }
+        RulingMenuItem { menuRoot: rulingMenuRoot; rulingType: 0; rulingIcon: "circle";           rulingLabel: "Aucun" }
+        RulingMenuItem { menuRoot: rulingMenuRoot; rulingType: 1; rulingIcon: "grid-four";        rulingLabel: "Quadrillage" }
+        RulingMenuItem { menuRoot: rulingMenuRoot; rulingType: 2; rulingIcon: "rows-plus-top";    rulingLabel: "Séyès" }
+        RulingMenuItem { menuRoot: rulingMenuRoot; rulingType: 3; rulingIcon: "rows-plus-bottom"; rulingLabel: "Séyès agrandi" }
+        RulingMenuItem { menuRoot: rulingMenuRoot; rulingType: 4; rulingIcon: "list";             rulingLabel: "Double lignage 3 mm" }
     }
 
-    // One row of the ruling dropdown: leading themed icon, label, trailing
-    // check mark when it is the active ruling.
+    // #389/#434: background KIND axis (ADR-0009) — exclusive choice: Jour / Nuit
+    // (opaque light/dark) / Bureau (see-through) / Image. Replaces the sun/moon
+    // TopBar buttons (moved here).
+    component BackgroundKindMenu: Menu {
+        id: kindMenuRoot
+        popupType: Popup.Window
+        width: 240
+        background: Rectangle {
+            color: themeManager.surface
+            border.color: themeManager.border
+            border.width: 1
+            radius: 8
+        }
+        RulingMenuItem { menuRoot: kindMenuRoot; dayKind: true;   rulingIcon: "sun";     rulingLabel: "Jour (fond clair)" }
+        RulingMenuItem { menuRoot: kindMenuRoot; nightKind: true; rulingIcon: "moon";    rulingLabel: "Nuit (fond sombre)" }
+        MenuSeparator {}
+        RulingMenuItem { menuRoot: kindMenuRoot; seeThrough: true; rulingIcon: "desktop"; rulingLabel: "Bureau (transparent)" }
+        RulingMenuItem { menuRoot: kindMenuRoot; imagePick: true;  rulingIcon: "image";   rulingLabel: "Image…" }
+    }
+
+    // One row of a background dropdown: leading themed icon, label, trailing
+    // check mark when it is the active choice.
     component RulingMenuItem: MenuItem {
         id: item
+        // The owning Menu, so we can dismiss() it before a modal dialog.
+        property Menu menuRoot: null
         property int rulingType: 0
         property string rulingIcon: ""
         property string rulingLabel: ""
         // #407: when true this entry is the see-through "Bureau" background, not
         // a ruling — it enters desktop mode and its check follows isSeeThrough.
         property bool seeThrough: false
+        // #389: when true this entry opens the background-image picker.
+        property bool imagePick: false
+        // #434: opaque Jour / Nuit (background kind, light/dark).
+        property bool dayKind: false
+        property bool nightKind: false
 
         text: rulingLabel
         implicitHeight: 34
 
         onTriggered: {
-            if (item.seeThrough)
+            if (item.imagePick) {
+                // #389: close the menu FIRST, then open the (modal) file dialog
+                // on the next event loop turn — otherwise the modal dialog blocks
+                // the loop while this QML popup is still up, leaving the menu
+                // stuck open behind it (VM bug).
+                if (item.menuRoot) item.menuRoot.dismiss()
+                Qt.callLater(function() { appController.pickBackgroundImage() })
+            } else if (item.dayKind) {
+                appController.setBackgroundLight()
+            } else if (item.nightKind) {
+                appController.setBackgroundDark()
+            } else if (item.seeThrough) {
                 appController.setBackgroundSeeThrough()
-            else
+            } else {
                 appController.setGridType(rulingType)
+            }
         }
 
         contentItem: Item {
@@ -333,11 +355,21 @@ Rectangle {
                 anchors.fill: checkIcon
                 source: checkIcon
                 color: themeManager.onSurface
-                // #407: the Bureau entry checks on isSeeThrough; a ruling entry
-                // checks on its type AND only when the page is not see-through.
-                visible: item.seeThrough
-                         ? appController.isSeeThrough
-                         : (appController.gridType === item.rulingType && !appController.isSeeThrough)
+                // #407/#389/#434: each entry's check follows the axis it belongs
+                // to. Day/Night check only for an opaque page (not see-through /
+                // image); Bureau on isSeeThrough; Image on isImageBackground; a
+                // ruling on its type regardless of kind (orthogonal axes).
+                readonly property bool opaquePage: !appController.isSeeThrough
+                                                   && !appController.isImageBackground
+                visible: item.imagePick
+                         ? appController.isImageBackground
+                         : item.seeThrough
+                           ? appController.isSeeThrough
+                           : item.dayKind
+                             ? (opaquePage && !appController.isDarkBackground)
+                             : item.nightKind
+                               ? (opaquePage && appController.isDarkBackground)
+                               : (appController.gridType === item.rulingType)
             }
         }
     }

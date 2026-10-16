@@ -1890,6 +1890,26 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
       painter->fillRect (rect, QBrush (QColor (Qt::white)));   // ui-color-allow (scene background)
     }
 
+  // #389 / ADR-0011: a custom background image replaces the opaque fill on the
+  // BOARD view too. UBBoardView::drawBackground paints the board's own page
+  // background (it does not go through UBBackgroundRenderer::paintBackground),
+  // so the image must be drawn here as well, scaled to COVER the page via the
+  // same pure coverRect helper, clipped to the page. A ruling (below) still
+  // draws on top. A null pixmap leaves the opaque fill (degrade, ADR-0011).
+  if (scene() && scene()->backgroundKind () == UBBackgroundGrid::BackgroundKind::Image
+      && !scene()->backgroundImagePixmap ().isNull ())
+    {
+      const QSizeF ns = scene()->nominalSize ();
+      const QRectF pageRect (-ns.width () / 2.0, -ns.height () / 2.0,
+                             ns.width (), ns.height ());
+      const QPixmap& pix = scene()->backgroundImagePixmap ();
+      const QRectF dst = UBBackgroundGrid::coverRect (pageRect, pix.width (), pix.height ());
+      painter->save ();
+      painter->setClipRect (pageRect, Qt::IntersectClip);
+      painter->drawPixmap (dst, pix, pix.rect ());
+      painter->restore ();
+    }
+
   if (scene() && transform ().m11 () > 0.5)
     {
       QColor bgCrossColor;

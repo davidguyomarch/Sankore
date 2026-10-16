@@ -12,12 +12,20 @@
 
 #include "core/UBApplication.h"
 #include "core/UBApplicationController.h"
+#include "core/UBPersistenceManager.h"
+#include "core/UBSettings.h"
 #include "gui/UBMainWindow.h"
 #include "board/UBBoardController.h"
 #include "domain/UBGraphicsScene.h"
+#include "document/UBDocumentProxy.h"
 
 #include <QUndoStack>
 #include <QFile>
+#include <QDir>
+#include <QUuid>
+#include <QFileInfo>
+#include <QPixmap>
+#include <QFileDialog>
 #include <QTextStream>
 #include <QApplication>
 
@@ -87,6 +95,9 @@ void UBAppController::syncMode(int mode)
         return;
     m_mode = mode;
     emit activeModeChanged();
+    // #507: a mode transition (notably returning from Desktop) can change the
+    // page background kind (Bureau→Opaque); refresh the Fond/Lignage menu checks.
+    emit backgroundChanged();
 }
 
 // --- Background ---
@@ -120,6 +131,14 @@ bool UBAppController::isSeeThrough() const
         return false;
     auto* scene = UBApplication::boardController->activeScene();
     return scene ? scene->isSeeThrough() : false;
+}
+
+bool UBAppController::isImageBackground() const
+{
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    return scene && scene->backgroundKind() == UBBackgroundGrid::BackgroundKind::Image;
 }
 
 bool UBAppController::leaveSeeThroughIfActive()
@@ -160,6 +179,64 @@ void UBAppController::setBackgroundSeeThrough()
         UBApplication::applicationController->showDesktop();  // guarded
 }
 
+void UBAppController::pickBackgroundImage()
+{
+    // #389 / ADR-0011: let the user pick an image, embed it in the document
+    // package (images/<uuid>.<ext>, same convention as pixmap items), and set
+    // the current page's background to that image (kind == Image).
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return;
+    auto* scene = UBApplication::boardController->activeScene();
+    auto* proxy = UBApplication::boardController->selectedDocument();
+    if (!scene || !proxy)
+        return;
+
+    const QString filters = tr("Images (*.png *.jpg *.jpeg *.bmp *.gif *.svg)");
+    const QString start = UBSettings::settings()
+        ? UBSettings::settings()->lastImportFilePath->get().toString() : QString();
+    const QString src = QFileDialog::getOpenFileName(
+        UBApplication::mainWindow, tr("Choose a background image"), start, filters);
+    if (src.isEmpty())
+        return;
+
+    QPixmap pix(src);
+    if (pix.isNull())
+    {
+        if (UBApplication::mainWindow)
+            UBApplication::mainWindow->warning(tr("Background image"),
+                                               tr("The selected file is not a readable image."));
+        return;
+    }
+
+    // Remember the folder for next time.
+    if (UBSettings::settings())
+        UBSettings::settings()->lastImportFilePath->set(QFileInfo(src).absolutePath());
+
+    // Embed a copy in the package under images/<uuid>.<ext>.
+    QString ext = QFileInfo(src).suffix().toLower();
+    if (ext.isEmpty())
+        ext = QStringLiteral("png");
+    const QString rel = UBPersistenceManager::imageDirectory + "/"
+                        + QUuid::createUuid().toString() + "." + ext;
+    const QString dstDir = proxy->persistencePath() + "/" + UBPersistenceManager::imageDirectory;
+    QDir().mkpath(dstDir);
+    const QString dst = proxy->persistencePath() + "/" + rel;
+    if (!QFile::copy(src, dst))
+    {
+        if (UBApplication::mainWindow)
+            UBApplication::mainWindow->warning(tr("Background image"),
+                                               tr("Could not copy the image into the document."));
+        return;
+    }
+
+    // Leave any see-through (Bureau) background, then apply the image.
+    // (setBackgroundImage / setBackgroundKind already reset the view cache.)
+    leaveSeeThroughIfActive();
+    scene->setBackgroundImage(rel, pix);
+    scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Image);
+    emit backgroundChanged();
+}
+
 void UBAppController::setGridType(int gridType)
 {
     auto* scene = UBApplication::boardController->activeScene();
@@ -172,17 +249,40 @@ void UBAppController::setGridType(int gridType)
     emit backgroundChanged();
 }
 
+bool UBAppController::leaveImageIfActive()
+{
+    // #389/#434: choosing a normal background (Jour/Nuit) must leave the Image
+    // kind, resetting it to Opaque so isImageBackground() becomes false (else
+    // the Jour/Nuit check mark, gated on an opaque page, never shows).
+    if (UBApplication::isClosing() || !UBApplication::boardController)
+        return false;
+    auto* scene = UBApplication::boardController->activeScene();
+    if (!scene || scene->backgroundKind() != UBBackgroundGrid::BackgroundKind::Image)
+        return false;
+    scene->setBackgroundKind(UBBackgroundGrid::BackgroundKind::Opaque);
+    return true;
+}
+
 void UBAppController::setBackgroundLight()
 {
-    leaveSeeThroughIfActive();  // #407: choosing a normal bg leaves Bureau
-    UBApplication::boardController->changeBackground(false, false);
+    // #434: Jour flips the dark/light flag ONLY — it must keep the current
+    // ruling (passing crossed=false to the legacy changeBackground reset it to
+    // Plain) and leave the Bureau/Image kinds for a normal opaque page.
+    leaveSeeThroughIfActive();  // #407
+    leaveImageIfActive();       // #389
+    auto* scene = UBApplication::boardController->activeScene();
+    UBApplication::boardController->changeBackgroundType(
+        false, scene ? scene->gridType() : UBBackgroundGrid::Type::Plain);
     emit backgroundChanged();
 }
 
 void UBAppController::setBackgroundDark()
 {
     leaveSeeThroughIfActive();  // #407
-    UBApplication::boardController->changeBackground(true, false);
+    leaveImageIfActive();       // #389
+    auto* scene = UBApplication::boardController->activeScene();
+    UBApplication::boardController->changeBackgroundType(
+        true, scene ? scene->gridType() : UBBackgroundGrid::Type::Plain);
     emit backgroundChanged();
 }
 
