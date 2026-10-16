@@ -154,10 +154,17 @@ void UBGraphicsDelegateFrame::paint(QPainter *painter, const QStyleOptionGraphic
     // Draw a thin, subtle border instead of a thick filled frame
     QRectF innerRect = rect().adjusted(mFrameWidth, mFrameWidth, -mFrameWidth, -mFrameWidth);
 
-    QColor borderColor(0, 0, 0, 60); // subtle dark border
+    // #511: the selection border must read on ANY page background. A subtle
+    // dark border is invisible on a black page; pick a light border on a dark
+    // background and a dark one on a light background.
+    bool darkPage = false;
+    if (auto* ubScene = dynamic_cast<UBGraphicsScene*>(delegated()->scene()))
+        darkPage = ubScene->isDarkBackground();
+    QColor borderColor = darkPage ? QColor(255, 255, 255, 90)   // light border on dark page
+                                  : QColor(0, 0, 0, 60);        // dark border on light page
     QVariant vLocked = delegated()->data(UBGraphicsItemData::ItemLocked);
     if (vLocked.isValid() && vLocked.toBool()) {
-        borderColor.setAlpha(25);
+        borderColor.setAlpha(darkPage ? 40 : 25);
     }
 
     QPen borderPen(borderColor, 1.5);
