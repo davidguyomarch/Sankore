@@ -92,6 +92,25 @@ namespace UBInkColors
     {
         return hasDesktopHint ? desktopIsDark : pageIsDark;
     }
+
+    /**
+     * (#515) Tint for the selection-frame CONTROLS (the floating delete /
+     * duplicate / "…" / z-order buttons, the resize grips and the rotate
+     * handle) so they read on ANY page background.
+     *
+     * The control icons are monochrome dark Phosphor glyphs rendered as-is:
+     * fine on a light page, invisible on a dark/black page (follow-up to #511,
+     * which only fixed the frame BORDER). On a dark page we tint the glyph
+     * light; on a light page we keep it dark. Pure so the choice is unit-tested
+     * (tst_UBInkColorUtils) while the actual SVG compositing stays VM-only.
+     *
+     * @param pageIsDark  the current page's dark-background flag
+     */
+    inline QColor frameControlTint(bool pageIsDark)
+    {
+        return pageIsDark ? QColor(235, 235, 235)   // light glyph on a dark page
+                          : QColor(60, 60, 60);     // dark glyph on a light page
+    }
 }
 
 #endif // UBINKCOLORUTILS_H

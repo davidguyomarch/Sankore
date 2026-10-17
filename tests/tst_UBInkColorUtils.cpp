@@ -76,3 +76,17 @@ void TestUBInkColorUtils::testActiveDarkInkVariantUsesHintWhenPresent()
     QCOMPARE(activeDarkInkVariant(/*pageIsDark*/ false, /*hasHint*/ true, /*desktopDark*/ true),  true);
     QCOMPARE(activeDarkInkVariant(/*pageIsDark*/ true,  /*hasHint*/ true, /*desktopDark*/ false), false);
 }
+
+// #515 ---------------------------------------------------------------------
+
+void TestUBInkColorUtils::testFrameControlTintContrastsPage()
+{
+    // On a dark page the control glyph must be LIGHT (reads on black); on a
+    // light page it must be DARK (reads on white). The reproduction of #515: a
+    // dark glyph on a dark page would be invisible — so the two tints must sit
+    // on opposite sides of mid-luminance.
+    const QColor onDark = frameControlTint(/*pageIsDark*/ true);
+    const QColor onLight = frameControlTint(/*pageIsDark*/ false);
+    QVERIFY(relativeLuminance(onDark) > 0.5);   // light glyph on a dark page
+    QVERIFY(relativeLuminance(onLight) < 0.5);  // dark glyph on a light page
+}
