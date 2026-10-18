@@ -67,6 +67,14 @@ public:
     QString backgroundImageFile() const { return mBackgroundImageFile; }
     const QPixmap& backgroundImagePixmap() const { return mBackgroundImagePixmap; }
 
+    // #521 / ADR-0013 (brick 1): the TRANSIENT desktop capture painted as the
+    // surface of a see-through page. Distinct from the (serialized) image above:
+    // this pixmap is runtime-only, NEVER written to the .ubz — a Bureau page
+    // persists only its SeeThrough flag and re-grabs the current desktop on
+    // reopen. Null = no capture (the see-through page paints as before).
+    const QPixmap& desktopCapturePixmap() const { return mDesktopCapturePixmap; }
+    bool hasDesktopCapture() const { return !mDesktopCapturePixmap.isNull(); }
+
     // --- Mutators (called by scene facades) ---
 
     /**
@@ -94,6 +102,13 @@ public:
     // loaded). Does NOT change the kind — the caller sets kind==Image separately.
     void setBackgroundImage(const QString& fileName, const QPixmap& pixmap);
 
+    // #521 / ADR-0013 (brick 1): set (or clear, with a null pixmap) the transient
+    // desktop capture painted on a see-through page. Non-persisting by design —
+    // it invalidates the view cache but NEVER marks the scene modified, so the
+    // capture is never serialized (modeled on setDesktopMode, not
+    // setBackgroundImage). Does NOT change the kind.
+    void setDesktopCapturePixmap(const QPixmap& pixmap);
+
     // --- Painting (called from scene's drawBackground override) ---
 
     void paintBackground(QPainter* painter, const QRectF& rect);
@@ -112,6 +127,10 @@ private:
     // #389 / ADR-0011: background image (file name serialized, pixmap cached).
     QString mBackgroundImageFile;
     QPixmap mBackgroundImagePixmap;
+
+    // #521 / ADR-0013 (brick 1): transient desktop capture (runtime-only, never
+    // serialized). Painted cover-fit on a see-through page when non-null.
+    QPixmap mDesktopCapturePixmap;
 };
 
 #endif // UBBACKGROUNDRENDERER_H

@@ -1,9 +1,11 @@
 HEADERS += src/desktop/UBDesktopAnnotationController.h \
            src/desktop/UBCustomCaptureWindow.h \
+           src/desktop/UBDesktopCaptureService.h \
            src/desktop/UBWindowCapture.h
 
 SOURCES += src/desktop/UBDesktopAnnotationController.cpp \
-           src/desktop/UBCustomCaptureWindow.cpp
+           src/desktop/UBCustomCaptureWindow.cpp \
+           src/desktop/UBDesktopCaptureService.cpp
 
 win32 { 
     HEADERS += src/desktop/UBWindowCaptureDelegate_win.h

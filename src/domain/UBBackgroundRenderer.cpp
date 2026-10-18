@@ -114,6 +114,18 @@ void UBBackgroundRenderer::setDesktopMode(bool desktopMode)
                                    : UBBackgroundGrid::BackgroundKind::Opaque);
 }
 
+void UBBackgroundRenderer::setDesktopCapturePixmap(const QPixmap& pixmap)
+{
+    // #521 / ADR-0013 (brick 1): store the transient desktop capture and reset
+    // the view cache so it is actually repainted. Modeled on setDesktopMode:
+    // NON-persisting — it never calls setModified, so the capture is never
+    // serialized (ADR-0013: persisted = SeeThrough flag only). Does not change
+    // the kind.
+    mDesktopCapturePixmap = pixmap;
+    for (QGraphicsView* view : mScene->views())
+        view->resetCachedContent();
+}
+
 void UBBackgroundRenderer::recolorAllItems()
 {
     QMap<QGraphicsView*, QGraphicsView::ViewportUpdateMode> previousUpdateModes;
@@ -165,7 +177,30 @@ void UBBackgroundRenderer::recolorAllItems()
 void UBBackgroundRenderer::paintBackground(QPainter* painter, const QRectF& rect)
 {
     if (isSeeThrough())
+    {
+        // #521 / ADR-0013 (brick 1): a see-through page whose transient surface
+        // is a desktop capture paints that capture cover-fit (same idiom as the
+        // #389 image path), reusing the pure coverRect helper, clipped to the
+        // page. Non-persisted (the capture is never serialized). With no capture
+        // the page stays see-through (no opaque fill) as before.
+        if (!mDesktopCapturePixmap.isNull())
+        {
+            QRectF pageRect = rect;
+            if (auto* ubScene = dynamic_cast<UBGraphicsScene*>(mScene))
+            {
+                const QSizeF ns = ubScene->nominalSize();
+                pageRect = QRectF(-ns.width() / 2.0, -ns.height() / 2.0,
+                                  ns.width(), ns.height());
+            }
+            const QSize src = mDesktopCapturePixmap.size();
+            const QRectF dst = UBBackgroundGrid::coverRect(pageRect, src.width(), src.height());
+            painter->save();
+            painter->setClipRect(pageRect, Qt::IntersectClip);
+            painter->drawPixmap(dst, mDesktopCapturePixmap, mDesktopCapturePixmap.rect());
+            painter->restore();
+        }
         return;  // no opaque fill: caller falls through to QGraphicsScene::drawBackground
+    }
 
     // #389 / ADR-0011: a background image replaces the opaque fill. It is scaled
     // to COVER the page (aspect-preserving, centered, cropped) via the pure
