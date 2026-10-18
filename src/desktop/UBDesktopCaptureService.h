@@ -53,11 +53,27 @@ public:
     QPixmap grabDesktop(const QWidget* onWindow) const;
 
     /**
+     * #523 / ADR-0013: grab the desktop BEHIND @p window — hide the window, let
+     * the compositor drop it (short native sleep, NO processEvents, #135), grab,
+     * re-show. Use this for the Bureau ENTRY so the capture does not contain
+     * Sankoré's own UI. (grabDesktop above is the plain "grab whatever is on
+     * screen now" used by the focus-return refresh, where Sankoré being visible
+     * is expected to be behind the already-shown board page.)
+     */
+    QPixmap grabDesktopBehind(QWidget* window) const;
+
+    /**
      * Grab the desktop (via grabDesktop) and set it as @p scene's transient
      * capture. A null/failed grab clears the capture (passes a null pixmap).
      * Returns true if a non-null capture was applied.
      */
     bool refreshInto(UBGraphicsScene* scene, const QWidget* onWindow) const;
+
+    /**
+     * Like refreshInto but using grabDesktopBehind — the Bureau ENTRY grab that
+     * excludes Sankoré's own window.
+     */
+    bool refreshBehindInto(UBGraphicsScene* scene, QWidget* window) const;
 
     /**
      * Clear @p scene's transient desktop capture (null pixmap). Used when leaving

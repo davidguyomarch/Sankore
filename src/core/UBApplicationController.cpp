@@ -472,12 +472,18 @@ void UBApplicationController::doShowDesktopSingleWindow()
     // desktop as its background. Contrast with doShowDesktop(), which hides the
     // main window and shows mTransparentDrawingView.
     //
-    // Grab the desktop BEFORE any window/state change so the capture sees the
-    // real desktop and not a half-transitioned Sankoré (ADR-0013 open question;
-    // the main window is already frontmost here, so we grab the screen behind it
-    // as-is — refined on the VM).
+    // #523 / ADR-0013 open question: grab the desktop BEHIND Sankoré (the service
+    // hides the main window for the grab) so the captured background does not
+    // contain Sankoré's own UI (VM-reported). Done BEFORE flipping the page
+    // see-through so the capture is ready when the board view repaints.
     UBGraphicsScene* scene = UBApplication::boardController
                                  ? UBApplication::boardController->activeScene() : nullptr;
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[DESKTOP] doShowDesktopSingleWindow BEGIN scene="
+                            << (scene ? 1 : 0) << "\n";
+    }
     if (scene && mUninoteController)
         mUninoteController->installDesktopCapture(scene, mMainWindow);
 
