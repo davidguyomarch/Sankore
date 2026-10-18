@@ -30,6 +30,7 @@
 #include <QWindow>
 
 #include "UBDesktopAnnotationController.h"
+#include "UBDesktopCaptureService.h"
 
 #include "frameworks/UBPlatformUtils.h"
 
@@ -514,6 +515,23 @@ void UBDesktopAnnotationController::updateDesktopInkHint()
 void UBDesktopAnnotationController::close()
 {
     // NOOP
+}
+
+void UBDesktopAnnotationController::installDesktopCapture(UBGraphicsScene* scene, QWidget* onWindow)
+{
+    // #523 / ADR-0013 (bricks 2+3): grab the desktop of onWindow's screen and
+    // set it as the scene's transient background capture (never serialized).
+    if (!mCaptureService)
+        mCaptureService = new UBDesktopCaptureService(this);
+    mCaptureService->refreshInto(scene, onWindow);
+}
+
+void UBDesktopAnnotationController::clearDesktopCapture(UBGraphicsScene* scene)
+{
+    if (mCaptureService)
+        mCaptureService->clear(scene);
+    else if (scene)
+        scene->setDesktopCapturePixmap(QPixmap());
 }
 
 
