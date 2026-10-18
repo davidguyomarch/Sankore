@@ -31,10 +31,10 @@ tradeoffs. Not implementation details. See the workflow in
 | [0004](0004-version-driven-by-git-tag.md) | The release version is driven by the git tag | Accepted |
 | [0005](0005-shared-pen-shape-color-palette.md) | Shared color palette between the pen and shape tools | Accepted |
 | [0006](0006-desktop-toolbar-qml-v2.md) | Unify the Desktop-mode toolbar on QML V2 | Accepted |
-| [0007](0007-unify-board-desktop-modes.md) | Unify Board and Desktop annotation modes on a single scene/view | Accepted |
+| [0007](0007-unify-board-desktop-modes.md) | Unify Board and Desktop annotation modes on a single scene/view | Accepted (windowing/see-through superseded by ADR-0013) |
 | [0008](0008-target-architecture-and-strangler-strategy.md) | Target architecture and incremental (strangler) migration strategy | Accepted |
 | [0009](0009-background-kind-axis.md) | Page background is two orthogonal axes — ruling type and background kind | Accepted |
 | [0010](0010-object-menu-capability-model.md) | Homogeneous capability model for object context menus | Accepted |
 | [0011](0011-custom-background-image.md) | Custom page background image — embedded in the .ubz, rendered via BackgroundKind::Image | Accepted |
 | [0012](0012-keep-active-tool-across-board-desktop.md) | Keep the active tool across the Board ↔ Desktop transition (amends ADR-0007/#390) | Accepted |
-| [0013](0013-desktop-single-window-captured-background.md) | Desktop mode is a single-window see-through page backed by a refreshable desktop capture (supersedes ADR-0007 live-overlay path) | Proposed |
+| [0013](0013-desktop-single-window-captured-background.md) | Desktop mode is a single-window see-through page backed by a refreshable desktop capture (supersedes ADR-0007 live-overlay path) | Accepted |

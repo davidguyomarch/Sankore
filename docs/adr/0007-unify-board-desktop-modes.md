@@ -1,7 +1,21 @@
 # ADR-0007: Unify Board and Desktop annotation modes on a single scene/view
 
-- **Status:** Accepted <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
+- **Status:** Accepted — windowing/see-through mechanism (R3) **Superseded by ADR-0013** <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
 - **Date:** 2026-09-25 (Accepted 2026-10-02)
+
+> **Superseded note (2026-10-17, ADR-0013).** The *unification intent* of this ADR
+> (one scene, shared tools/UI — R1/R2) stands and is kept. But its **windowing /
+> see-through mechanism** — R3's "genuinely transparent window showing the *live*
+> desktop", and the overlay implementation the project ended at (#414, overlay
+> renders the shared scene) — is **superseded by ADR-0013**. Measurement in the
+> #413 follow-up (see `notes/408-seethrough-board-spike-decision.md`) showed a
+> translucent *main* window hits the #397 "painted-but-not-presented" wall on the
+> software VM; the live-see-through path only ever worked on the dedicated
+> overlay, i.e. the duplicated surface we are removing. ADR-0013 replaces it with
+> a **single window, no overlay, Bureau = a see-through page whose background is a
+> refreshable desktop *capture*** (not a live compositor hole). ADR-0012 (tool
+> kept across the transition) and the ADR-0009/ADR-0011 background model remain in
+> force.
 - **Deciders:** maintainer (David Guyomarch)
 - **Related:** #393 (single-surface implementation); #408 (see-through feasibility spike — **proven on the GPU-less VM**); #350 (4.5.0 review); #364 (first-stroke-on-return, root-caused); #387 (ghost process on quit); #389 (future custom background image — same page-background model); ADR-0006 (dedicated desktop toolbar); ADR-0008 (strangler strategy — this is D4); desktop-mode / drawing-model steering; `notes/397-desktop-return-firststroke-diagnosis.md`; `notes/408-seethrough-board-spike-decision.md`
 

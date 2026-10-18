@@ -1,6 +1,6 @@
 # ADR-0013: Desktop mode is a single-window see-through page backed by a refreshable desktop capture (supersedes the live-overlay path of ADR-0007)
 
-- **Status:** Proposed <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
+- **Status:** Accepted <!-- Proposed | Accepted | Superseded by ADR-XXXX -->
 - **Date:** 2026-10-17
 - **Deciders:** maintainer (David Guyomarch)
 - **Related:** supersedes the live-see-through / windowing decision of [ADR-0007](0007-unify-board-desktop-modes.md) (R3 and the overlay implementation it ended on); builds on [ADR-0009](0009-background-kind-axis.md) (background kind axis — `Opaque | SeeThrough | Image`) and [ADR-0011](0011-custom-background-image.md) (image embedded + cover fit + `drawBackground` path); keeps [ADR-0012](0012-keep-active-tool-across-board-desktop.md) (tool kept across the transition); `notes/408-seethrough-board-spike-decision.md` (the #413 follow-up — live main-window see-through hit the #397 presentation wall and was abandoned); #393/#414 (current overlay-renders-shared-scene state); #433/#503/#514/#515 (desktop-toolbar cost/bugs this removes); #397 (paint-but-not-present wall on the software VM)
@@ -81,15 +81,18 @@ Concretely:
 
 3. **The capture is refreshed on events, not continuously.** The desktop
    background is re-grabbed:
-   - on **entry** into Bureau;
+   - on **entry** into Bureau — and specifically **just before the window
+     transition** so the grab sees the real desktop, not Sankoré's own window
+     (the exact sequencing is VM-only to settle, see Open questions);
    - when **Sankoré regains focus** (`QApplication::applicationStateChanged ==
      ApplicationActive` / window-activate) while a Bureau page is shown — this is
      the alt-tab case: the teacher went to another app and came back, so the
-     desktop may have changed;
-   - on an explicit **"refresh desktop"** action (a button on the shared toolbar),
-     for cases the focus event misses (e.g. a video playing behind).
+     desktop may have changed.
    Between refreshes the background is frozen. This is an accepted, documented
-   limitation (no live video behind the annotations).
+   limitation (no live video behind the annotations). An explicit **"refresh
+   desktop"** button is **deferred**: we ship with auto-refresh only (entry +
+   focus-return) and add a manual refresh later only if that proves insufficient
+   (it may well not be needed).
 
 4. **Shared UI components, no desktop-specific chrome.** The same TopBar,
    StylusPaletteV2 and DrawingPropsBar serve both. `DesktopToolbar.qml` is
@@ -105,16 +108,19 @@ Concretely:
    pages sidebar thumbnail may show the capture that was current when the page was
    last shown (preview only).
 
-6. **A new, transient background kind for the capture.** The persisted model
-   stays ADR-0009's `Opaque | SeeThrough | Image`. The desktop capture is a
-   **transient rendering state**, not a new persisted kind: a `SeeThrough` page
-   whose *runtime* surface is "the current desktop capture". We reuse ADR-0011's
-   image **paint/cover-fit** path to draw that transient capture, but we do **not**
-   serialize it as `Image` (an embedded user image) — the two must not be
-   confused. The exact representation (a runtime-only "desktop capture" source fed
-   to the renderer vs. a 4th transient kind) is an implementation detail to settle
-   in the first brick; the invariant is: **persisted = SeeThrough flag only;
-   runtime = a refreshable capture painted via the image path.**
+6. **The capture is a runtime-only source, not a new background kind.** The
+   persisted model stays ADR-0009's `Opaque | SeeThrough | Image`. A Bureau page
+   is a **`SeeThrough` page** (that flag, and only that flag, is serialized). The
+   desktop capture is a **runtime-only "desktop capture" source** handed to the
+   renderer — **not** a 4th `BackgroundKind` and **not** serialized as `Image`
+   (an embedded user image). We reuse ADR-0011's image **paint/cover-fit** path to
+   *draw* the capture, but the two must never be confused: `Image` is a persisted
+   user picture embedded in the `.ubz`; the desktop capture is transient pixels
+   the renderer is given at runtime and discards. From the user's point of view
+   this is simply the **"Bureau" entry in the Fond (background) menu**, alongside
+   the rulings and the image — choosing it shows the desktop captured at the
+   moments above. Invariant: **persisted = SeeThrough flag only; runtime = a
+   refreshable capture painted via the image path.**
 
 This **supersedes ADR-0007** on the windowing/see-through mechanism (R3) and on
 the overlay implementation it ended at (#414): the drawing surface is the main
@@ -146,9 +152,10 @@ changed.
   frontmost; the grab must capture the desktop *behind* Sankoré, not Sankoré
   itself. The safe sequencing (grab before re-presenting, or briefly exclude our
   window) is VM-only to validate — instrument with `[DESKTOP]` logs, do not guess.
-- **Multi-monitor.** Grab the screen the main window is on (as the overlay did via
+- **Multi-monitor — capture the screen Sankoré's window is on.** Grab only the
+  screen where the main window is displayed (as the overlay did via
   `mTransparentDrawingView->screen()` → now `mainWindow->screen()`); the teacher's
-  other screen is not captured.
+  other screen(s) are **not** captured and stay private. Settled (was Q5).
 - **Large removal + churn.** `UBDesktopAnnotationController` shrinks to a small
   "desktop-capture background service"; `UBApplicationController::showDesktop/
   hideDesktop`, `UBBoardPaletteManager::changeMode`, and the `bIsDesktop` paths in
@@ -227,18 +234,26 @@ the structural horizon of the other two). The QWidget-canvas / QML-chrome split
   document and, worse, saves a snapshot of the teacher's desktop into a shared
   file. Store the SeeThrough flag only; re-grab on reopen (ADR-0007 R5 intent).
 
-## Open questions (to resolve during implementation)
+## Settled during review (2026-10-17)
 
-1. **Transient capture representation.** A runtime-only "desktop capture" source
-   handed to the renderer, vs. a 4th transient `BackgroundKind`. Invariant either
-   way: persisted = SeeThrough flag only; the capture is never serialized.
-2. **Focus-return grab sequencing** so the capture excludes Sankoré's own window
-   (grab-before-present, or momentarily exclude the window). VM-only to settle.
-3. **"Refresh desktop" affordance** placement on the shared toolbar and whether it
-   ships in the first version or follows once auto-refresh (entry + focus) proves
-   sufficient.
-4. **Captures (region/screen)** re-wired to the single view; the overlay's
-   `desktopPalettePath` mask is removed.
-5. **Multi-monitor fullscreen-over-desktop** behavior re-derived in
-   `UBDisplayManager` for the single-window case (mono-screen stays Maximized per
-   #397).
+These were open when the ADR was Proposed; the maintainer resolved them before
+acceptance:
+
+- **Transient capture representation** → a **runtime-only "desktop capture"
+  source** handed to the renderer; no 4th `BackgroundKind`, never serialized
+  (Decision point 6). User-facing: the **"Bureau" entry in the Fond menu**.
+- **"Refresh desktop" button** → **deferred**. Ship with auto-refresh only (entry
+  + focus-return); add a manual refresh later only if needed (Decision point 3).
+- **Multi-monitor** → capture **only the screen Sankoré's window is on**; other
+  screens stay private (Consequences / Q5).
+- **Captures (region/screen)** → not a decision, just implementation: re-wire them
+  to the single view and remove the overlay's `desktopPalettePath` mask (listed in
+  the migration bricks).
+
+## Open questions (to resolve during implementation — VM-only)
+
+1. **Entry grab sequencing.** The entry capture must be taken **just before the
+   window transition** so it sees the real desktop, not Sankoré's own window
+   (grab-before-present, or momentarily exclude the window). This is runtime
+   compositor behavior on the software VM — to validate on the VM with
+   `[DESKTOP]` diagnostics, not reproducible headless.
