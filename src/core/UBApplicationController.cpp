@@ -430,7 +430,10 @@ void UBApplicationController::showDesktop(bool dontSwitchFrontProcess)
         return;
     }
     mInModeTransition = true;
-    doShowDesktop(dontSwitchFrontProcess);
+    if (useSingleWindowDesktop())
+        doShowDesktopSingleWindow();
+    else
+        doShowDesktop(dontSwitchFrontProcess);
     mInModeTransition = false;
 }
 
@@ -444,8 +447,102 @@ void UBApplicationController::hideDesktop()
         return;
     }
     mInModeTransition = true;
-    doHideDesktop();
+    if (useSingleWindowDesktop())
+        doHideDesktopSingleWindow();
+    else
+        doHideDesktop();
     mInModeTransition = false;
+}
+
+bool UBApplicationController::useSingleWindowDesktop()
+{
+    // #523 / ADR-0013 (bricks 2+3): the new single-window Bureau is the default
+    // path. SANKORE_SINGLE_WINDOW_DESKTOP=0 falls back to the legacy translucent
+    // overlay (kept until the single-window path is VM-validated; removed in
+    // brick 3b). Read once.
+    static const bool single = (qgetenv("SANKORE_SINGLE_WINDOW_DESKTOP") != "0");
+    return single;
+}
+
+void UBApplicationController::doShowDesktopSingleWindow()
+{
+    // #523 / ADR-0013 (bricks 2+3): enter Bureau WITHOUT an overlay. The main
+    // window and the board view stay the presenting surface (never translucent,
+    // #397/#413); we just make the current page see-through and paint a captured
+    // desktop as its background. Contrast with doShowDesktop(), which hides the
+    // main window and shows mTransparentDrawingView.
+    //
+    // #523 / ADR-0013 open question: grab the desktop BEHIND Sankoré (the service
+    // hides the main window for the grab) so the captured background does not
+    // contain Sankoré's own UI (VM-reported). Done BEFORE flipping the page
+    // see-through so the capture is ready when the board view repaints.
+    UBGraphicsScene* scene = UBApplication::boardController
+                                 ? UBApplication::boardController->activeScene() : nullptr;
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[DESKTOP] doShowDesktopSingleWindow BEGIN scene="
+                            << (scene ? 1 : 0) << "\n";
+    }
+    if (scene && mUninoteController)
+        mUninoteController->installDesktopCapture(scene, mMainWindow);
+
+    mIsShowingDesktop = true;
+    // Drive the presentation state (Fond menu highlight, guards). The palette
+    // manager keeps the board chrome visible in this state when single-window is
+    // on (see UBBoardPaletteManager::changeMode).
+    mPresentationController->setState(UBPresentationController::State::DesktopAnnotation);
+
+    // Make the current page see-through (transient, not persisted) so the board
+    // view paints the capture instead of an opaque fill — same renderer flip the
+    // overlay used, but here it is the MAIN board view that presents it.
+    if (scene)
+        scene->setDrawingMode(true);
+
+    UBPlatformUtils::setDesktopMode(true);
+
+    // Keep the board view the presenting surface: do NOT hide the main window,
+    // do NOT disable the control view, do NOT show the overlay.
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->viewport()->update();
+}
+
+void UBApplicationController::doHideDesktopSingleWindow()
+{
+    // #523 / ADR-0013 (bricks 2+3): leave single-window Bureau. Clear the
+    // transient capture, restore the page's opaque look, and go back to the
+    // Board presentation state. No overlay to tear down.
+    UBGraphicsScene* scene = UBApplication::boardController
+                                 ? UBApplication::boardController->activeScene() : nullptr;
+    if (scene)
+    {
+        scene->setDrawingMode(false);
+        if (mUninoteController)
+            mUninoteController->clearDesktopCapture(scene);
+    }
+
+    UBPlatformUtils::setDesktopMode(false);
+    mIsShowingDesktop = false;
+
+    // Back to the board presentation state (restores the TopBar highlight etc.).
+    mPresentationController->setState(UBPresentationController::State::Board);
+
+    if (UBApplication::boardController && UBApplication::boardController->controlView())
+        UBApplication::boardController->controlView()->viewport()->update();
+}
+
+void UBApplicationController::refreshDesktopCaptureIfActive()
+{
+    // #523 / ADR-0013 (brick 2): on focus-return (alt-tab), re-grab the desktop
+    // into the current see-through page so the frozen background follows what the
+    // teacher changed behind Sankoré. Only in single-window Bureau, only while a
+    // see-through page is shown.
+    if (!useSingleWindowDesktop() || !mIsShowingDesktop)
+        return;
+    UBGraphicsScene* scene = UBApplication::boardController
+                                 ? UBApplication::boardController->activeScene() : nullptr;
+    if (scene && scene->isDrawingMode() && mUninoteController)
+        mUninoteController->installDesktopCapture(scene, mMainWindow);
 }
 
 

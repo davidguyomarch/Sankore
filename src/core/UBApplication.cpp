@@ -1011,6 +1011,13 @@ bool UBApplication::eventFilter(QObject *obj, QEvent *event)
     {
         if (boardController && boardController->controlView())
             boardController->controlView()->setMultiselection(false);
+
+        // #523 / ADR-0013 (brick 2): regaining focus (alt-tab back) is the cue
+        // to re-grab the desktop into the current single-window Bureau page, so
+        // the frozen background follows what changed behind Sankoré. No-op unless
+        // single-window Bureau is active and a see-through page is shown.
+        if (applicationController)
+            applicationController->refreshDesktopCaptureIfActive();
     }
 
 #ifdef Q_OS_MACOS

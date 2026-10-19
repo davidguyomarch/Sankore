@@ -805,6 +805,25 @@ void UBBoardPaletteManager::changeMode(eUBDockPaletteWidgetMode newMode, bool is
 
         case eUBDockPaletteWidget_DESKTOP:
             {
+                // #523 / ADR-0013 (bricks 2+3): in SINGLE-WINDOW Bureau the board
+                // view stays the presenting surface and the shared chrome
+                // (TopBar, StylusPalette, PageNav…) must stay VISIBLE — Bureau is
+                // just a see-through page, not a separate overlay world. Only the
+                // legacy overlay path hides them (they were parented to the
+                // hidden main window). So skip the whole hide + overlay-reparent
+                // block when single-window is active.
+                if (UBApplicationController::useSingleWindowDesktop())
+                {
+                    if (mStylusPaletteQml) mStylusPaletteQml->show();
+                    if (mTopBarQml)        mTopBarQml->show();
+                    if (mPageNavQml)       mPageNavQml->show();
+                    if (mDrawingPropsBarQml && mToolController && mToolController->showDrawingProps())
+                        mDrawingPropsBarQml->show();
+                    if (!isInit)
+                        UBApplication::boardController->notifyPageChanged();
+                    break;
+                }
+
                 // Hide all QML V2 palettes — they are parented to mContainer (board view)
                 // which gets hidden in desktop mode. The desktop overlay has its own
                 // UBDesktopPalette for tool control.

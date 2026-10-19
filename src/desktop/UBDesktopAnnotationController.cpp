@@ -30,6 +30,7 @@
 #include <QWindow>
 
 #include "UBDesktopAnnotationController.h"
+#include "UBDesktopCaptureService.h"
 
 #include "frameworks/UBPlatformUtils.h"
 
@@ -514,6 +515,26 @@ void UBDesktopAnnotationController::updateDesktopInkHint()
 void UBDesktopAnnotationController::close()
 {
     // NOOP
+}
+
+void UBDesktopAnnotationController::installDesktopCapture(UBGraphicsScene* scene, QWidget* onWindow)
+{
+    // #523 / ADR-0013 (bricks 2+3): grab the desktop BEHIND onWindow (hide it for
+    // the grab) and set it as the scene's transient background capture (never
+    // serialized). Behind-grab both on entry and on focus-return, because in both
+    // cases Sankoré is frontmost at that instant — grabbing it visible would
+    // capture Sankoré's own UI as the background (VM-reported).
+    if (!mCaptureService)
+        mCaptureService = new UBDesktopCaptureService(this);
+    mCaptureService->refreshBehindInto(scene, onWindow);
+}
+
+void UBDesktopAnnotationController::clearDesktopCapture(UBGraphicsScene* scene)
+{
+    if (mCaptureService)
+        mCaptureService->clear(scene);
+    else if (scene)
+        scene->setDesktopCapturePixmap(QPixmap());
 }
 
 
