@@ -32,6 +32,7 @@ class UBSettings;
 
 class UBBoardView;
 class UBGraphicsScene;
+class UBDesktopCaptureService;
 class QQuickWidget;
 
 /**
@@ -80,6 +81,13 @@ class UBDesktopAnnotationController : public QObject
         void stylusToolChanged(int tool);
         void updateBackground();
 
+        // #523 / ADR-0013 (bricks 2+3): single-window Bureau capture hooks.
+        // install = grab the desktop of @p onWindow's screen and set it as the
+        // transient background of @p scene; clear = drop it. Both delegate to the
+        // brick-1 UBDesktopCaptureService and never serialize.
+        void installDesktopCapture(UBGraphicsScene* scene, QWidget* onWindow);
+        void clearDesktopCapture(UBGraphicsScene* scene);
+
     signals:
         /**
          * This signal is emitted once the screenshot has been performed. This signal is also emitted when user
@@ -118,6 +126,10 @@ class UBDesktopAnnotationController : public QObject
         void showToolbar();
         void hideToolbarForCapture();
         void restoreToolbarAfterCapture();
+        // #523 / ADR-0013 (bricks 2+3): grabs the desktop for single-window
+        // Bureau. Owned here; no overlay dependency.
+        UBDesktopCaptureService* mCaptureService = nullptr;
+
         // #351: pen/marker color+width bar (reuses the board's DrawingPropsBar.qml),
         // hosted like the toolbar (top-level, transient-parented to the overlay),
         // shown above the toolbar when a drawing tool is active.

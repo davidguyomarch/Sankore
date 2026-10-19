@@ -268,6 +268,13 @@ class UBGraphicsScene: public UBCoreGraphicsScene, public UBItem
         const QPixmap& backgroundImagePixmap() const;
         void setBackgroundImage(const QString& fileName, const QPixmap& pixmap);
 
+        // #521 / ADR-0013 (brick 1): transient desktop capture painted on a
+        // see-through page. Runtime-only — NEVER serialized (does not mark the
+        // scene modified). Pass a null pixmap to clear it.
+        const QPixmap& desktopCapturePixmap() const;
+        bool hasDesktopCapture() const;
+        void setDesktopCapturePixmap(const QPixmap& pixmap);
+
         bool hasBackground()
         {
             return (mBackgroundObject != 0);

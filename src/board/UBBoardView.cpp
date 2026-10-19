@@ -1880,6 +1880,28 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
       return;
     }
 
+  // #521 / ADR-0013 (brick 1): a see-through page whose transient surface is a
+  // desktop CAPTURE paints that capture cover-fit on the normal board view too,
+  // using the same pure coverRect idiom as the #389 image branch below. This is
+  // the single-window path (no overlay): the capture is drawn by this view, not
+  // by a translucent overlay. Non-persisted (never serialized). With no capture,
+  // a see-through page keeps today's behaviour (falls through to the opaque
+  // fill) — the single-window Bureau ENTRY that sets the capture is a later
+  // brick; this brick only makes the capture renderable here.
+  if (scene () && scene ()->isSeeThrough () && scene ()->hasDesktopCapture ())
+    {
+      const QSizeF ns = scene ()->nominalSize ();
+      const QRectF pageRect (-ns.width () / 2.0, -ns.height () / 2.0,
+                             ns.width (), ns.height ());
+      const QPixmap& pix = scene ()->desktopCapturePixmap ();
+      const QRectF dst = UBBackgroundGrid::coverRect (pageRect, pix.width (), pix.height ());
+      painter->save ();
+      painter->setClipRect (pageRect, Qt::IntersectClip);
+      painter->drawPixmap (dst, pix, pix.rect ());
+      painter->restore ();
+      return;
+    }
+
   bool darkBackground = scene() && scene()->isDarkBackground();
 
   // #297: the board page background follows the scene's dark/light mode — this
