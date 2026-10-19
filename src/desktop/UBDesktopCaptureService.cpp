@@ -67,31 +67,53 @@ QPixmap UBDesktopCaptureService::grabDesktopBehind(QWidget* window) const
     // hide, flush to the platform, let the compositor remove the window with a
     // short NATIVE sleep (NOT processEvents — that re-enters the event loop and
     // crashed during the transition, #135), grab, then re-show.
-    ubDesktopLog(QString("grabDesktopBehind BEGIN window=%1 visible=%2")
-                     .arg((quintptr)window, 0, 16)
-                     .arg(window ? window->isVisible() : -1));
-
-    const bool wasVisible = window && window->isVisible();
-    if (wasVisible)
+    // Option B (#523, VM-confirmed): the main window is not the only Sankoré
+    // surface on screen — the Fond menu is a SEPARATE top-level popup window, so
+    // hiding mMainWindow alone leaves it in the capture. Hide EVERY visible
+    // top-level window of this app for the grab, then restore them. This is
+    // defensive against any popup/palette (not just the one menu we know about).
+    const QWindowList tops = QGuiApplication::topLevelWindows();
+    QList<QWindow*> hidden;
+    hidden.reserve(tops.size());
+    for (QWindow* w : tops)
     {
-        window->hide();
-        // Push the hide to the window system without pumping our own event loop.
-        if (window->windowHandle())
-            window->windowHandle()->requestActivate();
-        QGuiApplication::sync();                 // flush pending platform ops
-        QThread::msleep(120);                    // let the compositor drop the window
-        QGuiApplication::sync();
+        if (w && w->isVisible())
+        {
+            w->setVisible(false);
+            hidden.append(w);
+        }
     }
+
+    ubDesktopLog(QString("grabDesktopBehind BEGIN mainWindow=%1 mainVisible=%2 topLevelsHidden=%3")
+                     .arg((quintptr)window, 0, 16)
+                     .arg(window ? window->isVisible() : -1)
+                     .arg(hidden.size()));
+
+    // Also hide the main QWidget window itself (its QWindow is normally in the
+    // list above, but hide the widget too so its backing store is released).
+    const bool widgetWasVisible = window && window->isVisible();
+    if (widgetWasVisible)
+        window->hide();
+
+    // Push the hides to the window system WITHOUT pumping our own event loop
+    // (processEvents re-enters and crashed during the transition, #135), then
+    // let the compositor drop the windows with a short native sleep.
+    QGuiApplication::sync();
+    QThread::msleep(120);
+    QGuiApplication::sync();
 
     const QPixmap shot = grabDesktop(window);
 
-    if (wasVisible && window)
+    // Restore everything we hid, in the same order.
+    if (widgetWasVisible && window)
         window->show();
+    for (QWindow* w : hidden)
+        w->setVisible(true);
 
-    ubDesktopLog(QString("grabDesktopBehind END wasVisible=%1 pixmap=%2x%3 null=%4")
-                     .arg(wasVisible)
+    ubDesktopLog(QString("grabDesktopBehind END pixmap=%1x%2 null=%3 restored=%4")
                      .arg(shot.width()).arg(shot.height())
-                     .arg(shot.isNull()));
+                     .arg(shot.isNull())
+                     .arg(hidden.size()));
     return shot;
 }
 
