@@ -148,6 +148,25 @@ class UBApplicationController : public QObject
 
         void hideDesktop();
 
+        // #523 / ADR-0013 (bricks 2+3): is the single-window Bureau path active
+        // (vs the legacy overlay fallback)? Read from the environment once.
+        static bool useSingleWindowDesktop();
+
+        // #523 / ADR-0013 (brick 2): focus-return hook — re-grab the desktop into
+        // the current single-window Bureau page. Called from UBApplication's
+        // event filter on QEvent::ApplicationActivate. No-op otherwise.
+        void refreshDesktopCaptureIfActive();
+
+    private:
+        // #523: the capture hides/re-shows Sankoré's windows, which itself emits
+        // window-activation events. Without a guard, the ApplicationActivate hook
+        // (refreshDesktopCaptureIfActive) re-enters the grab → hide/show → another
+        // ApplicationActivate → … a feedback loop that flickers the screen many
+        // times and can crash the transition (#135 family). This flag suppresses
+        // the focus-return refresh while a grab is in flight.
+        bool mDesktopGrabInFlight = false;
+    public:
+
         void useMultiScreen(bool use);
 
         void actionCut();
@@ -168,6 +187,15 @@ class UBApplicationController : public QObject
         void doShowDocument();
         void doShowDesktop(bool dontSwitchFrontProcess);
         void doHideDesktop();
+
+        // #523 / ADR-0013 (bricks 2+3): single-window Bureau — no overlay. The
+        // main window stays put (Maximized, #397); the current board page is set
+        // see-through and a desktop CAPTURE is installed as its background (via
+        // the brick-1 service), refreshed on focus-return. doShowDesktop/
+        // doHideDesktop keep the OLD overlay path as a fallback, selected by
+        // useSingleWindowDesktop().
+        void doShowDesktopSingleWindow();
+        void doHideDesktopSingleWindow();
 
     protected:
 
