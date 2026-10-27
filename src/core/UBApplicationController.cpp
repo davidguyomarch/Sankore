@@ -479,13 +479,20 @@ void UBApplicationController::doShowDesktopSingleWindow()
     UBGraphicsScene* scene = UBApplication::boardController
                                  ? UBApplication::boardController->activeScene() : nullptr;
     {
+        static int sEnterCount = 0;
         QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
         if (f.open(QIODevice::Append | QIODevice::Text))
-            QTextStream(&f) << "[DESKTOP] doShowDesktopSingleWindow BEGIN scene="
-                            << (scene ? 1 : 0) << "\n";
+            QTextStream(&f) << "[DESKTOP] doShowDesktopSingleWindow BEGIN #"
+                            << (++sEnterCount) << " scene=" << (scene ? 1 : 0)
+                            << " grabInFlight=" << mDesktopGrabInFlight << "\n";
     }
+    // #523: the grab hides/re-shows Sankoré's windows, which emits activation
+    // events; guard so the ApplicationActivate hook does not re-enter the grab
+    // (the feedback loop that flickered the screen and crashed the VM).
+    mDesktopGrabInFlight = true;
     if (scene && mUninoteController)
         mUninoteController->installDesktopCapture(scene, mMainWindow);
+    mDesktopGrabInFlight = false;
 
     mIsShowingDesktop = true;
     // Drive the presentation state (Fond menu highlight, guards). The palette
@@ -537,12 +544,36 @@ void UBApplicationController::refreshDesktopCaptureIfActive()
     // into the current see-through page so the frozen background follows what the
     // teacher changed behind Sankoré. Only in single-window Bureau, only while a
     // see-through page is shown.
+    //
+    // #523 FEEDBACK-LOOP GUARD: the grab itself hides and re-shows Sankoré's
+    // windows, each of which raises a QEvent::ApplicationActivate — which calls
+    // THIS method again. Bail out when a grab is already in flight (or a mode
+    // transition is running), otherwise the hide/show cycles indefinitely
+    // (observed as heavy flicker + a VM crash).
+    if (mDesktopGrabInFlight || mInModeTransition)
+    {
+        QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+            QTextStream(&f) << "[DESKTOP] refresh ignored (grabInFlight="
+                            << mDesktopGrabInFlight << " inTransition="
+                            << mInModeTransition << ")\n";
+        return;
+    }
     if (!useSingleWindowDesktop() || !mIsShowingDesktop)
         return;
     UBGraphicsScene* scene = UBApplication::boardController
                                  ? UBApplication::boardController->activeScene() : nullptr;
     if (scene && scene->isDrawingMode() && mUninoteController)
+    {
+        {
+            QFile f(QCoreApplication::applicationDirPath() + "/startup.log");
+            if (f.open(QIODevice::Append | QIODevice::Text))
+                QTextStream(&f) << "[DESKTOP] refresh (focus-return) grabbing\n";
+        }
+        mDesktopGrabInFlight = true;
         mUninoteController->installDesktopCapture(scene, mMainWindow);
+        mDesktopGrabInFlight = false;
+    }
 }
 
 

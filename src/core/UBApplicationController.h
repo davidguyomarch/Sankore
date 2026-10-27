@@ -157,6 +157,16 @@ class UBApplicationController : public QObject
         // event filter on QEvent::ApplicationActivate. No-op otherwise.
         void refreshDesktopCaptureIfActive();
 
+    private:
+        // #523: the capture hides/re-shows Sankoré's windows, which itself emits
+        // window-activation events. Without a guard, the ApplicationActivate hook
+        // (refreshDesktopCaptureIfActive) re-enters the grab → hide/show → another
+        // ApplicationActivate → … a feedback loop that flickers the screen many
+        // times and can crash the transition (#135 family). This flag suppresses
+        // the focus-return refresh while a grab is in flight.
+        bool mDesktopGrabInFlight = false;
+    public:
+
         void useMultiScreen(bool use);
 
         void actionCut();
