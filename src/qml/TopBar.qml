@@ -309,7 +309,13 @@ Rectangle {
             } else if (item.nightKind) {
                 appController.setBackgroundDark()
             } else if (item.seeThrough) {
-                appController.setBackgroundSeeThrough()
+                // #523: close the menu FIRST, then enter Bureau on the next event
+                // loop turn. Entering grabs the desktop, and the entry grab hides
+                // Sankoré's windows to exclude its UI — but this menu is a
+                // separate top-level popup; if still open at grab time it ends up
+                // in the captured background (VM bug). Dismiss it, then enter.
+                if (item.menuRoot) item.menuRoot.dismiss()
+                Qt.callLater(function() { appController.setBackgroundSeeThrough() })
             } else {
                 appController.setGridType(rulingType)
             }
