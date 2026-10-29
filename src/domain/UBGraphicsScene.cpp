@@ -431,6 +431,25 @@ void UBGraphicsScene::setBackgroundImage(const QString& fileName, const QPixmap&
     setModified(true);
 }
 
+const QPixmap& UBGraphicsScene::desktopCapturePixmap() const
+{
+    return mBackgroundRenderer->desktopCapturePixmap();
+}
+
+bool UBGraphicsScene::hasDesktopCapture() const
+{
+    return mBackgroundRenderer && mBackgroundRenderer->hasDesktopCapture();
+}
+
+void UBGraphicsScene::setDesktopCapturePixmap(const QPixmap& pixmap)
+{
+    // #521 / ADR-0013 (brick 1): transient desktop capture. Delegate to the
+    // renderer and DO NOT setModified — the capture is never serialized (the
+    // page persists only its SeeThrough flag; the desktop is re-grabbed on
+    // reopen).
+    mBackgroundRenderer->setDesktopCapturePixmap(pixmap);
+}
+
 bool UBGraphicsScene::isSeeThrough() const
 {
     return mBackgroundRenderer && mBackgroundRenderer->isSeeThrough();
